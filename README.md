@@ -1,10 +1,17 @@
 # Free-Mac-NTFS
 
-Mac自由读写NTFS小攻略及通用小工具
+Mac自由读写NTFS小攻略及通用小工具。现在omi ntfs也开始收费了，所以我把我目前了解到的免费ntfs图形化、相较于易于操作的软件先列出来。
 
-## 1. 充分准备前提（已安装及已配置SIP可跳至第二大步）
+* [easyuefi ntfs](https://www.easyuefi.com/ntfs-for-mac/ntfs-for-mac.html) (免费，支持及更新频率较快，但目前不支持macOS13.1)
+* [paragon ntfs for Mac](https://www.seagate.com/cn/zh/support/software/paragon/#downloads)(客户支持免费版，一般支持最新系统)
+* [mounty](https://mounty.app)(免费，最高支持macOS12，支持最新系统较慢)
+* [ntfstool](https://ntfstool.com)(免费，较长时间没更新了2020.5)
 
-### 1.1. 安装homebrew
+## macOSFUSE + NTFS-3g-Mac
+
+### 1. 充分准备前提（已安装及已配置SIP可跳至第二大步）
+
+#### 1.1. 安装homebrew
 
 ⌘+space输入`终端`复制以下代码粘贴至终端，安装完成重启终端
 
@@ -14,21 +21,21 @@ Mac自由读写NTFS小攻略及通用小工具
 
 快速通道来自[ineo6](https://github.com/ineo6/homebrew-install)提供
 
-### 1.2. 关闭安全性设置
+#### 1.2. 关闭安全性设置
 
 1. “通用”中“隐私与安全性”，允许任何来源，可直接终端 `sudo spctl --master-disable`
 2. 关闭SIP，输入后 `csrutil disable`重启
 3. [关机后长按开机键，进入“恢复”环境，在“实用工具”->“启动安全性实用工具”降低安全性的选项全都都勾上](https://www.pcbiji.com/212402.html)（出现不能更改安全性设置，关机盒盖，30秒后再操作一遍即可）
 
 
-### ***1.3. 安装Xcode工具（可选，不影响）***
+#### ***1.3. 安装Xcode工具（可选，不影响）***
 
 将此命令行复制进去安装 `xcode-select --install` 
 
 
-## 2. 构建NTFS生态环境
+### 2. 构建NTFS生态环境
 
-### 2.1 安装fuse 
+#### 2.1 安装fuse 
 
 [整体是一个系统扩展的容器、插件；macFUSE允许您通过第三方文件系统扩展macOS的原生文件处理功能，详情看官网](https://osxfuse.github.io)
 
@@ -43,7 +50,7 @@ brew tap gromgit/homebrew-fuse
 brew install --cask macfuse
 ```
 
-### 2.2. 安装ntfs-3g-mac
+#### 2.2. 安装ntfs-3g-mac
 
 安装这个就是让Mac支持上ntfs
 
@@ -51,9 +58,9 @@ brew install --cask macfuse
 brew install ntfs-3g-mac
 ```
 
-## 3. 使用 
+### 3. 使用 
 
-### 3.1. 查看移动硬盘及U盘的挂载信息
+#### 3.1. 查看移动硬盘及U盘的挂载信息
 
 `diskutil list` 复制进终端
 
@@ -61,7 +68,7 @@ brew install ntfs-3g-mac
 
 我们看到：Windows_NTFS KIOXIA（每个U盘的厂家名不一样）记住它旁边的`disk4s1`（每台电脑的显示略有不同，原理一致）
 
-### 3.2. 挂载硬盘
+#### 3.2. 挂载硬盘
 
 直接挂载容易出现“busy”等无法写入的错误提示。所以保险起见，先卸载掉U盘，报错也是这样解决。
 
