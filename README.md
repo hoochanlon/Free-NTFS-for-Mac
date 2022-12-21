@@ -2,9 +2,9 @@
 
 Mac自由读写NTFS小攻略及通用小工具
 
-## 充分准备前提（已安装及已配置SIP可跳过）
+## 1. 充分准备前提（已安装及已配置SIP可跳至第二大步）
 
-### 1.安装homebrew
+### 1.1. 安装homebrew
 
 复制以下代码粘贴至终端，安装完成重启终端
 
@@ -14,11 +14,17 @@ Mac自由读写NTFS小攻略及通用小工具
 
 快速通道来自[ineo6](https://github.com/ineo6/homebrew-install)提供
 
-### 2.安装Xcode工具（可选）
+### 1.2. 关闭安全性设置
+
+1. “通用”中“隐私与安全性”，允许任何来源，可直接终端 `sudo spctl --master-disable`
+2. 关闭SIP，输入后 `csrutil disable`重启
+3. [关机后长按开机键，进入“恢复”环境，在“实用工具”->“启动安全性实用工具”降低安全性的选项全都都勾上](https://www.pcbiji.com/212402.html)
+
+
+### 1.3. 安装Xcode工具（可选）
 
 ⌘+space输入`终端`，打开“终端”，将此命令行复制进去安装 `xcode-select --install' 
 
-### 3. 关闭SIP
 
 
 
