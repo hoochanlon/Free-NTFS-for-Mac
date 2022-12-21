@@ -11,13 +11,13 @@ Mac自由读写NTFS小攻略及通用小工具。现在omi ntfs也开始收费�
 
 ### 1. 充分准备前提（已安装及已配置SIP可跳至第二大步）
 
-#### 1.1. 安装Xcode工具
+#### 1.1. 安装Xcode工具包
 
-将此命令行复制进去安装 `xcode-select --install` 
+将此命令行复制进去安装 `xcode-select --install` 。（你可以理解为Windows上的VC++、.NET环境包什么的）
 
 #### 1.2. 安装homebrew
 
-⌘+space输入`终端`复制以下代码粘贴至终端，安装完成重启终端
+⌘+space输入`终端`复制以下代码粘贴至终端，安装完成重启终端。（macOS下包管理器）
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
@@ -27,12 +27,11 @@ Mac自由读写NTFS小攻略及通用小工具。现在omi ntfs也开始收费�
 
 #### 1.3. 关闭安全性设置
 
+这是安装学习版软件和使用系统扩展插件的常规操作。
+
 1. “通用”中“隐私与安全性”，允许任何来源，可直接终端 `sudo spctl --master-disable`
 2. 关闭SIP，输入后 `csrutil disable`重启
 3. [关机后长按开机键，进入“恢复”环境，在“实用工具”->“启动安全性实用工具”降低安全性的选项全都都勾上](https://www.pcbiji.com/212402.html)（出现不能更改安全性设置，关机盒盖，30秒后再操作一遍即可）
-
-
-
 
 
 ### 2. 构建NTFS生态环境
