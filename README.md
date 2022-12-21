@@ -9,6 +9,8 @@ Mac自由读写NTFS小攻略及通用小工具。现在omi ntfs也开始收费�
 
 ## macOSFUSE + NTFS-3g-Mac
 
+👉 [shell脚本直通专列](https://github.com/hoochanlon/free-mac-ntfs/tree/main/shell)
+
 ### 1. 充分准备前提（已安装及已配置SIP可跳至第二大步）
 
 #### 1.1. 安装Xcode工具包
