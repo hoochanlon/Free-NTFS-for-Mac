@@ -51,9 +51,11 @@ brew install ntfs-3g-mac
 
 ### 3.1. 查看移动硬盘及U盘的挂载信息
 
-`diskutil list` 复制进终端, Windows_NTFS KIOXIA（每个U盘的厂家名不一样）记住它旁边的`disk4s1`（每台电脑的显示略有不同，原理一致）
+`diskutil list` 复制进终端
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/diskutil-list.png)
+
+我们看到：Windows_NTFS KIOXIA（每个U盘的厂家名不一样）记住它旁边的`disk4s1`（每台电脑的显示略有不同，原理一致）
 
 ### 3.2. 挂载硬盘
 
@@ -61,7 +63,11 @@ brew install ntfs-3g-mac
 sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -olocal -oallow_other -o auto_xattr
 ```
 
+### 3.3. 失败再重来（卸载再挂载）
 
+```shell
+
+```
 
 
 
