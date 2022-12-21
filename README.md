@@ -19,7 +19,7 @@ Mac自由读写NTFS小攻略及通用小工具。现在omi ntfs也开始收费�
 
 ⌘+space输入`终端`复制以下代码粘贴至终端，安装完成重启终端。（macOS下包管理器）
 
-命令二选一
+命令二选一，国内墙可通用
 
 ```shell
 /bin/zsh -c "$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)"
@@ -28,8 +28,6 @@ Mac自由读写NTFS小攻略及通用小工具。现在omi ntfs也开始收费�
 ```shell
 /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
 ```
-
-快速通道来自[ineo6](https://github.com/ineo6/homebrew-install)提供
 
 #### 1.3. 关闭安全性设置
 
