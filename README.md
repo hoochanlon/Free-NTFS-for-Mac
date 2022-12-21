@@ -75,7 +75,7 @@ brew install ntfs-3g-mac
 
 #### 3.2. 挂载硬盘
 
-直接挂载容易出现“busy”等无法写入的错误提示。所以保险起见，先卸载掉U盘，报错也是这样解决。
+直接挂载容易出现“busy”等无法写入的错误提示。所以保险起见，先卸载掉U盘。报错也是这样解决，[官网如是说](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G)。
 
 ```shell
 sudo umount /dev/disk4s1
