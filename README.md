@@ -20,11 +20,14 @@ Mac自由读写NTFS小攻略及通用小工具
 
 ## 安装NTFS环境依赖包
 
-### 3. 安装homebrew-fuse
+### 3. 安装fuse
+
+homebrew-fuse
 
 ```shell
 brew tap gromgit/homebrew-fuse
 ```
+macfuse
 
 ```shell
 brew install --cask macfuse
@@ -40,7 +43,9 @@ brew install ntfs-3g-mac
 
 ### 5. 查看移动硬盘及U盘的挂载信息
 
-diskutil list
+`diskutil list`
+
+
 
 
 
