@@ -23,17 +23,12 @@ Mac自由读写NTFS小攻略及通用小工具
 
 ### 1.3. 安装Xcode工具（可选）
 
-⌘+space输入`终端`，打开“终端”，将此命令行复制进去安装 `xcode-select --install' 
+⌘+space输入`终端`，打开“终端”，将此命令行复制进去安装 `xcode-select --install` 
 
 
+## 2. 安装NTFS环境依赖包
 
-
-
-
-
-## 安装NTFS环境依赖包
-
-### 3. 安装fuse
+### 2.1. 安装fuse
 
 homebrew-fuse
 
@@ -46,21 +41,21 @@ macfuse
 brew install --cask macfuse
 ```
 
-### 4. 安装ntfs-3g-mac
+### 2.2. 安装ntfs-3g-mac
 
 ```shell
 brew install ntfs-3g-mac
 ```
 
-## 使用 
+## 3. 使用 
 
-### 5. 查看移动硬盘及U盘的挂载信息
+### 3.1. 查看移动硬盘及U盘的挂载信息
 
-`diskutil list` 复制进终端, Windows_NTFS KIOXIA（每个U盘的厂家名不一样）记住它旁边的`diskAs1`（每台电脑的显示略有不同）
+`diskutil list` 复制进终端, Windows_NTFS KIOXIA（每个U盘的厂家名不一样）记住它旁边的`disk4s1`（每台电脑的显示略有不同，原理一致）
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/diskutil-list.png)
 
-### 6. 挂载硬盘
+### 3.2. 挂载硬盘
 
 ```shell
 sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -olocal -oallow_other -o auto_xattr
