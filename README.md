@@ -95,4 +95,5 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 * [电脑笔记网-Mac提示要在“恢复”环境中修改安全性设置解决教程](https://www.pcbiji.com/212402.html)
 * [百度经验-macbook m1芯片提示 不能更改安全性设置](https://jingyan.baidu.com/article/6dad5075eb900ee022e36ed0.html)
 * [云启博客-Jsdelivr CDN 加速服务失效解决方法](https://blog.52date.cn/article/84.html)
+* [Mac下载-苹果M1 Mac电脑关闭SIP方法](https://www.bilibili.com/read/cv10527878/)
 
