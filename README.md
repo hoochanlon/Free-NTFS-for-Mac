@@ -2,7 +2,7 @@
 
 Mac自由读写NTFS小攻略及通用小工具
 
-## 充分准备前提（已安装可跳过）
+## 充分准备前提（已安装及已配置SIP可跳过）
 
 ### 1.安装homebrew
 
@@ -17,6 +17,13 @@ Mac自由读写NTFS小攻略及通用小工具
 ### 2.安装Xcode工具（可选）
 
 ⌘+space输入`终端`，打开“终端”，将此命令行复制进去安装 `xcode-select --install' 
+
+### 3. 关闭SIP
+
+
+
+
+
 
 ## 安装NTFS环境依赖包
 
@@ -47,7 +54,11 @@ brew install ntfs-3g-mac
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/diskutil-list.png)
 
-### 6. 
+### 6. 挂载硬盘
+
+```shell
+sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -olocal -oallow_other -o auto_xattr
+```
 
 
 
