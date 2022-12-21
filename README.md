@@ -26,22 +26,22 @@ Mac自由读写NTFS小攻略及通用小工具
 ⌘+space输入`终端`，打开“终端”，将此命令行复制进去安装 `xcode-select --install` 
 
 
-## 2. 安装NTFS环境依赖包
+## 2. 构建NTFS生态环境
 
-### 2.1. 安装fuse
+安装fuse
 
 homebrew-fuse
 
 ```shell
 brew tap gromgit/homebrew-fuse
 ```
-macfuse
+安装macfuse
 
 ```shell
 brew install --cask macfuse
 ```
 
-### 2.2. 安装ntfs-3g-mac
+安装ntfs-3g-mac
 
 ```shell
 brew install ntfs-3g-mac
