@@ -74,7 +74,7 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/umount-3g.png)
 
-
+此时，Mac已经可以正常读写NTFS格式的U盘了（U盘名称拔出及再接上会重新恢复原有的名称的，不用担心），将U盘拔出的话，就需要重新再输入如上命令行才能读写。
 
 
 ## 参考资料
