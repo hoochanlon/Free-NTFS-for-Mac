@@ -28,7 +28,9 @@ Mac自由读写NTFS小攻略及通用小工具
 
 ## 2. 构建NTFS生态环境
 
-安装fuse
+### 2.1 安装fuse 
+
+[整体是一个系统扩展的容器、插件；macFUSE允许您通过第三方文件系统扩展macOS的原生文件处理功能，详情看官网](https://osxfuse.github.io)
 
 homebrew-fuse
 
@@ -41,7 +43,9 @@ brew tap gromgit/homebrew-fuse
 brew install --cask macfuse
 ```
 
-安装ntfs-3g-mac
+### 2.2. 安装ntfs-3g-mac
+
+安装这个就是让Mac支持上ntfs
 
 ```shell
 brew install ntfs-3g-mac
