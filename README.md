@@ -59,16 +59,16 @@ brew install ntfs-3g-mac
 
 ### 3.2. 挂载硬盘
 
+直接挂载容易出现“busy”等无法写入的错误提示。
+
 ```shell
+# 1. 保险起见，先卸载掉U盘
+sudo umount /dev/disk4s1
+# 2. 然后再挂载，也就是卸掉后，再来装上去
 sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -olocal -oallow_other -o auto_xattr
 ```
 
-### 3.3. 失败再重来（卸载再挂载）
-
-```shell
-
-```
-
+![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/umount-3g.png)
 
 
 
