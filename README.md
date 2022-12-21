@@ -6,7 +6,7 @@ Mac自由读写NTFS小攻略及通用小工具
 
 ### 1.1. 安装homebrew
 
-复制以下代码粘贴至终端，安装完成重启终端
+⌘+space输入`终端`复制以下代码粘贴至终端，安装完成重启终端
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
@@ -21,9 +21,9 @@ Mac自由读写NTFS小攻略及通用小工具
 3. [关机后长按开机键，进入“恢复”环境，在“实用工具”->“启动安全性实用工具”降低安全性的选项全都都勾上](https://www.pcbiji.com/212402.html)（出现不能更改安全性设置，关机盒盖，30秒后再操作一遍即可）
 
 
-### 1.3. 安装Xcode工具（可选，不影响）
+### ***1.3. 安装Xcode工具（可选，不影响）***
 
-⌘+space输入`终端`，打开“终端”，将此命令行复制进去安装 `xcode-select --install` 
+将此命令行复制进去安装 `xcode-select --install` 
 
 
 ## 2. 构建NTFS生态环境
