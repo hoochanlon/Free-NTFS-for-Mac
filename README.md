@@ -43,14 +43,11 @@ brew install ntfs-3g-mac
 
 ### 5. 查看移动硬盘及U盘的挂载信息
 
-`diskutil list` 复制进终端, kioxia 
+`diskutil list` 复制进终端, Windows_NTFS KIOXIA（每个U盘的厂家名不一样）记住它旁边的`diskAs1`（每台电脑的显示略有不同）
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/diskutil-list.png)
 
-
-
-
-
+### 6. 
 
 
 
