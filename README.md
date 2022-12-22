@@ -1,5 +1,7 @@
 # Free-Mac-NTFS
 
+## 即将升级为全自动脚本、程序化！
+
 Mac自由读写NTFS小攻略及通用小工具。现在omi ntfs也开始收费了，所以我把我目前了解到的免费ntfs图形化、相较于易于操作的软件先列出来。
 
 * [easyuefi ntfs](https://www.easyuefi.com/ntfs-for-mac/ntfs-for-mac.html) (免费，支持及更新频率较快，但目前不支持macOS13.1)
