@@ -9,7 +9,7 @@ Mac自由读写NTFS小攻略及通用小工具。现在omi ntfs也开始收费�
 
 ## macOSFUSE + NTFS-3g-Mac
 
-👉 [shell脚本直通专列](https://github.com/hoochanlon/free-mac-ntfs/tree/main/shell)
+👉 [shell脚本直通专列](https://github.com/hoochanlon/free-mac-ntfs/tree/main/shell_old)
 
 ### 1. 充分准备前提（已安装及已配置SIP可跳至第二大步）
 
@@ -54,6 +54,7 @@ brew tap gromgit/homebrew-fuse
 安装macfuse
 
 ```shell
+# brew install gromgit/fuse/sshfs-mac
 brew install --cask macfuse
 ```
 
@@ -102,5 +103,7 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 * [百度经验-macbook m1芯片提示 不能更改安全性设置](https://jingyan.baidu.com/article/6dad5075eb900ee022e36ed0.html)
 * [云启博客-Jsdelivr CDN 加速服务失效解决方法](https://blog.52date.cn/article/84.html)
 * [Mac下载-苹果M1 Mac电脑关闭SIP方法](https://www.bilibili.com/read/cv10527878/)
-
-
+* [进击云原生- Mac下brew 切换为国内源，安装sshfs](https://www.cnblogs.com/liabio/p/16647600.html)
+* [Mac OS X Big SurでTelepresenceのインストールが出来ない問題の解消法](https://qiita.com/sayama0402/items/598e31fe351dcc188774)
+* [记忆残留-shell脚本字符串截取的8种方法](https://www.cnblogs.com/zwgblog/p/6031256.html)
+* [菜鸟教程-文件测试运算符部分](https://www.runoob.com/linux/linux-shell-basic-operators.html)
