@@ -1,7 +1,11 @@
 #/bin/bash
 
 # set -e
-# 自动
+
+close_boring(){
+  sudo spctl --master-disable
+  sudo csrutil disable
+}
 
 check_install() {
 
@@ -26,23 +30,24 @@ check_install() {
 }
 
 mount_nfs() {
-
+  # 以空格来截取什么的
   newDev=$(mount | grep ntfs | awk -F ' ' '{print $1}')
 
   # for循环，每有一个新设备，来一次。
   for i in $newDev; do
     echo "新设备 : "$i
     echo '----------\n' #打印换行
-
+    # 截取方法参考： https://www.cnblogs.com/zwgblog/p/6031256.html
     onceCutVal="${i%/*}"
-
     twiceCutVal="${onceCutVal#*//}"
+    thriceCutVal="${i##*/}"
 
     sudo umount $i
 
-    # ${twiceCutVal} 替代了NTFS
-    sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/${twiceCutVal} /Volumes/${twiceCutVal} -olocal -oallow_other -o auto_xattr
-    # sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -olocal -oallow_other -o auto_xattr
+    # 参考文档：
+    ##  https://github.com/osxfuse/osxfuse/wiki/Mount-options
+    ##  https://blog.csdn.net/coraline1991/article/details/120234508
+    sudo -S /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/${twiceCutVal} /Volumes/${twiceCutVal} -olocal -oallow_other -o auto_xattr -ovolname=${thriceCutVal}
 
     echo "新${twiceCutVal}设备，添加写权限成功！"
 
@@ -50,7 +55,7 @@ mount_nfs() {
 
 }
 
-
+close_boring
 check_install
 mount_nfs
 

@@ -8,8 +8,8 @@ while True:
     udev.close()
     if udev_result:
         print("已接入优盘")
-        os.system("chmod 777 /Users/chanlonhoo/Desktop/4.auto.sh")
-        os.system("/Users/chanlonhoo/Desktop/4.auto.sh")
+        os.system("chmod 777 /Users/chanlonhoo/Desktop/ntfs_support.sh")
+        os.system("/Users/chanlonhoo/Desktop/ntfs_support.sh")
         while True:
             sleep(5)
             udev = os.popen("mount | grep ntfs | awk -F ' ' '{print $1}'")
