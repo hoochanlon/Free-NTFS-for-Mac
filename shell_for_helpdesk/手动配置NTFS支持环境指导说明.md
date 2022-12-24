@@ -99,6 +99,7 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 
 * [iCheer-xu-Macbook pro M1使用免费的方法读写NTFS的折腾之路](https://blog.csdn.net/qq_36071963/article/details/126052367)
 * [99度的水K06-解决Mac下NTFS格式移动硬盘无法写入的问题（ntfs-3g安装方法）](https://www.bilibili.com/read/cv18512586/)
+* [半夜啃西瓜-Mac挂载其他文件系统](https://zhuanlan.zhihu.com/p/558825467)
 * [电脑笔记网-Mac提示要在“恢复”环境中修改安全性设置解决教程](https://www.pcbiji.com/212402.html)
 * [百度经验-macbook m1芯片提示 不能更改安全性设置](https://jingyan.baidu.com/article/6dad5075eb900ee022e36ed0.html)
 * [云启博客-Jsdelivr CDN 加速服务失效解决方法](https://blog.52date.cn/article/84.html)
