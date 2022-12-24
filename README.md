@@ -1,6 +1,6 @@
-# Nigate
+# Nigate（Free NTFS for Mac）
 
-Nigate，苦手（ニガテ），一款macOS平台免费开源的NTFS小程序应用app （Free NTFS for Mac）。
+Nigate，苦手（ニガテ），一款macOS平台免费开源的NTFS小程序应用app。
 
 小工具制作原由：
 
