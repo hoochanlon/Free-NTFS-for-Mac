@@ -6,7 +6,7 @@ Nigate，苦手，一款macOS平台免费开源的NTFS小程序应用app。
 
 实机演示：
 
-[![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/main/shashin/example.png)](hhttps://www.bilibili.com/video/BV1XG4y1f79N/)
+[![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)](hhttps://www.bilibili.com/video/BV1XG4y1f79N/)
 
 
 ## 安装使用前提，需要关闭安全性设置
