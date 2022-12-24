@@ -2,11 +2,18 @@
 
 Nigate，苦手，一款macOS平台免费开源的NTFS小程序应用app。
 
-小工具制作原由：Mac平台下支持的NTFS软件，普遍收费。免费的难找，就算找到了又不支持最新的macOS...又或是arm架构芯片，整体的体验上不太让人舒服。尤其是对于我们做计算机维护的人来说，更是如此了。
+小工具制作原由：Mac平台下支持的NTFS软件，普遍收费。免费的难找，就算找到了又不支持最新的macOS，又或是arm架构芯片...macfuse，对于一个普通用户来说，上手门槛又实在有些高了...整体的体验上不太让人舒服。尤其是对于我们做计算机维护的人来说，更是如此了。
+
+实机演示：
+
+<div style="position: relative; padding: 30% 45%;">
+<iframe style="position: absolute; width: 100%; height: 100%; left: 0; top: 0;" src="//player.bilibili.com/player.html?bvid=BV1XG4y1f79N" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+</div>
+
 
 ## 安装使用前提，需要关闭安全性设置
 
-[关机后长按开机键，进入“恢复”环境，在“实用工具”->“启动安全性实用工具”降低安全性的选项全都都勾上](https://www.pcbiji.com/212402.html)（出现不能更改安全性设置，关机盒盖，30秒后再操作一遍即可），这是安装学习版软件和使用系统扩展插件的常规操作。
+[关机后长按开机键，进入“恢复”环境，在“实用工具”->“启动安全性实用工具”降低安全性的选项全都都勾上](https://www.pcbiji.com/212402.html)（出现不能更改安全性设置，关机盒盖，30秒后再操作一遍即可），这是安装使用学习版软件和系统扩展插件的常规操作，基本上懂点也方便些。
 
 ## ⏬ Mac app下载
 
@@ -28,3 +35,4 @@ https://download.fastgit.org/hoochanlon/free-mac-ntfs/releases/download/0.1/niga
 * [osxfuse](https://osxfuse.github.io)
 * [cunkai/HomebrewCN](https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)
 * [ineo6/homebrew-install](https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)
+* [icons8图标网](https://icons8.com)
