@@ -15,7 +15,7 @@ Mac平台下支持的NTFS软件，普遍收费。免费的难找，就算找到�
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
 
-## 安装使用前提，需要关闭安全性设置
+## 前提：安装需关闭SIP
 
 [关机后长按开机键，进入“恢复”环境，在“实用工具”->“启动安全性实用工具”降低安全性的选项全都都勾上（出现不能更改安全性设置，关机盒盖，30秒后再操作一遍即可）](https://www.pcbiji.com/212402.html)。
 
