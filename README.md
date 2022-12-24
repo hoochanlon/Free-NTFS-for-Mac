@@ -11,7 +11,9 @@ Nigate，苦手，一款macOS平台免费开源的NTFS小程序应用app。
 * 首次运行软件，程序会检测所需要的集成环境，并自动下载安装（之后不用了）。
 * 运行软件保持在后台，插入U盘即可。
 
-由 fastgit 加速下载支持：https://download.fastgit.org/hoochanlon/free-mac-ntfs/releases/download/0.1/nigate.dmg
+由 fastgit 加速下载支持：
+
+https://download.fastgit.org/hoochanlon/free-mac-ntfs/releases/download/0.1/nigate.dmg
 
 ## 桌维技术人员版(脚本)
 
