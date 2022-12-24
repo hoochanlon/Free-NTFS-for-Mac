@@ -15,7 +15,7 @@ Mac平台下支持的NTFS软件，普遍收费。免费的难找，就算找到�
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
 
-## 前提：安装需关闭SIP
+## ⚠️ 需关闭SIP进行安装及使用
 
 [关机后长按开机键，进入“恢复”环境，在“实用工具”->“启动安全性实用工具”降低安全性的选项全都都勾上（出现不能更改安全性设置，关机盒盖，30秒后再操作一遍即可）](https://www.pcbiji.com/212402.html)。
 
@@ -30,13 +30,13 @@ Mac平台下支持的NTFS软件，普遍收费。免费的难找，就算找到�
 
 https://ghproxy.com/https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/0.1/nigate.dmg
 
-## 桌维技术支持版(脚本)
+## 🧑‍🔧 桌维技术支持版(脚本)
 
 1. 在“shell_for_helpdesk”文件夹，找到 “自动化支持NTFS读写.sh” 下载
 2. 在终端授权脚本文件，如：`chmod 777 自动化支持NTFS读写.sh`。
 3. 在终端下直接 `自动化支持NTFS读写.sh` 回车输入密码即可（只需输入一遍）。
 
-## 感谢
+## ❤️ 感谢
 
 提供集成应用支持与图标设计样例。
 
