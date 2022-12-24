@@ -24,9 +24,9 @@ Mac平台下支持的NTFS软件，普遍收费。免费的难找，就算找到�
 * 首次运行软件，程序会检测所需要的集成环境，并自动下载安装（之后不用了）。
 * 运行软件保持在后台，插入U盘即可。
 
-由 fastgit 加速下载支持：
+由 ghproxy 加速下载支持：
 
-https://download.fastgit.org/hoochanlon/free-mac-ntfs/releases/download/0.1/nigate.dmg
+https://ghproxy.com/https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/0.1/nigate.dmg”
 
 ## 桌维技术支持版(脚本)
 
