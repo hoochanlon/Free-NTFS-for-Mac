@@ -23,12 +23,6 @@ Mac平台下支持的NTFS软件，普遍收费。免费的难找，就算找到�
 
 这是安装使用学习版软件和系统扩展插件的常规操作，你懂的，基本上知道这个也方便像windows那样使用软件了。
 
-## ⏬ Mac app下载
-
-由 ghproxy 加速下载支持：
-
-https://ghproxy.com/https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/0.1/nigate.dmg
-
 ## ✅ Mac app使用
 
 0. 把软件拖入到“应用程序”文件夹
@@ -36,7 +30,13 @@ https://ghproxy.com/https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/dow
 2. 运行软件保持在后台，插入U盘即可。
 3. 要是觉得小窗口最小化还占地方，加一个虚拟桌面拖入进去就行。
 
-## 🧑‍🔧 桌维技术支持版(脚本)
+## ⏬ Mac app下载
+
+由 ghproxy 加速下载支持：
+
+https://ghproxy.com/https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/0.1/nigate.dmg
+
+## 🧑‍🔧 桌维技术支持版(脚本及方案)
 
 1. 在“shell_for_helpdesk”文件夹，找到 “自动化支持NTFS读写.sh” 下载
 2. 在终端授权脚本文件，如：`chmod 777 自动化支持NTFS读写.sh`。
