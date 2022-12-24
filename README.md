@@ -36,11 +36,11 @@ Mac平台下支持的NTFS软件，普遍收费。免费的难找，就算找到�
 
 https://ghproxy.com/https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/0.1/nigate.dmg
 
-## 🧑‍🔧 桌维技术支持版(脚本及方案)
+## 🧑‍🔧 桌维技术员版
 
-1. 在“shell_for_helpdesk”文件夹，找到 “自动化支持NTFS读写.sh” 下载
-2. 在终端授权脚本文件，如：`chmod 777 自动化支持NTFS读写.sh`。
-3. 在终端下直接 `自动化支持NTFS读写.sh` 回车输入密码即可（只需输入一遍）。
+1. 在“shell_for_helpdesk”文件夹。
+2. 找到 “自动化支持NTFS读写.sh” 下载，“手动配置NTFS支持环境指导说明.md”即实现方案。
+3. 在终端授权脚本文件，如：`chmod 777 自动化支持NTFS读写.sh`，接下来再对 `自动化支持NTFS读写.sh` 回车即可。
 
 ## ❤️ 感谢
 
