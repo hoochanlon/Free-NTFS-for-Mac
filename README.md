@@ -39,8 +39,9 @@ https://ghproxy.com/https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/dow
 ## 🧑‍🔧 桌维技术员版
 
 1. 在“shell_for_helpdesk”文件夹。
-2. 找到 “自动化支持NTFS读写.sh” 下载，“手动配置NTFS支持环境指导说明.md”即实现方案。
-3. 在终端授权脚本文件，如：`chmod 777 自动化支持NTFS读写.sh`，接下来回车这个文件即可。
+2. “手动配置NTFS支持环境指导说明.md”即实现方案。
+3. 找到 “自动化支持NTFS读写.sh” 下载。
+4. 在终端授权脚本文件，如：`chmod 777 自动化支持NTFS读写.sh`，接下来回车这个文件即可。
 
 ## ❤️ 感谢
 
