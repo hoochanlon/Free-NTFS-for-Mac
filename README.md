@@ -12,7 +12,7 @@ Mac平台下支持的NTFS软件，普遍收费。免费的难找，就算找到�
 
 视频：https://www.bilibili.com/video/BV1XG4y1f79N/
 
-(演示优盘是公司测试用的，usb2.0接口，所以拷贝速度比较慢)
+ps: 之前软件安装好过的了，为了方便演示，才将软件拷贝到桌面进行演示的；优盘是公司测试用的，usb2.0接口，所以拷贝速度比较慢。
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
