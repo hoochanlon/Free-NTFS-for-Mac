@@ -47,7 +47,7 @@ https://ghproxy.com/https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/dow
 2. “手动配置NTFS支持环境指导说明.md”即实现方案。
 3. 找到 “自动化支持NTFS读写.sh” 下载。
 4. 在终端授权脚本文件，如：`chmod 777 自动化支持NTFS读写.sh`，接下来回车这个文件即可。
-5. 在“okidoki”文件夹里的python程序用pyinstaller打包成小软件也行
+5. 在“okidoki”文件夹里的python程序用pyinstaller打包成小软件也行。
 
 ## ❤️ 感谢
 
