@@ -21,12 +21,11 @@ ps: 之前软件安装好过的了，为了方便演示，才将软件拷贝到�
 
 [关机后长按开机键，进入“恢复”环境，在“实用工具”->“启动安全性实用工具”降低安全性的选项全都都勾上](https://www.pcbiji.com/212402.html)。若是意外出现“不能更改安全性设置”，先关机盒盖，等待十几秒之后，再操作一遍即可；[直接在“恢复”环境打开终端](http://www.sdifen.com/sip.html)，`csrutil enable`也行。这是安装使用学习版软件的常规操作，你懂的。基本上知道这个，也就像windows那样方便使用一些“免费”软件了。
 
-程序的依赖包需要下载完全：
+第一次运行程序会自动识别是否安装依赖包，并自动下载，完整下载依赖包安装需要耐心等待片刻：
 
-* Xcode
-* homebrew
-* gromgit/homebrew-fuse、macfuse
-* ntfs-3g-mac
+1. python 与 Xcode
+2. homebrew 与 gromgit/homebrew-fuse
+3. macfuse 与 ntfs-3g-mac
 
 软件需要放在应用程序目录打开，输入密码是你电脑的开机密码。
 
