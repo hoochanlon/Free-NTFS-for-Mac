@@ -26,7 +26,7 @@ ps: 之前软件安装好过的了，为了方便演示，才将软件拷贝到�
 
 由于每个人的电脑环境不一样，软件版需要使用重新打包（pyinstaller）。尤其是Mac，Windows几乎不存在这类问题。第一次运行程序时，软件会自动识别是否安装依赖包，并自动下载，完整下载依赖包安装需要耐心等待片刻：
 
-1. python 与 Xcode
+1. python3 与 Xcode
 2. homebrew 与 gromgit/homebrew-fuse
 3. macfuse 与 ntfs-3g-mac
 
