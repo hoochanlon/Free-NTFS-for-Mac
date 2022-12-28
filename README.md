@@ -18,7 +18,7 @@ ps: 之前软件安装好过的了，为了方便演示，才将软件拷贝到�
 
 ## ⚠️ 注意事项/使用前提
 
-由于每个人的电脑环境不一样，软件版需要使用重新打包（pyinstaller）。软件需放在应用程序目录打开，弹出输入密码的提示，输入的是你电脑的开机密码。第一次运行程序时，软件会自动识别是否安装依赖包，并自动下载，完整下载依赖包安装需要耐心等待片刻：
+由于每个人的电脑环境不一样，软件版需要使用重新打包（pyinstaller）。尤其是Mac，Windows几乎不存在这类问题。第一次运行程序时，软件会自动识别是否安装依赖包，并自动下载，完整下载依赖包安装需要耐心等待片刻：
 
 1. python 与 Xcode
 2. homebrew 与 gromgit/homebrew-fuse
@@ -47,6 +47,7 @@ https://ghproxy.com/https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/dow
 2. “手动配置NTFS支持环境指导说明.md”即实现方案。
 3. 找到 “自动化支持NTFS读写.sh” 下载。
 4. 在终端授权脚本文件，如：`chmod 777 自动化支持NTFS读写.sh`，接下来回车这个文件即可。
+5. 在“okidoki”文件夹里的python程序用pyinstaller打包成小软件也行
 
 ## ❤️ 感谢
 
