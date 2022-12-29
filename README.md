@@ -20,7 +20,7 @@ ps: 之前软件安装好过的了，为了方便演示，才将软件拷贝到�
 
 ### 第一，关闭SIP
 
-[关机后长按开机键，进入“恢复”环境，在“实用工具”->“启动安全性实用工具”降低安全性的选项全都都勾上](https://www.pcbiji.com/212402.html)。或[直接在“恢复”环境打开终端](http://www.sdifen.com/sip.html)，`csrutil enable`。
+[关机后长按开机键，进入“恢复”环境，在“实用工具”->“启动安全性实用工具”降低安全性的选项全都都勾上](https://www.pcbiji.com/212402.html)。[或直接在“恢复”环境打开终端](http://www.sdifen.com/sip.html)，`csrutil enable`。
 
 ### 第二，注意安装依赖项
 
