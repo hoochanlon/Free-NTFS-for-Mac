@@ -27,6 +27,18 @@ ps: 之前软件安装好过的了，为了方便演示，才将软件拷贝到�
 1. Xcode && homebrew
 2. homebrew-fuse && macfuse && ntfs-3g-mac
 
+
+### 第三，出现“busy”等错误提示，先用umount卸载优盘。
+
+出现“busy”等无法写入的错误提示，先卸载掉U盘。报错也是这样解决，[官网如是说](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G)。
+
+```shell
+# disk4s1为当前的U盘设备序列名，其他同理
+sudo umount /dev/disk4s1
+```
+
+
+
 ## ✅ Mac app使用
 
 如出现文件损坏（苹果签名问题），在终端输入 `sudo xattr -d com.apple.quarantine`，加空格，手动拖入程序到该命令行回车。
