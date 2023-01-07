@@ -10,13 +10,13 @@ Free NTFS for Mac
 
 ## 先决条件
 
-homebrew
+安装homebrew
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
 ```
 
-python
+安装python
 
 ```shell
 brew install python
