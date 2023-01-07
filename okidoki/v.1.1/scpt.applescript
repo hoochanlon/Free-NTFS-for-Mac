@@ -1,4 +1,4 @@
 tell application "Terminal"
-	do script "/Applications/Nigate.app/Contents/Cake/nigate"
+	do script "python3 /Applications/Nigate.app/Contents/Cake/nigate.py"
 	activate
 end tell
