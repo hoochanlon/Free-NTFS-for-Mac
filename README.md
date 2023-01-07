@@ -12,13 +12,13 @@ Free NTFS for Mac
 
 homebrew
 
-```
+```shell
 /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
 ```
 
 python
 
-```
+```shell
 brew install python
 ```
 
@@ -34,6 +34,12 @@ brew install python
 ```shell
 sudo umount /dev/disk4s1
 ```
+
+```shell
+sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -olocal -oallow_other -o auto_xattr
+```
+
+[](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/umount-3g.png)
 
 **文件损坏扔入废纸篓**
 
