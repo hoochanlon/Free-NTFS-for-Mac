@@ -51,6 +51,11 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
+***Error loading Python lib***
+
+目前版本已解决；pyinstaller制作的程序受限于所在主机环境环境的问题，网上有说配置虚拟环境可以解决，但我还是在app程序内嵌入python源文件才搞定。
+
+
 ## 完全免费的NTFS软件清单
 
 通常不建议macOS升级系统，软件系统兼容性比Windows差很多，不少驱动（绿联千兆网驱）甚至小版本升级后就失效了，一些付费软件大版本升级就完全用不了（crossover21），不少软件商家就是恰这兼容升级版本这口饭的。所以，一般情况是，保持macOS当前系统的上一代的长期支持版本。
