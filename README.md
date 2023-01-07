@@ -39,14 +39,9 @@ sudo umount /dev/disk4s1
 
 这是苹果签名问题，在终端输入 `sudo xattr -d com.apple.quarantine`，加空格，手动拖入程序到该命令行回车。
 
-
 ## 感谢
 
-提供集成应用支持与图标设计样例。
-
 * [osxfuse](https://osxfuse.github.io)
-* [sveinbjorn.org](https://sveinbjorn.org/platypus) 
-* [langui.net](https://langui.net/new-file-menu/)
+* [lezgomatt/ezntfs](https://github.com/lezgomatt/ezntfs)
 * [cunkai/HomebrewCN](https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)
 * [ineo6/homebrew-install](https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)
-* [qastack](https://qastack.cn) | [icons8](https://icons8.com) | [gofans](https://gofans.cn)
