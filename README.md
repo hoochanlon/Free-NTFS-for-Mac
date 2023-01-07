@@ -10,19 +10,19 @@ Free NTFS for Mac
 
 ## 先决条件
 
-安装homebrew
+homebrew
 
 ```
 /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
 ```
 
-安装python
+python
 
 ```
 brew install python
 ```
 
-[关闭SIP](https://www.pcbiji.com/212402.html)、[“允许任何来源”](https://jingyan.baidu.com/article/49ad8bce2f5cee1834d8faaa.html)。
+最后调整Mac系统设置：[关闭SIP](https://www.pcbiji.com/212402.html)、[“允许任何来源”](https://jingyan.baidu.com/article/49ad8bce2f5cee1834d8faaa.html)。
 
 
 ## 报错解决
@@ -40,7 +40,7 @@ sudo umount /dev/disk4s1
 这是苹果签名问题，在终端输入 `sudo xattr -d com.apple.quarantine`，加空格，手动拖入程序到该命令行回车。
 
 
-## ❤️ 感谢
+## 感谢
 
 提供集成应用支持与图标设计样例。
 
