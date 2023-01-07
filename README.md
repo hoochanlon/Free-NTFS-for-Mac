@@ -54,7 +54,7 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ## macOS上完全免费的NTFS软件清单
 
 * [easyuefi ntfs](https://www.easyuefi.com/ntfs-for-mac/ntfs-for-mac.html) 
-* [paragon ntfs for Mac](https://www.seagate.com/cn/zh/support/software/paragon/#downloads)
+* [paragon ntfs for Mac（希捷客户支持版）](https://www.seagate.com/cn/zh/support/software/paragon/#downloads)
 * [mounty](https://mounty.app)
 * [ntfstool](https://ntfstool.com)
 
