@@ -1,6 +1,6 @@
 # Nigate
 
-一款支持苹果芯片的Free NTFS for Mac小工具软件，方案[oxfuse]、[ntfs-3g]()集成，和[ezntfs CLI](https://github.com/lezgomatt/ezntfs)实现上大同小异。
+一款支持苹果芯片的Free NTFS for Mac小工具软件，[oxfuse](https://osxfuse.github.io)、[ntfs-3g](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G#installation)方案集成整合，和[ezntfs CLI](https://github.com/lezgomatt/ezntfs)实现上大同小异。
 
 ## 实机演示
 
