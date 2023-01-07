@@ -22,7 +22,7 @@ Free NTFS for Mac
 brew install python
 ```
 
-[关闭SIP](https://www.pcbiji.com/212402.html)，并在安全与隐私性设置为[“允许任何来源”](https://jingyan.baidu.com/article/49ad8bce2f5cee1834d8faaa.html)。
+[关闭SIP](https://www.pcbiji.com/212402.html)、[“允许任何来源”](https://jingyan.baidu.com/article/49ad8bce2f5cee1834d8faaa.html)。
 
 
 ## 报错解决
