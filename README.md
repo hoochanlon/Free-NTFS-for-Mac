@@ -51,10 +51,13 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
+## macOS上完全免费的NTFS软件清单
+
+* [easyuefi ntfs](https://www.easyuefi.com/ntfs-for-mac/ntfs-for-mac.html) 
+* [paragon ntfs for Mac](https://www.seagate.com/cn/zh/support/software/paragon/#downloads)
+* [mounty](https://mounty.app)
+* [ntfstool](https://ntfstool.com)
 
 ## 感谢
 
-* [osxfuse](https://osxfuse.github.io)
-* [lezgomatt/ezntfs](https://github.com/lezgomatt/ezntfs)
-* [cunkai/HomebrewCN](https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)
-* [ineo6/homebrew-install](https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)
+[osxfuse](https://osxfuse.github.io)、[ezntfs](https://github.com/lezgomatt/ezntfs)、[HomebrewCN](https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)、[homebrew-install](https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)提供的支持于帮助。
