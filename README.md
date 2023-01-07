@@ -1,6 +1,6 @@
 # Nigate
 
-Free NTFS for Mac
+一款支持苹果芯片的Free NTFS for Mac小工具软件，方案[oxfuse]、[ntfs-3g]()集成，和[ezntfs CLI](https://github.com/lezgomatt/ezntfs)实现上大同小异。
 
 ## 实机演示
 
@@ -50,7 +50,6 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
-
 
 
 ## 感谢
