@@ -1,15 +1,29 @@
 # Nigate
 
-## 💻 实机演示
+## 实机演示
 
 视频：https://www.bilibili.com/video/BV1XG4y1f79N
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
-## ⚠️ 注意事项及使用前提
+## 先决条件
 
-* [关闭SIP](https://www.pcbiji.com/212402.html)
-* [安装python]()
+安装homebrew
+
+```
+/bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
+```
+
+
+安装python
+
+```
+brew install python
+```
+
+
+[关闭SIP](https://www.pcbiji.com/212402.html)
+
 
 ### 第二，注意安装依赖项
 
