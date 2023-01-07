@@ -53,12 +53,13 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
 ## macOS上完全免费的NTFS软件清单
 
+注意仅支持2020之前的电脑及系统。
+
 * [easyuefi ntfs](https://www.easyuefi.com/ntfs-for-mac/ntfs-for-mac.html) 
 * [mounty](https://mounty.app)
 * [ntfstool](https://ntfstool.com)
 * [paragon ntfs for Mac（希捷客户支持版）](https://www.seagate.com/cn/zh/support/software/paragon/#downloads)
 * [Omi NTFS磁盘专家（最后的完全免费版 v1.1.1）](https://www.52pojie.cn/thread-1513314-1-1.html)
-
 
 ## 感谢
 
