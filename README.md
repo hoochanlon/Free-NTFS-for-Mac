@@ -53,7 +53,9 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
 ## macOS上完全免费的NTFS软件清单
 
-注意仅支持2020之前的电脑及系统。
+一般不建议macOS升级系统，软件系统兼容性比Windows差很多，不少驱动、付费软件大版本，甚至小版本升级后就失效了，如绿联千兆网卡驱动、crossover21等。
+
+，，仅支持2020之前的电脑及系统。
 
 * [easyuefi ntfs](https://www.easyuefi.com/ntfs-for-mac/ntfs-for-mac.html) 
 * [mounty](https://mounty.app)
