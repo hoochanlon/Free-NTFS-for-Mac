@@ -22,12 +22,6 @@ python
 brew install python
 ```
 
-ezntfs(可选)
-
-```
-pip3 install ezntfs
-```
-
 最后调整Mac系统设置：[关闭SIP](https://www.pcbiji.com/212402.html)、[“允许任何来源”](https://jingyan.baidu.com/article/49ad8bce2f5cee1834d8faaa.html)。
 
 
