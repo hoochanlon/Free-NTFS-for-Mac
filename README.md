@@ -53,7 +53,7 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
 ***Error loading Python lib***
 
-目前版本已解决；pyinstaller制作的程序受限于所在主机环境环境的问题，网上有说配置虚拟环境可以解决，但我还是在app程序内嵌入python源文件才搞定。
+目前版本已解决；pyinstaller制作的程序受限于所在主机环境环境的问题，网上有说配置虚拟环境，但我还是在app程序内嵌入python源文件才搞定。
 
 
 ## 完全免费的NTFS软件清单
