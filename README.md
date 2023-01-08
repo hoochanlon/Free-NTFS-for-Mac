@@ -60,9 +60,10 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
 通常不建议macOS升级系统，[软件系统兼容性比Windows差很多](https://www.zhihu.com/question/21441309/answer/1660319199)，不少驱动（绿联千兆网驱）甚至小版本升级后就失效了，一些付费软件大版本升级就完全用不了（crossover21），不少软件商家就是恰这兼容升级版本这口饭的。
 
-所以，一般情况是，保持macOS当前系统的上一代的长期支持版本。除了[easyuefi ntfs](https://www.easyuefi.com/ntfs-for-mac/ntfs-for-mac.html)外，以下软件均不支持Ventura。
- 
-* [mounty](https://mounty.app)
+所以，一般情况是，保持macOS当前系统的上一代的长期支持版本，尤其是macOS用户请谨慎升级。
+
+* [easyuefi ntfs（支持macOS13.0）](https://www.easyuefi.com/ntfs-for-mac/ntfs-for-mac.html)
+* [mounty（不支持macOS13）](https://mounty.app)
 * [ntfstool（2020.5.20停止更新）](https://ntfstool.com)
 * [paragon ntfs for Mac（希捷客户支持版）](https://www.seagate.com/cn/zh/support/software/paragon/#downloads)
 * [Omi NTFS磁盘专家（最后的完全免费版-吾爱破解存档 v1.1.1）](https://www.52pojie.cn/thread-1513314-1-1.html)
