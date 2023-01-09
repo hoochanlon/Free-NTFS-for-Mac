@@ -55,11 +55,13 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 目前版本已解决；pyinstaller制作的程序受限于所在主机环境环境的问题，网上有说配置虚拟环境，但我还是在app程序内嵌入python源文件才搞定。
 
 
-## 完全免费的NTFS软件清单
+## 完全免费软件清单
 
-通常不建议macOS升级系统，[软件系统兼容性比Windows差很多](https://www.zhihu.com/question/21441309/answer/1660319199)，不少驱动（绿联千兆网驱）甚至小版本升级后就失效了，一些付费软件大版本升级就完全用不了（crossover21），不少软件商家就是恰这兼容升级版本这口饭的。
+**提示**
 
-所以，一般情况是，保持macOS当前系统的上一代的长期支持版本，尤其是macOS用户请谨慎升级。
+通常不建议macOS升级系统，[软件系统兼容性比Windows差很多](https://www.zhihu.com/question/21441309/answer/1660319199)，不少驱动（绿联千兆网驱）甚至小版本升级后就失效了，一些付费软件大版本升级就完全用不了（crossover21），不少软件商家就是恰这兼容升级版本这口饭的。所以，一般情况是，保持macOS当前系统的上一代的长期支持版本，尤其是macOS用户请谨慎升级。
+
+***Free NTFS for Mac list***
 
 * [easyuefi ntfs（支持macOS13.0）](https://www.easyuefi.com/ntfs-for-mac/ntfs-for-mac.html)
 * [mounty（仅限macOS12及以下）](https://mounty.app)
