@@ -67,4 +67,12 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 * [paragon ntfs for Mac（希捷客户支持版）](https://www.seagate.com/cn/zh/support/software/paragon/#downloads)
 * [Omi NTFS磁盘专家（最后的完全免费版-吾爱破解存档 v1.1.1）](https://www.52pojie.cn/thread-1513314-1-1.html)
 
-**注意**
+
+ **注意**
+
+ 通常不建议macOS升级系统，[软件系统兼容性比Windows差很多](https://www.zhihu.com/question/21441309/answer/1660319199)，不少付费购买软件、安装好的驱动升级成大版本就完全用不了，所以就存在诸多软件商家恰这支持最新系统这口饭的。因此一般情况是，保持macOS当前系统的上一代的长期支持版本，尤其是macOS用户请谨慎升级。
+
+
+ ## 感谢
+
+[osxfuse](https://osxfuse.github.io)、[ezntfs](https://github.com/lezgomatt/ezntfs)、[HomebrewCN](https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)、[homebrew-install](https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)提供的支持与帮助。
