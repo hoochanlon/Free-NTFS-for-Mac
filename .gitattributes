@@ -1,2 +1,2 @@
-*.py linguist-language=AppleScript;
-*.sh linguist-language=AppleScript;
+# *.py linguist-language=AppleScript;
+# *.sh linguist-language=AppleScript;
