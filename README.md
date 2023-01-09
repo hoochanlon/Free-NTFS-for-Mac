@@ -26,21 +26,18 @@ brew install python
 
 ## 报错解答
 
-**文件损坏扔入废纸篓**
-
-![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/fileberak.png)
-
-这是苹果签名问题，将命令复制到终端回车
+“文件损坏扔入废纸篓”，是苹果对软件迁移主机进行了限制，将命令复制到终端回车
 
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
-**出现“busy”等错误提示**
+![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/fileberak.png)
 
-![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/umount-3g.png)
 
 出现“busy”等无法写入的错误提示，先卸载掉U盘，disk4s1为当前的U盘设备序列名，[官网如是，此类同理](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G)。
+
+![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/umount-3g.png)
 
 ```shell
 sudo umount /dev/disk4s1
@@ -69,10 +66,3 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 * [Omi NTFS磁盘专家（最后的完全免费版-吾爱破解存档 v1.1.1）](https://www.52pojie.cn/thread-1513314-1-1.html)
 
 **注意**
-
-通常不建议macOS升级系统，[软件系统兼容性比Windows差很多](https://www.zhihu.com/question/21441309/answer/1660319199)，不少付费购买软件、安装好的驱动升级成大版本就完全用不了，所以就存在诸多软件商家恰这支持最新系统这口饭的。因此一般情况是，保持macOS当前系统的上一代的长期支持版本，尤其是macOS用户请谨慎升级。
-
-
-## 感谢
-
-[osxfuse](https://osxfuse.github.io)、[ezntfs](https://github.com/lezgomatt/ezntfs)、[HomebrewCN](https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)、[homebrew-install](https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)提供的支持与帮助。
