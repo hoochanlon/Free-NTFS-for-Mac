@@ -70,7 +70,7 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 
 **注意**
 
-通常不建议macOS升级系统，[软件系统兼容性比Windows差很多](https://www.zhihu.com/question/21441309/answer/1660319199)，不少驱动（绿联千兆网驱）甚至小版本升级后就失效了，一些付费软件大版本升级就完全用不了（crossover21），不少软件商家就是恰这兼容升级版本这口饭的。所以，一般情况是，保持macOS当前系统的上一代的长期支持版本，尤其是macOS用户请谨慎升级。
+通常不建议macOS升级系统，[软件系统兼容性比Windows差很多](https://www.zhihu.com/question/21441309/answer/1660319199)，不少付费购买软件、安装好的驱动升级成大版本就完全用不了，所以就存在诸多软件商家恰这支持最新系统这口饭的。因此一般情况是，保持macOS当前系统的上一代的长期支持版本，尤其是macOS用户请谨慎升级。
 
 
 ## 感谢
