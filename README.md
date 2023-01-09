@@ -30,7 +30,7 @@ brew install python
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/fileberak.png)
 
-这是苹果签名问题
+这是苹果签名问题，将命令复制到终端回车
 
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
