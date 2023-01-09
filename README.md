@@ -22,8 +22,7 @@
 brew install python
 ```
 
-最后调整Mac系统设置：[关闭SIP](https://www.pcbiji.com/212402.html)、[“允许任何来源”](https://jingyan.baidu.com/article/49ad8bce2f5cee1834d8faaa.html)。
-
+最后调整Mac系统设置，[关闭SIP](https://www.pcbiji.com/212402.html)与[“允许任何来源”](https://jingyan.baidu.com/article/49ad8bce2f5cee1834d8faaa.html)；如果你了解过python的话，可直接运行[ntfs_supprot.py](helpdesk/ntfs_supprot.py)脚本使用。
 
 ## 报错解答
 
