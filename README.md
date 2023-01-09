@@ -49,7 +49,10 @@ sudo umount /dev/disk4s1
 sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -olocal -oallow_other -o auto_xattr
 ```
 
-不能用的个别例子，是移动盘的文件存在非法字符。由用户kevintao0417反馈支持。参考：[issues#3](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3#issuecomment-1375314466)
+其他现象:
+
+* 移动盘的文件存在非法字符。由用户kevintao0417反馈支持。参考：[issues#3](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3#issuecomment-1375314466)
+* 由于国内特殊网络环境原因导致homebrew、oxfuse、ntfs-3g其中某项没安装好。参考：[issues#8](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)
 
 <!--
 
