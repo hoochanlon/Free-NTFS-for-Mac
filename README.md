@@ -26,6 +26,16 @@ brew install python
 
 ## 报错解答
 
+**文件损坏扔入废纸篓**
+
+![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/fileberak.png)
+
+这是苹果签名问题
+
+```shell
+sudo xattr -d com.apple.quarantine /Applications/nigate.app
+```
+
 **出现“busy”等错误提示**
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/umount-3g.png)
@@ -38,16 +48,6 @@ sudo umount /dev/disk4s1
 
 ```shell
 sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -olocal -oallow_other -o auto_xattr
-```
-
-**文件损坏扔入废纸篓**
-
-![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/fileberak.png)
-
-这是苹果签名问题
-
-```shell
-sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
 ***Error loading Python lib***
