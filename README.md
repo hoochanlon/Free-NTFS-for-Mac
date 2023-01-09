@@ -49,6 +49,8 @@ sudo umount /dev/disk4s1
 sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -olocal -oallow_other -o auto_xattr
 ```
 
+[不能用的个别例子，是移动盘的文件存在非法字符。由 kevintao0417 反馈提供](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3#issuecomment-1375314466)
+
 <!--
 
 ***Error loading Python lib***
