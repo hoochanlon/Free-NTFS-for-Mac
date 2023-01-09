@@ -1,15 +1,6 @@
 # Free-Mac-NTFS
 
-Mac自由读写NTFS小攻略及通用小工具。现在omi ntfs也开始收费了，所以我把我目前了解到的免费ntfs图形化、相较于易于操作的软件先列出来。
-
-* [easyuefi ntfs](https://www.easyuefi.com/ntfs-for-mac/ntfs-for-mac.html) (免费，支持及更新频率较快，但目前不支持macOS13.1)
-* [paragon ntfs for Mac](https://www.seagate.com/cn/zh/support/software/paragon/#downloads)(客户支持免费版，一般支持最新系统)
-* [mounty](https://mounty.app)(免费，最高支持macOS12，支持最新系统较慢)
-* [ntfstool](https://ntfstool.com)(免费，较长时间没更新了2020.5)
-
 ## macOSFUSE + NTFS-3g-Mac
-
-👉 [shell脚本直通专列](https://github.com/hoochanlon/free-mac-ntfs/tree/main/shell_old)
 
 ### 1. 充分准备前提（已安装及已配置SIP可跳至第二大步）
 
