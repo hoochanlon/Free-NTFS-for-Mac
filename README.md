@@ -50,10 +50,13 @@ sudo umount /dev/disk4s1
 sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -olocal -oallow_other -o auto_xattr
 ```
 
+<!--
+
 ***Error loading Python lib***
 
 目前版本已解决；pyinstaller制作的程序受限于所在主机环境环境的问题，网上有说配置虚拟环境，但我还是在app程序内嵌入python源文件才搞定。
 
+-->
 
 ## 完全免费软件清单
 
