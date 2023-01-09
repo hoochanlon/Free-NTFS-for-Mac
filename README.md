@@ -39,6 +39,8 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/umount-3g.png)
 
+复制下面两行命令，如上图操作即可。
+
 ```shell
 sudo umount /dev/disk4s1
 ```
