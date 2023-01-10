@@ -22,7 +22,7 @@
 brew install python
 ```
 
-关闭SIP与“允许任何来源”，[Mac新手请看下载之家操作指引](http://www.downza.cn/mac/10419030.html)；以及用以下命令[解除苹果对软件迁移安装的门禁](https://developer.apple.com/cn/developer-id/)。
+关闭SIP与“允许任何来源”，[Mac新手请看下载之家操作指引](http://www.downza.cn/mac/10419030.html)；以及用以下命令解除[苹果对软件迁移安装的门禁](https://developer.apple.com/cn/developer-id/)。
 
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
