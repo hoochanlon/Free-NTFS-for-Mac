@@ -20,18 +20,29 @@ config_u_drive(){
 		twiceCutVal=${onceCutVal#*//}
 		thriceCutVal=${i##*/}
 		echo "新设备: "${thriceCutVal}
-		# echo '---------\n'
+		## echo '---------\n'
 		sudo umount $i
 		sudo -S /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/${twiceCutVal} /Volumes/${twiceCutVal} -olocal -oallow_other -o auto_xattr -ovolname=${thriceCutVal}
 		echo "新设备: ${thriceCutVal}，已可读写！"
-		echo '---------\n'
+		# echo '---------\n'
+		echo '---------'
+		echo " "
 	done
 
 }
 
-echo "\n"
-echo "等待NTFS新设备接入\n"
-echo '---------\n'
+# origin echo text
+# echo "\n"
+# echo "等待NTFS新设备接入\n"
+# echo '---------\n'
+
+echo " "
+echo " "
+echo "等待NTFS新设备接入"
+echo " "
+echo '---------'
+echo " "
+
 while true
 do
 	sleep 5
