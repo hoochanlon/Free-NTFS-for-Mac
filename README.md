@@ -55,7 +55,7 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
  ## 感谢
 
-* [ezntfs](https://github.com/lezgomatt/ezntfs)
+* [ezntfs](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)
 * [kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)
 
 提供的支持与帮助。
