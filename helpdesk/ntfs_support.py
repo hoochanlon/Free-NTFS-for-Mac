@@ -35,7 +35,7 @@ ntfs_yes = [
     # "thriceCutVal=","${i##*/}","\n",
     "sudo umount $i","\n",
     "sudo -S /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/${twiceCutVal} /Volumes/${twiceCutVal} -olocal -oallow_other -o auto_xattr -ovolname=${thriceCutVal}",
-    "\n","echo " "\"新设备: ${thriceCutVal}，已可读写！\"",
+    "\n","echo " "\"新设备${thriceCutVal}已可读写！\"",
     "\ndone\n","}\n",
     "close_boring\n",
     "check_install\n",
