@@ -14,6 +14,7 @@
 
 ## 快速开始
 
+苹果生态新手还是建议先使用[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)。Mac老鸟或IT人士可使用以下任意指令一键起飞。
 
  shell
 
@@ -21,18 +22,12 @@
  /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
  ```
 
-
  python
 
  ```
  python3 -c "$(curl -fsSL https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.py)"
  ```
 
- [软件版下载](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)
-
- ```
- aira2c https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg
- ```
 
 ## 使用须知
 
