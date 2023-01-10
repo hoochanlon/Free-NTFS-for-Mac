@@ -47,7 +47,6 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 
 疑难现象：
 
-* 小软件目前只针对NTFS存储设备进行读写，暂不支持重命名、修改软件图标等扩展操作。
 * 由于网络等原因导致[homebrew、oxfuse、ntfs-3g三者其中某项没装好](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)，需重装一次该软件。
 * 移动盘符存在["某些非合规字符"](https://www.bing.com/search?q=非法字符)。（[由用户kevintao0417反馈支持](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3#issuecomment-1375314466)）
 
