@@ -28,40 +28,6 @@ brew install python
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
-
-## 疑难解答
-
-**注意：[homebrew、oxfuse、ntfs-3g，三者由于网络等其他特殊原因，没有完全装好](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)，以及移动盘符存在["某些非合规字符"](https://www.bing.com/search?q=非法字符)，都会导致软件不能正常读写，需重新运行一遍软件。**
-
-出现“busy”等无法写入的错误提示，先卸载掉U盘，disk4s1为当前的U盘设备序列名，[官网如是，此类同理](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G)。
-
-![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/umount-3g.png)
-
-复制下面两行命令，如上图操作即可。
-
-```shell
-sudo umount /dev/disk4s1
-```
-
-```shell
-sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -olocal -oallow_other -o auto_xattr
-```
-
-<!---
-“文件损坏扔入废纸篓”，[是苹果的门禁系统对软件迁移主机进行了限制，详情官网](https://developer.apple.com/cn/developer-id/)，将命令复制到终端回车
-
-```shell
-sudo xattr -d com.apple.quarantine /Applications/nigate.app
-```
-
-![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/fileberak.png)
-
-Error loading Python lib目前版本已解决；pyinstaller制作的程序受限于所在主机环境环境的问题，网上有说配置虚拟环境，但我还是在app程序内嵌入python源文件才搞定。
-
-[关闭SIP](https://www.pcbiji.com/212402.html)与[“允许任何来源”](https://jingyan.baidu.com/article/49ad8bce2f5cee1834d8faaa.html)
-
--->
-
 ## 进阶技巧
 
 重命名U盘
