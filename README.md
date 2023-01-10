@@ -2,7 +2,7 @@
 
 一款支持苹果芯片的Free NTFS for Mac小工具软件。[oxfuse](https://osxfuse.github.io)、[ntfs-3g](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G#installation)方案集成整合，与[ezntfs CLI](https://github.com/lezgomatt/ezntfs)异曲同工。
 
-## 演示效果
+## 使用与个性化演示
 
 [实机视频](https://www.bilibili.com/video/BV1XG4y1f79N)
 
@@ -11,33 +11,6 @@
 重命名
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
-
-## 快速开始
-
-
-<!-- 
-
-shell
-
-```
-/bin/bash -c "$(curl -fsSL https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh)"
-```
-
--->
-
-python
-
-```
-python3 -c "$(curl -fsSL https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.py)"
-```
-
-[软件版下载](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)
-
-```
-aira2c https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg
-```
-
-
 
 ## 预备知识
 
