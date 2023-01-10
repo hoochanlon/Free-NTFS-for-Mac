@@ -37,7 +37,7 @@
 /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)" && brew install python
 ```
 
-[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及用以下命令解除[苹果对软件迁移安装的门禁](https://developer.apple.com/cn/developer-id/)。当然还有些对[macOS系统升级的个人经验之谈](https://github.com/hoochanlon/Free-NTFS-for-Mac/shashin)。
+[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及用以下命令解除[苹果对软件迁移安装的门禁](https://developer.apple.com/cn/developer-id/)。当然还有[我对macOS系统升级的个人经验之谈](https://github.com/hoochanlon/Free-NTFS-for-Mac/shashin)。
 
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
