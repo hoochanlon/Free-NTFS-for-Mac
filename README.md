@@ -32,6 +32,8 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
 ## 疑难解答
 
+**注意：[homebrew、oxfuse、ntfs-3g，三者由于网络等其他特殊原因，没有完全装好](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)，以及移动盘符存在["某些非合规字符"](https://www.bing.com/search?q=非法字符)，都会导致软件不能正常读写，需重新运行一遍软件。**
+
 出现“busy”等无法写入的错误提示，先卸载掉U盘，disk4s1为当前的U盘设备序列名，[官网如是，此类同理](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G)。
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/umount-3g.png)
@@ -46,7 +48,7 @@ sudo umount /dev/disk4s1
 sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -olocal -oallow_other -o auto_xattr
 ```
 
-注意：[homebrew、oxfuse、ntfs-3g三者由于网络等其他特殊原因，没完全装好](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)，以及移动盘符存在["某些非合规字符"](https://www.bing.com/search?q=非法字符)，都会导致软件不能正常读写。
+
 
 
 <!---
