@@ -28,18 +28,6 @@ brew install python
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
-## 重命名U盘
-
-![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
-
-```shell
-diskutil list
-```
-
-```shell
-sudo umount /dev/disk4s2 && ntfslabel /dev/disk4s2 carsh
-```
-
 
 ## 疑难解答
 
@@ -74,6 +62,19 @@ Error loading Python lib目前版本已解决；pyinstaller制作的程序受限
 
 -->
 
+## 进阶技巧
+
+重命名U盘
+
+![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
+
+```shell
+diskutil list
+```
+
+```shell
+sudo umount /dev/disk4s2 && ntfslabel /dev/disk4s2 carsh
+```
 
  ## 感谢
 
