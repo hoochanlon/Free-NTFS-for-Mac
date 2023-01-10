@@ -12,7 +12,30 @@
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
 
-## 预备知识
+## 快速开始
+
+
+ shell
+
+ ```
+ /bin/bash -c "$(curl -fsSL https://raw.cdnweb.icu/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
+ ```
+
+
+ python
+
+ ```
+ python3 -c "$(curl -fsSL https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.py)"
+ ```
+
+ [软件版下载](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)
+
+ ```
+ aira2c https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg
+ ```
+
+
+## 使用须知
 
 安装homebrew与python3（软件会自动检测依赖环境安装）
 
