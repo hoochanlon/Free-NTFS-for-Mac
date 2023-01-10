@@ -12,7 +12,7 @@
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
 
-## 先决条件
+## 预备知识
 
 安装homebrew与python3（软件会自动检测依赖环境安装）
 
