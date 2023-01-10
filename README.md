@@ -4,7 +4,7 @@
 
 ## 实机演示
 
-视频：https://www.bilibili.com/video/BV1XG4y1f79N
+使用软件时，小窗口应保持在后台，请看视频：https://www.bilibili.com/video/BV1XG4y1f79N
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
@@ -22,18 +22,15 @@
 brew install python
 ```
 
-最后[关闭SIP](https://www.pcbiji.com/212402.html)与[“允许任何来源”](https://jingyan.baidu.com/article/49ad8bce2f5cee1834d8faaa.html)；如果你了解过python的话，可直接运行[ntfs_supprot.py](helpdesk/ntfs_supprot.py)脚本使用。
-
-## 报错解答
-
-“文件损坏扔入废纸篓”，是苹果对软件迁移主机进行了限制，将命令复制到终端回车
+[关闭SIP](https://www.pcbiji.com/212402.html)与[“允许任何来源”](https://jingyan.baidu.com/article/49ad8bce2f5cee1834d8faaa.html)；以及用以下命令[解除苹果门禁对软件主机迁移的安装限制](https://developer.apple.com/cn/developer-id/)。
 
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
-![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/fileberak.png)
 
+
+## 报错解答
 
 出现“busy”等无法写入的错误提示，先卸载掉U盘，disk4s1为当前的U盘设备序列名，[官网如是，此类同理](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G)。
 
@@ -54,11 +51,17 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 * 移动盘的文件存在非法字符。由用户kevintao0417反馈支持。参考：[issues#3](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3#issuecomment-1375314466)
 * 由于国内特殊网络环境原因导致homebrew、oxfuse、ntfs-3g其中某项没安装好。参考：[ezntfs/issues/8](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)
 
-<!--
 
-***Error loading Python lib***
+<!---
+“文件损坏扔入废纸篓”，[是苹果的门禁系统对软件迁移主机进行了限制，详情官网](https://developer.apple.com/cn/developer-id/)，将命令复制到终端回车
 
-目前版本已解决；pyinstaller制作的程序受限于所在主机环境环境的问题，网上有说配置虚拟环境，但我还是在app程序内嵌入python源文件才搞定。
+```shell
+sudo xattr -d com.apple.quarantine /Applications/nigate.app
+```
+
+![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/fileberak.png)
+
+Error loading Python lib目前版本已解决；pyinstaller制作的程序受限于所在主机环境环境的问题，网上有说配置虚拟环境，但我还是在app程序内嵌入python源文件才搞定。
 
 -->
 
