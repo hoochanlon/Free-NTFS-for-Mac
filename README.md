@@ -22,12 +22,11 @@
 brew install python
 ```
 
-[关闭SIP](https://www.pcbiji.com/212402.html)与[“允许任何来源”](https://jingyan.baidu.com/article/49ad8bce2f5cee1834d8faaa.html)；以及用以下命令[解除苹果门禁对软件主机迁移的安装限制](https://developer.apple.com/cn/developer-id/)。
+关闭SIP与“允许任何来源”，[Mac新手请看下载之家操作指引](http://www.downza.cn/mac/10419030.html)；以及用以下命令[解除苹果门禁对软件主机迁移的安装限制](https://developer.apple.com/cn/developer-id/)。
 
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
-
 
 
 ## 报错解答
@@ -62,6 +61,8 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/fileberak.png)
 
 Error loading Python lib目前版本已解决；pyinstaller制作的程序受限于所在主机环境环境的问题，网上有说配置虚拟环境，但我还是在app程序内嵌入python源文件才搞定。
+
+[关闭SIP](https://www.pcbiji.com/212402.html)与[“允许任何来源”](https://jingyan.baidu.com/article/49ad8bce2f5cee1834d8faaa.html)
 
 -->
 
