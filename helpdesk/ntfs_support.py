@@ -4,7 +4,7 @@ import getpass
 # 双引号转义：https://blog.csdn.net/try_and_do/article/details/80649663
 # 强制字符串不转义：https://zhidao.baidu.com/question/2057931750861815427.html
 
-苦手 = [
+ntfs_yes = [
 
     "#/bin/bash\n", "\n", "close_boring(){\n", "sudo spctl --master-disable\n", 
     "}\n",
@@ -48,7 +48,7 @@ def File_plus():
     folder_path = "/Users/"+username+"/Public/shell-ntfs.sh"
     if not os.path.exists(folder_path):
         file = open(folder_path, mode='w')
-        file.writelines(苦手)
+        file.writelines(ntfs_yes)
     
     else:
         print('\nshell-ntfs.sh 文件已检测\n')
