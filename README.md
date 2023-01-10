@@ -34,7 +34,6 @@
  aira2c https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg
  ```
 
-
 ## 使用须知
 
 安装homebrew与python3（软件会自动检测依赖环境安装）
@@ -55,6 +54,9 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
  sudo /usr/bin/kmutil unload -b io.macfuse.filesystems.macfuse
  ```
 
+## 进阶技巧
+
+全速热爱中...
 
  ## 感谢
 
