@@ -27,7 +27,7 @@ ntfs_yes = [
     "onceCutVal=","${i%/*}","\n",
     "twiceCutVal=","${onceCutVal#*//}","\n",
     "thriceCutVal=","${i##*/}","\n",
-    "echo \"新设备: \"${thriceCutVal}\n",
+    "echo \"\n 新设备 \"${thriceCutVal}\n",
     "echo '---------\\n'","\n",
     # "echo \"新设备 : \"$i\n",
     # "onceCutVal=","${i%/*}","\n",
