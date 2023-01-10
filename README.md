@@ -28,24 +28,17 @@ brew install python
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
-## 进阶
+## 重命名U盘
 
-
-重命名U盘
+![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
 
 ```shell
 diskutil list
 ```
 
 ```shell
-sudo umount /dev/disk4s2
+sudo umount /dev/disk4s2 && ntfslabel /dev/disk4s2 carsh
 ```
-
-```shell
-sudo ntfslabel /dev/disk4s2 carsh
-```
-
-![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
 
 
 ## 疑难解答
