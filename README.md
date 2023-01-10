@@ -2,11 +2,15 @@
 
 一款支持苹果芯片的Free NTFS for Mac小工具软件。[oxfuse](https://osxfuse.github.io)、[ntfs-3g](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G#installation)方案集成整合，与[ezntfs CLI](https://github.com/lezgomatt/ezntfs)异曲同工。
 
-## 实机演示
+## 使用与个性化演示
 
-使用软件时，小窗口应保持在后台，请看视频：https://www.bilibili.com/video/BV1XG4y1f79N
+[实机视频](https://www.bilibili.com/video/BV1XG4y1f79N)
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
+
+重命名
+
+![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
 
 ## 先决条件
 
@@ -22,19 +26,6 @@
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
-## 个性化
-
-重命名U盘
-
-![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
-
-```shell
-diskutil list
-```
-
-```shell
-sudo umount /dev/disk4s2 && ntfslabel /dev/disk4s2 carsh
-```
 
  ## 感谢
 
