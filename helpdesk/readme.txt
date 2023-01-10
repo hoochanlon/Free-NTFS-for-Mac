@@ -1,10 +1,3 @@
-## 桌面技术支持专业版
-
-***smalltalk***
-
-通常不建议macOS升级系统，[软件系统兼容性比Windows差很多](https://www.zhihu.com/question/21441309/answer/1660319199)，升级到大版本系统，不少付费购买软件与固件驱动完全用不了的情况，在macOS平台常有发生，所以就存在诸多软件生产者恰这口支持最新系统的钱。因此一般情况是，保持macOS当前系统的上一代的长期支持版本，谨慎升级。
-
-
 ***Free NTFS for Mac list***
 
 * [easyuefi ntfs（支持macOS13.0）](https://www.easyuefi.com/ntfs-for-mac/ntfs-for-mac.html)
