@@ -10,16 +10,10 @@
 
 ## 先决条件
 
-安装homebrew
+安装homebrew与python3（软件会自动检测依赖环境安装）
 
 ```shell
-/bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
-```
-
-安装python
-
-```shell
-brew install python
+/bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)" && brew install python
 ```
 
 关闭SIP与“允许任何来源”，[请看由“下载之家”提供的操作指引](http://www.downza.cn/mac/10419030.html)；以及用以下命令解除[苹果对软件迁移安装的门禁](https://developer.apple.com/cn/developer-id/)。
