@@ -27,7 +27,7 @@ ntfs_yes = [
     "onceCutVal=","${i%/*}","\n",
     "twiceCutVal=","${onceCutVal#*//}","\n",
     "thriceCutVal=","${i##*/}","\n",
-    "echo \"\n 新设备 \"${thriceCutVal}\n",
+    "echo \"新设备: \"${thriceCutVal}\n",
     "echo '---------\\n'","\n",
     # "echo \"新设备 : \"$i\n",
     # "onceCutVal=","${i%/*}","\n",
@@ -35,7 +35,7 @@ ntfs_yes = [
     # "thriceCutVal=","${i##*/}","\n",
     "sudo umount $i","\n",
     "sudo -S /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/${twiceCutVal} /Volumes/${twiceCutVal} -olocal -oallow_other -o auto_xattr -ovolname=${thriceCutVal}",
-    "\n","echo " "\"新设备${thriceCutVal}已可读写！\"",
+    "\n","echo " "\"新设备: ${thriceCutVal}，已可读写！\"",
     "\ndone\n","}\n",
     "close_boring\n",
     "check_install\n",
@@ -79,4 +79,3 @@ while True:
     else:
         # print("没有NTFS优盘接入")
         continue
-
