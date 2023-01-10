@@ -28,7 +28,7 @@ brew install python
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
-## 进阶技巧
+## 个性化
 
 重命名U盘
 
