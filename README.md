@@ -18,7 +18,7 @@
  shell
 
  ```
- /bin/bash -c "$(curl -fsSL https://raw.cdnweb.icu/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
+ /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
  ```
 
 
