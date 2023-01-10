@@ -1,6 +1,6 @@
 # Nigate
 
-一款支持苹果芯片的Free NTFS for Mac小工具软件。[oxfuse](https://osxfuse.github.io)、[ntfs-3g](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G#installation)方案集成整合，与[ezntfs CLI](https://github.com/lezgomatt/ezntfs)异曲同工。
+一款支持苹果芯片的Free NTFS for Mac小工具软件。由[homebrew](https://github.com/Homebrew)、[oxfuse](https://osxfuse.github.io)、[ntfs-3g](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G#installation)方案集成整合。
 
 ## 使用与个性化演示
 
@@ -55,4 +55,7 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
  ## 感谢
 
-[osxfuse](https://osxfuse.github.io)、[ezntfs](https://github.com/lezgomatt/ezntfs)、[HomebrewCN](https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)、[homebrew-install](https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)、[downza](http://www.downza.cn/mac/10419030.html)提供的支持与帮助。
+* [ezntfs](https://github.com/lezgomatt/ezntfs)
+* [kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)
+
+提供的支持与帮助。
