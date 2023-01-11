@@ -28,11 +28,11 @@ Mac老鸟或IT人士可使用以下任意指令一键起飞。
  /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
  ```
 
-<details><summary> <b>个性化定制 （<i>Need Geek Style</i>）</b> </summary>
+## 个性化
  
- ##### 需用 `diskutil list` 查看挂载盘ID方可对应操作。
+**重命名及格式化U盘，需用 `diskutil list` 查看挂载盘ID方可对应操作。**
 
- **重命名**
+### 重命名
  
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
  
@@ -45,7 +45,7 @@ Mac老鸟或IT人士可使用以下任意指令一键起飞。
  sudo ntfslabel /dev/disk4s2 carsh
  ```
  
-**格式化**
+### 格式化为NTFS
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/shashin/formatntfs.png)
  
