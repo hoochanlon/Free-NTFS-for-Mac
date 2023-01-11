@@ -56,6 +56,13 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
 ## 快速体验
 
+<details><summary> <i>homebrew(brew已安装，可忽视)</i> </summary>
+
+```shell
+/bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
+```
+
+</details>
 Mac老鸟或IT人士可使用以下任意指令一键起飞。
 
  shell
@@ -64,19 +71,8 @@ Mac老鸟或IT人士可使用以下任意指令一键起飞。
  /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
  ```
 
-homebrew (brew已安装，可忽视)
-
-```shell
-/bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
-```
 
 
-<!--
-
- ```
- python3 -c "$(curl -fsSL https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.py)"
- ```
--->
 
 
  ## 感谢支持
@@ -84,3 +80,14 @@ homebrew (brew已安装，可忽视)
 * [ezntfs](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)
 * [kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)
 * [花了钱买软件的Mac正版用户，还过来折腾的我自己](https://github.com/hoochanlon/Free-NTFS-for-Mac)
+
+
+<!--
+
+注释段
+
+ ```
+ python3 -c "$(curl -fsSL https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.py)"
+ ```
+-->
+
