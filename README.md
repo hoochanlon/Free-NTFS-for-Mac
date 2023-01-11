@@ -4,9 +4,10 @@
 
 ## 使用与个性化演示
 
-[实机视频](https://www.bilibili.com/video/BV1XG4y1f79N)
+[实机视频](https://www.bilibili.com/video/BV1XG4y1f79N)与[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)。
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
+
 
 <details><summary> NTFS个性化 Geek Style </summary>
  
@@ -59,7 +60,7 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
 ## 快速开始
 
-苹果生态新手还是建议先使用[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)。Mac老鸟或IT人士可使用以下任意指令一键起飞。
+Mac老鸟或IT人士可使用以下任意指令一键起飞。
 
  shell
 
