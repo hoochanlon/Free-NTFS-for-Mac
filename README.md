@@ -8,9 +8,17 @@
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
+<details><summary> **个性化** </summary>
+
 重命名
 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
+
+格式化
+
+![](https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/blob/main/shashin/formatntfs.png)
+
+</details>
 
 ## 快速开始
 
