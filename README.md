@@ -76,10 +76,6 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
  sudo /usr/bin/kmutil unload -b io.macfuse.filesystems.macfuse
  ```
 
-## 进阶技巧
-
-全速热爱中...
-
  ## 感谢
 
 * [ezntfs](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)
