@@ -4,7 +4,7 @@
 
 ## 使用与个性化演示
 
-[实机视频](https://www.bilibili.com/video/BV1XG4y1f79N)。
+[实机视频](https://www.bilibili.com/video/BV1XG4y1f79N)
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
