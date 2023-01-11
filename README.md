@@ -6,8 +6,6 @@
 
 [实机视频](https://www.bilibili.com/video/BV1XG4y1f79N)
 
-![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
-
 <details><summary> <b>使用须知</b> </summary>
  
 1. 由于NTFS不受苹果支持的特殊性，需要[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及需放开[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)。
@@ -22,9 +20,20 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
   
 </details>
 
+![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
 
-<details><summary> <i>Personal Geek Style</i> </summary>
+
+## 快速体验
+
+Mac老鸟或IT人士可使用以下任意指令一键起飞。
+
+ ```
+ /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
+ ```
+
+
+<details><summary> 个性化定制 （<i>Need Geek Style</i>） </summary>
  
  ##### 需用 `diskutil list` 查看挂载盘ID方可对应操作。
 
@@ -53,16 +62,6 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
  sudo mkntfs -f /dev/disk4s1
 ```
 </details>
-
-
-
-## 快速体验
-
-Mac老鸟或IT人士可使用以下任意指令一键起飞。
-
- ```
- /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
- ```
 
 
 
