@@ -70,11 +70,8 @@
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
-软件内核扩展未加载问题，[其他问题转，答疑中心，issues#9](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
+以及需要[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)，[其他问题转，答疑中心，issues#9](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
 
- ```shell
- sudo /usr/bin/kmutil unload -b io.macfuse.filesystems.macfuse
- ```
 
  ## 感谢
 
