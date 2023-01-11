@@ -9,20 +9,14 @@
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
 <details><summary> <b>使用须知</b> </summary>
-
-安装homebrew与python3（软件会自动检测依赖环境安装）
-
-```shell
-/bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)" && brew install python
-```
-
-[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)使用时，需以下指令解除[苹果对软件迁移安装的门禁](https://developer.apple.com/cn/developer-id/)。
+ 
+1. 由于NTFS不受苹果支持的特殊性，需要[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及需放开[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)，[其他问题转，可答疑中心，issues#9](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
+2. 安装homebrew与python3（软件会自动检测依赖环境安装）
+3. 由于本人买不起[苹果开发者ID](https://blog.csdn.net/Alexander_Wei/article/details/111149103)，所以[nigate软件](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)在使用时，需以下指令解除[苹果对软件迁移安装的门禁](https://developer.apple.com/cn/developer-id/)。
 
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
-
-以及最后打开[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)，[其他问题转，答疑中心，issues#9](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
  
 </details>
 
@@ -70,15 +64,19 @@ Mac老鸟或IT人士可使用以下任意指令一键起飞。
  /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
  ```
 
- python
+homebrew (brew已安装，可忽视)
+
+```shell
+/bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)" && brew install python
+```
+
+
+<!--
 
  ```
  python3 -c "$(curl -fsSL https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.py)"
  ```
-
-软件版（[软件未受苹果公证，太贵了买不起](https://blog.csdn.net/Alexander_Wei/article/details/111149103)）下载链接：
-
-https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg
+-->
 
 
  ## 感谢支持
