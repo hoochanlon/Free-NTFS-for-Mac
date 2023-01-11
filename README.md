@@ -53,9 +53,6 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
 </details>
 
-
-## 快速体验
-
 <details><summary> <i> -- 若homebrew已安装，可忽略该条快捷安装指令 -- </i> </summary>
 
 ```shell
@@ -63,6 +60,11 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
 </details>
+
+
+
+## 快速体验
+
 Mac老鸟或IT人士可使用以下任意指令一键起飞。
 
  shell
