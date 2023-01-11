@@ -12,7 +12,11 @@
  
  ##### 需用 `diskutil list` 查看挂载盘ID方可对应操作。
 
-
+ **重命名**
+ 
+![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
+ 
+ 
  ```shell
  sudo umount /dev/disk4s2
  ```
@@ -21,17 +25,17 @@
  sudo ntfslabel /dev/disk4s2 carsh
  ```
  
-![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
+**格式化**
 
+![](https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/shashin/formatntfs.png)
+ 
 ```shell
  sudo diskutil unmount /dev/disk4s1
 ```
  
- ```shell
+```shell
  sudo mkntfs -f /dev/disk4s1
- ```
-
-![](https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/shashin/formatntfs.png)
+```
 
 </details>
 
