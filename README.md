@@ -58,7 +58,7 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 以及需要[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)，[其他问题转，答疑中心，issues#9](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
 
 
-## 快速开始
+## 快速体验
 
 Mac老鸟或IT人士可使用以下任意指令一键起飞。
 
