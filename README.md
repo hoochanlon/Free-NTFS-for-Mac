@@ -57,7 +57,7 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```shell
  sudo mkntfs -f /dev/disk4s1
 ```
-
+</details>
 
 
 
