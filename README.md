@@ -8,15 +8,30 @@
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
-<details><summary> **个性化** </summary>
+<details><summary> NTFS重命名与格式化 </summary>
+ 
+ ##### 需用 `diskutil list` 查看挂载盘ID方可对应操作。
 
-重命名
 
+ ```shell
+ sudo umount /dev/disk4s2
+ ```
+ 
+ ```shell
+ sudo ntfslabel /dev/disk4s2 carsh
+ ```
+ 
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
 
-格式化
+```shell
+ sudo diskutil unmount /dev/disk4s1
+```
+ 
+ ```shell
+ sudo mkntfs -f /dev/disk4s1
+ ```
 
-![](https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/blob/main/shashin/formatntfs.png)
+![](https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/shashin/formatntfs.png)
 
 </details>
 
