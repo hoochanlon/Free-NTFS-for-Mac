@@ -56,7 +56,7 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
 ## 快速体验
 
-<details><summary> <i>（若homebrew已安装，可忽略该条快捷安装指令）</i> </summary>
+<details><summary> <i> -- 若homebrew已安装，可忽略该条快捷安装指令 -- </i> </summary>
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
