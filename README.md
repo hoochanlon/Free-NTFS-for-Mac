@@ -33,7 +33,7 @@ Mac老鸟或IT人士可使用以下任意指令一键起飞。
  ```
 
 
-<details><summary> 个性化定制 （<i>Need Geek Style</i>） </summary>
+<details><summary> <b>个性化定制 （<i>Need Geek Style</i>）</b> </summary>
  
  ##### 需用 `diskutil list` 查看挂载盘ID方可对应操作。
 
