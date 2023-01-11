@@ -8,8 +8,6 @@
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
-**[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)**
-
 <details><summary> <b>使用须知</b> </summary>
 
 安装homebrew与python3（软件会自动检测依赖环境安装）
@@ -18,13 +16,13 @@
 /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)" && brew install python
 ```
 
-[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及用以下命令解除[苹果对软件迁移安装的门禁](https://blog.csdn.net/Alexander_Wei/article/details/111149103)。
+[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及**[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)**使用时，需以下指令解除[苹果对软件迁移安装的门禁](https://blog.csdn.net/Alexander_Wei/article/details/111149103)。
 
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
-以及需要[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)，[其他问题转，答疑中心，issues#9](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
+以及最后打开[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)，[其他问题转，答疑中心，issues#9](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
  
 </details>
 
