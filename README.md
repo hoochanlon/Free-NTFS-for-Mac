@@ -67,8 +67,6 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
 Mac老鸟或IT人士可使用以下任意指令一键起飞。
 
- shell
-
  ```
  /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
  ```
