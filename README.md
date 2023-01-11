@@ -16,7 +16,7 @@
 /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)" && brew install python
 ```
 
-[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)使用时，需以下指令解除[苹果对软件迁移安装的门禁](https://blog.csdn.net/Alexander_Wei/article/details/111149103)。
+[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)使用时，需以下指令解除[苹果对软件迁移安装的门禁](https://developer.apple.com/cn/developer-id/)。
 
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
@@ -76,7 +76,7 @@ Mac老鸟或IT人士可使用以下任意指令一键起飞。
  python3 -c "$(curl -fsSL https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.py)"
  ```
 
-非IT相关专业的Mac用户，软件版下载链：
+非IT相关专业的Mac用户，软件版下载链接（[买不起苹果开发者ID，未签名](https://blog.csdn.net/Alexander_Wei/article/details/111149103)）
 
 https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg
 
