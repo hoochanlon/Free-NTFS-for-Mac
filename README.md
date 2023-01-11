@@ -64,7 +64,7 @@ Mac老鸟或IT人士可使用以下任意指令一键起飞。
 
 * [ezntfs](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)
 * [kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)
-* [花了钱买软件的Mac正版用户，还过来折腾的我自己，Nigate答疑中心](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
+* [Nigate issue支持与反馈的所有人](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
 
 
 <!--
