@@ -36,6 +36,8 @@ Mac老鸟或IT人士可使用以下任意指令一键起飞。
 cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc
 ```
  
+![](https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/shashin/ln-s-to-nigate.png)
+
 
 ## 个性化
  
