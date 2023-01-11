@@ -39,22 +39,6 @@
 
 </details>
 
-## 快速开始
-
-苹果生态新手还是建议先使用[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)。Mac老鸟或IT人士可使用以下任意指令一键起飞。
-
- shell
-
- ```
- /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
- ```
-
- python
-
- ```
- python3 -c "$(curl -fsSL https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.py)"
- ```
-
 
 ## 使用须知
 
@@ -73,9 +57,27 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 以及需要[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)，[其他问题转，答疑中心，issues#9](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
 
 
+## 快速开始
+
+苹果生态新手还是建议先使用[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)。Mac老鸟或IT人士可使用以下任意指令一键起飞。
+
+ shell
+
+ ```
+ /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
+ ```
+
+ python
+
+ ```
+ python3 -c "$(curl -fsSL https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.py)"
+ ```
+
+
  ## 感谢
 
 * [ezntfs](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)
 * [kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)
+* [花了钱买软件的Mac正版用户，还来过来折腾的我自己](https://github.com/hoochanlon/Free-NTFS-for-Mac)
 
 提供的支持与帮助。
