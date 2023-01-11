@@ -9,7 +9,7 @@
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
 
-<details><summary> NTFS个性化 Geek Style </summary>
+<details><summary> <i>个性化 NTFS Geek Style</i> </summary>
  
  ##### 需用 `diskutil list` 查看挂载盘ID方可对应操作。
 
@@ -41,7 +41,7 @@
 </details>
 
 
-## 使用须知
+<details><summary> <b>使用须知</b>  </summary>
 
 安装homebrew与python3（软件会自动检测依赖环境安装）
 
@@ -56,6 +56,8 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
 
 以及需要[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)，[其他问题转，答疑中心，issues#9](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
+ 
+</details>
 
 
 ## 快速体验
