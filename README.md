@@ -8,7 +8,7 @@
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
-<details><summary> NTFS重命名与格式化 </summary>
+<details><summary> NTFS个性化极客操作 </summary>
  
  ##### 需用 `diskutil list` 查看挂载盘ID方可对应操作。
 
