@@ -2,27 +2,23 @@
 
 一款支持苹果芯片的Free NTFS for Mac小工具软件。由[homebrew](https://github.com/Homebrew)、[oxfuse](https://osxfuse.github.io)、[ntfs-3g](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G#installation)方案集成整合。
 
-## 使用与个性化演示
-
-[实机视频](https://www.bilibili.com/video/BV1XG4y1f79N)
-
-<details><summary> <b>使用须知</b> </summary>
+## 前言
  
-1. 由于NTFS不受苹果支持的特殊性，需要[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及需放开[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)。
-2. 软件会自动检测依赖环境安装homebrew与python3，若需手动安装请复制以下指令。
+由于NTFS不受苹果支持的特殊性，需要[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及需放开[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)。软件会自动检测依赖环境安装homebrew，若需手动安装请复制以下指令。
+
 ```shell
  /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
 ``` 
-3. 由于本人买不起[苹果开发者ID](https://blog.csdn.net/Alexander_Wei/article/details/111149103)，所以[nigate软件](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)在使用时，需以下指令解除[苹果对软件迁移安装的门禁](https://developer.apple.com/cn/developer-id/)。
+
+由于本人买不起[苹果开发者ID](https://blog.csdn.net/Alexander_Wei/article/details/111149103)，所以[nigate软件](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)在使用时，需以下指令解除[苹果对软件迁移安装的门禁](https://developer.apple.com/cn/developer-id/)。
+
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
   
-</details>
+## [实机视频演示](https://www.bilibili.com/video/BV1XG4y1f79N)
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
-
-
 
 ## 快速体验
 
@@ -31,7 +27,6 @@ Mac老鸟或IT人士可使用以下任意指令一键起飞。
  ```
  /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
  ```
-
 
 <details><summary> <b>个性化定制 （<i>Need Geek Style</i>）</b> </summary>
  
