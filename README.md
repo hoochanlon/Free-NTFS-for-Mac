@@ -67,7 +67,7 @@ Mac老鸟或IT人士可使用以下任意指令一键起飞。
 homebrew (brew已安装，可忽视)
 
 ```shell
-/bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)" && brew install python
+/bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
 ```
 
 
