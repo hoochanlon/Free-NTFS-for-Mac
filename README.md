@@ -76,7 +76,7 @@ Mac老鸟或IT人士可使用以下任意指令一键起飞。
  python3 -c "$(curl -fsSL https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.py)"
  ```
 
-非IT相关专业的Mac用户，软件版下载链接（[买不起苹果开发者ID，未签名](https://blog.csdn.net/Alexander_Wei/article/details/111149103)）
+软件版（[软件未受苹果公证，太贵了买不起](https://blog.csdn.net/Alexander_Wei/article/details/111149103)）下载链接：
 
 https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg
 
