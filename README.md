@@ -10,14 +10,21 @@
 
 <details><summary> <b>使用须知</b> </summary>
  
-1. 由于NTFS不受苹果支持的特殊性，需要[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及需放开[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)，[其他问题转，可答疑中心，issues#9](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
+1. 由于NTFS不受苹果支持的特殊性，需要[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及需放开[终端的完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)。
 2. 软件会自动检测依赖环境安装homebrew与python3
 3. 由于本人买不起[苹果开发者ID](https://blog.csdn.net/Alexander_Wei/article/details/111149103)，所以[nigate软件](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)在使用时，需以下指令解除[苹果对软件迁移安装的门禁](https://developer.apple.com/cn/developer-id/)。
 
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
+4. 若homebrew已安装，可忽略该条快捷安装指令
+
+```shell
+ /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
+```
  
+5. [其他问题转，可答疑中心，issues#9](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
+  
 </details>
 
 
@@ -51,15 +58,6 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
  sudo mkntfs -f /dev/disk4s1
 ```
 
-</details>
-
-<details><summary> <i> -- 若homebrew已安装，可忽略该条快捷安装指令 -- </i> </summary>
-
-```shell
-/bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
-```
-
-</details>
 
 
 
