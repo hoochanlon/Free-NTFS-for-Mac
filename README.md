@@ -79,7 +79,9 @@ cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alia
 
 
 <div align="center">
-## ***Power by Homebrew、Macfuse、NTFS-3G***
+<i>
+<b>Power by Homebrew、Macfuse、NTFS-3G</b>
+</i>
 </div>
 
 
