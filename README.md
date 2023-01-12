@@ -1,6 +1,6 @@
 # Nigate
 
-Nigate，にがて，中文译“苦手”。这是一款支持苹果芯片的Free NTFS for Mac小工具软件，主要针对应急免费解决苹果电脑下对NTFS格式移动存储的文件拷贝与共享。由[homebrew](https://github.com/Homebrew)、[oxfuse](https://osxfuse.github.io)、[ntfs-3g](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G#installation)方案集成整合。
+Nigate，にがて，中文译“苦手”。这是一款支持苹果芯片的Free NTFS for Mac小工具软件，虽然自己购买了[Paragon NTFS For Mac](https://www.paragon-software.com/home/ntfs-mac/)、[tuxera](https://www.tuxera.com)但还是想折腾一番，主要是为了想要免费使用下对NTFS格式移动存储的文件拷贝与共享的苹果电脑用户。
 
 ## 前言
  
@@ -77,4 +77,4 @@ cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alia
 * [kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)
 * [Nigate issue支持与反馈的所有人](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
 
-
+由[homebrew](https://github.com/Homebrew)、[oxfuse](https://osxfuse.github.io)、[ntfs-3g](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G#installation)等开源项目，进行方案集成整合。
