@@ -130,7 +130,6 @@ cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alia
  
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/rename.png)
  
- 
  ```shell
  sudo umount /dev/disk4s2
  ```
@@ -162,9 +161,5 @@ cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alia
 
 ---
 
-<center>
-<i><b>
-Power by Homebrew、Macfuse、NTFS-3G
-</b></i>
-</center>
+<i><b>Power by Homebrew、Macfuse、NTFS-3G</b></i>
 
