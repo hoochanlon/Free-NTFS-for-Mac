@@ -1,6 +1,6 @@
 # Nigate
 
-Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Free NTFS for Mac小工具软件，虽然自己购买了[Paragon NTFS For Mac](https://www.paragon-software.com/home/ntfs-mac/)、[TUXERA](https://www.tuxera.com)但还是想折腾一番，但主要是为了方便想要免费使用下对NTFS格式移动存储的文件拷贝与共享的苹果电脑用户。
+Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Free NTFS for Mac小工具软件，虽然自己购买了[Paragon NTFS For Mac](https://www.paragon-software.com/home/ntfs-mac/)、[TUXERA](https://www.tuxera.com)，可我还是想折腾一番，主要是为了方便想要免费使用下对NTFS格式移动存储的文件拷贝与共享的苹果电脑用户。
 
 ## 前言
  
