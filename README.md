@@ -168,5 +168,3 @@ Power by Homebrew、Macfuse、NTFS-3G
 </b></i>
 </center>
 
-</b></i>
-</center>
