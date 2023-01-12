@@ -77,11 +77,9 @@ cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alia
 * [kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)
 * [Nigate issue支持与反馈的所有人](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
 
----
 
 <div align="center">
-
-# ***Power by Homebrew、Macfuse、NTFS-3G***
+## ***Power by Homebrew、Macfuse、NTFS-3G***
 </div>
 
 
