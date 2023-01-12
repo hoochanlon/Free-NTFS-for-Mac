@@ -79,4 +79,8 @@ cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alia
 
 ---
 
+<center>
+<i><b>
 Power by [homebrew](https://github.com/Homebrew)、[oxfuse](https://osxfuse.github.io)、[ntfs-3g](https://github.com/osxfuse/osxfuse/wiki/NTFS-3G#installation)
+</b></i>
+</center>
