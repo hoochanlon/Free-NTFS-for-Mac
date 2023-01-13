@@ -4,7 +4,7 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 
 ## 前言
 
-由于本人买不起[苹果开发者ID](https://blog.csdn.net/Alexander_Wei/article/details/111149103)，所以[nigate软件](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)在使用时，会有“此软件已损坏，扔入废纸篓”的提示弹窗，点击取消，并使用以下指令解除[苹果对软件迁移安装的门禁](https://developer.apple.com/cn/developer-id/)。
+由于[苹果开发者ID太贵](https://blog.csdn.net/Alexander_Wei/article/details/111149103)和[苹果对软件迁移有安装门禁的原因](https://developer.apple.com/cn/developer-id/)，所以[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)在使用时，会有“此软件已损坏，扔入废纸篓”的提示弹窗，点击取消，并使用以下指令解除
 
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
