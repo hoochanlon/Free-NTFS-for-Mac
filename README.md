@@ -10,7 +10,7 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
  
-并且NTFS不受苹果支持的特殊性，需要[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及需放开终端与该软件的[完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)。软件会自动检测依赖环境安装homebrew，若需手动安装请复制以下指令。
+并且[NTFS不受苹果支持的特殊性](https://zh.wikipedia.org/wiki/NTFS)，需要[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及需放开终端与该软件的[完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)。软件会自动检测依赖环境安装homebrew，若需手动安装请复制以下指令。
 
 ```shell
  /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
