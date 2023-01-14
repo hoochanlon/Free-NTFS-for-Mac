@@ -31,6 +31,6 @@
 
 ### U盘图标设定
 
-macOS与Windows图标设置是独立的，只能在所在的对应系统显示。关于Windows系统，请查看[保姆级教学，手把手教你修改U盘显示图标](https://baijiahao.baidu.com/s?id=1717036176555487935&wfr=spider&for=pc&searchword=ntfs-3g修改u盘图标)，以下是macOS的演示。
+macOS与Windows图标设置是独立的，只能在所在的对应系统显示。关于Windows系统，请查看[保姆级教学，手把手教你修改U盘显示图标](https://baijiahao.baidu.com/s?id=1717036176555487935&wfr=spider&for=pc&searchword=ntfs-3g修改u盘图标)，macOS的演示研究中。
 
 
