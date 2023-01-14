@@ -69,6 +69,9 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 ```shell
  sudo mkntfs -f /dev/disk4s1
 ```
+
+注意格式化完成后，是不显示U盘的，此时需要重新插拔U盘。
+
 </details>
 
 
