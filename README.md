@@ -38,7 +38,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
  
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/shashin/ln-s-to-nigate.png)
 
-后续可直接在终端输入`nigate`开启NTFS读写。[关于读写之后的个性化操作，点击翻阅 MOCHIAJI.md(持ち味)](MOCHIAJI.md)
+后续可直接在终端输入`nigate`开启NTFS读写。[关于读写之后的个性化操作，点击翻阅 MOCHIAJI.md](MOCHIAJI.md)
 
 
  ## 感谢支持
