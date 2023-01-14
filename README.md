@@ -22,15 +22,13 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
 
 ## 快速开始
 
-Mac老鸟或IT人士可使用以下任意指令一键起飞。
-
-在线体验
+在线体验，Mac老鸟或IT人士可使用以下任意指令一键起飞。
 
  ```shell
  /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
  ```
  
-下载到本地目录并本地执行
+有homebrew的同学，可下载到本地目录并本地执行
 
 ```shell
 curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/Public/nigate.sh && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc
