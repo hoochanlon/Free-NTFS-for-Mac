@@ -88,6 +88,7 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 
 ## 参考资料
 
+* [penddy-macOS Ventura 写入 NTFS 格式移动硬盘的方法](https://zhuanlan.zhihu.com/p/558705589?utm_id=0)
 * [iCheer-xu-Macbook pro M1使用免费的方法读写NTFS的折腾之路](https://blog.csdn.net/qq_36071963/article/details/126052367)
 * [99度的水K06-解决Mac下NTFS格式移动硬盘无法写入的问题（ntfs-3g安装方法）](https://www.bilibili.com/read/cv18512586/)
 * [半夜啃西瓜-Mac挂载其他文件系统](https://zhuanlan.zhihu.com/p/558825467)
