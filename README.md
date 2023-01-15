@@ -28,15 +28,15 @@ sudo xattr -d com.apple.quarantine /Applications/nigate.app
  /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
  ```
  
-有homebrew的同学，可下载到本地目录，并本地执行
+下载到本地并运行，往后可使用`nigate`开启NTFS读写。
 
 ```shell
-curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc
+curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
 ```
  
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/shashin/ln-s-to-nigate.png)
 
-后续可直接在终端输入`nigate`开启NTFS读写。[关于读写之后的个性化操作，点击翻阅 MOCHIAJI.md](MOCHIAJI.md)
+[关于读写之后的个性化操作，点击翻阅 MOCHIAJI.md](MOCHIAJI.md)
 
 
  ## 感谢支持与鼓励
