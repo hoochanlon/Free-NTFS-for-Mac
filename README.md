@@ -36,10 +36,11 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
  
 ![](https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/shashin/ln-s-to-nigate.png)
 
-[关于读写之后的个性化操作，点击翻阅 MOCHIAJI.md](MOCHIAJI.md)
+[关于读写之后的个性化操作，点击翻阅 MOCHIAJI.md](MOCHIAJI.md)。 PS：制作Mac启动盘记录 [(如PE般顺滑制作macOS启动盘)](https://www.cleverfiles.com/data-recovery-software.html)+ [mrmacintosh（macOS各版本镜像下载）](https://mrmacintosh.com/blog/)
 
 
- ## 感谢支持与鼓励
+
+## 感谢支持与鼓励
  
  总的来说，大家能愿意使用代码写的不怎样、界面丑陋，甚至还要一些小操作的，仅作为救急应付使用的小软件，提供反馈和支持，我已经很荣幸了。
 
