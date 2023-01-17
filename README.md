@@ -2,38 +2,28 @@
 
 Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Free NTFS for Mac小工具软件，主要是为了方便想要免费使用NTFS格式移动存储的文件拷贝与共享的苹果电脑用户。
 
-## 前言
-
-由于[苹果对软件迁移有安装门禁的原因](https://developer.apple.com/cn/developer-id/)，所以[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)在使用时，会有“此软件已损坏，扔入废纸篓”的提示弹窗，点击取消，并使用以下指令解除。
-
-```shell
-sudo xattr -d com.apple.quarantine /Applications/nigate.app
-```
- 
-并且NTFS不受苹果支持的特殊性，需要关闭SIP与“允许任何来源”，以及需放开终端的完全文件夹磁盘访问权限。
-
-## [实机视频演示](https://www.bilibili.com/video/BV1XG4y1f79N)
+<a href="https://www.bilibili.com/video/BV1XG4y1f79N">视频演示</a>
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
-## 快速开始
+## 快速开始（三种方式任选其一）
 
-在线体验，Mac老鸟或IT人士可使用以下任意指令一键起飞。
+一、在线体验，复制粘贴到终端，回车起飞。
 
  ```shell
  /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
  ```
- 
-下载到本地并运行，往后可直接使用`nigate`开启NTFS读写。
+
+二、下载到本地，往后开启可直接输入`nigate`
 
 ```shell
 curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
 ```
- 
-![](https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/shashin/ln-s-to-nigate.png)
 
-[关于读写之后的个性化操作，点击翻阅 MOCHIAJI.md](MOCHIAJI.md)。
+三、下载使用 <a href="https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg">Nigate 软件版</a>，需要注意解除[苹果对软件的门禁限制](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9#issue-1527116834)。
 
+
+关于读写之后的个性化操作，[点击翻阅 MOCHIAJI.md](MOCHIAJI.md)，以及实现原理[请查看，SEMMEISHO.md](helpdesk/SEMMEISHO.md)。
 
 
 ## 感谢支持与鼓励
@@ -52,3 +42,4 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 </div>
 
 
+<!-- ![](https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/shashin/ln-s-to-nigate.png) -->
