@@ -1,6 +1,6 @@
-# Free-Mac-NTFS
+# 手动说明
 
-## macOSFUSE + NTFS-3g-Mac
+原则上macOS是不支持NTFS的，但可以通过 macOSFUSE内核扩展（homebrew-fuse、macfuse） + NTFS-3g-Mac方案支持（ntfs-3g-mac）实现。
 
 ### 1. 充分准备前提（已安装及已配置SIP可跳至第二大步）
 
