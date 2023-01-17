@@ -6,7 +6,7 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
-## 快速开始（三种方式任选其一）
+## 快速开始（三种方式，任选其一）
 
 一、在线体验，复制粘贴到终端，回车起飞。
 
