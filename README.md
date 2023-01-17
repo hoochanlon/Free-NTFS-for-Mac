@@ -1,12 +1,10 @@
 # Nigate
 
-Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Free NTFS for Mac小工具软件，主要是为了方便想要免费使用NTFS格式移动存储的文件拷贝与共享的苹果电脑用户。
-
-<a href="https://www.bilibili.com/video/BV1XG4y1f79N">视频演示</a>
+Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Free NTFS for Mac小工具软件，主要是为了方便想要免费使用NTFS格式移动存储的文件拷贝与共享的苹果电脑用户。<a href="https://www.bilibili.com/video/BV1XG4y1f79N">视频演示</a>。
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
-## 快速开始（三种方式，任选其一）
+## 快速开始，三种方式，任选其一
 
 一、在线体验，复制粘贴到终端，回车起飞。
 
@@ -23,7 +21,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 三、下载使用 <a href="https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg">Nigate 软件版</a>，需要注意解除[苹果对软件的门禁限制](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9#issue-1527116834)。
 
 
-关于读写之后的个性化操作，[点击翻阅 MOCHIAJI.md](MOCHIAJI.md)，以及实现原理[请查看，SEMMEISHO.md](helpdesk/SEMMEISHO.md)。
+关于读写之后的个性化操作，[点击翻阅 MOCHIAJI.md](MOCHIAJI.md)；以及实现原理，[点击详情 SEMMEISHO.md](helpdesk/SEMMEISHO.md)。
 
 
 ## 感谢支持与鼓励
