@@ -38,7 +38,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 [关于读写之后的个性化操作，点击翻阅 MOCHIAJI.md](MOCHIAJI.md)。
 
-PS：制作Mac启动盘记录 [(如PE般顺滑制作macOS启动盘)](https://www.cleverfiles.com/data-recovery-software.html)+ [mrmacintosh（macOS各版本镜像下载）](https://mrmacintosh.com/blog/)
+PS：制作Mac启动盘记录，[Disk Drill(如PE般顺滑制作macOS启动盘)](https://www.cleverfiles.com/data-recovery-software.html)+ [mrmacintosh（macOS各版本镜像下载）](https://mrmacintosh.com/blog/)
 
 
 
