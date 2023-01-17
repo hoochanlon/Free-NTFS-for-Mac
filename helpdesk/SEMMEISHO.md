@@ -1,4 +1,4 @@
-# 手动说明
+# 手动配置NTFS支持环境指导说明
 
 原则上macOS是不支持NTFS的，但可以通过Homebrew包管理器安装macOSFUSE内核扩展，以及NTFS-3G的格式方案支持来实现。
 
