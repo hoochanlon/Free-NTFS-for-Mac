@@ -1,22 +1,18 @@
 # 手动说明
 
-原则上macOS是不支持NTFS的，但可以通过 macOSFUSE内核扩展（homebrew-fuse、macfuse） + NTFS-3g-Mac方案支持（ntfs-3g-mac）实现。
+原则上macOS是不支持NTFS的，但可以通过Homebrew包管理器安装macOSFUSE内核扩展，以及NTFS-3G的格式方案支持来实现。
 
 ### 1. 充分准备前提（已安装及已配置SIP可跳至第二大步）
 
-#### 1.1. 安装Xcode工具包
+需要安装的项目。
 
-将此命令行复制进去安装 `xcode-select --install` 。（你可以理解为Windows上的VC++、.NET环境包什么的）
+* homebrew
+* Macfuse：homebrew-fuse、macfuse
+* NTFS-3G：ntfs-3g-mac
 
 #### 1.2. 安装homebrew
 
 ⌘+space输入`终端`复制以下代码粘贴至终端，安装完成重启终端。（macOS下包管理器）
-
-命令二选一，国内墙可通用
-
-```shell
-/bin/zsh -c "$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)"
-```
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
