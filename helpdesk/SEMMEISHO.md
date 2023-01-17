@@ -7,7 +7,7 @@
 需要安装的项目。
 
 * homebrew
-* Macfuse：homebrew-fuse、macfuse
+* Macfuse：homebrew-fuse（为了支持已从Homebrew核心中删除的macOS FUSE相关软件）、macfuse
 * NTFS-3G：ntfs-3g-mac
 
 #### 1.2. 安装homebrew
