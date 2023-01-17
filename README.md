@@ -1,21 +1,17 @@
 # Nigate
 
-Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Free NTFS for Mac小工具软件，虽然自己购买了[Paragon NTFS For Mac](https://www.paragon-software.com/home/ntfs-mac/)、[TUXERA](https://www.tuxera.com)。可我还是因“兴趣”来折腾一番，主要是为了方便想要免费使用NTFS格式移动存储的文件拷贝与共享的苹果电脑用户。
+Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Free NTFS for Mac小工具软件，主要是为了方便想要免费使用NTFS格式移动存储的文件拷贝与共享的苹果电脑用户。
 
 ## 前言
 
-由于[苹果开发者ID太贵](https://blog.csdn.net/Alexander_Wei/article/details/111149103)和[苹果对软件迁移有安装门禁的原因](https://developer.apple.com/cn/developer-id/)，所以[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)在使用时，会有“此软件已损坏，扔入废纸篓”的提示弹窗，点击取消，并使用以下指令解除。
+由于[苹果对软件迁移有安装门禁的原因](https://developer.apple.com/cn/developer-id/)，所以[nigate软件版](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg)在使用时，会有“此软件已损坏，扔入废纸篓”的提示弹窗，点击取消，并使用以下指令解除。
 
 ```shell
 sudo xattr -d com.apple.quarantine /Applications/nigate.app
 ```
  
-并且[NTFS不受苹果支持的特殊性](https://zh.wikipedia.org/wiki/NTFS)，需要[关闭SIP与“允许任何来源”](http://www.downza.cn/mac/10419030.html)，以及需放开终端与该软件的[完全磁盘访问权限](https://github.com/MacPaw/PermissionsKit)。软件会自动检测依赖环境安装homebrew，若需手动安装请复制以下指令。
+并且NTFS不受苹果支持的特殊性，需要关闭SIP与“允许任何来源”，以及需放开终端的完全文件夹磁盘访问权限。
 
-```shell
- /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
-``` 
-  
 ## [实机视频演示](https://www.bilibili.com/video/BV1XG4y1f79N)
 
 ![Watch the video](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
@@ -38,13 +34,9 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 [关于读写之后的个性化操作，点击翻阅 MOCHIAJI.md](MOCHIAJI.md)。
 
-PS：制作Mac启动盘记录，[Disk Drill(如PE般顺滑制作macOS启动盘)](https://www.cleverfiles.com/data-recovery-software.html)+ [mrmacintosh（macOS各版本镜像下载）](https://mrmacintosh.com/blog/)
-
 
 
 ## 感谢支持与鼓励
- 
- 总的来说，大家能愿意使用代码写的不怎样、界面丑陋，甚至还要一些小操作的，仅作为救急应付使用的小软件，提供反馈和支持，我已经很荣幸了。
 
 * [ezntfs](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)
 * [kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)
