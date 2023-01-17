@@ -46,7 +46,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 * [ezntfs](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)
 * [kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)
 * [吾爱破解论坛的网友们](https://www.52pojie.cn/forum.php?mod=viewthread&tid=1735607&page=1#pid45353784)
-* [B站用户，ID：琛少君](https://space.bilibili.com/32713000)
+* [B站软件体验者：琛少君](https://space.bilibili.com/32713000)
 * [Nigate issue支持与反馈的所有人](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
 
 
