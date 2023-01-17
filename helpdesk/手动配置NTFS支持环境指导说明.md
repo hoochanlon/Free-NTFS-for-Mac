@@ -85,6 +85,9 @@ sudo /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/disk4s1 /Volumes/NTFS -o
 
 此时，Mac已经可以正常读写NTFS格式的U盘了（U盘名称拔出及再接上会重新恢复原有的名称的，不用担心），将U盘拔出的话，就需要重新再输入如上命令行才能读写。
 
+## 其他 
+
+制作Mac启动盘记录，[Disk Drill(如PE般顺滑制作macOS启动盘)](https://www.cleverfiles.com/data-recovery-software.html)+ [mrmacintosh（macOS各版本镜像下载）](https://mrmacintosh.com/blog/)
 
 ## 参考资料
 
