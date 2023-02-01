@@ -21,7 +21,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 ![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
 
-关于读写之后的个性化操作，[点击翻阅 MOCHIAJI.md](MOCHIAJI.md)；以及实现原理，[点击详情 SEMMEISHO.md](helpdesk/SEMMEISHO.md)。
+关于读写之后的个性化操作，[点击翻阅 MOCHIAJI.md](MOCHIAJI.md)；以及实现原理，[点击详情 SEMMEISHO.md](helpdesk/SEMMEISHO.md)。拷贝50-60G的文件，注意不能休眠，使用`caffeinate`，让电脑处于常亮状态。
 
 
 ## 感谢支持与鼓励
