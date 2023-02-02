@@ -28,6 +28,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 
 * [吾爱破解论坛的网友们](https://www.52pojie.cn/forum.php?mod=viewthread&tid=1735607&page=1#pid45353784)
+* [百度知道网友：瓜子吧3（类似的破解论坛）](http://zhidao.baidu.com/question/1988486592586723387/answer/1824407923)
 * [微信公众号：APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)
 * [B站软件体验者：琛少君](https://space.bilibili.com/32713000)
 * [佛系软件](https://foxirj.com)
