@@ -31,12 +31,11 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 * [吾爱破解论坛的网友们](https://www.52pojie.cn/forum.php?mod=viewthread&tid=1735607&page=1#pid45353784)
 * [对破解论坛及资源站点收集的百度知道网友们](https://zhidao.baidu.com/question/1988486592586723387.html)
-* [微信公众号APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)
+* [爱折腾破解软件的朋友：APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)
 * [B站软件体验者：琛少君](https://space.bilibili.com/32713000)
-* [佛系软件](https://foxirj.com)
-* [ezntfs](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)
-* [kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)
-* [Nigate issue支持与反馈的所有人](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9)
+* [软件收集爱好者：佛系软件](https://foxirj.com)
+* Issue问题支持与反馈：[ezntfs](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)、[kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)
+
 
 
 <div align="center">
