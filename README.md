@@ -18,6 +18,8 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 三、下载使用 <a href="https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg">Nigate 软件版</a>，打开软件[弹窗“文件已损坏，扔入废纸篓”，需解除苹果对软件的门禁限制](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9#issue-1527116834)。
 
+特别感谢[APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)对小软件特别打包及上传，提升了下载与使用的便携与易用性： https://www.123pan.com/s/8dzUVv-qpH8d 提取码:VT25
+
 ![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
 
@@ -28,9 +30,9 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 
 * [吾爱破解论坛的网友们](https://www.52pojie.cn/forum.php?mod=viewthread&tid=1735607&page=1#pid45353784)
-* [微信公众号：APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)
+* [对破解论坛及资源站点收集的百度知道网友们](https://zhidao.baidu.com/question/1988486592586723387.html)
+* [微信公众号APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)
 * [B站软件体验者：琛少君](https://space.bilibili.com/32713000)
-* [百度知道网友：瓜子吧3（破解论坛及资源站点收集回答）](http://zhidao.baidu.com/question/1988486592586723387/answer/1824407923)
 * [佛系软件](https://foxirj.com)
 * [ezntfs](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)
 * [kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)
