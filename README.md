@@ -31,6 +31,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 * [吾爱破解论坛的网友们](https://www.52pojie.cn/forum.php?mod=viewthread&tid=1735607&page=1#pid45353784)
 * [对破解论坛及资源站点收集的百度知道网友们](https://zhidao.baidu.com/question/1988486592586723387.html)
 * [爱折腾破解软件的朋友：APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)
+* [俄罗斯盗版收集：卓聚社区-大龙](http://www.zhuoju.xyz/thread-135154-1-1.html)
 * [B站投放演示视频的软件支持者：琛少君](https://space.bilibili.com/32713000)
 * [挺能折腾的：配主机网](https://www.peizhuji.com)
 * [软件收集爱好者：佛系软件](https://foxirj.com)
