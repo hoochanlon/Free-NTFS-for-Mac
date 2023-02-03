@@ -23,20 +23,18 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 ![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
 
-关于读写之后的个性化操作，[点击翻阅 MOCHIAJI.md](MOCHIAJI.md)；以及实现原理，[点击详情 SEMMEISHO.md](helpdesk/SEMMEISHO.md)。拷贝50-60G的文件，注意不能休眠，使用`caffeinate`，让电脑处于常亮状态。
+关于读写之后的个性化操作，[点击翻阅 MOCHIAJI.md](MOCHIAJI.md)；以及实现原理，[点击详情 SEMMEISHO.md](helpdesk/SEMMEISHO.md)；软件收集与学习研究，[点击名册 MEIBO.md](MEIBO.md)。拷贝50-60G的文件，注意不能休眠，使用`caffeinate`，让电脑处于常亮状态。
 
 
-## 特别关注
+## 感谢
+
 
 * [吾爱破解论坛的网友们](https://www.52pojie.cn/forum.php?mod=viewthread&tid=1735607&page=1#pid45353784)
 * [对破解论坛及资源站点收集的百度知道网友们](https://zhidao.baidu.com/question/1988486592586723387.html)
 * [爱折腾破解软件的朋友：APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)
-* [俄罗斯盗版收集：卓聚社区-大龙](http://www.zhuoju.xyz/thread-135154-1-1.html)
 * [B站投放演示视频的软件支持者：琛少君](https://space.bilibili.com/32713000)
-* [挺能折腾的：配主机网](https://www.peizhuji.com)
+* [配主机网](https://www.peizhuji.com)
 * [软件收集爱好者：佛系软件](https://foxirj.com)
-* [在知乎专栏推荐qttabbar的阿虚同学](https://www.axutongxue.com)
-* [整活小能手：驿站网](https://www.yzw12.com)
 * Issue问题支持与其他相关反馈：[ezntfs](https://github.com/lezgomatt/ezntfs/issues/8#issuecomment-1374428139)、[kevintao0417](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/3)、[itfanr](https://www.52pojie.cn/forum.php?mod=redirect&goto=findpost&ptid=1735607&pid=45507166)
 
 
