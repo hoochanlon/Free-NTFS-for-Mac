@@ -1,8 +1,6 @@
 # Nigate
 
-Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Free NTFS for Mac小工具软件，主要是为了方便想要免费使用NTFS格式移动存储的文件拷贝与共享的苹果电脑用户。<a href="https://www.bilibili.com/video/BV1XG4y1f79N">视频演示</a>。
-
-特别感谢[APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)对小软件特别打包及上传，提升了下载与使用的便携与易用性： https://www.123pan.com/s/8dzUVv-qpH8d 提取码:VT25
+Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Free NTFS for Mac小工具软件，主要是为了方便想要免费使用NTFS格式移动存储的文件拷贝与共享的苹果电脑用户。<a href="https://www.bilibili.com/video/BV1XG4y1f79N">视频演示</a>。特别感谢[APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)对小软件特别打包及上传，提升了下载与使用的便携与易用性： https://www.123pan.com/s/8dzUVv-qpH8d 提取码:VT25 。
 
 ## 快速开始，三种方式，任选其一
 
@@ -22,7 +20,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 ![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
-关于读写之后的个性化操作，[点击翻阅 MOCHIAJI.md](MOCHIAJI.md)；以及实现原理，[点击详情 SEMMEISHO.md](helpdesk/SEMMEISHO.md)；软件收集与逆向学习研究，[点击收录单 软件分享及网页备份/README.md](https://github.com/hoochanlon/w3-goto-world/blob/master/软件分享及网页备份/README.md)。
+关于读写之后的个性化操作，[点击翻阅：MOCHIAJI.md](MOCHIAJI.md)；以及实现原理，[点击详情：SEMMEISHO.md](helpdesk/SEMMEISHO.md)；软件收集与逆向学习研究，[点击我的收录单：软件分享及网页备份](https://github.com/hoochanlon/w3-goto-world/blob/master/软件分享及网页备份/README.md)![](https://img.shields.io/github/stars/hoochanlon/w3-goto-world?color=green&style=social)。
 
 
 ## 感谢
