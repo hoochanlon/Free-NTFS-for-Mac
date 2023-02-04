@@ -28,7 +28,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 ### 其他补充
 
-打开软件[弹窗“文件已损坏，扔入废纸篓”，需解除苹果对软件的门禁限制](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9#issue-1527116834)。拷贝几十百来G的资料，需注意让电脑处于常亮状态，Mac可在终端`caffeinate`激活不休眠功能。
+打开软件[弹窗“文件已损坏，扔入废纸篓”，需解除苹果对软件的门禁限制](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9#issue-1527116834)。拷贝几十百来G的资料，需注意让Mac处于激活的常亮状态，可在终端输入指令`caffeinate`。
 
 关于读写之后的个性化操作，[点击翻阅：MOCHIAJI.md](MOCHIAJI.md)；以及实现原理，[点击详情：SEMMEISHO.md](helpdesk/SEMMEISHO.md)；软件收集与逆向学习研究，[点击我的收录单：软件分享及网页备份](https://github.com/hoochanlon/w3-goto-world/blob/master/软件分享及网页备份/README.md)![](https://img.shields.io/github/stars/hoochanlon/w3-goto-world?color=green&style=social)。
 
