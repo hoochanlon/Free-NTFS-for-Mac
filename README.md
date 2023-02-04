@@ -7,7 +7,6 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 * [琛少君](https://space.bilibili.com/32713000)和[配主机网](https://www.peizhuji.com)，在有着众多不错界面的NTFS软件，还能对款脚本终端小工具热情支持。
 * [lezgomatt](https://github.com/lezgomatt)，虽然交流语言不通，但还是热心回答我的问题。
 * [APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)对小软件特别打包及上传，提升了下载与使用的便携与易用性。
-  * https://www.123pan.com/s/8dzUVv-qpH8d 提取码: VT25
 
 ## 快速开始，三种方式，任选其一
 
@@ -23,7 +22,7 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
 ```
 
-三、下载使用 <a href="https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/download/v1.1/nigate.dmg">Nigate 软件版</a>，打开软件[弹窗“文件已损坏，扔入废纸篓”，需解除苹果对软件的门禁限制](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9#issue-1527116834)。拷贝几十百来G的资料，也需注意让电脑处于常亮状态。
+三、下载使用 <a href="https://www.123pan.com/s/8dzUVv-qpH8d">Nigate 软件版（by APPERK 提取码: VT25）</a>，打开软件[弹窗“文件已损坏，扔入废纸篓”，需解除苹果对软件的门禁限制](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9#issue-1527116834)。拷贝几十百来G的资料，也需注意让电脑处于常亮状态。
 
 ![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
