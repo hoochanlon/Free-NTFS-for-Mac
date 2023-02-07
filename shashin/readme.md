@@ -7,3 +7,5 @@
 297KB 2880 × 1800 https://squoosh.app
 
 ![](./spu.jpg)
+
+据此，已建压缩及图床方案存放图片，picgo。
