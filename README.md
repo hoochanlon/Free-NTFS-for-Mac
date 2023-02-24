@@ -22,7 +22,11 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
 ```
 
-三、下载使用 <a href="https://www.123pan.com/s/8dzUVv-qpH8d">Nigate 软件版（by APPERK 提取码: VT25）</a>
+三、下载使用 
+
+<a href="https://www.123pan.com/s/8dzUVv-qpH8d">Nigate 软件版(仅支持arm)（by APPERK 提取码: VT25 ）</a>
+
+https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/tag/v1.1 （更新 2023.2.24）
 
 ![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
 
