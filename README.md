@@ -6,7 +6,7 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 
 * [琛少君](https://space.bilibili.com/32713000)和[配主机网](https://www.peizhuji.com)，在有着众多不错界面的NTFS软件，还能对款脚本终端小工具热情支持。
 * [lezgomatt](https://github.com/lezgomatt)，虽然交流语言不通，但还是热心回答我的问题。
-* [APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)对小软件特别打包及上传，提升了下载与使用的便携与易用性。
+* [APPERK](https://mp.weixin.qq.com/s/ByEBBCXFUmfBqF506F-Cvg)对小软件特别打包及上传，以及英特尔芯片Mac的兼容工作，提升了下载与使用的便携与易用性。
 
 ## 快速开始，三种方式，任选其一
 
