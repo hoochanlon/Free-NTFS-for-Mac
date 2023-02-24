@@ -22,7 +22,7 @@ config_u_drive(){
 		echo "新设备: "${thriceCutVal}
 		## echo '---------\n'
 		sudo umount $i
-		sudo -S /System/Volumes/Data/opt/homebrew/bin/ntfs-3g /dev/${twiceCutVal} /Volumes/${twiceCutVal} -olocal -oallow_other -o auto_xattr -ovolname=${thriceCutVal}
+		sudo -S /System/Volumes/Data/$(which ntfs-3g) /dev/${twiceCutVal} /Volumes/${twiceCutVal} -olocal -oallow_other -o auto_xattr -ovolname=${thriceCutVal}
 		echo "新设备: ${thriceCutVal}，已可读写！"
 		# echo '---------\n'
 		echo '---------'
