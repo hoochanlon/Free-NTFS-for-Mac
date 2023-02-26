@@ -24,8 +24,6 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 三、下载使用 
 
-<a href="https://www.123pan.com/s/8dzUVv-qpH8d">Nigate 软件版(仅支持arm)（by APPERK 提取码: VT25 ）</a>
-
 https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/tag/v1.1 （更新 2023.2.24）
 
 ![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
