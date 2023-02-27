@@ -4,7 +4,7 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 
 特别感谢：
 
-* [APPERK](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/friend's_wx.jpg)，投入了大量时间与精力梳理小工具的代码逻辑，[并对英特尔芯片兼容的特别工作，与图文并茂分解式说明](https://mp.weixin.qq.com/s/kHOsdXLXlFBardoSAsaXiA)。
+* [APPERK](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/friend's_wx.jpg)，投入了大量时间与精力，梳理的代码逻辑，并对英特尔芯片兼容的特别工作，与图文并茂分解式说明，更易理解，也降低初期使用的前提知识储备 👉 [Mac NTFS 读写的白嫖方案](https://mp.weixin.qq.com/s/kHOsdXLXlFBardoSAsaXiA)。
 * [琛少君](https://space.bilibili.com/32713000)和[配主机网](https://www.peizhuji.com)，在有着众多不错界面的NTFS软件，还能对款脚本终端小工具热情支持。
 * [lezgomatt](https://github.com/lezgomatt)，虽然交流语言不通，但还是热心回答我的问题。
 
