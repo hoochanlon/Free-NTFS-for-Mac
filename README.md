@@ -4,7 +4,7 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 
 特别感谢：
 
-* [APPERK](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/friend's_wx.jpg)，投入大量时间与精力，分解安装流程及兼容工作与特别打包。
+* [APPERK](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/friend's_wx.jpg)（可能公众号失效了），投入大量时间与精力，分解安装流程及兼容工作与特别打包。
 * [琛少君](https://space.bilibili.com/32713000)和[配主机网](https://www.peizhuji.com)，在有着众多不错界面的NTFS软件，还能对款脚本终端小工具热情支持
 * [lezgomatt](https://github.com/lezgomatt)，虽然交流语言不通，但还是热心回答我的问题。
 
