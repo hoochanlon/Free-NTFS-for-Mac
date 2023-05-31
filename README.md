@@ -34,6 +34,16 @@ https://wwi.lanzoup.com/izuT50pxxn7c （[APPERK](https://fastly.jsdelivr.net/gh/
 
 关于读写之后的个性化操作，[点击翻阅：MOCHIAJI.md](MOCHIAJI.md)；以及实现原理，[点击详情：SEMMEISHO.md](helpdesk/SEMMEISHO.md)；软件收集与逆向学习研究，[点击我的收录单：软件分享及网页备份](https://github.com/hoochanlon/w3-goto-world/blob/master/软件分享及网页备份/README.md)![](https://img.shields.io/github/stars/hoochanlon/w3-goto-world?color=green&style=social)。
 
+## Star History
+
+<a href="https://star-history.com/#hoochanlon/Free-NTFS-for-Mac&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=hoochanlon/Free-NTFS-for-Mac&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=hoochanlon/Free-NTFS-for-Mac&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=hoochanlon/Free-NTFS-for-Mac&type=Date" />
+  </picture>
+</a>
+
 
 ## 感谢
 
