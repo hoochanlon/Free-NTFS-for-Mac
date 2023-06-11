@@ -26,7 +26,12 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 https://wwi.lanzoup.com/izuT50pxxn7c （[APPERK](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/friend's_wx.jpg)特别打包版）
 
-![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png)
+<!-- ![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png) -->
+
+https://github.com/hoochanlon/Free-NTFS-for-Mac/assets/35732922/8f2d3ced-62cb-4c08-912e-909321b3f1db
+
+
+
 
 ### 其他补充
 
