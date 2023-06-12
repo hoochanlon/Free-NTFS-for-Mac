@@ -24,6 +24,8 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 三、下载使用 
 
+注意：U盘名称不支持空格与非法字符。https://github.com/osxfuse/osxfuse/issues/57#issuecomment-9367833
+
 https://wwi.lanzoup.com/izuT50pxxn7c （[APPERK](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/friend's_wx.jpg)特别打包版）
 
 <!-- ![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png) -->
