@@ -11,7 +11,7 @@ config_u_drive(){
 	fi
 
 
-	if [ ! -e "/System/Volumes/Data/opt/homebrew/bin/ntfs-3g" ]; then
+	if [ ! -e "/System/Volumes/Data/$(which ntfs-3g)" ]; then
 	brew tap gromgit/homebrew-fuse && brew install --cask macfuse && brew install ntfs-3g-mac
 	fi
 	
@@ -22,7 +22,7 @@ config_u_drive(){
 		echo "新设备: "${thriceCutVal}
 		## echo '---------\n'
 		sudo umount $i
-		sudo -S $(which ntfs-3g) /dev/${twiceCutVal} /Volumes/${twiceCutVal} -olocal -oallow_other -o auto_xattr -ovolname=${thriceCutVal}
+		sudo -S /System/Volumes/Data/$(which ntfs-3g) /dev/${twiceCutVal} "/Volumes/${thriceCutVal}" -olocal -oallow_other -oauto_xattr -ovolname="${thriceCutVal}"
 		echo "新设备: ${thriceCutVal}，已可读写！"
 		# echo '---------\n'
 		echo '---------'
