@@ -40,13 +40,8 @@ https://wwi.lanzoup.com/izuT50pxxn7c （[APPERK](https://fastly.jsdelivr.net/gh/
 
 ## Star History
 
-<a href="https://star-history.com/#hoochanlon/Free-NTFS-for-Mac&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=hoochanlon/Free-NTFS-for-Mac&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=hoochanlon/Free-NTFS-for-Mac&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=hoochanlon/Free-NTFS-for-Mac&type=Date" />
-  </picture>
-</a>
+[![Star History Chart](https://api.star-history.com/svg?repos=hoochanlon/Free-NTFS-for-Mac&type=Date)](https://star-history.com/#hoochanlon/Free-NTFS-for-Mac&Date)
+
 
 ## 感谢
 
