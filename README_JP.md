@@ -31,9 +31,6 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 - ソフトウェアを開く時に「ファイルが破損しているため、ゴミ箱に入れます」というポップアップが表示される場合、Appleのソフトウェア制限を解除する必要があります。数十GBから数百GBのデータをコピーする場合は、Macを常にアクティブな状態にする必要があります。ターミナルで「caffeinate」というコマンドを入力すると、Macをアクティブな状態に保つことができます。
 - 読み書き後の個別の操作については、[MOCHIAJI.md](https://chat.aichatos.top/MOCHIAJI.md)を参照してください。実装原理については、[SEMMEISHO.md](https://chat.aichatos.top/helpdesk/SEMMEISHO.md)を参照してください。さらに、ソフトウェアの収集とリバースエンジニアリングの研究については、[私のリポジトリ：ソフトウェアの共有とWebページのバックアップ](https://github.com/hoochanlon/w3-goto-world/blob/master/软件分享及网页备份/README.md)をご覧ください。
 
-Star History：
-
-[![Star History Chart](https://api.star-history.com/svg?repos=hoochanlon/Free-NTFS-for-Mac&type=Date)](https://star-history.com/#hoochanlon/Free-NTFS-for-Mac&Date)
 
 感謝：
 
