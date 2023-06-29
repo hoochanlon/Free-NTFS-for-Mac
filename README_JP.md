@@ -1,6 +1,4 @@
-Nigate (にがて) は、Appleチップに対応したMac用の無料NTFSツールです。このツールは、NTFS形式のファイルのコピーと共有を簡単にするために、NTFS形式の移動ストレージを無料で使用したいAppleコンピュータのユーザーをサポートします。[ビデオデモ](https://www.bilibili.com/video/BV1XG4y1f79N)をご覧ください。
-
-[![](https://i.im.ge/2023/06/26/01qebp.videos-fxxk-chxxa.png)](https://github.com/hoochanlon/Free-NTFS-for-Mac/assets/35732922/8f2d3ced-62cb-4c08-912e-909321b3f1db)
+Nigate (にがて) は、Appleチップに対応したMac用の無料NTFSツールです。このツールは、NTFS形式のファイルのコピーと共有を簡単にするために、NTFS形式の移動ストレージを無料で使用したいAppleコンピュータのユーザーをサポートします。
 
 特別な感謝：
 
