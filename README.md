@@ -1,6 +1,6 @@
 # Nigate
 <div align="center">
- <a href="./README_JP.md">日本語</a> | <a href="./README.md">中文</a>
+ <a href="https://github.com/hoochanlon/Free-NTFS-for-Mac/blob/main/README_JP.md">日本語</a> | <a href="https://github.com/hoochanlon/Free-NTFS-for-Mac/blob/main/README.md">中文</a>
 </div>
 <br>
 Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Free NTFS for Mac小工具软件，主要是为了方便想要免费使用NTFS格式移动存储的文件拷贝与共享的苹果电脑用户。<a href="https://www.bilibili.com/video/BV1XG4y1f79N">视频演示</a>。
