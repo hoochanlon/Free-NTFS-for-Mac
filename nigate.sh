@@ -41,6 +41,8 @@ config_u_drive(){
 
 	#***********************************************************************
 	# macOS14及以上
+ 	# https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/20
+
 	# 输出结果：
 	# /dev/disk4s1 on /Volumes/TOSHIBA (ntfs, local, nodev, nosuid, read-only, noowners, noatime)
 	line=$(mount | grep ntfs)
