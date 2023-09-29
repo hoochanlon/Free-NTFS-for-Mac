@@ -16,6 +16,8 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 
 ## 快速开始，三种方式，任选其一
 
+**下载使用仅为工具打包示例，推荐命令行使用，以便获取实时更新**
+
 一、在线体验，复制粘贴到 ***完全管理权限的终端*** 回车，一键起飞。
 
  ```shell
@@ -33,8 +35,6 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 注意：U盘名称不支持空格与非法字符，见：https://github.com/osxfuse/osxfuse/issues/57#issuecomment-9367833
 
 <!-- ![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png) -->
-
-***工具软件为打包示例，推荐命令行使用***
 
 ### 其他补充
 
