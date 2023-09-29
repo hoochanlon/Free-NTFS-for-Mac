@@ -1,3 +1,4 @@
+puts ' ruby版本已过时'
 def config_u_drive
   system('sudo spctl --master-disable')
 
