@@ -10,7 +10,7 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 
 特别感谢：
 
-* [APPERK](https://www.cnblogs.com/98record/p/mac-da-yin-ji-yi-jian-an-zhuang.html)，投入大量时间与精力，分解安装流程及兼容工作与特别打包。
+* [APPERK](https://www.cnblogs.com/98record/p/mac-da-yin-ji-yi-jian-an-zhuang.html)，投入大量时间与精力，分解安装流程，早期特别打包与兼容工作。
 * [琛少君](https://space.bilibili.com/32713000)和[配主机网](https://www.peizhuji.com)，在有着众多不错界面的NTFS软件，还能对款脚本终端小工具热情支持
 * [lezgomatt](https://github.com/lezgomatt)，虽然交流语言不通，但还是热心回答我的问题。
 
@@ -28,13 +28,11 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
 ```
 
-三、下载使用 
+三、下载使用，见[tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags)
 
 注意：U盘名称不支持空格与非法字符，见：https://github.com/osxfuse/osxfuse/issues/57#issuecomment-9367833
 
 <!-- ![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png) -->
-
-https://wwi.lanzoup.com/izuT50pxxn7c （[APPERK](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/friend's_wx.jpg)特别打包版）
 
 ### 其他补充
 
