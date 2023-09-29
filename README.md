@@ -34,6 +34,8 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 <!-- ![ ](https://fastly.jsdelivr.net/gh/hoochanlon/free-mac-ntfs/shashin/example.png) -->
 
+***工具软件为打包示例，推荐命令行使用***
+
 ### 其他补充
 
 打开软件[弹窗“文件已损坏，扔入废纸篓”，需解除苹果对软件的门禁限制](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9#issue-1527116834)。拷贝几十百来G的资料，需注意让Mac处于激活的常亮状态，可在终端输入指令`caffeinate`。
