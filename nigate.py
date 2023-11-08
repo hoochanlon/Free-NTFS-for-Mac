@@ -1,3 +1,4 @@
+import linecache
 import os
 from time import sleep
 import getpass
@@ -43,7 +44,9 @@ import getpass
 
 # ]
 
+苦手版本 = "v1.2"
 苦手 = '''#!/bin/bash
+# %s
 
 close_boring(){
     sudo spctl --master-disable
@@ -76,20 +79,20 @@ mount_ntfs() {
 close_boring
 check_install
 mount_ntfs
-'''
+''' % 苦手版本
 
 username = getpass.getuser()
 
 def File_plus():
     folder_path = "/Users/"+username+"/Public/shell-ntfs.sh"
-    if not os.path.exists(folder_path):
+    version = linecache.getline(folder_path, 2).strip()[2:]
+    if (not os.path.exists(folder_path)) or (苦手版本 != version):
         file = open(folder_path, mode='w')
         file.writelines(苦手)
 
-    else:
-        print('\nshell-ntfs.sh 文件已检测\n')
-        print('开启程序第一次启动，接入优盘时，需要输入电脑开机密码，方可正常使用\n')
-        print('等待NTFS格式优盘接入')
+    print('\nshell-ntfs.sh 文件已检测\n')
+    print('开启程序第一次启动，接入优盘时，需要输入电脑开机密码，方可正常使用\n')
+    print('等待NTFS格式优盘接入')
 
 File_plus()
 
