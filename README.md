@@ -20,17 +20,11 @@ Nigate，にがて，中译为“苦手”。这是一款支持苹果芯片的Fr
 
 一、在线体验，复制粘贴到 ***完全管理权限的终端*** 回车，一键起飞。
 
-** macOS14及以上 **
 
  ```shell
  /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
  ```
 
-** macOS12及以下 **
-
- ```shell
- /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja.sh)"
- ```
 
 二、下载到本地，往后开启可直接输入`nigate`
 
