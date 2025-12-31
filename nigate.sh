@@ -79,13 +79,18 @@ config_u_drive(){
 	    disk=$(echo "$line" | awk '{split($1, a, "/"); print a[3]}')
 	    volume=$(echo "$line" | awk '{split($3, a, "/"); print a[3]}')
 
+	    # 检查是否已经处理过（避免重复处理）
+	    if [ -f "/tmp/ntfs_mounted_${disk}" ]; then
+	        continue
+	    fi
+
 	    echo "Disk: $disk"
 	    echo "Volume: $volume"
 
 	    # 卸载分区
 	    # sudo umount /dev/$disk
 	    # 强制卸载
-	    sudo umount -f /dev/$disk
+	    sudo umount -f /dev/$disk 2>/dev/null
 
 	    # 检查卸载是否成功
 	    if [ $? -eq 0 ]; then
@@ -95,14 +100,51 @@ config_u_drive(){
 	        continue
 	    fi
 
-	    # 重新挂载为读写模式
-	    sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ovolname=$volume
+	    # 重新挂载为读写模式（添加超时和Windows快速启动处理）
+	    # 使用 timeout 命令防止卡死（macOS 使用 gtimeout，如果没有则使用后台进程+kill）
+	    # -o remove_hiberfile: 处理Windows快速启动导致的休眠文件
+	    # -o noatime: 提高性能
+	    echo "正在挂载 /dev/$disk 到 /Volumes/$volume..."
+
+	    # 尝试使用 timeout（如果系统有的话），否则使用后台进程+超时kill
+	    if command -v timeout >/dev/null 2>&1; then
+	        timeout 10 sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ovolname=$volume -oremove_hiberfile -onoatime 2>&1
+	        mount_result=$?
+	    elif command -v gtimeout >/dev/null 2>&1; then
+	        gtimeout 10 sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ovolname=$volume -oremove_hiberfile -onoatime 2>&1
+	        mount_result=$?
+	    else
+	        # 如果没有 timeout 命令，使用后台进程+超时kill
+	        sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ovolname=$volume -oremove_hiberfile -onoatime 2>&1 &
+	        mount_pid=$!
+	        # 等待最多10秒
+	        for i in {1..10}; do
+	            if ! kill -0 $mount_pid 2>/dev/null; then
+	                wait $mount_pid
+	                mount_result=$?
+	                break
+	            fi
+	            sleep 1
+	        done
+	        # 如果10秒后还在运行，杀死进程
+	        if kill -0 $mount_pid 2>/dev/null; then
+	            echo "警告: 挂载操作超时（可能是Windows快速启动导致），正在终止..."
+	            sudo kill -9 $mount_pid 2>/dev/null
+	            mount_result=124  # timeout exit code
+	        fi
+	    fi
 
 	    # 检查挂载是否成功
-	    if [ $? -eq 0 ]; then
+	    if [ $mount_result -eq 0 ]; then
 	        echo "新设备: ${volume}，已可读写！"
+	        # 标记为已处理
+	        touch "/tmp/ntfs_mounted_${disk}"
+	    elif [ $mount_result -eq 124 ]; then
+	        echo "错误: 挂载超时。可能是Windows快速启动导致文件系统处于脏状态。"
+	        echo "建议: 在Windows中完全关闭（而非休眠），或禁用快速启动功能。"
 	    else
-	        echo "重新挂载分区 /dev/$disk 到 /Volumes/$volume 失败。"
+	        echo "重新挂载分区 /dev/$disk 到 /Volumes/$volume 失败（退出码: $mount_result）。"
+	        echo "提示: 如果是Windows快速启动问题，请在Windows中完全关闭后再试。"
 	    fi
 
 	    echo '---------'
@@ -118,9 +160,24 @@ echo " "
 echo '---------'
 echo " "
 
+# 清理旧的标记文件（设备可能已移除）
+cleanup_old_mounts() {
+	for marker in /tmp/ntfs_mounted_*; do
+		if [ -f "$marker" ]; then
+			disk=$(basename "$marker" | sed 's/ntfs_mounted_//')
+			if ! mount | grep -q "/dev/$disk"; then
+				rm -f "$marker"
+			fi
+		fi
+	done
+}
+
 while true
 do
 	sleep 5
+	# 清理已移除设备的标记
+	cleanup_old_mounts
+
 	newDev=$(mount | grep ntfs | awk -F ' ' '{print $1}')
 	if [ ! -n "$newDev" ]; then
 		a=1 # 无意义，过语法检测
