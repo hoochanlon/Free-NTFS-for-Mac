@@ -1,0 +1,227 @@
+// macOS 风格系统依赖标签页样式
+@import 'variables'
+
+// 依赖列表容器
+.deps-list
+  display flex
+  flex-direction column
+  gap 10px
+
+  // 隐藏滚动条（如果内容溢出）
+  &::-webkit-scrollbar
+    display none
+
+  scrollbar-width none
+  -ms-overflow-style none
+
+// 依赖项样式（macOS 风格）
+.dep-item
+  display flex
+  justify-content space-between
+  align-items center
+  padding 14px 18px
+  background var(--bg-secondary)
+  border 1px solid var(--border)
+  border-radius 8px
+  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+  position relative
+  overflow hidden
+
+  // 悬停效果
+  &:hover
+    background var(--bg-tertiary)
+    border-color var(--border)
+    box-shadow 0 1px 3px var(--shadow)
+
+  // 左侧装饰线
+  &::before
+    content ''
+    position absolute
+    left 0
+    top 0
+    bottom 0
+    width 3px
+    background var(--border)
+    transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+
+  // 已安装状态
+  &.installed::before,
+  .dep-status.installed ~ *::before
+    background var(--success)
+
+  // 未安装状态
+  &.missing::before,
+  .dep-status.missing ~ *::before
+    background var(--error)
+
+.dep-name
+  font-size 14px
+  font-weight 500
+  color var(--text-primary)
+  display flex
+  align-items center
+  gap 10px
+  flex 1
+  letter-spacing -0.01em
+
+  // 图标占位
+  &::before
+    content ''
+    width 20px
+    height 20px
+    background var(--bg-tertiary)
+    border-radius 5px
+    display inline-block
+    flex-shrink 0
+
+.dep-status
+  display flex
+  align-items center
+  gap 6px
+  font-size 12px
+  font-weight 500
+  padding 4px 12px
+  border-radius 6px
+  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+  letter-spacing 0.01em
+
+  // 已安装状态
+  &.installed
+    background rgba(52, 199, 89, 0.15)
+    color var(--success)
+    border 1px solid rgba(52, 199, 89, 0.3)
+
+    &::before
+      content ''
+      width 12px
+      height 12px
+      background-image url('src/imgs/svg/check.svg')
+      background-size contain
+      background-repeat no-repeat
+      background-position center
+      filter brightness(0) saturate(100%) invert(60%) sepia(90%) saturate(400%) hue-rotate(120deg) brightness(95%) contrast(90%)
+
+  // 未安装状态
+  &.missing
+    background rgba(255, 59, 48, 0.15)
+    color var(--error)
+    border 1px solid rgba(255, 59, 48, 0.3)
+
+    &::before
+      content ''
+      width 12px
+      height 12px
+      background-image url('src/imgs/svg/failure.svg')
+      background-size contain
+      background-repeat no-repeat
+      background-position center
+      filter brightness(0) saturate(100%) invert(50%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(100%) contrast(90%)
+
+// 安装区域
+.install-section
+  margin-top 20px
+  padding-top 20px
+  border-top 1px solid var(--border)
+  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+  display none
+  animation slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+
+  &.visible
+    display block
+
+@keyframes slideDown
+  from
+    opacity 0
+    transform translateY(-8px)
+  to
+    opacity 1
+    transform translateY(0)
+
+// 安装按钮
+#installDepsBtn
+  width 100%
+  padding 10px 20px
+  font-size 13px
+  font-weight 500
+  border-radius 6px
+  position relative
+  overflow hidden
+  letter-spacing -0.01em
+
+  // 加载动画
+  &::after
+    content ''
+    position absolute
+    top 50%
+    left 50%
+    width 18px
+    height 18px
+    margin -9px 0 0 -9px
+    border 2px solid rgba(255, 255, 255, 0.3)
+    border-top-color #fff
+    border-radius 50%
+    animation spin 0.8s linear infinite
+    opacity 0
+    transition opacity 0.2s
+
+  &:disabled
+    &::after
+      opacity 1
+
+@keyframes spin
+  to
+    transform rotate(360deg)
+
+// 安装日志
+.install-log
+  margin-top 14px
+  padding 14px
+  background var(--bg-tertiary)
+  border 1px solid var(--border)
+  border-radius 8px
+  font-family 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace
+  font-size 12px
+  line-height 1.6
+  color var(--text-secondary)
+  max-height 280px
+  overflow-y auto
+  white-space pre-wrap
+  word-break break-word
+
+  // 滚动条样式
+  &::-webkit-scrollbar
+    width 6px
+
+  &::-webkit-scrollbar-track
+    background var(--bg-secondary)
+
+  &::-webkit-scrollbar-thumb
+    background var(--border)
+    border-radius 3px
+
+    &:hover
+      background var(--accent)
+
+// 空状态
+.deps-empty
+  text-align center
+  padding 50px 20px
+  color var(--text-secondary)
+
+  .empty-icon
+    font-size 40px
+    margin-bottom 12px
+    opacity 0.4
+
+  p
+    font-size 15px
+    margin 6px 0
+
+// 浅色模式调整
+body.light-theme
+  .dep-item
+    &:hover
+      box-shadow 0 1px 2px var(--light-shadow)
+
+  .install-log
+    background var(--light-bg-tertiary)

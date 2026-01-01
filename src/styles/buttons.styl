@@ -1,0 +1,100 @@
+// macOS 风格按钮样式
+@import 'variables'
+
+.btn
+  padding 6px 16px
+  border none
+  border-radius 6px
+  font-size 13px
+  font-weight 500
+  cursor pointer
+  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+  outline none
+  letter-spacing -0.01em
+  -webkit-app-region no-drag
+
+  &.btn-primary
+    background var(--accent)
+    color #ffffff
+    box-shadow 0 1px 2px rgba(0, 0, 0, 0.1)
+
+    &:hover
+      background var(--accent-hover)
+      box-shadow 0 2px 4px rgba(0, 0, 0, 0.15)
+
+    &:active
+      transform scale(0.98)
+      box-shadow 0 1px 1px rgba(0, 0, 0, 0.1)
+
+    &:disabled
+      background var(--bg-tertiary)
+      color var(--text-secondary)
+      cursor not-allowed
+      box-shadow none
+      opacity 0.5
+
+  &.btn-secondary
+    background var(--bg-tertiary)
+    color var(--text-primary)
+    border 1px solid var(--border)
+
+    &:hover
+      background var(--bg-primary)
+      border-color var(--border)
+
+    &:active
+      transform scale(0.98)
+
+    &:disabled
+      opacity 0.5
+      cursor not-allowed
+
+  &.btn-success
+    background var(--success)
+    color #ffffff
+    box-shadow 0 1px 2px rgba(0, 0, 0, 0.1)
+
+    &:hover
+      background #30b04a
+      box-shadow 0 2px 4px rgba(0, 0, 0, 0.15)
+
+    &:active
+      transform scale(0.98)
+
+  &.btn-danger
+    background var(--error)
+    color #ffffff
+    box-shadow 0 1px 2px rgba(0, 0, 0, 0.1)
+
+    &:hover
+      background #ff2d20
+      box-shadow 0 2px 4px rgba(0, 0, 0, 0.15)
+
+    &:active
+      transform scale(0.98)
+
+  &.btn-text
+    background transparent
+    color var(--text-secondary)
+    padding 4px 8px
+
+    &:hover
+      color var(--text-primary)
+      background var(--bg-tertiary)
+
+    &:active
+      transform scale(0.98)
+
+  // 主题切换按钮
+  &.btn-theme-toggle
+    background transparent
+    border 1px solid var(--border)
+    color var(--text-primary)
+    padding 6px 12px
+    font-size 12px
+    -webkit-app-region no-drag
+    cursor pointer
+    user-select none
+
+    &:hover
+      background var(--bg-tertiary)

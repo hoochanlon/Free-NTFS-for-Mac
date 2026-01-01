@@ -1,0 +1,375 @@
+// macOS 风格关于窗口样式
+@import 'variables'
+
+// 关于窗口标题栏（macOS 风格，只显示关闭按钮）
+.about-window-titlebar
+  display flex
+  align-items center
+  height 44px
+  padding 0 20px
+  background var(--bg-secondary)
+  border-bottom 1px solid var(--border)
+  -webkit-app-region drag
+  position relative
+
+.about-window-traffic-lights
+  display flex
+  gap 8px
+  -webkit-app-region no-drag
+
+.traffic-light
+  width 12px
+  height 12px
+  border-radius 50%
+  border none
+  cursor pointer
+  -webkit-app-region no-drag
+  transition all 0.15s ease
+  padding 0
+
+.traffic-light-close
+  display none
+  background #ff5f57
+
+  &:hover
+    background #ff3b30
+
+  &:active
+    transform scale(0.95)
+
+.about-window-title
+  position absolute
+  left 50%
+  transform translateX(-50%)
+  font-size 13px
+  font-weight 600
+  color var(--text-primary)
+  letter-spacing -0.01em
+
+// 关于窗口容器
+.about-window-container
+  padding 32px
+  background var(--bg-primary)
+  min-height calc(100vh - 44px)
+  display flex
+  align-items center
+  justify-content center
+
+// 确保 body 有背景色
+body
+  background var(--bg-primary)
+
+.about-window-content
+  max-width 420px
+  width 100%
+  padding 0
+
+  h1,
+  .about-title
+    font-size 18px
+    font-weight 600
+    color var(--text-primary)
+    margin-bottom 8px
+    margin-top 0
+    letter-spacing -0.01em
+
+  h2
+    font-size 16px
+    font-weight 600
+    color var(--text-primary)
+    margin-top 16px
+    margin-bottom 10px
+    letter-spacing -0.01em
+
+  p
+    color var(--text-primary)
+    line-height 1.6
+    margin-bottom 12px
+    font-size 13px
+
+  ul
+    color var(--text-primary)
+    line-height 1.7
+    margin-left 20px
+    margin-bottom 16px
+    font-size 13px
+
+  li
+    margin-bottom 6px
+
+  // 图标行容器
+  .about-icons-row
+    display flex
+    align-items center
+    justify-content center
+    gap 12px
+    margin-top 16px
+    padding-top 16px
+    border-top 1px solid var(--border)
+    flex-wrap nowrap
+
+  // 图标链接样式
+  .about-icon-link
+    display flex
+    align-items center
+    justify-content center
+    width 40px
+    height 40px
+    border-radius 6px
+    background transparent
+    border none
+    text-decoration none
+    cursor pointer
+    flex-shrink 0
+
+    .about-icon
+      width 24px
+      height 24px
+      opacity 0.8
+      display block
+      object-fit contain
+      max-width 24px
+      max-height 24px
+
+    // 确保所有图标大小一致
+    img.about-icon
+      width 24px !important
+      height 24px !important
+      max-width 24px !important
+      max-height 24px !important
+
+// 关于按钮（右上角）
+.btn-about
+  background transparent
+  border none
+  padding 6px
+  cursor pointer
+  display flex
+  align-items center
+  justify-content center
+  border-radius 4px
+  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+  -webkit-app-region no-drag
+  opacity 0.7
+  position relative
+  z-index 10
+
+  &:hover
+    background var(--bg-tertiary)
+    opacity 1
+
+  &:active
+    transform scale(0.95)
+
+  .btn-about-icon
+    width 18px
+    height 18px
+    opacity 0.8
+    pointer-events none
+
+// 关于弹窗
+.about-modal
+  position fixed
+  top 0
+  left 0
+  right 0
+  bottom 0
+  z-index 2000
+  display none
+  align-items center
+  justify-content center
+  animation fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+
+  &.visible
+    display flex
+
+.about-modal-overlay
+  position absolute
+  top 0
+  left 0
+  right 0
+  bottom 0
+  background rgba(0, 0, 0, 0.4)
+  backdrop-filter blur(4px)
+  -webkit-backdrop-filter blur(4px)
+
+.about-modal-content
+  position relative
+  background var(--bg-secondary)
+  border 1px solid var(--border)
+  border-radius 12px
+  width 90%
+  max-width 480px
+  max-height 80vh
+  box-shadow 0 8px 32px rgba(0, 0, 0, 0.3)
+  display flex
+  flex-direction column
+  animation slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+  overflow hidden
+
+@keyframes slideUp
+  from
+    opacity 0
+    transform translateY(20px) scale(0.95)
+  to
+    opacity 1
+    transform translateY(0) scale(1)
+
+.about-modal-header
+  display flex
+  justify-content space-between
+  align-items center
+  padding 20px 24px
+  border-bottom 1px solid var(--border)
+
+  h2
+    font-size 18px
+    font-weight 600
+    color var(--text-primary)
+    margin 0
+    letter-spacing -0.01em
+
+.about-modal-close
+  background transparent
+  border none
+  font-size 24px
+  color var(--text-secondary)
+  cursor pointer
+  width 28px
+  height 28px
+  display flex
+  align-items center
+  justify-content center
+  border-radius 4px
+  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+  line-height 1
+  padding 0
+
+  &:hover
+    background var(--bg-tertiary)
+    color var(--text-primary)
+
+  &:active
+    transform scale(0.9)
+
+.about-modal-body
+  padding 16px 24px
+  overflow-y auto
+  font-size 13px
+  line-height 1.6
+  color var(--text-primary)
+
+  // 隐藏滚动条
+  &::-webkit-scrollbar
+    display none
+
+  scrollbar-width none
+  -ms-overflow-style none
+
+  // 第一个元素减少上边距
+  > *:first-child
+    margin-top 0
+
+  h1,
+  .about-title
+    font-size 18px
+    font-weight 600
+    color var(--text-primary)
+    margin-bottom 8px
+    margin-top 0
+    letter-spacing -0.01em
+
+  h2
+    font-size 16px
+    font-weight 600
+    color var(--text-primary)
+    margin-top 16px
+    margin-bottom 10px
+    letter-spacing -0.01em
+
+  // 第一个 h2 减少上边距
+  > h2:first-child,
+  > *:first-child h2
+    margin-top 0
+
+  h3
+    font-size 14px
+    font-weight 600
+    color var(--text-primary)
+    margin-top 16px
+    margin-bottom 8px
+    letter-spacing -0.01em
+
+  p
+    color var(--text-primary)
+    line-height 1.6
+    margin-bottom 12px
+    font-size 13px
+
+  ul, ol
+    color var(--text-primary)
+    line-height 1.7
+    margin-left 20px
+    margin-bottom 16px
+    font-size 13px
+
+  li
+    margin-bottom 6px
+
+  a
+    color var(--accent)
+    text-decoration none
+    transition color 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+
+    &:hover
+      color var(--accent-hover)
+      text-decoration underline
+
+  // 图标行容器
+  .about-icons-row
+    display flex
+    align-items center
+    justify-content center
+    gap 12px
+    margin-top 16px
+    padding-top 16px
+    border-top 1px solid var(--border)
+    flex-wrap nowrap
+
+  // 图标链接样式
+  .about-icon-link
+    display flex
+    align-items center
+    justify-content center
+    width 40px
+    height 40px
+    border-radius 6px
+    background transparent
+    border none
+    text-decoration none
+    cursor pointer
+    flex-shrink 0
+
+    .about-icon
+      width 24px
+      height 24px
+      opacity 0.8
+      display block
+      object-fit contain
+      max-width 24px
+      max-height 24px
+
+    // 确保所有图标大小一致
+    img.about-icon
+      width 24px
+      height 24px
+      max-width 24px
+      max-height 24px
+
+// 浅色模式调整
+body.light-theme
+  .about-modal-overlay
+    background rgba(0, 0, 0, 0.2)
+
+  .about-modal-content
+    box-shadow 0 8px 32px rgba(0, 0, 0, 0.15)

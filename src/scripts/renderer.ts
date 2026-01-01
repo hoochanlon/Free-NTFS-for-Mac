@@ -1,0 +1,143 @@
+// 主入口文件 - 初始化所有模块
+// 注意：不使用 import，避免生成 CommonJS 代码（浏览器环境不支持）
+// 所有模块通过全局命名空间 AppUtils 和 AppModules 访问
+
+(function() {
+  'use strict';
+
+  // 获取全局命名空间（在运行时可用）
+  const AppUtils = (window as any).AppUtils;
+  const AppModules = (window as any).AppModules;
+
+  // 检查是否已经初始化（在函数开始就检查）
+  if (window.__rendererInitialized) {
+    console.warn('renderer.ts 已经初始化，跳过重复执行');
+    return;
+  }
+
+  // 立即标记为已初始化，防止并发执行
+  window.__rendererInitialized = true;
+
+  // 检查 electronAPI 是否已存在
+  if (typeof window.electronAPI === 'undefined') {
+    console.error('electronAPI 未定义，请检查 preload.js 是否正确加载');
+    // 创建一个空对象避免后续错误
+    window.electronAPI = {} as any;
+  }
+
+  // DOM 元素
+  const statusIndicator = document.getElementById('statusIndicator')!;
+  const statusText = statusIndicator.querySelector('.status-text') as HTMLElement;
+  const statusDot = statusIndicator.querySelector('.status-dot') as HTMLElement;
+  const depsList = document.getElementById('depsList')!;
+  const checkDepsBtn = document.getElementById('checkDepsBtn') as HTMLButtonElement;
+  const installSection = document.getElementById('installSection') as HTMLElement;
+  const installDepsBtn = document.getElementById('installDepsBtn') as HTMLButtonElement;
+  const installLog = document.getElementById('installLog') as HTMLElement;
+  const devicesList = document.getElementById('devicesList')!;
+  const readWriteDevicesList = document.getElementById('readWriteDevicesList')!;
+  const refreshBtn = document.getElementById('refreshBtn') as HTMLButtonElement;
+  const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
+  const logContainer = document.getElementById('logContainer')!;
+  const clearLogBtn = document.getElementById('clearLogBtn') as HTMLButtonElement;
+  const themeToggleButton = document.getElementById('theme-toggle-btn') as HTMLButtonElement;
+  const docBody = document.body;
+  const helpTab = document.getElementById('helpTab') as HTMLElement;
+  const aboutBtn = document.getElementById('aboutBtn') as HTMLButtonElement;
+
+  // 自动刷新间隔
+  let autoRefreshInterval: NodeJS.Timeout | null = null;
+
+  // 初始化
+  document.addEventListener('DOMContentLoaded', () => {
+    // 初始化主题（在 DOM 加载前设置，避免闪烁）
+    AppUtils.Theme.initializeTheme(docBody, themeToggleButton);
+
+    // 初始化标签页
+    AppModules.Tabs.initTabs(logContainer, helpTab);
+
+    // 初始化功能模块
+    AppModules.Dependencies.checkDependencies(
+      depsList,
+      installSection,
+      loadingOverlay,
+      statusDot,
+      statusText
+    );
+    AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+    startAutoRefresh();
+
+    // 初始化时加载帮助说明的 markdown 内容
+    if (helpTab) {
+      AppUtils.Markdown.loadMarkdown('help.md', helpTab);
+    }
+
+    // 初始化关于按钮
+    if (aboutBtn) {
+      AppModules.About.initAboutButton(aboutBtn);
+    }
+
+    // 事件监听
+    checkDepsBtn.addEventListener('click', () => {
+      AppModules.Dependencies.checkDependencies(
+        depsList,
+        installSection,
+        loadingOverlay,
+        statusDot,
+        statusText
+      );
+    });
+
+    installDepsBtn.addEventListener('click', () => {
+      AppModules.Dependencies.installDependencies(
+        installDepsBtn,
+        installLog,
+        installSection,
+        depsList,
+        loadingOverlay,
+        statusDot,
+        statusText
+      );
+    });
+
+    refreshBtn.addEventListener('click', () => {
+      AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+    });
+
+    clearLogBtn.addEventListener('click', () => {
+      AppUtils.Logs.clearLog(logContainer);
+    });
+
+    if (themeToggleButton) {
+      themeToggleButton.addEventListener('click', () => {
+        AppUtils.Theme.handleThemeToggleClick(docBody, themeToggleButton);
+      });
+    }
+
+    // 定期刷新日志显示（如果日志标签页是活动的）
+    // 降低刷新频率，避免闪烁
+    setInterval(() => {
+      const logsTab = document.getElementById('logsTab');
+      if (logsTab && logsTab.classList.contains('active')) {
+        // 只在日志标签页可见时才更新，且不强制更新
+        AppUtils.Logs.renderLogs(logContainer, false);
+      }
+    }, 2000);
+  });
+
+  // 自动刷新
+  function startAutoRefresh(): void {
+    // 每 5 秒刷新一次设备列表
+    autoRefreshInterval = setInterval(() => {
+      AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+    }, 5000);
+  }
+
+  // 清理
+  window.addEventListener('beforeunload', () => {
+    if (autoRefreshInterval) {
+      clearInterval(autoRefreshInterval);
+    }
+  });
+
+})(); // 结束立即执行函数

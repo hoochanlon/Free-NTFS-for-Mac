@@ -1,0 +1,207 @@
+// macOS 风格操作日志标签页样式
+@import 'variables'
+
+// 日志容器
+.log-container
+  background var(--bg-secondary)
+  border 1px solid var(--border)
+  border-radius 10px
+  padding 16px
+  min-height 400px
+  max-height 600px
+  overflow-y auto
+  font-family 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace
+  font-size 12px
+  line-height 1.7
+  transition all 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+  position relative
+
+  // 隐藏滚动条
+  &::-webkit-scrollbar
+    display none
+
+  scrollbar-width none
+  -ms-overflow-style none
+
+// 空状态
+.log-empty
+  color var(--text-secondary)
+  text-align center
+  padding 60px 20px
+  font-size 14px
+  display flex
+  flex-direction column
+  align-items center
+  gap 12px
+
+  &::before
+    content ''
+    width 48px
+    height 48px
+    background-image url('src/imgs/svg/log.svg')
+    background-size contain
+    background-repeat no-repeat
+    background-position center
+    opacity 0.3
+    filter grayscale(1)
+
+// 日志条目（macOS 风格）
+.log-entry
+  padding 8px 10px
+  margin-bottom 6px
+  border-radius 6px
+  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+  word-break break-word
+  position relative
+  padding-left 32px
+
+  // 左侧图标
+  &::before
+    content ''
+    position absolute
+    left 10px
+    top 50%
+    transform translateY(-50%)
+    width 12px
+    height 12px
+    border-radius 50%
+    opacity 0.7
+
+  // 默认信息样式
+  color var(--text-secondary)
+  background transparent
+
+  // 成功日志
+  &.success
+    color var(--success)
+    background rgba(52, 199, 89, 0.08)
+
+    &::before
+      background-image url('src/imgs/svg/check.svg')
+      background-size contain
+      background-repeat no-repeat
+      background-position center
+      filter brightness(0) saturate(100%) invert(60%) sepia(90%) saturate(400%) hue-rotate(120deg) brightness(95%) contrast(90%)
+      opacity 1
+
+  // 错误日志
+  &.error
+    color var(--error)
+    background rgba(255, 59, 48, 0.08)
+
+    &::before
+      background-image url('src/imgs/svg/failure.svg')
+      background-size contain
+      background-repeat no-repeat
+      background-position center
+      filter brightness(0) saturate(100%) invert(50%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(100%) contrast(90%)
+      opacity 1
+
+  // 警告日志
+  &.warning
+    color var(--warning)
+    background rgba(255, 149, 0, 0.08)
+
+    &::before
+      content ''
+      width 10px
+      height 10px
+      background var(--warning)
+      border-radius 50%
+      opacity 1
+
+  // 信息日志
+  &.info
+    color var(--accent)
+    background rgba(0, 122, 255, 0.08)
+
+    &::before
+      content ''
+      width 10px
+      height 10px
+      background var(--accent)
+      border-radius 50%
+      opacity 1
+
+  // 悬停效果
+  &:hover
+    background rgba(0, 122, 255, 0.12)
+    transform translateX(2px)
+
+// 日志时间戳
+.log-time
+  color var(--text-secondary)
+  margin-right 10px
+  opacity 0.6
+  font-weight 500
+  transition color 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+
+  // 不同日志类型的时间戳颜色
+  .log-entry.success &,
+  .log-entry.error &,
+  .log-entry.warning &,
+  .log-entry.info &
+    opacity 0.7
+
+// 日志容器全屏模式（如果存在）
+.log-container-full
+  flex 1
+  background var(--bg-primary)
+  border 1px solid var(--border)
+  border-radius 10px
+  padding 16px
+  overflow-y auto
+  font-family 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace
+  font-size 12px
+  line-height 1.7
+  transition background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+
+  // 滚动条样式
+  &::-webkit-scrollbar
+    width 6px
+
+  &::-webkit-scrollbar-track
+    background var(--bg-tertiary)
+    border-radius 3px
+
+  &::-webkit-scrollbar-thumb
+    background var(--border)
+    border-radius 3px
+
+    &:hover
+      background var(--accent)
+
+// 日志条目动画（只对新添加的条目应用）
+@keyframes logEntryAppear
+  from
+    opacity 0
+    transform translateX(-4px)
+  to
+    opacity 1
+    transform translateX(0)
+
+// 只在首次渲染时应用动画，避免重复动画导致闪烁
+.log-entry
+  animation logEntryAppear 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+
+// 浅色模式调整
+body.light-theme
+  .log-container,
+  .log-container-full
+    background var(--light-bg-secondary)
+
+  .log-entry
+    &.success
+      background rgba(52, 199, 89, 0.1)
+
+    &.error
+      background rgba(255, 59, 48, 0.1)
+
+    &.warning
+      background rgba(255, 149, 0, 0.1)
+
+    &.info
+      background rgba(0, 122, 255, 0.1)
+
+    &:hover
+      background rgba(0, 122, 255, 0.12)

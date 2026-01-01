@@ -1,0 +1,48 @@
+// macOS 风格基础样式
+@import 'variables'
+
+// CSS 变量（用于动态主题切换）
+:root
+  // 深色模式
+  --bg-primary dark-bg-primary
+  --bg-secondary dark-bg-secondary
+  --bg-tertiary dark-bg-tertiary
+  --text-primary dark-text-primary
+  --text-secondary dark-text-secondary
+  --accent accent
+  --accent-hover accent-hover
+  --success success
+  --warning warning
+  --error error
+  --border dark-border
+  --shadow dark-shadow
+
+  // 浅色模式变量（通过类切换）
+  --light-bg-primary light-bg-primary
+  --light-bg-secondary light-bg-secondary
+  --light-bg-tertiary light-bg-tertiary
+  --light-text-primary light-text-primary
+  --light-text-secondary light-text-secondary
+  --light-border light-border
+  --light-shadow light-shadow
+
+// 浅色模式类
+body.light-theme
+  --bg-primary var(--light-bg-primary)
+  --bg-secondary var(--light-bg-secondary)
+  --bg-tertiary var(--light-bg-tertiary)
+  --text-primary var(--light-text-primary)
+  --text-secondary var(--light-text-secondary)
+  --border var(--light-border)
+  --shadow var(--light-shadow)
+
+body
+  font-family -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif
+  background var(--bg-primary)
+  color var(--text-primary)
+  overflow hidden
+  -webkit-font-smoothing antialiased
+  -moz-osx-font-smoothing grayscale
+  font-feature-settings 'kern' 1
+  text-rendering optimizeLegibility
+  transition background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s cubic-bezier(0.4, 0, 0.2, 1)

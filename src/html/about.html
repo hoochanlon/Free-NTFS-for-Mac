@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self';">
+  <title>关于</title>
+  <link rel="stylesheet" href="../../styles.css?v=11">
+  <script src="../../scripts/theme-init.js"></script>
+</head>
+<body>
+  <div class="about-window-titlebar">
+    <div class="about-window-traffic-lights">
+      <button class="traffic-light traffic-light-close" onclick="window.electronAPI?.closeModuleWindow()" title="关闭"></button>
+    </div>
+    <div class="about-window-title">关于</div>
+  </div>
+  <div class="about-window-container">
+    <div class="about-window-content">
+      <h1 class="about-title">Free NTFS for Mac</h1>
+      <p>Free NTFS for Mac 是基于 ntfs-3g 驱动制作的免费读写 NTFS 格式存储设备工具。</p>
+
+      <h2>软件信息</h2>
+      <ul>
+        <li><strong>作者：</strong> Hoochanlon</li>
+        <li><strong>软件版本：</strong> Free NTFS for Mac v1.3.0</li>
+        <li><strong>基于技术：</strong> Electron + Shell + TypeScript + Stylus</li>
+      </ul>
+
+      <div class="about-icons-row">
+        <a href="https://github.com/hoochanlon/Free-NTFS-for-Mac" target="_blank" class="about-icon-link" title="项目地址">
+          <img src="../imgs/svg/github.svg" alt="项目地址" class="about-icon" onerror="this.style.display='none'">
+        </a>
+        <a href="mailto:hoochanlon@outlook.com" class="about-icon-link" title="邮箱">
+          <img src="../imgs/svg/email.svg" alt="邮箱" class="about-icon" onerror="this.style.display='none'">
+        </a>
+        <a href="https://bsky.app/profile/hoochanlon" target="_blank" class="about-icon-link" title="Bluesky">
+          <img src="../imgs/svg/bluesky.svg" alt="Bluesky" class="about-icon" onerror="this.style.display='none'">
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../scripts/utils/theme.js"></script>
+  <script>
+    // 等待 DOM 和脚本加载完成后再初始化主题
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化主题
+      const AppUtils = window.AppUtils;
+      if (AppUtils && AppUtils.Theme) {
+        AppUtils.Theme.initializeTheme(document.body, null);
+      }
+    });
+
+    // 如果 DOMContentLoaded 已经触发，立即执行
+    if (document.readyState === 'loading') {
+      // DOM 还在加载中，等待 DOMContentLoaded
+    } else {
+      // DOM 已经加载完成，立即初始化
+      const AppUtils = window.AppUtils;
+      if (AppUtils && AppUtils.Theme) {
+        AppUtils.Theme.initializeTheme(document.body, null);
+      }
+    }
+
+    // 监听主题变化（通过 IPC 事件）
+    if (window.electronAPI && window.electronAPI.onThemeChange) {
+      window.electronAPI.onThemeChange(function(isLightMode) {
+        const AppUtils = window.AppUtils;
+        if (AppUtils && AppUtils.Theme) {
+          AppUtils.Theme.updateTheme(isLightMode, document.body, null);
+        }
+      });
+    }
+
+    // 备用方案：定期检查主题变化
+    let lastTheme = localStorage.getItem('app-theme');
+    setInterval(function() {
+      const currentTheme = localStorage.getItem('app-theme');
+      if (currentTheme !== lastTheme) {
+        lastTheme = currentTheme;
+        const AppUtils = window.AppUtils;
+        if (AppUtils && AppUtils.Theme) {
+          const isLightMode = currentTheme === 'light';
+          AppUtils.Theme.updateTheme(isLightMode, document.body, null);
+        }
+      }
+    }, 500);
+
+    // 关闭窗口
+    window.close = function() {
+      if (window.electronAPI && window.electronAPI.closeModuleWindow) {
+        window.electronAPI.closeModuleWindow();
+      }
+    };
+
+    // 处理外部链接点击
+    document.addEventListener('DOMContentLoaded', function() {
+      const links = document.querySelectorAll('.about-icon-link');
+      links.forEach(link => {
+        link.addEventListener('click', function(e) {
+          const href = this.getAttribute('href');
+          if (href) {
+            e.preventDefault();
+            // 使用 Electron API 打开外部链接
+            if (window.electronAPI && window.electronAPI.openExternal) {
+              window.electronAPI.openExternal(href);
+            } else {
+              // 降级方案：使用 shell.openExternal（需要在 preload 中暴露）
+              window.open(href, '_blank');
+            }
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

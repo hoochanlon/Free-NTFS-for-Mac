@@ -1,0 +1,47 @@
+{
+  "name": "free-ntfs-for-mac",
+  "version": "1.0.0",
+  "description": "免费的 macOS NTFS 读写工具 - Electron 界面版",
+  "main": "scripts/main.js",
+  "scripts": {
+    "build:ts": "tsc",
+    "build:stylus": "stylus src/styles/main.styl -o styles.css",
+    "build:all": "npm run build:stylus && npm run build:ts",
+    "watch:ts": "tsc --watch",
+    "watch:stylus": "stylus -w src/styles/main.styl -o styles.css",
+    "watch:all": "npm run watch:stylus & npm run watch:ts",
+    "start": "npm run build:all && electron .",
+    "dev": "npm run watch:all & npm run build:all && electron . --dev",
+    "dev:reload": "npm install --save-dev electron-reloader && npm run dev",
+    "build": "npm run build:all && electron-builder"
+  },
+  "keywords": [
+    "ntfs",
+    "macos",
+    "electron"
+  ],
+  "author": "hoochanlon",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "electron-reloader": "^1.2.3",
+    "stylus": "^0.63.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "marked": "^17.0.1",
+    "node-pty": "^1.0.0"
+  },
+  "build": {
+    "appId": "com.freentfs.mac",
+    "productName": "Free NTFS for Mac",
+    "icon": "src/ico/flash.svg",
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": "dmg",
+      "icon": "src/ico/flash.svg"
+    }
+  }
+}

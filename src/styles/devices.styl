@@ -1,0 +1,241 @@
+// macOS 风格 NTFS 设备标签页样式
+@import 'variables'
+
+// 设备列表容器
+.devices-list,
+.read-write-devices-list
+  display flex
+  flex-direction column
+  gap 12px
+
+  // 隐藏滚动条（如果内容溢出）
+  &::-webkit-scrollbar
+    display none
+
+  scrollbar-width none
+  -ms-overflow-style none
+
+// 设备项样式（macOS 风格）
+.device-item
+  background var(--bg-secondary)
+  border 1px solid var(--border)
+  border-radius 10px
+  padding 20px
+  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+  position relative
+  overflow hidden
+
+  // 悬停效果
+  &:hover
+    background var(--bg-tertiary)
+    border-color var(--border)
+    box-shadow 0 1px 3px var(--shadow)
+
+  // 左侧装饰条
+  &::before
+    content ''
+    position absolute
+    left 0
+    top 0
+    bottom 0
+    width 3px
+    background var(--border)
+    transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+
+  // 只读设备
+  &.read-only::before
+    background var(--warning)
+
+  // 读写设备
+  &.read-write::before
+    background var(--success)
+
+// 设备头部
+.device-header
+  display flex
+  justify-content space-between
+  align-items center
+  margin-bottom 16px
+
+.device-name
+  display flex
+  align-items center
+  gap 10px
+  font-size 15px
+  font-weight 600
+  color var(--text-primary)
+  letter-spacing -0.01em
+
+  .device-icon
+    width 28px
+    height 28px
+    display flex
+    align-items center
+    justify-content center
+    background var(--bg-tertiary)
+    border-radius 6px
+    flex-shrink 0
+
+    // 使用 SVG 图标
+    &::before
+      content ''
+      width 20px
+      height 20px
+      background-image url('src/imgs/svg/flash-drive.svg')
+      background-size contain
+      background-repeat no-repeat
+      background-position center
+      opacity 0.7
+
+// 设备状态标签（macOS 风格）
+.device-status
+  display inline-flex
+  align-items center
+  gap 6px
+  padding 4px 12px
+  border-radius 6px
+  font-size 12px
+  font-weight 500
+  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+  letter-spacing 0.01em
+
+  // 只读状态
+  &.read-only
+    background rgba(255, 149, 0, 0.15)
+    color var(--warning)
+    border 1px solid rgba(255, 149, 0, 0.3)
+
+  // 读写状态
+  &.read-write
+    background rgba(52, 199, 89, 0.15)
+    color var(--success)
+    border 1px solid rgba(52, 199, 89, 0.3)
+
+    &::before
+      content ''
+      width 12px
+      height 12px
+      background-image url('src/imgs/svg/check.svg')
+      background-size contain
+      background-repeat no-repeat
+      background-position center
+      filter brightness(0) saturate(100%) invert(60%) sepia(90%) saturate(400%) hue-rotate(120deg) brightness(95%) contrast(90%)
+
+// 设备信息
+.device-info
+  display flex
+  flex-direction column
+  gap 8px
+  margin-bottom 16px
+  padding 14px
+  background var(--bg-tertiary)
+  border-radius 8px
+  border 1px solid var(--border)
+
+.device-info-item
+  display flex
+  align-items center
+  gap 10px
+  font-size 13px
+  color var(--text-secondary)
+
+  .device-info-label
+    font-weight 500
+    color var(--text-primary)
+    min-width 70px
+    flex-shrink 0
+
+  span:not(.device-info-label)
+    color var(--text-secondary)
+    font-family 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace
+    font-size 12px
+    word-break break-all
+
+// 设备操作按钮
+.device-actions
+  display flex
+  gap 8px
+  flex-wrap wrap
+
+  .mount-btn,
+  .unmount-btn
+    flex 1
+    min-width 120px
+    padding 8px 16px
+    font-size 13px
+    font-weight 500
+    border-radius 6px
+    transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+    position relative
+    overflow hidden
+    letter-spacing -0.01em
+
+    // 点击效果
+    &:active
+      transform scale(0.98)
+
+// 空状态（macOS 风格）
+.empty-state
+  text-align center
+  padding 60px 20px
+  color var(--text-secondary)
+
+  .empty-icon
+    width 64px
+    height 64px
+    margin 0 auto 20px
+    display flex
+    align-items center
+    justify-content center
+    background var(--bg-tertiary)
+    border-radius 50%
+    opacity 0.5
+    border 2px dashed var(--border)
+    transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+
+    // 使用 SVG 图标
+    &::before
+      content ''
+      width 36px
+      height 36px
+      background-image url('src/imgs/svg/flash-drive.svg')
+      background-size contain
+      background-repeat no-repeat
+      background-position center
+      filter grayscale(1) opacity(0.4)
+
+  p
+    font-size 15px
+    margin 8px 0
+    color var(--text-primary)
+    font-weight 500
+    letter-spacing -0.01em
+
+  .empty-hint
+    font-size 13px
+    color var(--text-secondary)
+    margin-top 6px
+
+// 已可读写设备列表的特殊样式
+.read-write-devices-list
+  .device-item
+    border-color var(--success)
+    background rgba(52, 199, 89, 0.05)
+
+    &:hover
+      background rgba(52, 199, 89, 0.08)
+      border-color var(--success)
+
+// 浅色模式调整
+body.light-theme
+  .device-item
+    &:hover
+      box-shadow 0 1px 2px var(--light-shadow)
+
+  .device-info
+    background var(--light-bg-tertiary)
+
+  .empty-state
+    .empty-icon
+      background var(--light-bg-tertiary)
+      border-color var(--light-border)

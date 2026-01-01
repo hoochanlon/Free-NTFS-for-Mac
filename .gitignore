@@ -1,7 +1,40 @@
- !.github
- !.gitattributes
+# Dependencies
 node_modules/
-.npmignore
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Electron build output
+dist/
+build/
+out/
+
+# macOS
 .DS_Store
-docs/.vuepress/dist
-docs/.vuepress/.git
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
+
+# Compiled files (from TypeScript and Stylus)
+*.js
+*.js.map
+styles.css
+!node_modules/**/*.js

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self';">
+  <title>NTFS 设备 - Free NTFS for Mac</title>
+  <link rel="stylesheet" href="../../styles.css?v=11">
+</head>
+<body>
+  <div class="devices-page">
+    <div class="devices-header">
+      <h1>NTFS 设备</h1>
+      <div class="devices-actions">
+        <button class="btn btn-secondary" id="refreshBtn">刷新</button>
+        <button class="btn btn-text" id="closeBtn">关闭</button>
+      </div>
+    </div>
+    <div class="devices-content">
+      <div class="section">
+        <div class="devices-list" id="devicesList">
+          <div class="empty-state">
+            <div class="empty-icon">💾</div>
+            <p>未检测到 NTFS 设备</p>
+            <p class="empty-hint">请插入 NTFS 格式的移动存储设备</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 加载遮罩 -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <p>处理中...</p>
+  </div>
+
+  <script src="../../scripts/devices.js"></script>
+</body>
+</html>

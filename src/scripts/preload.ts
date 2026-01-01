@@ -1,0 +1,27 @@
+import { contextBridge, ipcRenderer } from 'electron';
+import type { ElectronAPI } from '../types/electron';
+
+const electronAPI: ElectronAPI = {
+  checkDependencies: () => ipcRenderer.invoke('check-dependencies'),
+  getNTFSDevices: () => ipcRenderer.invoke('get-ntfs-devices'),
+  mountDevice: (device) => ipcRenderer.invoke('mount-device', device),
+  unmountDevice: (device) => ipcRenderer.invoke('unmount-device', device),
+  installDependencies: () => ipcRenderer.invoke('install-dependencies'),
+  requestSudoPassword: () => ipcRenderer.invoke('request-sudo-password'),
+  onDeviceUpdate: (callback) => {
+    ipcRenderer.on('device-update', (event, data) => callback(data));
+  },
+  openLogsWindow: () => ipcRenderer.invoke('open-logs-window'),
+  closeLogsWindow: () => ipcRenderer.invoke('close-logs-window'),
+  openModuleWindow: (moduleName: string) => ipcRenderer.invoke('open-module-window', moduleName),
+  closeModuleWindow: () => ipcRenderer.invoke('close-module-window'),
+  readMarkdown: (filename: string) => ipcRenderer.invoke('read-markdown', filename),
+  openAboutWindow: () => ipcRenderer.invoke('open-about-window'),
+  openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
+  broadcastThemeChange: (isLightMode: boolean) => ipcRenderer.invoke('broadcast-theme-change', isLightMode),
+  onThemeChange: (callback: (isLightMode: boolean) => void) => {
+    ipcRenderer.on('theme-changed', (event, isLightMode: boolean) => callback(isLightMode));
+  }
+};
+
+contextBridge.exposeInMainWorld('electronAPI', electronAPI);

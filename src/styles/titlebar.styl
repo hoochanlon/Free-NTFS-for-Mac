@@ -1,0 +1,75 @@
+// macOS 风格标题栏样式
+@import 'variables'
+
+.titlebar
+  background var(--bg-secondary)
+  border-bottom 1px solid var(--border)
+  padding 0
+  -webkit-app-region drag
+  display flex
+  align-items center
+  height 44px
+  position relative
+  transition background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+  backdrop-filter blur(20px) saturate(180%)
+  -webkit-backdrop-filter blur(20px) saturate(180%)
+
+.titlebar-traffic-lights
+  width 78px
+  height 100%
+  -webkit-app-region no-drag
+  flex-shrink 0
+
+.titlebar-content
+  flex 1
+  display flex
+  justify-content space-between
+  align-items center
+  padding 0 20px
+  height 100%
+
+.app-title
+  font-size 13px
+  font-weight 600
+  color var(--text-primary)
+  margin 0
+  letter-spacing -0.01em
+  transition color 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+
+.status-indicator
+  display flex
+  align-items center
+  gap 8px
+  -webkit-app-region no-drag
+
+.status-dot
+  width 6px
+  height 6px
+  border-radius 50%
+  background var(--text-secondary)
+  animation pulse 2s infinite
+  transition background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+
+  &.active
+    background var(--success)
+
+  &.error
+    background var(--error)
+
+@keyframes pulse
+  0%, 100%
+    opacity 1
+  50%
+    opacity 0.6
+
+.status-text
+  font-size 11px
+  color var(--text-secondary)
+  font-weight 500
+  letter-spacing 0.01em
+  transition color 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+
+.titlebar-right
+  display flex
+  align-items center
+  gap 12px

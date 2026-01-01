@@ -1,0 +1,206 @@
+// macOS 风格标签页样式
+@import 'variables'
+
+.tabs-container
+  background var(--bg-secondary)
+  border-bottom 1px solid var(--border)
+  display flex
+  gap 0
+  padding 0
+  overflow-x auto
+  -webkit-app-region no-drag
+  position relative
+
+  // 滚动条样式
+  &::-webkit-scrollbar
+    height 2px
+
+  &::-webkit-scrollbar-track
+    background transparent
+
+  &::-webkit-scrollbar-thumb
+    background var(--border)
+    border-radius 1px
+
+    &:hover
+      background var(--accent)
+
+.tab
+  padding 10px 20px
+  background transparent
+  border none
+  border-bottom 2px solid transparent
+  cursor pointer
+  color var(--text-secondary)
+  font-size 13px
+  font-weight 500
+  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+  white-space nowrap
+  display flex
+  align-items center
+  gap 8px
+  position relative
+  min-height 44px
+  user-select none
+  letter-spacing -0.01em
+
+  // 图标样式
+  .tab-icon
+    width 18px
+    height 18px
+    opacity 0.6
+    transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+    flex-shrink 0
+
+  // 悬停效果
+  &:hover
+    background var(--bg-tertiary)
+    color var(--text-primary)
+
+    .tab-icon
+      opacity 0.8
+
+  // 激活状态
+  &.active
+    background transparent
+    color var(--text-primary)
+    border-bottom-color var(--accent)
+    font-weight 600
+
+    .tab-icon
+      opacity 1
+
+  // 点击时的反馈
+  &:active
+    transform scale(0.98)
+
+// 标签页内容区域
+.tab-content
+  flex 1
+  overflow-y auto
+  display none
+  padding 0
+  animation fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+
+  &.active
+    display block
+
+// 淡入动画
+@keyframes fadeIn
+  from
+    opacity 0
+    transform translateY(4px)
+  to
+    opacity 1
+    transform translateY(0)
+
+// macOS 风格帮助内容样式（文档风格）
+.help-content
+  max-width 800px
+  margin 0 auto
+  padding 0 32px 32px 32px
+  font-size 14px
+  line-height 1.7
+  color var(--text-primary)
+
+  h1
+    font-size 24px
+    font-weight 700
+    color var(--text-primary)
+    margin-bottom 8px
+    margin-top 0
+    letter-spacing -0.02em
+
+  // 第一个元素的顶部间距 - 与系统依赖标签页保持一致
+  // 系统依赖标签页：section 的 padding 是 24px，所以第一个元素距离标签页底部是 32px + 24px = 56px
+  // 但用户反馈间距太高，调整为更小的值
+  > *:first-child
+    margin-top 0
+    padding-top 0
+
+  h2
+    font-size 20px
+    font-weight 600
+    color var(--text-primary)
+    margin-top 32px
+    margin-bottom 16px
+    padding-bottom 8px
+    border-bottom 1px solid var(--border)
+    letter-spacing -0.01em
+
+  h3
+    font-size 17px
+    font-weight 600
+    color var(--text-primary)
+    margin-top 24px
+    margin-bottom 12px
+    letter-spacing -0.01em
+
+  p
+    color var(--text-primary)
+    line-height 1.7
+    margin-bottom 16px
+    font-size 14px
+
+  ul, ol
+    color var(--text-primary)
+    line-height 1.8
+    margin-left 24px
+    margin-bottom 20px
+    font-size 14px
+
+  li
+    margin-bottom 8px
+    position relative
+
+  code
+    background var(--bg-tertiary)
+    padding 2px 6px
+    border-radius 4px
+    font-family 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace
+    font-size 13px
+    color var(--text-primary)
+    border 1px solid var(--border)
+    display inline-block
+
+  // 代码块样式
+  pre
+    background var(--bg-tertiary)
+    border 1px solid var(--border)
+    border-radius 8px
+    padding 16px
+    overflow-x auto
+    margin 16px 0
+
+    code
+      background transparent
+      padding 0
+      border none
+      color var(--text-primary)
+
+  blockquote
+    margin 20px 0
+    padding 12px 16px
+    background var(--bg-tertiary)
+    border-left 3px solid var(--accent)
+    border-radius 4px
+    color var(--text-secondary)
+    font-style normal
+
+    p
+      margin 0
+      color var(--text-secondary)
+
+// 浅色模式下的调整
+body.light-theme
+  .help-content
+    code
+      background var(--light-bg-tertiary)
+      border-color var(--light-border)
+
+    pre
+      background var(--light-bg-tertiary)
+      border-color var(--light-border)
+
+    blockquote
+      background var(--light-bg-tertiary)
