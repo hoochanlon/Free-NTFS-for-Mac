@@ -32,7 +32,8 @@
   },
   "dependencies": {
     "marked": "^17.0.1",
-    "node-pty": "^1.0.0"
+    "node-pty": "^1.0.0",
+    "pnpm": "^10.27.0"
   },
   "build": {
     "appId": "com.freentfs.mac",
