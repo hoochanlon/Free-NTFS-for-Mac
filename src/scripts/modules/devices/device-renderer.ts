@@ -21,9 +21,26 @@
 
   // 设备渲染功能
   AppModules.Devices.Renderer = {
+    // 上次渲染的设备列表（用于比较）
+    lastRenderedDevices: [] as any[],
+
     // 渲染设备列表
     renderDevices(devicesList: HTMLElement, readWriteDevicesList: HTMLElement): void {
-      if (AppModules.Devices.devices.length === 0) {
+      const devices = AppModules.Devices.devices || [];
+
+      // 生成设备标识字符串用于比较
+      const currentDeviceKey = devices.map((d: any) => `${d.disk}:${d.isReadOnly}:${d.isUnmounted || false}`).join('|');
+      const lastDeviceKey = AppModules.Devices.Renderer.lastRenderedDevices.map((d: any) => `${d.disk}:${d.isReadOnly}:${d.isUnmounted || false}`).join('|');
+
+      // 如果设备列表没有变化，跳过重新渲染
+      if (currentDeviceKey === lastDeviceKey && devices.length > 0) {
+        return;
+      }
+
+      // 更新上次渲染的设备列表
+      AppModules.Devices.Renderer.lastRenderedDevices = devices.map((d: any) => ({ ...d }));
+
+      if (devices.length === 0) {
         devicesList.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon"></div>
@@ -37,7 +54,6 @@
       devicesList.innerHTML = '';
 
       // 按状态分组：先显示只读设备，再显示读写设备
-      const devices = AppModules.Devices.devices || [];
       const readOnlyDevices = devices.filter((device: any) => device.isReadOnly);
       const readWriteDevices = devices.filter((device: any) => !device.isReadOnly);
 
