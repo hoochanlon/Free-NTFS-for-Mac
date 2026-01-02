@@ -84,40 +84,24 @@
               <span class="dep-status">-</span>
             </div>
           </div>
-          <div class="install-section" id="installSection">
-            <button class="btn btn-primary" id="installDepsBtn">安装缺失依赖</button>
-            <div class="install-log" id="installLog"></div>
-          </div>
         </div>
       </div>
 
       <!-- NTFS 设备标签页 -->
       <div class="tab-content" id="devicesTab">
-        <div class="devices-layout">
-          <div class="devices-column">
-            <div class="section-header">
-              <h2>NTFS 设备</h2>
+        <div class="devices-container">
+          <div class="section-header">
+            <h2>NTFS 设备</h2>
+            <div class="header-actions">
+              <button class="btn btn-danger" id="unmountAllBtn">卸载所有NTFS设备</button>
               <button class="btn btn-secondary" id="refreshBtn">刷新</button>
             </div>
-            <div class="devices-list" id="devicesList">
-              <div class="empty-state">
-                <div class="empty-icon"></div>
-                <p>未检测到 NTFS 设备</p>
-                <p class="empty-hint">请插入 NTFS 格式的移动存储设备</p>
-              </div>
-            </div>
           </div>
-          <div class="devices-column">
-            <div class="section-header">
-              <h2>已可读写的设备</h2>
-              <button class="btn btn-danger" id="unmountAllBtn">卸载所有NTFS设备</button>
-            </div>
-            <div class="read-write-devices-list" id="readWriteDevicesList">
-              <div class="empty-state">
-                <div class="empty-icon"></div>
-                <p>暂无已可读写的设备</p>
-                <p class="empty-hint">已挂载为读写模式的设备将显示在这里</p>
-              </div>
+          <div class="devices-list" id="devicesList">
+            <div class="empty-state">
+              <div class="empty-icon"></div>
+              <p>未检测到 NTFS 设备</p>
+              <p class="empty-hint">请插入 NTFS 格式的移动存储设备</p>
             </div>
           </div>
         </div>

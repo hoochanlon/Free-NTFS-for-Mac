@@ -44,15 +44,16 @@ export function setupNTFSHandlers(): void {
     }
   });
 
-  ipcMain.handle('install-dependencies', async () => {
-    try {
-      const result = await ntfsManager.installDependencies();
-      return { success: true, result };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      return { success: false, error: errorMessage };
-    }
-  });
+  // 已移除自动安装功能，改为仅检测和提供安装指引
+  // ipcMain.handle('install-dependencies', async () => {
+  //   try {
+  //     const result = await ntfsManager.installDependencies();
+  //     return { success: true, result };
+  //   } catch (error) {
+  //     const errorMessage = error instanceof Error ? error.message : String(error);
+  //     return { success: false, error: errorMessage };
+  //   }
+  // });
 
   ipcMain.handle('request-sudo-password', async () => {
     return new Promise<void>((resolve) => {

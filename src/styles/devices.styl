@@ -1,15 +1,15 @@
 // macOS 风格 NTFS 设备标签页样式
 @import 'variables'
 
-// 设备布局容器（左右两栏）- 统一滚动容器
-.devices-layout
+// 设备容器（统一布局）
+.devices-container
   display flex
-  gap 0
+  flex-direction column
   flex 1
   min-height 0
+  padding 24px
   overflow-y auto
   overflow-x hidden
-  align-items flex-start
 
   // 滚动条样式
   &::-webkit-scrollbar
@@ -25,33 +25,32 @@
     &:hover
       background var(--accent)
 
-// 设备列（左右两栏）
-.devices-column
-  flex 1
-  display flex
-  flex-direction column
-  padding 16px
-  overflow visible
-  position relative
-  min-width 0
-
-  // 右侧栏添加左边框作为分隔
-  &:last-child
-    border-left 1px solid var(--border)
-
   // 标题区域
   .section-header
-    margin-bottom 12px
+    display flex
+    justify-content space-between
+    align-items center
+    margin-bottom 20px
     flex-shrink 0
 
+    h2
+      font-size 17px
+      font-weight 600
+      color var(--text-primary)
+      letter-spacing -0.01em
+      margin 0
+
+    .header-actions
+      display flex
+      gap 8px
+      align-items center
+
 // 设备列表容器
-.devices-list,
-.read-write-devices-list
+.devices-list
   display flex
   flex-direction column
   gap 8px
   flex-shrink 0
-  min-height 100%
 
 // 设备项样式（macOS 风格）
 .device-item
@@ -260,15 +259,14 @@
     color var(--text-secondary)
     margin-top 6px
 
-// 已可读写设备列表的特殊样式
-.read-write-devices-list
-  .device-item
-    border-color var(--success)
-    background rgba(52, 199, 89, 0.05)
+// 已可读写设备列表的特殊样式（现在整合到统一列表中）
+.device-item.read-write-device
+  border-color var(--success)
+  background rgba(52, 199, 89, 0.05)
 
-    &:hover
-      background rgba(52, 199, 89, 0.08)
-      border-color var(--success)
+  &:hover
+    background rgba(52, 199, 89, 0.08)
+    border-color var(--success)
 
 // 浅色模式调整
 body.light-theme

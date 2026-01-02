@@ -5,7 +5,7 @@
 .deps-list
   display flex
   flex-direction column
-  gap 10px
+  gap 6px
 
   // 隐藏滚动条（如果内容溢出）
   &::-webkit-scrollbar
@@ -63,6 +63,16 @@
   gap 10px
   flex 1
   letter-spacing -0.01em
+  cursor pointer
+  user-select none
+
+  .dep-expand-icon
+    font-size 10px
+    color var(--text-secondary)
+    transition transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+    flex-shrink 0
+    width 14px
+    text-align center
 
 .dep-number
   display inline-flex
@@ -134,17 +144,131 @@
       background-position center
       filter brightness(0) saturate(100%) invert(50%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(100%) contrast(90%)
 
-// 安装区域
-.install-section
-  margin-top 20px
-  padding-top 20px
-  border-top 1px solid var(--border)
-  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
-  display none
-  animation slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+// 安装指引卡片（折叠在依赖项下方）
+.install-guide-card
+  background var(--bg-secondary)
+  border 1px solid var(--border)
+  border-radius 8px
+  padding 16px
+  margin-top 4px
+  margin-left 30px
+  max-height 0
+  overflow hidden
+  opacity 0
+  transition max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1)
 
-  &.visible
+  &:not(.collapsed)
+    max-height 1000px
+    opacity 1
+    margin-top 4px
+    margin-bottom 4px
+
+    &:hover
+      background var(--bg-tertiary)
+      border-color var(--border)
+      box-shadow 0 1px 3px var(--shadow)
+
+.guide-header
+  display flex
+  justify-content space-between
+  align-items center
+  margin-bottom 12px
+
+  h3
+    font-size 15px
+    font-weight 600
+    color var(--text-primary)
+    margin 0
+    letter-spacing -0.01em
+
+  .guide-status
+    padding 4px 10px
+    border-radius 5px
+    font-size 11px
+    font-weight 500
+
+    &.missing
+      background rgba(255, 59, 48, 0.15)
+      color var(--error)
+      border 1px solid rgba(255, 59, 48, 0.3)
+
+    &.installed
+      background rgba(52, 199, 89, 0.15)
+      color var(--success)
+      border 1px solid rgba(52, 199, 89, 0.3)
+
+.guide-description
+  font-size 13px
+  color var(--text-secondary)
+  line-height 1.6
+  margin-bottom 16px
+
+.guide-command
+  margin-bottom 16px
+
+  label
     display block
+    font-size 12px
+    font-weight 500
+    color var(--text-secondary)
+    margin-bottom 8px
+
+  .command-box
+    display flex
+    align-items center
+    gap 8px
+    padding 12px
+    background var(--bg-tertiary)
+    border 1px solid var(--border)
+    border-radius 6px
+    transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+
+    &:hover
+      border-color var(--accent)
+
+    .command-text
+      flex 1
+      font-family 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace
+      font-size 12px
+      color var(--text-primary)
+      word-break break-all
+      margin 0
+
+    .btn-copy
+      flex-shrink 0
+      width 32px
+      height 32px
+      display flex
+      align-items center
+      justify-content center
+      background transparent
+      border 1px solid var(--border)
+      border-radius 5px
+      cursor pointer
+      transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+      color var(--text-secondary)
+
+      &:hover
+        background var(--bg-secondary)
+        border-color var(--accent)
+        color var(--accent)
+
+      &:active
+        transform scale(0.95)
+
+      svg
+        width 16px
+        height 16px
+
+.guide-instructions
+  font-size 12px
+  color var(--text-secondary)
+  line-height 1.6
+  margin 0
+  padding 12px
+  background var(--bg-tertiary)
+  border-radius 6px
+  border-left 3px solid var(--accent)
 
 @keyframes slideDown
   from
@@ -153,71 +277,6 @@
   to
     opacity 1
     transform translateY(0)
-
-// 安装按钮
-#installDepsBtn
-  width 100%
-  padding 10px 20px
-  font-size 13px
-  font-weight 500
-  border-radius 6px
-  position relative
-  overflow hidden
-  letter-spacing -0.01em
-
-  // 加载动画
-  &::after
-    content ''
-    position absolute
-    top 50%
-    left 50%
-    width 18px
-    height 18px
-    margin -9px 0 0 -9px
-    border 2px solid rgba(255, 255, 255, 0.3)
-    border-top-color #fff
-    border-radius 50%
-    animation spin 0.8s linear infinite
-    opacity 0
-    transition opacity 0.2s
-
-  &:disabled
-    &::after
-      opacity 1
-
-@keyframes spin
-  to
-    transform rotate(360deg)
-
-// 安装日志
-.install-log
-  margin-top 14px
-  padding 14px
-  background var(--bg-tertiary)
-  border 1px solid var(--border)
-  border-radius 8px
-  font-family 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace
-  font-size 12px
-  line-height 1.6
-  color var(--text-secondary)
-  max-height 280px
-  overflow-y auto
-  white-space pre-wrap
-  word-break break-word
-
-  // 滚动条样式
-  &::-webkit-scrollbar
-    width 6px
-
-  &::-webkit-scrollbar-track
-    background var(--bg-secondary)
-
-  &::-webkit-scrollbar-thumb
-    background var(--border)
-    border-radius 3px
-
-    &:hover
-      background var(--accent)
 
 // 空状态
 .deps-empty
@@ -240,5 +299,12 @@ body.light-theme
     &:hover
       box-shadow 0 1px 2px var(--light-shadow)
 
-  .install-log
+  .install-guide-card
+    &:hover
+      box-shadow 0 1px 2px var(--light-shadow)
+
+  .command-box
+    background var(--light-bg-tertiary)
+
+  .guide-instructions
     background var(--light-bg-tertiary)

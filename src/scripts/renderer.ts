@@ -31,11 +31,9 @@
   const statusDot = statusIndicator.querySelector('.status-dot') as HTMLElement;
   const depsList = document.getElementById('depsList')!;
   const checkDepsBtn = document.getElementById('checkDepsBtn') as HTMLButtonElement;
-  const installSection = document.getElementById('installSection') as HTMLElement;
-  const installDepsBtn = document.getElementById('installDepsBtn') as HTMLButtonElement;
-  const installLog = document.getElementById('installLog') as HTMLElement;
   const devicesList = document.getElementById('devicesList')!;
-  const readWriteDevicesList = document.getElementById('readWriteDevicesList')!;
+  // readWriteDevicesList 已整合到 devicesList 中，保留变量以兼容现有代码
+  const readWriteDevicesList = devicesList;
   const refreshBtn = document.getElementById('refreshBtn') as HTMLButtonElement;
   const unmountAllBtn = document.getElementById('unmountAllBtn') as HTMLButtonElement;
   const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
@@ -73,7 +71,6 @@
     // 初始化功能模块
     AppModules.Dependencies.checkDependencies(
       depsList,
-      installSection,
       loadingOverlay,
       statusDot,
       statusText
@@ -94,19 +91,6 @@
     // 事件监听
     checkDepsBtn.addEventListener('click', () => {
       AppModules.Dependencies.checkDependencies(
-        depsList,
-        installSection,
-        loadingOverlay,
-        statusDot,
-        statusText
-      );
-    });
-
-    installDepsBtn.addEventListener('click', () => {
-      AppModules.Dependencies.installDependencies(
-        installDepsBtn,
-        installLog,
-        installSection,
         depsList,
         loadingOverlay,
         statusDot,

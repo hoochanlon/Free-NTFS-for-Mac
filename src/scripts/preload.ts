@@ -6,7 +6,8 @@ const electronAPI: ElectronAPI = {
   getNTFSDevices: () => ipcRenderer.invoke('get-ntfs-devices'),
   mountDevice: (device) => ipcRenderer.invoke('mount-device', device),
   unmountDevice: (device) => ipcRenderer.invoke('unmount-device', device),
-  installDependencies: () => ipcRenderer.invoke('install-dependencies'),
+  // 已移除自动安装功能
+  // installDependencies: () => ipcRenderer.invoke('install-dependencies'),
   requestSudoPassword: () => ipcRenderer.invoke('request-sudo-password'),
   onDeviceUpdate: (callback) => {
     ipcRenderer.on('device-update', (event, data) => callback(data));

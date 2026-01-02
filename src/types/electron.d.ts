@@ -9,7 +9,8 @@ export interface ElectronAPI {
   getNTFSDevices: () => Promise<NTFSDevice[]>;
   mountDevice: (device: NTFSDevice) => Promise<OperationResult>;
   unmountDevice: (device: NTFSDevice) => Promise<OperationResult>;
-  installDependencies: () => Promise<OperationResult>;
+  // 已移除自动安装功能
+  // installDependencies: () => Promise<OperationResult>;
   requestSudoPassword: () => Promise<void>;
   onDeviceUpdate: (callback: (data: any) => void) => void;
   openLogsWindow: () => Promise<void>;

@@ -107,38 +107,38 @@
     });
   }
 
-  // 安装依赖
-  async function installDependencies(): Promise<void> {
-    if (!confirm('这将安装缺失的系统依赖，可能需要较长时间。是否继续？')) {
-      return;
-    }
+  // 已移除自动安装功能，改为仅检测和提供安装指引
+  // async function installDependencies(): Promise<void> {
+  //   if (!confirm('这将安装缺失的系统依赖，可能需要较长时间。是否继续？')) {
+  //     return;
+  //   }
 
-    try {
-      showLoading(true);
-      installDepsBtn.disabled = true;
-      installLog.textContent = '开始安装依赖...\n';
-      addLog('开始安装系统依赖...', 'info');
+  //   try {
+  //     showLoading(true);
+  //     installDepsBtn.disabled = true;
+  //     installLog.textContent = '开始安装依赖...\n';
+  //     addLog('开始安装系统依赖...', 'info');
 
-      const result = await electronAPI.installDependencies();
-      if (result.success && result.result) {
-        installLog.textContent += result.result;
-        addLog('依赖安装完成，请重新检查依赖状态', 'success');
+  //     const result = await electronAPI.installDependencies();
+  //     if (result.success && result.result) {
+  //       installLog.textContent += result.result;
+  //       addLog('依赖安装完成，请重新检查依赖状态', 'success');
 
-        setTimeout(() => {
-          checkDependencies();
-        }, 3000);
-      } else {
-        throw new Error(result.error || '安装失败');
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      installLog.textContent += `\n错误: ${errorMessage}`;
-      addLog(`安装依赖失败: ${errorMessage}`, 'error');
-    } finally {
-      showLoading(false);
-      installDepsBtn.disabled = false;
-    }
-  }
+  //       setTimeout(() => {
+  //         checkDependencies();
+  //       }, 3000);
+  //     } else {
+  //       throw new Error(result.error || '安装失败');
+  //     }
+  //   } catch (error) {
+  //     const errorMessage = error instanceof Error ? error.message : String(error);
+  //     installLog.textContent += `\n错误: ${errorMessage}`;
+  //     addLog(`安装依赖失败: ${errorMessage}`, 'error');
+  //   } finally {
+  //     showLoading(false);
+  //     installDepsBtn.disabled = false;
+  //   }
+  // }
 
   // 关闭窗口
   async function closeWindow(): Promise<void> {
@@ -156,7 +156,8 @@
   // 初始化
   document.addEventListener('DOMContentLoaded', () => {
     checkDepsBtn.addEventListener('click', checkDependencies);
-    installDepsBtn.addEventListener('click', installDependencies);
+    // 已移除自动安装功能
+    // installDepsBtn.addEventListener('click', installDependencies);
     closeBtn.addEventListener('click', closeWindow);
 
     // 自动检查一次

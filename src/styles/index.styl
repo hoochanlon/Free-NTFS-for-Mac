@@ -96,6 +96,15 @@
       display flex
       flex-direction column
 
+  // 系统依赖标签页需要滚动
+  &#dependenciesTab
+    &.active
+      overflow-y auto
+      overflow-x hidden
+      display flex
+      flex-direction column
+      gap 20px
+
   // 帮助说明标签页需要滚动
   &#helpTab
     overflow-y auto

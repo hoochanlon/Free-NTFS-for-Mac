@@ -92,54 +92,82 @@
             <p class="empty-hint">请插入 NTFS 格式的移动存储设备</p>
           </div>
         `;
-        AppModules.Devices.renderReadWriteDevices(readWriteDevicesList);
         return;
       }
 
       devicesList.innerHTML = '';
 
-      AppModules.Devices.devices.forEach((device: any) => {
-        const item = document.createElement('div');
-        item.className = 'device-item';
+      // 按状态分组：先显示只读设备，再显示读写设备
+      const readOnlyDevices = AppModules.Devices.devices.filter((device: any) => device.isReadOnly);
+      const readWriteDevices = AppModules.Devices.devices.filter((device: any) => !device.isReadOnly);
 
-        const statusClass = device.isReadOnly ? 'read-only' : 'read-write';
-        const statusText = device.isReadOnly ? '只读' : '读写';
+      // 渲染只读设备
+      if (readOnlyDevices.length > 0) {
+        readOnlyDevices.forEach((device: any) => {
+          const item = AppModules.Devices.createDeviceItem(device);
+          devicesList.appendChild(item);
+        });
+      }
 
-        item.innerHTML = `
-          <div class="device-header">
-            <div class="device-name">
-              <span class="device-icon"></span>
-              ${device.volumeName}
-            </div>
-            <span class="device-status ${statusClass}">${statusText}</span>
-          </div>
-          <div class="device-info">
-            <div class="device-info-item">
-              <span class="device-info-label">设备:</span>
-              <span>${device.devicePath}</span>
-            </div>
-            <div class="device-info-item">
-              <span class="device-info-label">挂载点:</span>
-              <span>${device.volume}</span>
-            </div>
-          </div>
-          <div class="device-actions">
-            ${device.isReadOnly ? `
-              <button class="btn btn-success mount-btn" data-disk="${device.disk}">
-                挂载为读写
-              </button>
-            ` : `
-              <button class="btn btn-danger unmount-btn" data-disk="${device.disk}">
-                卸载
-              </button>
-            `}
-          </div>
-        `;
-
-        devicesList.appendChild(item);
-      });
+      // 渲染读写设备
+      if (readWriteDevices.length > 0) {
+        readWriteDevices.forEach((device: any) => {
+          const item = AppModules.Devices.createDeviceItem(device);
+          devicesList.appendChild(item);
+        });
+      }
 
       // 绑定按钮事件
+      AppModules.Devices.bindDeviceEvents(devicesList, readWriteDevicesList);
+    },
+
+    // 创建设备项
+    createDeviceItem(device: any): HTMLElement {
+      const item = document.createElement('div');
+      item.className = 'device-item';
+      if (!device.isReadOnly) {
+        item.classList.add('read-write-device');
+      }
+
+      const statusClass = device.isReadOnly ? 'read-only' : 'read-write';
+      const statusText = device.isReadOnly ? '只读' : '读写';
+
+      item.innerHTML = `
+        <div class="device-header">
+          <div class="device-name">
+            <span class="device-icon"></span>
+            ${device.volumeName}
+          </div>
+          <span class="device-status ${statusClass}">${statusText}</span>
+        </div>
+        <div class="device-info">
+          <div class="device-info-item">
+            <span class="device-info-label">设备:</span>
+            <span>${device.devicePath}</span>
+          </div>
+          <div class="device-info-item">
+            <span class="device-info-label">挂载点:</span>
+            <span>${device.volume}</span>
+          </div>
+        </div>
+        <div class="device-actions">
+          ${device.isReadOnly ? `
+            <button class="btn btn-success mount-btn" data-disk="${device.disk}">
+              挂载为读写
+            </button>
+          ` : `
+            <button class="btn btn-danger unmount-btn" data-disk="${device.disk}">
+              卸载
+            </button>
+          `}
+        </div>
+      `;
+
+      return item;
+    },
+
+    // 绑定设备事件
+    bindDeviceEvents(devicesList: HTMLElement, readWriteDevicesList: HTMLElement): void {
       devicesList.querySelectorAll('.mount-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const disk = (btn as HTMLElement).dataset.disk;
@@ -175,79 +203,8 @@
           }
         });
       });
-
-      // 渲染已可读写的设备列表
-      AppModules.Devices.renderReadWriteDevices(readWriteDevicesList);
     },
 
-    // 渲染已可读写的设备列表
-    renderReadWriteDevices(readWriteDevicesList: HTMLElement): void {
-      const readWriteDevices = AppModules.Devices.devices.filter(
-        (device: any) => !device.isReadOnly
-      );
-
-      if (readWriteDevices.length === 0) {
-        readWriteDevicesList.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon"></div>
-            <p>暂无已可读写的设备</p>
-            <p class="empty-hint">已挂载为读写模式的设备将显示在这里</p>
-          </div>
-        `;
-        return;
-      }
-
-      readWriteDevicesList.innerHTML = '';
-
-      readWriteDevices.forEach((device: any) => {
-        const item = document.createElement('div');
-        item.className = 'device-item read-write-device';
-
-        item.innerHTML = `
-          <div class="device-header">
-            <div class="device-name">
-              <span class="device-icon"></span>
-              ${device.volumeName}
-            </div>
-            <span class="device-status read-write">读写</span>
-          </div>
-          <div class="device-info">
-            <div class="device-info-item">
-              <span class="device-info-label">设备:</span>
-              <span>${device.devicePath}</span>
-            </div>
-            <div class="device-info-item">
-              <span class="device-info-label">挂载点:</span>
-              <span>${device.volume}</span>
-            </div>
-          </div>
-          <div class="device-actions">
-            <button class="btn btn-danger unmount-btn" data-disk="${device.disk}">
-              卸载
-            </button>
-          </div>
-        `;
-
-        readWriteDevicesList.appendChild(item);
-      });
-
-      // 绑定卸载按钮事件
-      readWriteDevicesList.querySelectorAll('.unmount-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const disk = (btn as HTMLElement).dataset.disk;
-          const device = AppModules.Devices.devices.find((d: any) => d.disk === disk);
-          if (device) {
-            AppModules.Devices.unmountDevice(
-              device,
-              document.getElementById('devicesList')!,
-              readWriteDevicesList,
-              document.querySelector('.status-dot') as HTMLElement,
-              document.querySelector('.status-text') as HTMLElement
-            );
-          }
-        });
-      });
-    },
 
     // 挂载设备
     async mountDevice(

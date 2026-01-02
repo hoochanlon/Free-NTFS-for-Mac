@@ -1,6 +1,6 @@
 // NTFS Manager 主文件 - 整合各个模块
 import { PathFinder } from './ntfs-manager/path-finder';
-import { checkDependencies, installDependencies } from './ntfs-manager/dependencies';
+import { checkDependencies } from './ntfs-manager/dependencies';
 import { fileExists, execAsync, ExecResult } from './ntfs-manager/utils';
 import { spawn } from 'child_process';
 import * as fs from 'fs/promises';
@@ -21,13 +21,13 @@ class NTFSManager {
     return await checkDependencies();
   }
 
-  // 安装依赖
-  async installDependencies(): Promise<string> {
-    const result = await installDependencies();
-    // 重新获取路径
-    this.pathFinder.reset();
-    return result;
-  }
+  // 已移除自动安装功能，改为仅检测和提供安装指引
+  // async installDependencies(): Promise<string> {
+  //   const result = await installDependencies();
+  //   // 重新获取路径
+  //   this.pathFinder.reset();
+  //   return result;
+  // }
 
   // 获取 ntfs-3g 路径
   async getNTFS3GPath(): Promise<string | null> {
