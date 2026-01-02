@@ -1,0 +1,157 @@
+// 设备检测模块
+import { execAsync, fileExists } from './utils';
+import type { NTFSDevice } from '../../types/electron';
+
+export class DeviceDetector {
+  private mountedDevices: Set<string>;
+  private unmountedDevices: Map<string, NTFSDevice>;
+
+  constructor(
+    mountedDevices: Set<string>,
+    unmountedDevices: Map<string, NTFSDevice>
+  ) {
+    this.mountedDevices = mountedDevices;
+    this.unmountedDevices = unmountedDevices;
+  }
+
+  // 获取 NTFS 设备列表
+  async getNTFSDevices(): Promise<NTFSDevice[]> {
+    try {
+      let stdout = '';
+      try {
+        // 同时检查 ntfs 和 ntfs-3g 的挂载信息（ntfs-3g 使用 FUSE）
+        const result = await execAsync('mount | grep -iE "(ntfs|fuse)"') as { stdout: string };
+        stdout = result.stdout || '';
+      } catch (error: any) {
+        if (error.code === 1) {
+          stdout = error.stdout || '';
+          if (!stdout) {
+            return [];
+          }
+        } else {
+          return [];
+        }
+      }
+
+      const lines = stdout.trim().split('\n').filter(line => line.length > 0 && (line.toLowerCase().includes('ntfs') || line.toLowerCase().includes('fuse')));
+
+      const devices: NTFSDevice[] = [];
+      for (const line of lines) {
+        const parts = line.split(' on ');
+        if (parts.length !== 2) continue;
+
+        const devicePath = parts[0].trim();
+        const rest = parts[1].trim();
+
+        const volumeMatch = rest.match(/^(\/Volumes\/[^\s(]+)/);
+        const optionsMatch = rest.match(/\(([^)]+)\)/);
+
+        if (!volumeMatch) continue;
+
+        const volume = volumeMatch[1].trim();
+        const volumeName = volume.replace('/Volumes/', '');
+        const disk = devicePath.replace('/dev/', '');
+        const options = optionsMatch ? optionsMatch[1] : '';
+        const isReadOnly = options.includes('read-only');
+
+        // 检查是否通过 ntfs-3g (FUSE) 挂载
+        // ntfs-3g 挂载的设备会在 mount 输出中包含 fuse 或特定的挂载选项
+        // 系统默认的 ntfs 挂载会包含 fskit，不是 FUSE
+        const isFuseMounted = line.toLowerCase().includes('fuse') ||
+                              line.toLowerCase().includes('ntfs-3g') ||
+                              (options.includes('local') && options.includes('allow_other'));
+
+        const markerFile = `/tmp/ntfs_mounted_${disk}`;
+        let markerExists = false;
+        try {
+          markerExists = await fileExists(markerFile);
+        } catch {
+          markerExists = false;
+        }
+
+        // 如果标记文件存在但设备不是通过 FUSE 挂载，说明设备被系统重新挂载为只读模式
+        // 需要清理标记文件，避免误判
+        if (markerExists && !isFuseMounted) {
+          try {
+            const fs = await import('fs/promises');
+            await fs.unlink(markerFile);
+            this.mountedDevices.delete(disk);
+            markerExists = false;
+          } catch {
+            // 忽略清理失败
+          }
+        }
+
+        // 如果标记文件存在且设备通过 FUSE 挂载，将设备添加到 mountedDevices Set 中
+        if (markerExists && isFuseMounted) {
+          this.mountedDevices.add(disk);
+        }
+
+        // 判断设备是否已通过 ntfs-3g 挂载为读写模式
+        // 必须同时满足：
+        // 1. 标记文件存在（说明之前通过本应用挂载过）
+        // 2. 当前通过 FUSE 挂载（说明确实是 ntfs-3g 挂载）
+        const isInMountedSet = this.mountedDevices.has(disk);
+        const deviceIsMounted = (isInMountedSet || markerExists) && isFuseMounted;
+
+        // 如果设备已通过 ntfs-3g 挂载为读写模式，强制设置 isReadOnly 为 false
+        // 否则，使用 mount 命令检测到的实际状态
+        const finalIsReadOnly = deviceIsMounted ? false : isReadOnly;
+
+        devices.push({
+          disk,
+          devicePath,
+          volume,
+          volumeName,
+          isReadOnly: finalIsReadOnly,
+          options,
+          isMounted: deviceIsMounted
+        });
+
+        // 如果设备已挂载，从已卸载设备列表中移除
+        this.unmountedDevices.delete(disk);
+      }
+
+      // 检查已卸载的设备是否仍然存在
+      for (const [disk, unmountedDevice] of this.unmountedDevices.entries()) {
+        // 检查设备是否已经在当前列表中（可能已经重新挂载）
+        const alreadyInList = devices.some(d => d.disk === disk);
+        if (alreadyInList) {
+          // 设备已重新挂载，从已卸载列表中移除
+          this.unmountedDevices.delete(disk);
+          continue;
+        }
+
+        try {
+          // 检查设备是否仍然存在（通过 diskutil 检查）
+          const result = await execAsync(`diskutil info ${unmountedDevice.devicePath} 2>/dev/null`) as { stdout: string };
+          if (result.stdout && result.stdout.includes('File System Personality:')) {
+            // 尝试从 diskutil 输出中获取卷名
+            const volumeNameMatch = result.stdout.match(/Volume Name:\s*(.+)/i);
+            const volumeName = volumeNameMatch ? volumeNameMatch[1].trim() : unmountedDevice.volumeName;
+
+            // 设备仍然存在，添加到列表中，标记为已卸载
+            devices.push({
+              ...unmountedDevice,
+              volumeName,
+              isUnmounted: true,
+              isReadOnly: true, // 已卸载的设备默认显示为只读
+              isMounted: false
+            });
+          } else {
+            // 设备不存在，从已卸载列表中移除
+            this.unmountedDevices.delete(disk);
+          }
+        } catch {
+          // 设备不存在或无法访问，从已卸载列表中移除
+          this.unmountedDevices.delete(disk);
+        }
+      }
+
+      return devices;
+    } catch (error) {
+      console.error('获取 NTFS 设备列表失败:', error);
+      return [];
+    }
+  }
+}

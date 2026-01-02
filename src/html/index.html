@@ -93,6 +93,7 @@
           <div class="section-header">
             <h2>NTFS 设备</h2>
             <div class="header-actions">
+              <button class="btn btn-warning" id="restoreAllReadOnlyBtn">还原所有设备为只读</button>
               <button class="btn btn-danger" id="unmountAllBtn">卸载所有NTFS设备</button>
               <button class="btn btn-secondary" id="refreshBtn">刷新</button>
             </div>
@@ -177,6 +178,10 @@
   <script src="../../scripts/utils/ui.js"></script>
   <!-- 功能模块 -->
   <script src="../../scripts/modules/dependencies.js"></script>
+  <!-- 设备管理子模块 -->
+  <script src="../../scripts/modules/devices/device-renderer.js"></script>
+  <script src="../../scripts/modules/devices/device-operations.js"></script>
+  <script src="../../scripts/modules/devices/device-events.js"></script>
   <script src="../../scripts/modules/devices.js"></script>
   <script src="../../scripts/modules/tabs.js"></script>
   <script src="../../scripts/modules/about.js"></script>

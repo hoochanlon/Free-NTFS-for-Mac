@@ -87,6 +87,10 @@
   &.read-write::before
     background var(--success)
 
+  // 已卸载设备
+  &.unmounted-device::before
+    background var(--text-secondary)
+
 // 设备头部
 .device-header
   display flex
@@ -157,6 +161,12 @@
       background-repeat no-repeat
       background-position center
       filter brightness(0) saturate(100%) invert(60%) sepia(90%) saturate(400%) hue-rotate(120deg) brightness(95%) contrast(90%)
+
+  // 已卸载状态
+  &.unmounted
+    background rgba(142, 142, 147, 0.15)
+    color var(--text-secondary)
+    border 1px solid rgba(142, 142, 147, 0.3)
 
 // 设备信息
 .device-info

@@ -9,6 +9,7 @@ export interface ElectronAPI {
   getNTFSDevices: () => Promise<NTFSDevice[]>;
   mountDevice: (device: NTFSDevice) => Promise<OperationResult>;
   unmountDevice: (device: NTFSDevice) => Promise<OperationResult>;
+  restoreToReadOnly: (device: NTFSDevice) => Promise<OperationResult>;
   // 已移除自动安装功能
   // installDependencies: () => Promise<OperationResult>;
   requestSudoPassword: () => Promise<void>;
@@ -44,6 +45,7 @@ export interface NTFSDevice {
   isReadOnly: boolean;
   options: string;
   isMounted: boolean;
+  isUnmounted?: boolean; // 标记设备是否已卸载但仍在系统中
 }
 
 export interface OperationResult {
