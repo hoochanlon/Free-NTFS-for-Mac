@@ -91,10 +91,16 @@
   &#devicesTab
     display none
     padding 0
+    overflow hidden
+    flex 1
+    min-height 0
 
     &.active
       display flex
       flex-direction column
+      overflow hidden
+      flex 1
+      min-height 0
 
   // 系统依赖标签页需要滚动
   &#dependenciesTab
@@ -119,6 +125,19 @@
       display flex
       flex-direction column
       height 100%
+
+  // 设置标签页需要滚动
+  &#settingsTab
+    &.active
+      overflow-y auto
+      overflow-x hidden
+      display flex
+      flex-direction column
+
+    .section
+      display flex
+      flex-direction column
+      min-height 100%
 
 // 淡入动画
 @keyframes fadeIn
@@ -273,8 +292,10 @@ body.light-theme
 
 .setting-control
   display flex
-  align-items center
+  align-items flex-start
   gap 12px
+  flex-shrink 0
+  margin-top 2px
 
   #deletePasswordBtn
     color #E83C3C
@@ -306,6 +327,8 @@ body.light-theme
   cursor pointer
   min-width 160px
   transition all 0.2s ease
+  align-self flex-start
+  margin-top 0
 
   &:hover
     border-color var(--accent)

@@ -10,6 +10,7 @@
   }
 
   const AppModules = (window as any).AppModules;
+  const AppUtils = (window as any).AppUtils;
   const electronAPI = (window as any).electronAPI;
 
   // 设置管理
@@ -19,6 +20,9 @@
       const savePasswordCheckbox = document.getElementById('savePasswordCheckbox') as HTMLInputElement;
       const deletePasswordBtn = document.getElementById('deletePasswordBtn') as HTMLButtonElement;
       const startupTabSelect = document.getElementById('startupTabSelect') as HTMLSelectElement;
+      const enableLogsCheckbox = document.getElementById('enableLogsCheckbox') as HTMLInputElement;
+      const resetLogsDailyCheckbox = document.getElementById('resetLogsDailyCheckbox') as HTMLInputElement;
+      const languageSelect = document.getElementById('languageSelect') as HTMLSelectElement;
 
       if (!savePasswordCheckbox || !deletePasswordBtn || !startupTabSelect) {
         return;
@@ -29,6 +33,15 @@
         const settings = await electronAPI.getSettings();
         savePasswordCheckbox.checked = settings.savePassword;
         startupTabSelect.value = settings.startupTab;
+        if (enableLogsCheckbox) {
+          enableLogsCheckbox.checked = settings.enableLogs !== false; // 默认启用
+        }
+        if (resetLogsDailyCheckbox) {
+          resetLogsDailyCheckbox.checked = settings.resetLogsDaily || false;
+        }
+        if (languageSelect) {
+          languageSelect.value = settings.language || 'zh-CN';
+        }
 
         // 检查是否有保存的密码
         const hasPassword = await electronAPI.hasSavedPassword();
@@ -76,6 +89,46 @@
             console.error('保存设置失败:', error);
           }
         });
+
+        // 启用日志复选框变化
+        if (enableLogsCheckbox) {
+          enableLogsCheckbox.addEventListener('change', async () => {
+            try {
+              await electronAPI.saveSettings({ enableLogs: enableLogsCheckbox.checked });
+            } catch (error) {
+              console.error('保存设置失败:', error);
+              enableLogsCheckbox.checked = !enableLogsCheckbox.checked;
+            }
+          });
+        }
+
+        // 每天重置日志复选框变化
+        if (resetLogsDailyCheckbox) {
+          resetLogsDailyCheckbox.addEventListener('change', async () => {
+            try {
+              await electronAPI.saveSettings({ resetLogsDaily: resetLogsDailyCheckbox.checked });
+            } catch (error) {
+              console.error('保存设置失败:', error);
+              resetLogsDailyCheckbox.checked = !resetLogsDailyCheckbox.checked;
+            }
+          });
+        }
+
+        // 语言选择变化
+        if (languageSelect) {
+          languageSelect.addEventListener('change', async () => {
+            try {
+              const newLanguage = languageSelect.value as 'zh-CN' | 'ja' | 'en';
+              await electronAPI.saveSettings({ language: newLanguage });
+              // 切换语言
+              if (AppUtils && AppUtils.I18n) {
+                await AppUtils.I18n.setLanguage(newLanguage);
+              }
+            } catch (error) {
+              console.error('保存设置失败:', error);
+            }
+          });
+        }
       } catch (error) {
         console.error('加载设置失败:', error);
       }

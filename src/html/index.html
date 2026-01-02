@@ -93,8 +93,9 @@
           <div class="section-header">
             <h2>NTFS 设备</h2>
             <div class="header-actions">
+              <button class="btn btn-primary" id="mountAllBtn">配置所有设备可读写</button>
               <button class="btn btn-warning" id="restoreAllReadOnlyBtn">还原所有设备为只读</button>
-              <button class="btn btn-info" id="unmountAllBtn">卸载所有NTFS设备</button>
+              <button class="btn btn-info" id="unmountAllBtn">卸载所有设备</button>
               <button class="btn btn-danger" id="ejectAllBtn">推出所有设备</button>
             </div>
           </div>
@@ -113,7 +114,10 @@
         <div class="section">
           <div class="section-header">
             <h2>操作日志</h2>
-            <button class="btn btn-text" id="clearLogBtn">清空</button>
+            <div class="header-actions">
+              <button class="btn btn-secondary" id="exportLogBtn">导出</button>
+              <button class="btn btn-text" id="clearLogBtn">清空</button>
+            </div>
           </div>
           <div class="log-container" id="logContainer">
             <div class="log-empty">暂无日志</div>
@@ -159,6 +163,37 @@
                 </select>
               </div>
             </div>
+            <div class="setting-item">
+              <div class="setting-label">
+                <label for="enableLogsCheckbox">启用操作日志</label>
+                <p class="setting-description">启用后，应用会记录所有操作日志。关闭后，将不再记录新的日志，但已记录的日志仍会保留。默认最长保存30天</p>
+              </div>
+              <div class="setting-control">
+                <input type="checkbox" id="enableLogsCheckbox" class="setting-checkbox">
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-label">
+                <label for="resetLogsDailyCheckbox">每天自动重置日志</label>
+                <p class="setting-description">启用后，应用会在每天首次启动时自动清空前一天的日志</p>
+              </div>
+              <div class="setting-control">
+                <input type="checkbox" id="resetLogsDailyCheckbox" class="setting-checkbox">
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-label">
+                <label for="languageSelect">语言</label>
+                <p class="setting-description">选择应用界面语言</p>
+              </div>
+              <div class="setting-control">
+                <select id="languageSelect" class="setting-select">
+                  <option value="zh-CN">简体中文</option>
+                  <option value="ja">日本語</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -172,6 +207,8 @@
   </div>
 
   <!-- 工具模块 -->
+  <script src="../../scripts/utils/i18n.js"></script>
+  <script src="../../scripts/utils/i18n-init.js"></script>
   <script src="../../scripts/utils/logs.js"></script>
   <script src="../../scripts/utils/theme.js"></script>
   <script src="../../scripts/utils/markdown.js"></script>

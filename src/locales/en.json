@@ -1,0 +1,115 @@
+{
+  "app": {
+    "title": "Free NTFS for Mac",
+    "about": "About"
+  },
+  "tabs": {
+    "dependencies": "System Dependencies",
+    "devices": "NTFS Devices",
+    "logs": "Operation Logs",
+    "help": "Help",
+    "settings": "Settings"
+  },
+  "status": {
+    "checking": "Checking...",
+    "ready": "Ready"
+  },
+  "dependencies": {
+    "title": "System Dependencies",
+    "checkButton": "Check Dependencies",
+    "checking": "Checking...",
+    "installed": "Installed",
+    "missing": "Not Installed",
+    "installGuide": "Installation Guide",
+    "installGuideIntro": "To install or reinstall dependencies, please follow the instructions below to install manually in the terminal:",
+    "copyCommand": "Copy Command"
+  },
+  "devices": {
+    "title": "NTFS Devices",
+    "emptyState": "No NTFS devices detected",
+    "emptyHint": "Please insert an NTFS formatted removable storage device",
+    "mountAll": "Configure All Devices as Read-Write",
+    "restoreAllReadOnly": "Restore All Devices to Read-Only",
+    "unmountAll": "Unmount All Devices",
+    "ejectAll": "Eject All Devices",
+    "mount": "Configure as Read-Write",
+    "remount": "Reconfigure as Read-Write",
+    "unmount": "Unmount",
+    "eject": "Eject",
+    "restoreReadOnly": "Restore to Read-Only",
+    "readOnly": "Read-Only",
+    "readWrite": "Read-Write",
+    "unmounted": "Unmounted",
+    "mountConfirm": "Are you sure you want to configure {name} as read-write mode?",
+    "mountConfirmNote": "Note:\n• This requires administrator privileges, and the system will prompt for a password\n• If the device uses Fast Startup in Windows, you may need to fully shut down the device in Windows first",
+    "unmountConfirm": "Are you sure you want to unmount {name}?",
+    "ejectConfirm": "Are you sure you want to eject {name}?",
+    "ejectConfirmNote": "Note:\n• After ejecting, the device will be completely disconnected from the system\n• The device will be removed from the list and needs to be reinserted to use\n• Please ensure no programs are using the device",
+    "restoreConfirm": "Are you sure you want to restore {name} to read-only mode?",
+    "restoreConfirmNote": "Note: This requires administrator privileges, and the system will prompt for a password"
+  },
+  "logs": {
+    "title": "Operation Logs",
+    "empty": "No logs",
+    "clear": "Clear",
+    "export": "Export",
+    "exportSuccess": "Logs exported successfully",
+    "exportError": "Export failed",
+    "noLogsToExport": "No logs to export"
+  },
+  "help": {
+    "title": "Help"
+  },
+  "settings": {
+    "title": "Application Settings",
+    "savePassword": "Save Administrator Password",
+    "savePasswordDesc": "When enabled, the app will securely save your administrator password using macOS Keychain for automatic input",
+    "deletePassword": "Delete Saved Password",
+    "startupTab": "Tab to Open on Startup",
+    "startupTabDesc": "Select the default tab to display when the app starts",
+    "enableLogs": "Enable Operation Logs",
+    "enableLogsDesc": "When enabled, the app will record all operation logs. When disabled, new logs will not be recorded, but previously recorded logs will still be retained. Logs are saved for a maximum of 30 days by default",
+    "resetLogsDaily": "Automatically Reset Logs Daily",
+    "resetLogsDailyDesc": "When enabled, the app will automatically clear the previous day's logs on the first launch each day",
+    "exportLogs": "Export Operation Logs",
+    "exportLogsDesc": "Export all operation logs as a text file",
+    "language": "Language",
+    "languageDesc": "Select the application interface language",
+    "languages": {
+      "zh-CN": "简体中文",
+      "ja": "日本語",
+      "en": "English"
+    }
+  },
+  "messages": {
+    "mounting": "Mounting {name}...",
+    "mountSuccess": "Mount successful",
+    "mountError": "Mount failed",
+    "unmounting": "Unmounting {name}...",
+    "unmountSuccess": "Unmount successful",
+    "unmountError": "Unmount failed",
+    "ejecting": "Ejecting {name}...",
+    "ejectSuccess": "Eject successful",
+    "ejectError": "Eject failed",
+    "restoring": "Restoring {name} to read-only mode...",
+    "restoreSuccess": "Restore successful",
+    "restoreError": "Restore failed",
+    "passwordError": "Password incorrect, please try again",
+    "cancelled": "Operation cancelled",
+    "enterPassword": "Tip: Please enter the administrator password in the dialog that appears",
+    "noDevicesToMount": "No devices to configure (all devices are already configured as read-write)",
+    "noDevicesToUnmount": "No devices mounted in read-write mode",
+    "mountAllStart": "Starting to configure {count} devices as read-write mode...",
+    "mountAllSuccess": "Successfully configured {count} devices as read-write mode",
+    "mountAllError": "{count} devices failed",
+    "unmountAllStart": "Starting to unmount {count} devices...",
+    "unmountAllSuccess": "Successfully unmounted {count} devices",
+    "unmountAllError": "{count} devices failed",
+    "ejectAllStart": "Starting to eject {count} devices...",
+    "ejectAllSuccess": "Successfully ejected {count} devices",
+    "ejectAllError": "{count} devices failed",
+    "restoreAllStart": "Starting to restore {count} devices to read-only mode...",
+    "restoreAllSuccess": "Successfully restored {count} devices to read-only mode",
+    "restoreAllError": "{count} devices failed"
+  }
+}

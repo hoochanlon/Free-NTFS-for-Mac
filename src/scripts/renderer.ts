@@ -70,6 +70,11 @@
     }
 
     // 初始化功能模块
+    // 检查并执行每天重置日志，并清理过期日志
+    AppUtils.Logs.checkAndResetDaily();
+    // 清理超过一个月的日志（getLogs 内部会自动清理）
+    AppUtils.Logs.getLogs();
+
     AppModules.Dependencies.checkDependencies(
       depsList,
       loadingOverlay,
@@ -98,6 +103,13 @@
         statusText
       );
     });
+
+    const mountAllBtn = document.getElementById('mountAllBtn') as HTMLButtonElement;
+    if (mountAllBtn) {
+      mountAllBtn.addEventListener('click', () => {
+        AppModules.Devices.mountAllDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+      });
+    }
 
     if (restoreAllReadOnlyBtn) {
       restoreAllReadOnlyBtn.addEventListener('click', () => {
@@ -128,6 +140,13 @@
     clearLogBtn.addEventListener('click', () => {
       AppUtils.Logs.clearLog(logContainer);
     });
+
+    const exportLogBtn = document.getElementById('exportLogBtn') as HTMLButtonElement;
+    if (exportLogBtn) {
+      exportLogBtn.addEventListener('click', () => {
+        AppUtils.Logs.exportLogs();
+      });
+    }
 
     if (themeToggleButton) {
       themeToggleButton.addEventListener('click', () => {

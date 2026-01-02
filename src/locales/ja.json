@@ -1,0 +1,115 @@
+{
+  "app": {
+    "title": "Free NTFS for Mac",
+    "about": "について"
+  },
+  "tabs": {
+    "dependencies": "システム依存",
+    "devices": "NTFS デバイス",
+    "logs": "操作ログ",
+    "help": "ヘルプ",
+    "settings": "設定"
+  },
+  "status": {
+    "checking": "チェック中...",
+    "ready": "準備完了"
+  },
+  "dependencies": {
+    "title": "システム依存",
+    "checkButton": "依存関係を確認",
+    "checking": "チェック中...",
+    "installed": "インストール済み",
+    "missing": "未インストール",
+    "installGuide": "インストールガイド",
+    "installGuideIntro": "依存関係をインストールまたは再インストールする場合は、以下のガイドに従ってターミナルで手動でインストールしてください：",
+    "copyCommand": "コマンドをコピー"
+  },
+  "devices": {
+    "title": "NTFS デバイス",
+    "emptyState": "NTFS デバイスが検出されませんでした",
+    "emptyHint": "NTFS 形式の移動ストレージデバイスを接続してください",
+    "mountAll": "すべてのデバイスを読み書き可能に設定",
+    "restoreAllReadOnly": "すべてのデバイスを読み取り専用に戻す",
+    "unmountAll": "すべてのデバイスをアンマウント",
+    "ejectAll": "すべてのデバイスをイジェクト",
+    "mount": "読み書き可能に設定",
+    "remount": "再度読み書き可能に設定",
+    "unmount": "アンマウント",
+    "eject": "イジェクト",
+    "restoreReadOnly": "読み取り専用に戻す",
+    "readOnly": "読み取り専用",
+    "readWrite": "読み書き可能",
+    "unmounted": "アンマウント済み",
+    "mountConfirm": "{name} を読み書き可能モードに設定しますか？",
+    "mountConfirmNote": "注意：\n• これには管理者権限が必要で、システムがパスワード入力ダイアログを表示します\n• デバイスが Windows で高速スタートアップを使用している場合、先に Windows でデバイスを完全にシャットダウンする必要がある場合があります",
+    "unmountConfirm": "{name} をアンマウントしますか？",
+    "ejectConfirm": "{name} をイジェクトしますか？",
+    "ejectConfirmNote": "注意：\n• イジェクト後、デバイスはシステムから完全に切断されます\n• デバイスはリストから削除され、再度接続する必要があります\n• デバイスを使用しているプログラムがないことを確認してください",
+    "restoreConfirm": "{name} を読み取り専用モードに戻しますか？",
+    "restoreConfirmNote": "注意：これには管理者権限が必要で、システムがパスワード入力ダイアログを表示します"
+  },
+  "logs": {
+    "title": "操作ログ",
+    "empty": "ログがありません",
+    "clear": "クリア",
+    "export": "エクスポート",
+    "exportSuccess": "ログをエクスポートしました",
+    "exportError": "エクスポートに失敗しました",
+    "noLogsToExport": "エクスポートするログがありません"
+  },
+  "help": {
+    "title": "ヘルプ"
+  },
+  "settings": {
+    "title": "アプリケーション設定",
+    "savePassword": "管理者パスワードを保存",
+    "savePasswordDesc": "有効にすると、アプリは macOS Keychain を使用して管理者パスワードを安全に保存し、自動入力できるようにします",
+    "deletePassword": "保存されたパスワードを削除",
+    "startupTab": "起動時に開くタブ",
+    "startupTabDesc": "アプリ起動時にデフォルトで表示されるタブを選択します",
+    "enableLogs": "操作ログを有効化",
+    "enableLogsDesc": "有効にすると、アプリはすべての操作ログを記録します。無効にすると、新しいログは記録されませんが、既に記録されたログは保持されます。デフォルトで最大30日間保存されます",
+    "resetLogsDaily": "毎日自動的にログをリセット",
+    "resetLogsDailyDesc": "有効にすると、アプリは毎日初回起動時に前日のログを自動的にクリアします",
+    "exportLogs": "操作ログをエクスポート",
+    "exportLogsDesc": "すべての操作ログをテキストファイルとしてエクスポートします",
+    "language": "言語",
+    "languageDesc": "アプリケーションのインターフェース言語を選択します",
+    "languages": {
+      "zh-CN": "简体中文",
+      "ja": "日本語",
+      "en": "English"
+    }
+  },
+  "messages": {
+    "mounting": "{name} をマウント中...",
+    "mountSuccess": "マウント成功",
+    "mountError": "マウント失敗",
+    "unmounting": "{name} をアンマウント中...",
+    "unmountSuccess": "アンマウント成功",
+    "unmountError": "アンマウント失敗",
+    "ejecting": "{name} をイジェクト中...",
+    "ejectSuccess": "イジェクト成功",
+    "ejectError": "イジェクト失敗",
+    "restoring": "{name} を読み取り専用モードに戻す中...",
+    "restoreSuccess": "復元成功",
+    "restoreError": "復元失敗",
+    "passwordError": "パスワードが間違っています。再試行してください",
+    "cancelled": "操作がキャンセルされました",
+    "enterPassword": "ヒント：表示されたダイアログで管理者パスワードを入力してください",
+    "noDevicesToMount": "設定するデバイスがありません（すべてのデバイスが読み書き可能に設定されています）",
+    "noDevicesToUnmount": "読み書き可能モードでマウントされているデバイスがありません",
+    "mountAllStart": "{count} 個のデバイスを読み書き可能モードに設定開始...",
+    "mountAllSuccess": "{count} 個のデバイスを読み書き可能モードに設定成功",
+    "mountAllError": "{count} 個のデバイスが失敗",
+    "unmountAllStart": "{count} 個のデバイスをアンマウント開始...",
+    "unmountAllSuccess": "{count} 個のデバイスをアンマウント成功",
+    "unmountAllError": "{count} 個のデバイスが失敗",
+    "ejectAllStart": "{count} 個のデバイスをイジェクト開始...",
+    "ejectAllSuccess": "{count} 個のデバイスをイジェクト成功",
+    "ejectAllError": "{count} 個のデバイスが失敗",
+    "restoreAllStart": "{count} 個のデバイスを読み取り専用モードに戻す開始...",
+    "restoreAllSuccess": "{count} 個のデバイスを読み取り専用モードに戻す成功",
+    "restoreAllError": "{count} 個のデバイスが失敗"
+  }
+}

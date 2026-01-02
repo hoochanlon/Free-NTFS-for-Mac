@@ -11,12 +11,18 @@ function getSettingsPath(): string {
 // 默认设置
 const DEFAULT_SETTINGS = {
   savePassword: false,
-  startupTab: 'dependencies' as 'dependencies' | 'devices' | 'logs' | 'help'
+  startupTab: 'dependencies' as 'dependencies' | 'devices' | 'logs' | 'help',
+  enableLogs: true,
+  resetLogsDaily: false,
+  language: 'zh-CN' as 'zh-CN' | 'ja' | 'en'
 };
 
 export interface AppSettings {
   savePassword: boolean;
   startupTab: 'dependencies' | 'devices' | 'logs' | 'help';
+  enableLogs: boolean;
+  resetLogsDaily: boolean;
+  language: 'zh-CN' | 'ja' | 'en';
 }
 
 /**

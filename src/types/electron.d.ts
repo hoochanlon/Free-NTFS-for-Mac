@@ -2,6 +2,9 @@
 export interface AppSettings {
   savePassword: boolean;
   startupTab: 'dependencies' | 'devices' | 'logs' | 'help';
+  enableLogs: boolean;
+  resetLogsDaily: boolean;
+  language: 'zh-CN' | 'ja' | 'en';
 }
 
 export interface ElectronAPI {
@@ -28,6 +31,7 @@ export interface ElectronAPI {
   saveSettings: (settings: Partial<AppSettings>) => Promise<{ success: boolean }>;
   hasSavedPassword: () => Promise<boolean>;
   deleteSavedPassword: () => Promise<{ success: boolean }>;
+  exportLogs: (content: string) => Promise<{ success: boolean; path?: string; error?: string }>;
 }
 
 export interface Dependencies {

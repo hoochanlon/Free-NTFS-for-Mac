@@ -64,6 +64,37 @@ export function setupNTFSHandlers(): void {
     }
   });
 
+  ipcMain.handle('export-logs', async (event, content: string) => {
+    try {
+      const { dialog } = require('electron');
+      const fs = require('fs').promises;
+      const path = require('path');
+      const { app } = require('electron');
+
+      const result = await dialog.showSaveDialog({
+        title: '导出操作日志',
+        defaultPath: path.join(
+          app.getPath('documents'),
+          `操作日志_${new Date().toISOString().split('T')[0]}.txt`
+        ),
+        filters: [
+          { name: '文本文件', extensions: ['txt'] },
+          { name: '所有文件', extensions: ['*'] }
+        ]
+      });
+
+      if (result.canceled) {
+        return { success: false, error: '用户取消' };
+      }
+
+      await fs.writeFile(result.filePath, content, 'utf-8');
+      return { success: true, path: result.filePath };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { success: false, error: errorMessage };
+    }
+  });
+
   // 已移除自动安装功能，改为仅检测和提供安装指引
   // ipcMain.handle('install-dependencies', async () => {
   //   try {

@@ -28,7 +28,8 @@ const electronAPI: ElectronAPI = {
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings: Partial<import('../types/electron').AppSettings>) => ipcRenderer.invoke('save-settings', settings),
   hasSavedPassword: () => ipcRenderer.invoke('has-saved-password'),
-  deleteSavedPassword: () => ipcRenderer.invoke('delete-saved-password')
+  deleteSavedPassword: () => ipcRenderer.invoke('delete-saved-password'),
+  exportLogs: (content: string) => ipcRenderer.invoke('export-logs', content)
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

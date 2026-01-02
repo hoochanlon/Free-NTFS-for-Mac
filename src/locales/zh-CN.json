@@ -1,0 +1,115 @@
+{
+  "app": {
+    "title": "Free NTFS for Mac",
+    "about": "关于"
+  },
+  "tabs": {
+    "dependencies": "系统依赖",
+    "devices": "NTFS 设备",
+    "logs": "操作日志",
+    "help": "帮助说明",
+    "settings": "设置"
+  },
+  "status": {
+    "checking": "正在检查...",
+    "ready": "就绪"
+  },
+  "dependencies": {
+    "title": "系统依赖",
+    "checkButton": "检查依赖",
+    "checking": "正在检查...",
+    "installed": "已安装",
+    "missing": "未安装",
+    "installGuide": "安装指引",
+    "installGuideIntro": "如需安装或重新安装依赖，请按照以下指引在终端中手动安装：",
+    "copyCommand": "复制命令"
+  },
+  "devices": {
+    "title": "NTFS 设备",
+    "emptyState": "未检测到 NTFS 设备",
+    "emptyHint": "请插入 NTFS 格式的移动存储设备",
+    "mountAll": "配置所有设备可读写",
+    "restoreAllReadOnly": "还原所有设备为只读",
+    "unmountAll": "卸载所有设备",
+    "ejectAll": "推出所有设备",
+    "mount": "配置为可读写",
+    "remount": "重新配置为可读写",
+    "unmount": "卸载",
+    "eject": "推出",
+    "restoreReadOnly": "还原为只读",
+    "readOnly": "只读",
+    "readWrite": "可读写",
+    "unmounted": "已卸载",
+    "mountConfirm": "确定要将 {name} 配置为可读写模式吗？",
+    "mountConfirmNote": "注意：\n• 这需要管理员权限，系统会弹出密码输入对话框\n• 如果设备在 Windows 中使用了快速启动，可能需要先在 Windows 中完全关闭设备",
+    "unmountConfirm": "确定要卸载 {name} 吗？",
+    "ejectConfirm": "确定要推出 {name} 吗？",
+    "ejectConfirmNote": "注意：\n• 推出后设备将从系统中完全断开\n• 设备将从列表中移除，需要重新插入才能使用\n• 请确保没有程序正在使用该设备",
+    "restoreConfirm": "确定要将 {name} 还原为只读模式吗？",
+    "restoreConfirmNote": "注意：这需要管理员权限，系统会弹出密码输入对话框"
+  },
+  "logs": {
+    "title": "操作日志",
+    "empty": "暂无日志",
+    "clear": "清空",
+    "export": "导出",
+    "exportSuccess": "日志已导出",
+    "exportError": "导出失败",
+    "noLogsToExport": "没有日志可导出"
+  },
+  "help": {
+    "title": "帮助说明"
+  },
+  "settings": {
+    "title": "应用设置",
+    "savePassword": "保存管理员密码",
+    "savePasswordDesc": "启用后，应用将使用 macOS Keychain 安全保存您的管理员密码，以便自动输入",
+    "deletePassword": "删除保存的密码",
+    "startupTab": "启动时打开的标签页",
+    "startupTabDesc": "选择应用启动时默认显示的标签页",
+    "enableLogs": "启用操作日志",
+    "enableLogsDesc": "启用后，应用会记录所有操作日志。关闭后，将不再记录新的日志，但已记录的日志仍会保留。默认最长保存30天",
+    "resetLogsDaily": "每天自动重置日志",
+    "resetLogsDailyDesc": "启用后，应用会在每天首次启动时自动清空前一天的日志",
+    "exportLogs": "导出操作日志",
+    "exportLogsDesc": "将所有操作日志导出为文本文件",
+    "language": "语言",
+    "languageDesc": "选择应用界面语言",
+    "languages": {
+      "zh-CN": "简体中文",
+      "ja": "日本語",
+      "en": "English"
+    }
+  },
+  "messages": {
+    "mounting": "正在挂载 {name}...",
+    "mountSuccess": "挂载成功",
+    "mountError": "挂载失败",
+    "unmounting": "正在卸载 {name}...",
+    "unmountSuccess": "卸载成功",
+    "unmountError": "卸载失败",
+    "ejecting": "正在推出 {name}...",
+    "ejectSuccess": "推出成功",
+    "ejectError": "推出失败",
+    "restoring": "正在还原 {name} 为只读模式...",
+    "restoreSuccess": "还原成功",
+    "restoreError": "还原失败",
+    "passwordError": "密码错误，请重试",
+    "cancelled": "已取消操作",
+    "enterPassword": "提示：请在弹出的对话框中输入管理员密码",
+    "noDevicesToMount": "没有需要配置的设备（所有设备已配置为可读写）",
+    "noDevicesToUnmount": "没有已挂载为读写模式的设备",
+    "mountAllStart": "开始配置 {count} 个设备为可读写模式...",
+    "mountAllSuccess": "成功配置 {count} 个设备为可读写模式",
+    "mountAllError": "失败 {count} 个设备",
+    "unmountAllStart": "开始卸载 {count} 个设备...",
+    "unmountAllSuccess": "成功卸载 {count} 个设备",
+    "unmountAllError": "失败 {count} 个设备",
+    "ejectAllStart": "开始推出 {count} 个设备...",
+    "ejectAllSuccess": "成功推出 {count} 个设备",
+    "ejectAllError": "失败 {count} 个设备",
+    "restoreAllStart": "开始还原 {count} 个设备为只读模式...",
+    "restoreAllSuccess": "成功还原 {count} 个设备为只读模式",
+    "restoreAllError": "失败 {count} 个设备"
+  }
+}

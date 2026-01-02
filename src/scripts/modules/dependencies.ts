@@ -76,15 +76,15 @@
 
         if (allInstalled) {
           AppUtils.UI.updateStatus('active', '系统就绪', statusDot, statusText);
-          AppUtils.Logs.addLog('所有依赖已安装', 'success');
+          await AppUtils.Logs.addLog('所有依赖已安装', 'success');
         } else {
           AppUtils.UI.updateStatus('error', '缺少依赖', statusDot, statusText);
-          AppUtils.Logs.addLog('检测到缺失的依赖，请查看下方安装指引', 'warning');
+          await AppUtils.Logs.addLog('检测到缺失的依赖，请查看下方安装指引', 'warning');
         }
       } catch (error) {
         AppUtils.UI.updateStatus('error', '检查失败', statusDot, statusText);
         const errorMessage = error instanceof Error ? error.message : String(error);
-        AppUtils.Logs.addLog(`检查依赖失败: ${errorMessage}`, 'error');
+        await AppUtils.Logs.addLog(`检查依赖失败: ${errorMessage}`, 'error');
         console.error('检查依赖错误:', error);
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);

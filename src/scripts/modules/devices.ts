@@ -81,7 +81,7 @@
         if (AppModules.Devices.devices.length === 0) {
           AppUtils.UI.updateStatus('active', '等待设备', statusDot, statusText);
           if (stateChanged) {
-            AppUtils.Logs.addLog('未检测到 NTFS 设备', 'info');
+            await AppUtils.Logs.addLog('未检测到 NTFS 设备', 'info');
           }
         } else {
           const readWriteCount = AppModules.Devices.devices.length - readOnlyCount;
@@ -90,12 +90,12 @@
             AppUtils.UI.updateStatus('error', `${readOnlyCount} 个设备只读`, statusDot, statusText);
             if (stateChanged) {
               if (readWriteCount > 0) {
-                AppUtils.Logs.addLog(
+                await AppUtils.Logs.addLog(
                   `检测到 ${AppModules.Devices.devices.length} 个设备（${readOnlyCount} 个只读，${readWriteCount} 个读写）`,
                   'info'
                 );
               } else {
-                AppUtils.Logs.addLog(
+                await AppUtils.Logs.addLog(
                   `检测到 ${AppModules.Devices.devices.length} 个 NTFS 设备（全部只读）`,
                   'warning'
                 );
@@ -104,7 +104,7 @@
           } else {
             AppUtils.UI.updateStatus('active', `${AppModules.Devices.devices.length} 个设备就绪`, statusDot, statusText);
             if (stateChanged) {
-              AppUtils.Logs.addLog(
+              await AppUtils.Logs.addLog(
                 `检测到 ${AppModules.Devices.devices.length} 个 NTFS 设备（全部可读写）`,
                 'success'
               );
@@ -117,7 +117,7 @@
       } catch (error) {
         AppUtils.UI.updateStatus('error', '检测失败', statusDot, statusText);
         const errorMessage = error instanceof Error ? error.message : String(error);
-        AppUtils.Logs.addLog(`刷新设备列表失败: ${errorMessage}`, 'error');
+        await AppUtils.Logs.addLog(`刷新设备列表失败: ${errorMessage}`, 'error');
       }
     },
 
@@ -127,6 +127,7 @@
     mountDevice: Operations.mountDevice,
     unmountDevice: Operations.unmountDevice,
     restoreToReadOnly: Operations.restoreToReadOnly,
+    mountAllDevices: Operations.mountAllDevices,
     restoreAllToReadOnly: Operations.restoreAllToReadOnly,
     unmountAllDevices: Operations.unmountAllDevices,
     ejectDevice: Operations.ejectDevice,

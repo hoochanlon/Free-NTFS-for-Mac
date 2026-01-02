@@ -13,6 +13,14 @@
   const electronAPI = (window as any).electronAPI;
   const AppUtils = (window as any).AppUtils;
 
+  // 获取翻译文本的辅助函数
+  function t(key: string, params?: Record<string, string | number>): string {
+    if (AppUtils && AppUtils.I18n) {
+      return AppUtils.I18n.t(key, params);
+    }
+    return key; // 如果 i18n 未初始化，返回 key
+  }
+
   // 初始化命名空间
   if (!AppModules.Devices) {
     AppModules.Devices = {};
@@ -31,10 +39,8 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
-      const message = `确定要将 ${device.volumeName} 配置为可读写模式吗？\n\n` +
-                      `注意：\n` +
-                      `• 这需要管理员权限，系统会弹出密码输入对话框\n` +
-                      `• 如果设备在 Windows 中使用了快速启动，可能需要先在 Windows 中完全关闭设备`;
+      const message = t('devices.mountConfirm', { name: device.volumeName }) + '\n\n' +
+                      t('devices.mountConfirmNote');
 
       if (!confirm(message)) {
         return;
@@ -44,29 +50,29 @@
 
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
-        AppUtils.Logs.addLog(`正在挂载 ${device.volumeName}...`, 'info');
-        AppUtils.Logs.addLog('提示：请在弹出的对话框中输入管理员密码', 'info');
+        await await AppUtils.Logs.addLog(t('messages.mounting', { name: device.volumeName }), 'info');
+        await await AppUtils.Logs.addLog(t('messages.enterPassword'), 'info');
 
         const result = await electronAPI.mountDevice(device);
 
         if (result.success) {
           if (result.result) {
-            AppUtils.Logs.addLog(result.result, 'success');
+            await await AppUtils.Logs.addLog(result.result, 'success');
           }
           // 等待一小段时间，确保挂载操作完全完成，标记文件已创建
           await new Promise(resolve => setTimeout(resolve, 500));
           await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
         } else {
-          AppUtils.Logs.addLog(`挂载失败: ${result.error || '未知错误'}`, 'error');
-          if (result.error?.includes('密码错误')) {
-            AppUtils.Logs.addLog('提示：密码错误，请重试', 'warning');
-          } else if (result.error?.includes('用户取消')) {
-            AppUtils.Logs.addLog('提示：已取消操作', 'info');
+          await await AppUtils.Logs.addLog(`${t('messages.mountError')}: ${result.error || t('messages.mountError')}`, 'error');
+          if (result.error?.includes('密码错误') || result.error?.includes('password')) {
+            await await AppUtils.Logs.addLog(t('messages.passwordError'), 'warning');
+          } else if (result.error?.includes('用户取消') || result.error?.includes('cancelled')) {
+            await await AppUtils.Logs.addLog(t('messages.cancelled'), 'info');
           }
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        AppUtils.Logs.addLog(`挂载失败: ${errorMessage}`, 'error');
+        await await AppUtils.Logs.addLog(`${t('messages.mountError')}: ${errorMessage}`, 'error');
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
       }
@@ -80,8 +86,8 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
-      const message = `确定要将 ${device.volumeName} 还原为只读模式吗？\n\n` +
-                      `注意：这需要管理员权限，系统会弹出密码输入对话框`;
+      const message = t('devices.restoreConfirm', { name: device.volumeName }) + '\n\n' +
+                      t('devices.restoreConfirmNote');
 
       if (!confirm(message)) {
         return;
@@ -91,29 +97,29 @@
 
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
-        AppUtils.Logs.addLog(`正在还原 ${device.volumeName} 为只读模式...`, 'info');
-        AppUtils.Logs.addLog('提示：请在弹出的对话框中输入管理员密码', 'info');
+        await AppUtils.Logs.addLog(t('messages.restoring', { name: device.volumeName }), 'info');
+        await AppUtils.Logs.addLog(t('messages.enterPassword'), 'info');
 
         const result = await electronAPI.restoreToReadOnly(device);
 
         if (result.success) {
           if (result.result) {
-            AppUtils.Logs.addLog(result.result, 'success');
+            await await AppUtils.Logs.addLog(result.result, 'success');
           }
           // 等待一小段时间，让系统重新挂载
           await new Promise(resolve => setTimeout(resolve, 1500));
           await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
         } else {
-          AppUtils.Logs.addLog(`还原失败: ${result.error || '未知错误'}`, 'error');
-          if (result.error?.includes('密码错误')) {
-            AppUtils.Logs.addLog('提示：密码错误，请重试', 'warning');
-          } else if (result.error?.includes('用户取消')) {
-            AppUtils.Logs.addLog('提示：已取消操作', 'info');
+          await AppUtils.Logs.addLog(`${t('messages.restoreError')}: ${result.error || t('messages.restoreError')}`, 'error');
+          if (result.error?.includes('密码错误') || result.error?.includes('password')) {
+            await AppUtils.Logs.addLog(t('messages.passwordError'), 'warning');
+          } else if (result.error?.includes('用户取消') || result.error?.includes('cancelled')) {
+            await AppUtils.Logs.addLog(t('messages.cancelled'), 'info');
           }
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        AppUtils.Logs.addLog(`还原失败: ${errorMessage}`, 'error');
+        await AppUtils.Logs.addLog(`${t('messages.restoreError')}: ${errorMessage}`, 'error');
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
       }
@@ -131,14 +137,14 @@
       const readWriteDevices = devices.filter((d: any) => !d.isReadOnly && !d.isUnmounted);
 
       if (readWriteDevices.length === 0) {
-        AppUtils.Logs.addLog('没有已挂载为读写模式的设备', 'info');
+        await AppUtils.Logs.addLog(t('messages.noDevicesToUnmount'), 'info');
         return;
       }
 
       const deviceNames = readWriteDevices.map((d: any) => d.volumeName).join('、');
-      const message = `确定要将所有已挂载的 NTFS 设备还原为只读模式吗？\n\n` +
+      const message = t('devices.restoreAllReadOnly') + '?\n\n' +
                       `将还原以下设备：\n${deviceNames}\n\n` +
-                      `注意：这需要管理员权限，系统会弹出密码输入对话框`;
+                      t('devices.restoreConfirmNote');
 
       if (!confirm(message)) {
         return;
@@ -148,8 +154,8 @@
 
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
-        AppUtils.Logs.addLog(`开始还原 ${readWriteDevices.length} 个设备为只读模式...`, 'info');
-        AppUtils.Logs.addLog('提示：请在弹出的对话框中输入管理员密码', 'info');
+        await AppUtils.Logs.addLog(t('messages.restoreAllStart', { count: readWriteDevices.length }), 'info');
+        await AppUtils.Logs.addLog(t('messages.enterPassword'), 'info');
 
         let successCount = 0;
         let failCount = 0;
@@ -157,22 +163,22 @@
         // 逐个还原设备
         for (const device of readWriteDevices) {
           try {
-            AppUtils.Logs.addLog(`正在还原 ${device.volumeName} 为只读模式...`, 'info');
+            await AppUtils.Logs.addLog(`正在还原 ${device.volumeName} 为只读模式...`, 'info');
             const result = await electronAPI.restoreToReadOnly(device);
 
             if (result.success) {
               successCount++;
               if (result.result) {
-                AppUtils.Logs.addLog(result.result, 'success');
+                await AppUtils.Logs.addLog(result.result, 'success');
               }
             } else {
               failCount++;
-              AppUtils.Logs.addLog(`还原 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
+              await AppUtils.Logs.addLog(`还原 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
             }
           } catch (error) {
             failCount++;
             const errorMessage = error instanceof Error ? error.message : String(error);
-            AppUtils.Logs.addLog(`还原 ${device.volumeName} 失败: ${errorMessage}`, 'error');
+            await AppUtils.Logs.addLog(`还原 ${device.volumeName} 失败: ${errorMessage}`, 'error');
           }
         }
 
@@ -184,14 +190,14 @@
 
         // 显示总结
         if (successCount > 0) {
-          AppUtils.Logs.addLog(`成功还原 ${successCount} 个设备为只读模式`, 'success');
+          await AppUtils.Logs.addLog(t('messages.restoreAllSuccess', { count: successCount }), 'success');
         }
         if (failCount > 0) {
-          AppUtils.Logs.addLog(`失败 ${failCount} 个设备`, 'warning');
+          await AppUtils.Logs.addLog(t('messages.restoreAllError', { count: failCount }), 'warning');
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        AppUtils.Logs.addLog(`还原所有设备失败: ${errorMessage}`, 'error');
+        await AppUtils.Logs.addLog(`${t('messages.restoreError')}: ${errorMessage}`, 'error');
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
       }
@@ -205,8 +211,8 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
-      const message = `确定要卸载 ${device.volumeName} 吗？\n\n` +
-                      `注意：这需要管理员权限，系统会弹出密码输入对话框`;
+      const message = t('devices.unmountConfirm', { name: device.volumeName }) + '\n\n' +
+                      t('devices.restoreConfirmNote');
 
       if (!confirm(message)) {
         return;
@@ -216,27 +222,102 @@
 
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
-        AppUtils.Logs.addLog(`正在卸载 ${device.volumeName}...`, 'info');
-        AppUtils.Logs.addLog('提示：请在弹出的对话框中输入管理员密码', 'info');
+        await AppUtils.Logs.addLog(t('messages.unmounting', { name: device.volumeName }), 'info');
+        await AppUtils.Logs.addLog('提示：请在弹出的对话框中输入管理员密码', 'info');
 
         const result = await electronAPI.unmountDevice(device);
 
         if (result.success) {
           if (result.result) {
-            AppUtils.Logs.addLog(result.result, 'success');
+            await await AppUtils.Logs.addLog(result.result, 'success');
           }
           await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
         } else {
-          AppUtils.Logs.addLog(`卸载失败: ${result.error || '未知错误'}`, 'error');
+          await AppUtils.Logs.addLog(`卸载失败: ${result.error || '未知错误'}`, 'error');
           if (result.error?.includes('密码错误')) {
-            AppUtils.Logs.addLog('提示：密码错误，请重试', 'warning');
+            await AppUtils.Logs.addLog('提示：密码错误，请重试', 'warning');
           } else if (result.error?.includes('用户取消')) {
-            AppUtils.Logs.addLog('提示：已取消操作', 'info');
+            await AppUtils.Logs.addLog('提示：已取消操作', 'info');
           }
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        AppUtils.Logs.addLog(`卸载失败: ${errorMessage}`, 'error');
+        await AppUtils.Logs.addLog(`卸载失败: ${errorMessage}`, 'error');
+      } finally {
+        AppUtils.UI.showLoading(loadingOverlay, false);
+      }
+    },
+
+    // 一键配置所有设备可读写
+    async mountAllDevices(
+      devicesList: HTMLElement,
+      readWriteDevicesList: HTMLElement,
+      statusDot: HTMLElement,
+      statusText: HTMLElement
+    ): Promise<void> {
+      // 获取所有只读设备和未挂载的设备
+      const devices = AppModules.Devices.devices || [];
+      const readOnlyDevices = devices.filter((d: any) => d.isReadOnly || d.isUnmounted);
+
+      if (readOnlyDevices.length === 0) {
+        await AppUtils.Logs.addLog(t('messages.noDevicesToMount'), 'info');
+        return;
+      }
+
+      const deviceNames = readOnlyDevices.map((d: any) => d.volumeName).join('、');
+      const message = t('devices.mountAll') + '?\n\n' +
+                      `将配置以下设备：\n${deviceNames}\n\n` +
+                      t('devices.mountConfirmNote');
+
+      if (!confirm(message)) {
+        return;
+      }
+
+      const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
+
+      try {
+        AppUtils.UI.showLoading(loadingOverlay, true);
+        await AppUtils.Logs.addLog(t('messages.mountAllStart', { count: readOnlyDevices.length }), 'info');
+        await AppUtils.Logs.addLog(t('messages.enterPassword'), 'info');
+
+        let successCount = 0;
+        let failCount = 0;
+
+        // 逐个配置设备
+        for (const device of readOnlyDevices) {
+          try {
+            await AppUtils.Logs.addLog(`正在配置 ${device.volumeName} 为可读写模式...`, 'info');
+            const result = await electronAPI.mountDevice(device);
+
+            if (result.success) {
+              successCount++;
+              if (result.result) {
+                await AppUtils.Logs.addLog(result.result, 'success');
+              }
+            } else {
+              failCount++;
+              await AppUtils.Logs.addLog(`配置 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
+            }
+          } catch (error) {
+            failCount++;
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            await AppUtils.Logs.addLog(`配置 ${device.volumeName} 失败: ${errorMessage}`, 'error');
+          }
+        }
+
+        // 刷新设备列表
+        await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+
+        // 显示总结
+        if (successCount > 0) {
+          await AppUtils.Logs.addLog(t('messages.mountAllSuccess', { count: successCount }), 'success');
+        }
+        if (failCount > 0) {
+          await AppUtils.Logs.addLog(t('messages.mountAllError', { count: failCount }), 'warning');
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        await AppUtils.Logs.addLog(`${t('messages.mountError')}: ${errorMessage}`, 'error');
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
       }
@@ -254,7 +335,7 @@
       const readWriteDevices = devices.filter((d: any) => !d.isReadOnly);
 
       if (readWriteDevices.length === 0) {
-        AppUtils.Logs.addLog('没有已挂载为读写模式的设备', 'info');
+        await AppUtils.Logs.addLog('没有已挂载为读写模式的设备', 'info');
         return;
       }
 
@@ -271,8 +352,8 @@
 
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
-        AppUtils.Logs.addLog(`开始卸载 ${readWriteDevices.length} 个设备...`, 'info');
-        AppUtils.Logs.addLog('提示：请在弹出的对话框中输入管理员密码', 'info');
+        await AppUtils.Logs.addLog(`开始卸载 ${readWriteDevices.length} 个设备...`, 'info');
+        await AppUtils.Logs.addLog('提示：请在弹出的对话框中输入管理员密码', 'info');
 
         let successCount = 0;
         let failCount = 0;
@@ -280,22 +361,22 @@
         // 逐个卸载设备
         for (const device of readWriteDevices) {
           try {
-            AppUtils.Logs.addLog(`正在卸载 ${device.volumeName}...`, 'info');
+            await AppUtils.Logs.addLog(`正在卸载 ${device.volumeName}...`, 'info');
             const result = await electronAPI.unmountDevice(device);
 
             if (result.success) {
               successCount++;
               if (result.result) {
-                AppUtils.Logs.addLog(result.result, 'success');
+                await AppUtils.Logs.addLog(result.result, 'success');
               }
             } else {
               failCount++;
-              AppUtils.Logs.addLog(`卸载 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
+              await AppUtils.Logs.addLog(`卸载 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
             }
           } catch (error) {
             failCount++;
             const errorMessage = error instanceof Error ? error.message : String(error);
-            AppUtils.Logs.addLog(`卸载 ${device.volumeName} 失败: ${errorMessage}`, 'error');
+            await AppUtils.Logs.addLog(`卸载 ${device.volumeName} 失败: ${errorMessage}`, 'error');
           }
         }
 
@@ -304,14 +385,14 @@
 
         // 显示总结
         if (successCount > 0) {
-          AppUtils.Logs.addLog(`成功卸载 ${successCount} 个设备`, 'success');
+          await AppUtils.Logs.addLog(t('messages.unmountAllSuccess', { count: successCount }), 'success');
         }
         if (failCount > 0) {
-          AppUtils.Logs.addLog(`失败 ${failCount} 个设备`, 'warning');
+          await AppUtils.Logs.addLog(t('messages.unmountAllError', { count: failCount }), 'warning');
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        AppUtils.Logs.addLog(`卸载所有设备失败: ${errorMessage}`, 'error');
+        await AppUtils.Logs.addLog(`${t('messages.unmountError')}: ${errorMessage}`, 'error');
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
       }
@@ -339,23 +420,23 @@
 
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
-        AppUtils.Logs.addLog(`正在推出 ${device.volumeName}...`, 'info');
+        await AppUtils.Logs.addLog(`正在推出 ${device.volumeName}...`, 'info');
 
         const result = await electronAPI.ejectDevice(device);
 
         if (result.success) {
           if (result.result) {
-            AppUtils.Logs.addLog(result.result, 'success');
+            await await AppUtils.Logs.addLog(result.result, 'success');
           }
           // 等待一小段时间，让系统完全断开设备
           await new Promise(resolve => setTimeout(resolve, 1000));
           await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
         } else {
-          AppUtils.Logs.addLog(`推出失败: ${result.error || '未知错误'}`, 'error');
+          await AppUtils.Logs.addLog(`推出失败: ${result.error || '未知错误'}`, 'error');
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        AppUtils.Logs.addLog(`推出失败: ${errorMessage}`, 'error');
+        await AppUtils.Logs.addLog(`推出失败: ${errorMessage}`, 'error');
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
       }
@@ -373,7 +454,7 @@
       const mountedDevices = devices.filter((d: any) => !d.isUnmounted);
 
       if (mountedDevices.length === 0) {
-        AppUtils.Logs.addLog('没有已挂载的设备', 'info');
+        await AppUtils.Logs.addLog('没有已挂载的设备', 'info');
         return;
       }
 
@@ -393,7 +474,7 @@
 
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
-        AppUtils.Logs.addLog(`开始推出 ${mountedDevices.length} 个设备...`, 'info');
+        await AppUtils.Logs.addLog(`开始推出 ${mountedDevices.length} 个设备...`, 'info');
 
         let successCount = 0;
         let failCount = 0;
@@ -401,22 +482,22 @@
         // 逐个推出设备
         for (const device of mountedDevices) {
           try {
-            AppUtils.Logs.addLog(`正在推出 ${device.volumeName}...`, 'info');
+            await AppUtils.Logs.addLog(`正在推出 ${device.volumeName}...`, 'info');
             const result = await electronAPI.ejectDevice(device);
 
             if (result.success) {
               successCount++;
               if (result.result) {
-                AppUtils.Logs.addLog(result.result, 'success');
+                await AppUtils.Logs.addLog(result.result, 'success');
               }
             } else {
               failCount++;
-              AppUtils.Logs.addLog(`推出 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
+              await AppUtils.Logs.addLog(`推出 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
             }
           } catch (error) {
             failCount++;
             const errorMessage = error instanceof Error ? error.message : String(error);
-            AppUtils.Logs.addLog(`推出 ${device.volumeName} 失败: ${errorMessage}`, 'error');
+            await AppUtils.Logs.addLog(`推出 ${device.volumeName} 失败: ${errorMessage}`, 'error');
           }
         }
 
@@ -428,14 +509,14 @@
 
         // 显示总结
         if (successCount > 0) {
-          AppUtils.Logs.addLog(`成功推出 ${successCount} 个设备`, 'success');
+          await AppUtils.Logs.addLog(t('messages.ejectAllSuccess', { count: successCount }), 'success');
         }
         if (failCount > 0) {
-          AppUtils.Logs.addLog(`失败 ${failCount} 个设备`, 'warning');
+          await AppUtils.Logs.addLog(t('messages.ejectAllError', { count: failCount }), 'warning');
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        AppUtils.Logs.addLog(`推出所有设备失败: ${errorMessage}`, 'error');
+        await AppUtils.Logs.addLog(`${t('messages.ejectError')}: ${errorMessage}`, 'error');
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
       }
