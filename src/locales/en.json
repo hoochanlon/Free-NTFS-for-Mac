@@ -7,12 +7,19 @@
     "dependencies": "System Dependencies",
     "devices": "NTFS Devices",
     "logs": "Operation Logs",
-    "help": "Help",
+    "help": "Guide",
     "settings": "Settings"
   },
   "status": {
     "checking": "Checking...",
-    "ready": "Ready"
+    "ready": "Ready",
+    "systemReady": "System Ready",
+    "missingDeps": "Missing Dependencies",
+    "checkFailed": "Check Failed",
+    "waitingDevices": "Waiting for Devices",
+    "devicesReadOnly": "{count} devices read-only",
+    "devicesReady": "{count} devices ready",
+    "detectFailed": "Detection Failed"
   },
   "dependencies": {
     "title": "System Dependencies",
@@ -22,7 +29,32 @@
     "missing": "Not Installed",
     "installGuide": "Installation Guide",
     "installGuideIntro": "To install or reinstall dependencies, please follow the instructions below to install manually in the terminal:",
-    "copyCommand": "Copy Command"
+    "copyCommand": "Copy Command",
+    "allInstalled": "All dependencies installed",
+    "missingDepsDetected": "Missing dependencies detected, please see installation guide below",
+    "checkFailed": "Failed to check dependencies: {error}",
+    "checkTimeout": "Check timeout, please try again",
+    "installCommandLabel": "Installation command:",
+    "swift": {
+      "name": "Swift (Xcode Command Line Tools)",
+      "description": "Apple official development tools, providing Swift compiler and basic development libraries",
+      "installGuide": "Run the above command in the terminal, an installation window will pop up, follow the prompts to complete the installation. The installation process may take several minutes to tens of minutes, please wait patiently."
+    },
+    "brew": {
+      "name": "Homebrew",
+      "description": "Package manager for macOS, used to install and manage software packages",
+      "installGuide": "Run the above command in the terminal, follow the prompts to complete the installation. If the network is slow, you can use a domestic mirror source."
+    },
+    "macfuse": {
+      "name": "MacFUSE",
+      "description": "File system user space framework, required by ntfs-3g",
+      "installGuide": "Homebrew must be installed first. Run the above command in the terminal to install."
+    },
+    "ntfs3g": {
+      "name": "ntfs-3g",
+      "description": "NTFS file system driver, providing NTFS read-write support",
+      "installGuide": "Homebrew and MacFUSE must be installed first. Run the above command in the terminal to install."
+    }
   },
   "devices": {
     "title": "NTFS Devices",
@@ -40,6 +72,9 @@
     "readOnly": "Read-Only",
     "readWrite": "Read-Write",
     "unmounted": "Unmounted",
+    "deviceLabel": "Device:",
+    "mountPointLabel": "Mount Point:",
+    "notMounted": "Not Mounted",
     "mountConfirm": "Are you sure you want to configure {name} as read-write mode?",
     "mountConfirmNote": "Note:\n• This requires administrator privileges, and the system will prompt for a password\n• If the device uses Fast Startup in Windows, you may need to fully shut down the device in Windows first",
     "unmountConfirm": "Are you sure you want to unmount {name}?",
@@ -55,16 +90,30 @@
     "export": "Export",
     "exportSuccess": "Logs exported successfully",
     "exportError": "Export failed",
-    "noLogsToExport": "No logs to export"
+    "noLogsToExport": "No logs to export",
+    "clearConfirm": "Are you sure you want to clear all logs?",
+    "exportPath": "Logs exported to: {path}",
+    "exportHeader": "Free NTFS for Mac - Operation Logs",
+    "exportTime": "Export time: {time}",
+    "exportCount": "Total {count} logs",
+    "logTypes": {
+      "info": "Info",
+      "success": "Success",
+      "error": "Error",
+      "warning": "Warning"
+    }
   },
   "help": {
-    "title": "Help"
+    "title": "Guide"
   },
   "settings": {
     "title": "Application Settings",
     "savePassword": "Save Administrator Password",
     "savePasswordDesc": "When enabled, the app will securely save your administrator password using macOS Keychain for automatic input",
     "deletePassword": "Delete Saved Password",
+    "deletePasswordConfirm": "Are you sure you want to delete the saved password?",
+    "deletePasswordSuccess": "Saved password deleted",
+    "deletePasswordError": "Failed to delete password, please try again",
     "startupTab": "Tab to Open on Startup",
     "startupTabDesc": "Select the default tab to display when the app starts",
     "enableLogs": "Enable Operation Logs",
@@ -76,7 +125,9 @@
     "language": "Language",
     "languageDesc": "Select the application interface language",
     "languages": {
+      "system": "Follow System",
       "zh-CN": "简体中文",
+      "zh-TW": "繁體中文",
       "ja": "日本語",
       "en": "English"
     }
@@ -110,6 +161,11 @@
     "ejectAllError": "{count} devices failed",
     "restoreAllStart": "Starting to restore {count} devices to read-only mode...",
     "restoreAllSuccess": "Successfully restored {count} devices to read-only mode",
-    "restoreAllError": "{count} devices failed"
+    "restoreAllError": "{count} devices failed",
+    "noDevicesDetected": "No NTFS devices detected",
+    "devicesDetected": "Detected {count} devices ({readOnly} read-only, {readWrite} read-write)",
+    "devicesDetectedAllReadOnly": "Detected {count} NTFS devices (all read-only)",
+    "devicesDetectedAllReadWrite": "Detected {count} NTFS devices (all read-write)",
+    "refreshFailed": "Failed to refresh device list: {error}"
   }
 }

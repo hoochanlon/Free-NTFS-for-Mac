@@ -12,10 +12,27 @@
   const AppUtils = (window as any).AppUtils;
 
   // 支持的语言
-  type SupportedLanguage = 'zh-CN' | 'ja' | 'en';
+  type SupportedLanguage = 'zh-CN' | 'zh-TW' | 'ja' | 'en';
+  type LanguageSetting = SupportedLanguage | 'system';
 
   // 当前语言
   let currentLanguage: SupportedLanguage = 'zh-CN';
+
+  // 检测系统语言
+  function detectSystemLanguage(): SupportedLanguage {
+    const systemLang = navigator.language;
+    if (systemLang.startsWith('ja')) {
+      return 'ja';
+    } else if (systemLang.startsWith('en')) {
+      return 'en';
+    } else if (systemLang.startsWith('zh-TW') || systemLang.startsWith('zh-Hant')) {
+      return 'zh-TW';
+    } else if (systemLang.startsWith('zh')) {
+      return 'zh-CN';
+    } else {
+      return 'zh-CN';
+    }
+  }
 
   // 翻译数据
   let translations: Record<string, any> = {};
@@ -75,45 +92,55 @@
   }
 
   // 初始化 i18n
-  async function init(lang?: SupportedLanguage): Promise<void> {
+  async function init(lang?: SupportedLanguage | LanguageSetting): Promise<void> {
     // 如果没有指定语言，尝试从设置中获取
     if (!lang) {
       try {
         const settings = await (window as any).electronAPI?.getSettings();
         if (settings && settings.language) {
-          lang = settings.language as SupportedLanguage;
+          lang = settings.language as LanguageSetting;
         }
       } catch (error) {
         console.error('Failed to get language from settings:', error);
       }
     }
 
-    // 如果还是没有语言，使用系统语言
-    if (!lang) {
-      const systemLang = navigator.language;
-      if (systemLang.startsWith('ja')) {
-        lang = 'ja';
-      } else if (systemLang.startsWith('en')) {
-        lang = 'en';
+    // 如果选择跟随系统或没有语言，使用系统语言
+    if (!lang || lang === 'system') {
+      lang = detectSystemLanguage();
       } else {
-        lang = 'zh-CN';
-      }
+      // 确保是支持的语言
+      lang = lang as SupportedLanguage;
     }
 
     await loadLanguage(lang);
   }
 
   // 切换语言
-  async function setLanguage(lang: SupportedLanguage): Promise<void> {
-    await loadLanguage(lang);
-    // 保存到设置
+  async function setLanguage(lang: LanguageSetting): Promise<void> {
+    let actualLang: SupportedLanguage;
+
+    // 如果选择跟随系统，检测系统语言
+    if (lang === 'system') {
+      actualLang = detectSystemLanguage();
+    } else {
+      actualLang = lang as SupportedLanguage;
+    }
+
+    await loadLanguage(actualLang);
+    // 保存到设置（保存原始值，可能是 'system'）
     try {
       await (window as any).electronAPI?.saveSettings({ language: lang });
     } catch (error) {
       console.error('Failed to save language setting:', error);
     }
     // 触发语言变更事件
-    window.dispatchEvent(new CustomEvent('languageChanged', { detail: lang }));
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: actualLang }));
+  }
+
+  // 获取系统语言
+  function getSystemLanguage(): SupportedLanguage {
+    return detectSystemLanguage();
   }
 
   // 获取当前语言
@@ -126,7 +153,8 @@
     init,
     t,
     setLanguage,
-    getLanguage
+    getLanguage,
+    getSystemLanguage
   };
 
 })();

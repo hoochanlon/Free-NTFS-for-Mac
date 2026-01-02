@@ -22,6 +22,14 @@
 
   const AppUtils = (window as any).AppUtils;
 
+  // 获取翻译文本的辅助函数
+  function t(key: string, params?: Record<string, string | number>): string {
+    if (AppUtils && AppUtils.I18n) {
+      return AppUtils.I18n.t(key, params);
+    }
+    return key; // 如果 i18n 未初始化，返回 key
+  }
+
   // 日志存储管理
   AppUtils.Logs = {
     // 上次重置日志的日期
@@ -110,7 +118,19 @@
       // 检查是否需要每天重置
       await AppUtils.Logs.checkAndResetDaily();
 
-      const time = new Date().toLocaleTimeString('zh-CN');
+      // 获取当前语言设置，用于格式化时间
+      const currentLang = AppUtils.I18n ? AppUtils.I18n.getLanguage() : 'zh-CN';
+      let locale = 'zh-CN';
+      if (currentLang === 'en') {
+        locale = 'en-US';
+      } else if (currentLang === 'ja') {
+        locale = 'ja-JP';
+      } else if (currentLang === 'zh-TW') {
+        locale = 'zh-TW';
+      } else {
+        locale = 'zh-CN';
+      }
+      const time = new Date().toLocaleTimeString(locale);
       const timestamp = Date.now(); // 添加时间戳
       const logs = AppUtils.Logs.getLogs();
       logs.push({ time, message, type, timestamp });
@@ -131,8 +151,9 @@
       const logs = AppUtils.Logs.getLogs();
 
       if (logs.length === 0) {
-        if (logContainer.innerHTML !== '<div class="log-empty">暂无日志</div>') {
-          logContainer.innerHTML = '<div class="log-empty">暂无日志</div>';
+        const emptyText = t('logs.empty');
+        if (logContainer.innerHTML !== `<div class="log-empty">${emptyText}</div>`) {
+          logContainer.innerHTML = `<div class="log-empty">${emptyText}</div>`;
         }
         return;
       }
@@ -183,7 +204,7 @@
 
     // 清空日志
     clearLog(logContainer: HTMLElement): void {
-      if (confirm('确定要清空所有日志吗？')) {
+      if (confirm(t('logs.clearConfirm'))) {
         localStorage.setItem('appLogs', '[]');
         AppUtils.Logs.renderLogs(logContainer, true);
       }
@@ -194,36 +215,47 @@
       try {
         const logs = AppUtils.Logs.getLogs();
         if (logs.length === 0) {
-          alert('没有日志可导出');
+          alert(t('logs.noLogsToExport'));
           return;
         }
 
         // 生成日志文本内容
         const logText = logs.map((log: LogEntry) => {
           const typeMap: Record<LogType, string> = {
-            info: '信息',
-            success: '成功',
-            error: '错误',
-            warning: '警告'
+            info: t('logs.logTypes.info'),
+            success: t('logs.logTypes.success'),
+            error: t('logs.logTypes.error'),
+            warning: t('logs.logTypes.warning')
           };
           return `[${log.time}] [${typeMap[log.type]}] ${log.message}`;
         }).join('\n');
 
         // 添加文件头信息
-        const exportDate = new Date().toLocaleString('zh-CN');
-        const header = `Free NTFS for Mac - 操作日志\n导出时间: ${exportDate}\n共 ${logs.length} 条日志\n${'='.repeat(50)}\n\n`;
+        const currentLang = AppUtils.I18n ? AppUtils.I18n.getLanguage() : 'zh-CN';
+        let locale = 'zh-CN';
+        if (currentLang === 'en') {
+          locale = 'en-US';
+        } else if (currentLang === 'ja') {
+          locale = 'ja-JP';
+        } else if (currentLang === 'zh-TW') {
+          locale = 'zh-TW';
+        } else {
+          locale = 'zh-CN';
+        }
+        const exportDate = new Date().toLocaleString(locale);
+        const header = `${t('logs.exportHeader')}\n${t('logs.exportTime', { time: exportDate })}\n${t('logs.exportCount', { count: logs.length })}\n${'='.repeat(50)}\n\n`;
         const fullContent = header + logText;
 
         // 使用 electronAPI 保存文件
         const result = await (window as any).electronAPI?.exportLogs(fullContent);
         if (result?.success) {
-          alert(`日志已导出到: ${result.path}`);
+          alert(t('logs.exportPath', { path: result.path }));
         } else {
-          throw new Error(result?.error || '导出失败');
+          throw new Error(result?.error || t('logs.exportError'));
         }
       } catch (error) {
         console.error('导出日志失败:', error);
-        alert(`导出日志失败: ${error instanceof Error ? error.message : String(error)}`);
+        alert(`${t('logs.exportError')}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
   };

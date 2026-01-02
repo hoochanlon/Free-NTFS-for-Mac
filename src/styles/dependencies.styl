@@ -19,7 +19,7 @@
   display flex
   justify-content space-between
   align-items center
-  padding 14px 18px
+  padding 12px 16px
   background var(--bg-secondary)
   border 1px solid var(--border)
   border-radius 8px
@@ -31,7 +31,7 @@
   &:hover
     background var(--bg-tertiary)
     border-color var(--border)
-    box-shadow 0 1px 3px var(--shadow)
+    box-shadow 0 1px 2px var(--shadow)
 
   // 左侧装饰线
   &::before
@@ -55,7 +55,7 @@
     background var(--error)
 
 .dep-name
-  font-size 14px
+  font-size 13px
   font-weight 500
   color var(--text-primary)
   display flex
@@ -149,7 +149,7 @@
   background var(--bg-secondary)
   border 1px solid var(--border)
   border-radius 8px
-  padding 16px
+  padding 12px 16px
   margin-top 4px
   margin-left 30px
   max-height 0
@@ -166,17 +166,17 @@
     &:hover
       background var(--bg-tertiary)
       border-color var(--border)
-      box-shadow 0 1px 3px var(--shadow)
+      box-shadow 0 1px 2px var(--shadow)
 
 .guide-header
   display flex
   justify-content space-between
   align-items center
-  margin-bottom 12px
+  margin-bottom 10px
 
   h3
-    font-size 15px
-    font-weight 600
+    font-size 14px
+    font-weight 500
     color var(--text-primary)
     margin 0
     letter-spacing -0.01em
@@ -198,26 +198,26 @@
       border 1px solid rgba(52, 199, 89, 0.3)
 
 .guide-description
-  font-size 13px
+  font-size 12px
   color var(--text-secondary)
-  line-height 1.6
-  margin-bottom 16px
+  line-height 1.5
+  margin-bottom 12px
 
 .guide-command
-  margin-bottom 16px
+  margin-bottom 12px
 
   label
     display block
-    font-size 12px
+    font-size 11px
     font-weight 500
     color var(--text-secondary)
-    margin-bottom 8px
+    margin-bottom 6px
 
   .command-box
     display flex
     align-items center
     gap 8px
-    padding 12px
+    padding 10px
     background var(--bg-tertiary)
     border 1px solid var(--border)
     border-radius 6px
@@ -261,11 +261,11 @@
         height 16px
 
 .guide-instructions
-  font-size 12px
+  font-size 11px
   color var(--text-secondary)
-  line-height 1.6
+  line-height 1.5
   margin 0
-  padding 12px
+  padding 10px
   background var(--bg-tertiary)
   border-radius 6px
   border-left 3px solid var(--accent)
@@ -300,7 +300,7 @@ body.light-theme
       box-shadow 0 1px 2px var(--light-shadow)
 
   .install-guide-card
-    &:hover
+    &:not(.collapsed):hover
       box-shadow 0 1px 2px var(--light-shadow)
 
   .command-box

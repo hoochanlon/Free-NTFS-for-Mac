@@ -88,7 +88,7 @@
       exportLogBtn.textContent = t('logs.export');
     }
 
-    // 帮助说明标签页
+    // 指南手册标签页
     const helpTitle = document.querySelector('#helpTab h2');
     if (helpTitle) {
       helpTitle.textContent = t('help.title');
@@ -100,15 +100,91 @@
       settingsTitle.textContent = t('settings.title');
     }
 
-    // 更新设置描述文本
+    // 更新所有设置项的标签和描述
+    // 保存管理员密码
+    const savePasswordLabel = document.querySelector('label[for="savePasswordCheckbox"]');
+    if (savePasswordLabel) {
+      savePasswordLabel.textContent = t('settings.savePassword');
+    }
+    const savePasswordDesc = document.querySelector('#savePasswordCheckbox')?.closest('.setting-item')?.querySelector('.setting-description');
+    if (savePasswordDesc) {
+      savePasswordDesc.textContent = t('settings.savePasswordDesc');
+    }
+    const deletePasswordBtn = document.getElementById('deletePasswordBtn');
+    if (deletePasswordBtn) {
+      deletePasswordBtn.textContent = t('settings.deletePassword');
+    }
+
+    // 启动时打开的标签页
+    const startupTabLabel = document.querySelector('label[for="startupTabSelect"]');
+    if (startupTabLabel) {
+      startupTabLabel.textContent = t('settings.startupTab');
+    }
+    const startupTabDesc = document.querySelector('#startupTabSelect')?.closest('.setting-item')?.querySelector('.setting-description');
+    if (startupTabDesc) {
+      startupTabDesc.textContent = t('settings.startupTabDesc');
+    }
+    // 更新启动标签页下拉选项
+    const startupTabSelect = document.getElementById('startupTabSelect') as HTMLSelectElement;
+    if (startupTabSelect) {
+      Array.from(startupTabSelect.options).forEach(option => {
+        const tabKey = option.value;
+        if (tabKey === 'dependencies') {
+          option.textContent = t('tabs.dependencies');
+        } else if (tabKey === 'devices') {
+          option.textContent = t('tabs.devices');
+        } else if (tabKey === 'logs') {
+          option.textContent = t('tabs.logs');
+        } else if (tabKey === 'help') {
+          option.textContent = t('tabs.help');
+        }
+      });
+    }
+
+    // 启用操作日志
+    const enableLogsLabel = document.querySelector('label[for="enableLogsCheckbox"]');
+    if (enableLogsLabel) {
+      enableLogsLabel.textContent = t('settings.enableLogs');
+    }
     const enableLogsDesc = document.querySelector('#enableLogsCheckbox')?.closest('.setting-item')?.querySelector('.setting-description');
     if (enableLogsDesc) {
       enableLogsDesc.textContent = t('settings.enableLogsDesc');
     }
 
+    // 每天自动重置日志
+    const resetLogsDailyLabel = document.querySelector('label[for="resetLogsDailyCheckbox"]');
+    if (resetLogsDailyLabel) {
+      resetLogsDailyLabel.textContent = t('settings.resetLogsDaily');
+    }
     const resetLogsDailyDesc = document.querySelector('#resetLogsDailyCheckbox')?.closest('.setting-item')?.querySelector('.setting-description');
     if (resetLogsDailyDesc) {
       resetLogsDailyDesc.textContent = t('settings.resetLogsDailyDesc');
+    }
+
+    // 语言
+    const languageLabel = document.querySelector('label[for="languageSelect"]');
+    if (languageLabel) {
+      languageLabel.textContent = t('settings.language');
+    }
+    const languageDesc = document.querySelector('#languageSelect')?.closest('.setting-item')?.querySelector('.setting-description');
+    if (languageDesc) {
+      languageDesc.textContent = t('settings.languageDesc');
+    }
+    // 更新语言选择器的选项文本
+    const languageSelect = document.getElementById('languageSelect') as HTMLSelectElement;
+    if (languageSelect) {
+      const langMap: Record<string, string> = {
+        'system': t('settings.languages.system'),
+        'zh-CN': t('settings.languages.zh-CN'),
+        'zh-TW': t('settings.languages.zh-TW'),
+        'ja': t('settings.languages.ja'),
+        'en': t('settings.languages.en')
+      };
+      Array.from(languageSelect.options).forEach(option => {
+        if (langMap[option.value]) {
+          option.textContent = langMap[option.value];
+        }
+      });
     }
 
     // 加载遮罩
@@ -129,13 +205,39 @@
       const statusDot = document.querySelector('.status-dot') as HTMLElement;
       const statusText = document.querySelector('.status-text') as HTMLElement;
 
-      if (devicesList && (window as any).AppModules.Devices && (window as any).AppModules.Devices.refreshDevices) {
-        (window as any).AppModules.Devices.refreshDevices(
-          devicesList,
-          readWriteDevicesList || devicesList,
-          statusDot,
-          statusText
-        );
+      if (devicesList && (window as any).AppModules.Devices) {
+        // 清除设备列表的缓存，强制重新渲染
+        if ((window as any).AppModules.Devices.Renderer) {
+          (window as any).AppModules.Devices.Renderer.lastRenderedDevices = [];
+        }
+        // 重新渲染设备列表
+        if ((window as any).AppModules.Devices.Renderer && (window as any).AppModules.Devices.Renderer.renderDevices) {
+          (window as any).AppModules.Devices.Renderer.renderDevices(
+            devicesList,
+            readWriteDevicesList || devicesList
+          );
+        }
+        // 刷新设备状态
+        if ((window as any).AppModules.Devices.refreshDevices) {
+          (window as any).AppModules.Devices.refreshDevices(
+            devicesList,
+            readWriteDevicesList || devicesList,
+            statusDot,
+            statusText
+          );
+        }
+      }
+
+      // 重新渲染依赖列表
+      const depsList = document.getElementById('depsList');
+      if (depsList && (window as any).AppModules.Dependencies && (window as any).AppModules.Dependencies.renderDependencies) {
+        (window as any).AppModules.Dependencies.renderDependencies(depsList);
+      }
+
+      // 重新渲染日志
+      const logContainer = document.getElementById('logContainer');
+      if (logContainer && (window as any).AppUtils && (window as any).AppUtils.Logs) {
+        (window as any).AppUtils.Logs.renderLogs(logContainer, true);
       }
     }
   });

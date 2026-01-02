@@ -5,8 +5,8 @@
 .log-container
   background var(--bg-secondary)
   border 1px solid var(--border)
-  border-radius 10px
-  padding 16px
+  border-radius 8px
+  padding 12px
   min-height 400px
   flex 1
   overflow-y auto
@@ -16,6 +16,7 @@
   transition all 0.2s cubic-bezier(0.4, 0, 0.2, 1)
   position relative
   min-height 0
+  box-shadow 0 1px 2px var(--shadow)
 
   // 隐藏滚动条
   &::-webkit-scrollbar
@@ -149,13 +150,14 @@
   flex 1
   background var(--bg-primary)
   border 1px solid var(--border)
-  border-radius 10px
-  padding 16px
+  border-radius 8px
+  padding 12px
   overflow-y auto
   font-family 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace
   font-size 12px
   line-height 1.7
   transition background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+  box-shadow 0 1px 2px var(--shadow)
 
   // 滚动条样式
   &::-webkit-scrollbar

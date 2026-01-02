@@ -60,8 +60,8 @@
         <span>操作日志</span>
       </button>
       <button class="tab" data-tab="help">
-        <img src="../imgs/svg/help.svg" alt="帮助说明" class="tab-icon">
-        <span>帮助说明</span>
+        <img src="../imgs/svg/help.svg" alt="指南手册" class="tab-icon">
+        <span>指南手册</span>
       </button>
       <button class="tab" data-tab="settings">
         <img src="../imgs/svg/setting.svg" alt="设置" class="tab-icon">
@@ -125,7 +125,7 @@
         </div>
       </div>
 
-      <!-- 帮助说明标签页 -->
+      <!-- 指南手册标签页 -->
       <div class="tab-content" id="helpTab">
         <div class="help-content">
           <p>加载中...</p>
@@ -159,7 +159,7 @@
                   <option value="dependencies">系统依赖</option>
                   <option value="devices">NTFS 设备</option>
                   <option value="logs">操作日志</option>
-                  <option value="help">帮助说明</option>
+                  <option value="help">指南手册</option>
                 </select>
               </div>
             </div>
@@ -188,7 +188,9 @@
               </div>
               <div class="setting-control">
                 <select id="languageSelect" class="setting-select">
+                  <option value="system">跟随系统</option>
                   <option value="zh-CN">简体中文</option>
+                  <option value="zh-TW">繁體中文</option>
                   <option value="ja">日本語</option>
                   <option value="en">English</option>
                 </select>

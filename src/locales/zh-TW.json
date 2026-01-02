@@ -1,0 +1,171 @@
+{
+  "app": {
+    "title": "Free NTFS for Mac",
+    "about": "關於"
+  },
+  "tabs": {
+    "dependencies": "系統依賴",
+    "devices": "NTFS 設備",
+    "logs": "操作日誌",
+    "help": "指南手冊",
+    "settings": "設定"
+  },
+  "status": {
+    "checking": "正在檢查...",
+    "ready": "就緒",
+    "systemReady": "系統就緒",
+    "missingDeps": "缺少依賴",
+    "checkFailed": "檢查失敗",
+    "waitingDevices": "等待設備",
+    "devicesReadOnly": "{count} 個設備只讀",
+    "devicesReady": "{count} 個設備就緒",
+    "detectFailed": "檢測失敗"
+  },
+  "dependencies": {
+    "title": "系統依賴",
+    "checkButton": "檢查依賴",
+    "checking": "正在檢查...",
+    "installed": "已安裝",
+    "missing": "未安裝",
+    "installGuide": "安裝指引",
+    "installGuideIntro": "如需安裝或重新安裝依賴，請按照以下指引在終端中手動安裝：",
+    "copyCommand": "複製命令",
+    "allInstalled": "所有依賴已安裝",
+    "missingDepsDetected": "檢測到缺失的依賴，請查看下方安裝指引",
+    "checkFailed": "檢查依賴失敗: {error}",
+    "checkTimeout": "檢查超時，請重試",
+    "installCommandLabel": "安裝命令：",
+    "swift": {
+      "name": "Swift (Xcode Command Line Tools)",
+      "description": "Apple 官方開發工具，提供 Swift 編譯器和基礎開發庫",
+      "installGuide": "在終端執行上述命令，會彈出安裝視窗，按照提示完成安裝。安裝過程可能需要幾分鐘到幾十分鐘，請耐心等待。"
+    },
+    "brew": {
+      "name": "Homebrew",
+      "description": "macOS 的套件管理器，用於安裝和管理軟體套件",
+      "installGuide": "在終端執行上述命令，按照提示完成安裝。如果網路較慢，可以使用國內鏡像源。"
+    },
+    "macfuse": {
+      "name": "MacFUSE",
+      "description": "檔案系統使用者空間框架，ntfs-3g 需要此依賴",
+      "installGuide": "需要先安裝 Homebrew。在終端執行上述命令即可安裝。"
+    },
+    "ntfs3g": {
+      "name": "ntfs-3g",
+      "description": "NTFS 檔案系統驅動，提供 NTFS 讀寫支援",
+      "installGuide": "需要先安裝 Homebrew 和 MacFUSE。在終端執行上述命令即可安裝。"
+    }
+  },
+  "devices": {
+    "title": "NTFS 設備",
+    "emptyState": "未檢測到 NTFS 設備",
+    "emptyHint": "請插入 NTFS 格式的移動儲存設備",
+    "mountAll": "配置所有設備可讀寫",
+    "restoreAllReadOnly": "還原所有設備為只讀",
+    "unmountAll": "卸載所有設備",
+    "ejectAll": "推出所有設備",
+    "mount": "配置為可讀寫",
+    "remount": "重新配置為可讀寫",
+    "unmount": "卸載",
+    "eject": "推出",
+    "restoreReadOnly": "還原為只讀",
+    "readOnly": "只讀",
+    "readWrite": "可讀寫",
+    "unmounted": "已卸載",
+    "deviceLabel": "設備:",
+    "mountPointLabel": "掛載點:",
+    "notMounted": "未掛載",
+    "mountConfirm": "確定要將 {name} 配置為可讀寫模式嗎？",
+    "mountConfirmNote": "注意：\n• 這需要管理員權限，系統會彈出密碼輸入對話框\n• 如果設備在 Windows 中使用了快速啟動，可能需要先在 Windows 中完全關閉設備",
+    "unmountConfirm": "確定要卸載 {name} 嗎？",
+    "ejectConfirm": "確定要推出 {name} 嗎？",
+    "ejectConfirmNote": "注意：\n• 推出後設備將從系統中完全斷開\n• 設備將從列表中移除，需要重新插入才能使用\n• 請確保沒有程式正在使用該設備",
+    "restoreConfirm": "確定要將 {name} 還原為只讀模式嗎？",
+    "restoreConfirmNote": "注意：這需要管理員權限，系統會彈出密碼輸入對話框"
+  },
+  "logs": {
+    "title": "操作日誌",
+    "empty": "暫無日誌",
+    "clear": "清空",
+    "export": "匯出",
+    "exportSuccess": "日誌已匯出",
+    "exportError": "匯出失敗",
+    "noLogsToExport": "沒有日誌可匯出",
+    "clearConfirm": "確定要清空所有日誌嗎？",
+    "exportPath": "日誌已匯出到: {path}",
+    "exportHeader": "Free NTFS for Mac - 操作日誌",
+    "exportTime": "匯出時間: {time}",
+    "exportCount": "共 {count} 條日誌",
+    "logTypes": {
+      "info": "資訊",
+      "success": "成功",
+      "error": "錯誤",
+      "warning": "警告"
+    }
+  },
+  "help": {
+    "title": "指南手冊"
+  },
+  "settings": {
+    "title": "應用設定",
+    "savePassword": "儲存管理員密碼",
+    "savePasswordDesc": "啟用後，應用將使用 macOS Keychain 安全儲存您的管理員密碼，以便自動輸入",
+    "deletePassword": "刪除儲存的密碼",
+    "deletePasswordConfirm": "確定要刪除儲存的密碼嗎？",
+    "deletePasswordSuccess": "已刪除儲存的密碼",
+    "deletePasswordError": "刪除密碼失敗，請重試",
+    "startupTab": "啟動時開啟的標籤頁",
+    "startupTabDesc": "選擇應用啟動時預設顯示的標籤頁",
+    "enableLogs": "啟用操作日誌",
+    "enableLogsDesc": "啟用後，應用會記錄所有操作日誌。關閉後，將不再記錄新的日誌，但已記錄的日誌仍會保留。預設最長儲存30天",
+    "resetLogsDaily": "每天自動重置日誌",
+    "resetLogsDailyDesc": "啟用後，應用會在每天首次啟動時自動清空前一天的日誌",
+    "exportLogs": "匯出操作日誌",
+    "exportLogsDesc": "將所有操作日誌匯出為文字檔案",
+    "language": "語言",
+    "languageDesc": "選擇應用介面語言",
+    "languages": {
+      "system": "跟隨系統",
+      "zh-CN": "簡體中文",
+      "zh-TW": "繁體中文",
+      "ja": "日本語",
+      "en": "English"
+    }
+  },
+  "messages": {
+    "mounting": "正在掛載 {name}...",
+    "mountSuccess": "掛載成功",
+    "mountError": "掛載失敗",
+    "unmounting": "正在卸載 {name}...",
+    "unmountSuccess": "卸載成功",
+    "unmountError": "卸載失敗",
+    "ejecting": "正在推出 {name}...",
+    "ejectSuccess": "推出成功",
+    "ejectError": "推出失敗",
+    "restoring": "正在還原 {name} 為只讀模式...",
+    "restoreSuccess": "還原成功",
+    "restoreError": "還原失敗",
+    "passwordError": "密碼錯誤，請重試",
+    "cancelled": "已取消操作",
+    "enterPassword": "提示：請在彈出的對話框中輸入管理員密碼",
+    "noDevicesToMount": "沒有需要配置的設備（所有設備已配置為可讀寫）",
+    "noDevicesToUnmount": "沒有已掛載為讀寫模式的設備",
+    "mountAllStart": "開始配置 {count} 個設備為可讀寫模式...",
+    "mountAllSuccess": "成功配置 {count} 個設備為可讀寫模式",
+    "mountAllError": "失敗 {count} 個設備",
+    "unmountAllStart": "開始卸載 {count} 個設備...",
+    "unmountAllSuccess": "成功卸載 {count} 個設備",
+    "unmountAllError": "失敗 {count} 個設備",
+    "ejectAllStart": "開始推出 {count} 個設備...",
+    "ejectAllSuccess": "成功推出 {count} 個設備",
+    "ejectAllError": "失敗 {count} 個設備",
+    "restoreAllStart": "開始還原 {count} 個設備為只讀模式...",
+    "restoreAllSuccess": "成功還原 {count} 個設備為只讀模式",
+    "restoreAllError": "失敗 {count} 個設備",
+    "noDevicesDetected": "未檢測到 NTFS 設備",
+    "devicesDetected": "檢測到 {count} 個設備（{readOnly} 個只讀，{readWrite} 個讀寫）",
+    "devicesDetectedAllReadOnly": "檢測到 {count} 個 NTFS 設備（全部只讀）",
+    "devicesDetectedAllReadWrite": "檢測到 {count} 個 NTFS 設備（全部可讀寫）",
+    "refreshFailed": "重新整理設備列表失敗: {error}"
+  }
+}

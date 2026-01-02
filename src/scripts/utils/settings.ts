@@ -14,7 +14,7 @@ const DEFAULT_SETTINGS = {
   startupTab: 'dependencies' as 'dependencies' | 'devices' | 'logs' | 'help',
   enableLogs: true,
   resetLogsDaily: false,
-  language: 'zh-CN' as 'zh-CN' | 'ja' | 'en'
+  language: 'system' as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system'
 };
 
 export interface AppSettings {
@@ -22,7 +22,7 @@ export interface AppSettings {
   startupTab: 'dependencies' | 'devices' | 'logs' | 'help';
   enableLogs: boolean;
   resetLogsDaily: boolean;
-  language: 'zh-CN' | 'ja' | 'en';
+  language: 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system';
 }
 
 /**

@@ -19,6 +19,14 @@
     AppModules.Devices.Renderer = {};
   }
 
+  // 获取翻译文本的辅助函数
+  function t(key: string, params?: Record<string, string | number>): string {
+    if ((window as any).AppUtils && (window as any).AppUtils.I18n) {
+      return (window as any).AppUtils.I18n.t(key, params);
+    }
+    return key; // 如果 i18n 未初始化，返回 key
+  }
+
   // 设备渲染功能
   AppModules.Devices.Renderer = {
     // 上次渲染的设备列表（用于比较）
@@ -44,8 +52,8 @@
         devicesList.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon"></div>
-            <p>未检测到 NTFS 设备</p>
-            <p class="empty-hint">请插入 NTFS 格式的移动存储设备</p>
+            <p>${t('devices.emptyState')}</p>
+            <p class="empty-hint">${t('devices.emptyHint')}</p>
           </div>
         `;
         return;
@@ -89,7 +97,7 @@
       }
 
       const statusClass = device.isUnmounted ? 'unmounted' : (device.isReadOnly ? 'read-only' : 'read-write');
-      const statusText = device.isUnmounted ? '已卸载' : (device.isReadOnly ? '只读' : '读写');
+      const statusText = device.isUnmounted ? t('devices.unmounted') : (device.isReadOnly ? t('devices.readOnly') : t('devices.readWrite'));
 
       item.innerHTML = `
         <div class="device-header">
@@ -101,41 +109,41 @@
         </div>
         <div class="device-info">
           <div class="device-info-item">
-            <span class="device-info-label">设备:</span>
+            <span class="device-info-label">${t('devices.deviceLabel')}</span>
             <span>${device.devicePath}</span>
           </div>
           <div class="device-info-item">
-            <span class="device-info-label">挂载点:</span>
-            <span>${device.isUnmounted ? '未挂载' : device.volume}</span>
+            <span class="device-info-label">${t('devices.mountPointLabel')}</span>
+            <span>${device.isUnmounted ? t('devices.notMounted') : device.volume}</span>
           </div>
         </div>
         <div class="device-actions">
           ${device.isUnmounted ? `
             <button class="btn btn-success mount-btn" data-disk="${device.disk}">
-              重新配置为可读写
+              ${t('devices.remount')}
             </button>
             <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
-              推出
+              ${t('devices.eject')}
             </button>
           ` : device.isReadOnly ? `
             <button class="btn btn-success mount-btn" data-disk="${device.disk}">
-              配置为可读写
+              ${t('devices.mount')}
             </button>
             <button class="btn btn-info unmount-btn" data-disk="${device.disk}">
-              卸载
+              ${t('devices.unmount')}
             </button>
             <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
-              推出
+              ${t('devices.eject')}
             </button>
           ` : `
             <button class="btn btn-secondary restore-readonly-btn" data-disk="${device.disk}">
-              还原为只读
+              ${t('devices.restoreReadOnly')}
             </button>
             <button class="btn btn-info unmount-btn" data-disk="${device.disk}">
-              卸载
+              ${t('devices.unmount')}
             </button>
             <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
-              推出
+              ${t('devices.eject')}
             </button>
           `}
         </div>

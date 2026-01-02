@@ -4,7 +4,7 @@ export interface AppSettings {
   startupTab: 'dependencies' | 'devices' | 'logs' | 'help';
   enableLogs: boolean;
   resetLogsDaily: boolean;
-  language: 'zh-CN' | 'ja' | 'en';
+  language: 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system';
 }
 
 export interface ElectronAPI {

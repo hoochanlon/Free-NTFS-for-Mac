@@ -111,7 +111,20 @@
       flex-direction column
       gap 20px
 
-  // 帮助说明标签页需要滚动
+    .section
+      // macOS 系统设置风格：更紧凑的设计
+      padding 16px 20px
+      border-radius 8px
+      box-shadow 0 1px 2px var(--shadow)
+
+      .section-header
+        margin-bottom 12px
+
+        h2
+          font-size 15px
+          font-weight 500
+
+  // 指南手册标签页需要滚动
   &#helpTab
     overflow-y auto
     overflow-x hidden
@@ -125,6 +138,17 @@
       display flex
       flex-direction column
       height 100%
+      // macOS 系统设置风格：更紧凑的设计
+      padding 16px 20px
+      border-radius 8px
+      box-shadow 0 1px 2px var(--shadow)
+
+      .section-header
+        margin-bottom 12px
+
+        h2
+          font-size 15px
+          font-weight 500
 
   // 设置标签页需要滚动
   &#settingsTab
@@ -158,6 +182,17 @@
       min-height 0
       // 根据内容自适应高度，确保所有设置项都能显示
       flex-shrink 0
+      // macOS 系统设置风格：更紧凑的设计
+      padding 16px 20px
+      border-radius 8px
+      box-shadow 0 1px 2px var(--shadow)
+
+      .section-header
+        margin-bottom 12px
+
+        h2
+          font-size 15px
+          font-weight 500
 
 // 淡入动画
 @keyframes fadeIn
@@ -281,38 +316,40 @@ body.light-theme
 
 // 设置界面样式
 .settings-content
-  padding 24px 0 32px 0
+  padding 0
   // 确保内容自然流动，不强制高度
   flex 1
   min-height 0
   // 确保最后一个设置项能够完全显示，即使窗口尺寸最小时也能滚动到底部
+  padding-bottom 16px
 
 .setting-item
   display flex
   justify-content space-between
   align-items flex-start
-  padding 20px 0
+  padding 14px 0
   border-bottom 1px solid var(--border)
 
   &:last-child
     border-bottom none
+    padding-bottom 0
 
 .setting-label
   flex 1
-  margin-right 24px
+  margin-right 20px
   min-width 0
 
   label
     display block
-    font-size 15px
+    font-size 14px
     font-weight 500
     color var(--text-primary)
-    margin-bottom 8px
+    margin-bottom 4px
 
   .setting-description
-    font-size 13px
+    font-size 12px
     color var(--text-secondary)
-    line-height 1.5
+    line-height 1.4
     margin 0
 
 .setting-control
@@ -320,9 +357,9 @@ body.light-theme
   align-items flex-start
   gap 12px
   flex-shrink 0
-  min-width 180px
+  min-width 160px
   justify-content flex-end
-  padding-top 2px
+  padding-top 0
 
   #deletePasswordBtn
     color #E83C3C
@@ -345,15 +382,15 @@ body.light-theme
   accent-color var(--accent)
 
 .setting-select
-  padding 8px 12px
+  padding 6px 10px
   border 1px solid var(--border)
   border-radius 6px
   background var(--bg-primary)
   color var(--text-primary)
-  font-size 14px
+  font-size 13px
   cursor pointer
-  min-width 160px
-  max-width 200px
+  min-width 140px
+  max-width 180px
   transition all 0.2s ease
   height fit-content
 

@@ -78,34 +78,46 @@
         const stateChanged = currentDeviceCount !== AppModules.Devices.lastDeviceCount ||
                            currentState !== AppModules.Devices.lastDeviceState;
 
+        // 获取翻译文本的辅助函数
+        function t(key: string, params?: Record<string, string | number>): string {
+          if (AppUtils && AppUtils.I18n) {
+            return AppUtils.I18n.t(key, params);
+          }
+          return key;
+        }
+
         if (AppModules.Devices.devices.length === 0) {
-          AppUtils.UI.updateStatus('active', '等待设备', statusDot, statusText);
+          AppUtils.UI.updateStatus('active', t('status.waitingDevices'), statusDot, statusText);
           if (stateChanged) {
-            await AppUtils.Logs.addLog('未检测到 NTFS 设备', 'info');
+            await AppUtils.Logs.addLog(t('messages.noDevicesDetected'), 'info');
           }
         } else {
           const readWriteCount = AppModules.Devices.devices.length - readOnlyCount;
 
           if (readOnlyCount > 0) {
-            AppUtils.UI.updateStatus('error', `${readOnlyCount} 个设备只读`, statusDot, statusText);
+            AppUtils.UI.updateStatus('error', t('status.devicesReadOnly', { count: readOnlyCount }), statusDot, statusText);
             if (stateChanged) {
               if (readWriteCount > 0) {
                 await AppUtils.Logs.addLog(
-                  `检测到 ${AppModules.Devices.devices.length} 个设备（${readOnlyCount} 个只读，${readWriteCount} 个读写）`,
+                  t('messages.devicesDetected', {
+                    count: AppModules.Devices.devices.length,
+                    readOnly: readOnlyCount,
+                    readWrite: readWriteCount
+                  }),
                   'info'
                 );
               } else {
                 await AppUtils.Logs.addLog(
-                  `检测到 ${AppModules.Devices.devices.length} 个 NTFS 设备（全部只读）`,
+                  t('messages.devicesDetectedAllReadOnly', { count: AppModules.Devices.devices.length }),
                   'warning'
                 );
               }
             }
           } else {
-            AppUtils.UI.updateStatus('active', `${AppModules.Devices.devices.length} 个设备就绪`, statusDot, statusText);
+            AppUtils.UI.updateStatus('active', t('status.devicesReady', { count: AppModules.Devices.devices.length }), statusDot, statusText);
             if (stateChanged) {
               await AppUtils.Logs.addLog(
-                `检测到 ${AppModules.Devices.devices.length} 个 NTFS 设备（全部可读写）`,
+                t('messages.devicesDetectedAllReadWrite', { count: AppModules.Devices.devices.length }),
                 'success'
               );
             }
@@ -115,9 +127,16 @@
         AppModules.Devices.lastDeviceCount = currentDeviceCount;
         AppModules.Devices.lastDeviceState = currentState;
       } catch (error) {
-        AppUtils.UI.updateStatus('error', '检测失败', statusDot, statusText);
+        // 获取翻译文本的辅助函数
+        function t(key: string, params?: Record<string, string | number>): string {
+          if (AppUtils && AppUtils.I18n) {
+            return AppUtils.I18n.t(key, params);
+          }
+          return key;
+        }
+        AppUtils.UI.updateStatus('error', t('status.detectFailed'), statusDot, statusText);
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await AppUtils.Logs.addLog(`刷新设备列表失败: ${errorMessage}`, 'error');
+        await AppUtils.Logs.addLog(t('messages.refreshFailed', { error: errorMessage }), 'error');
       }
     },
 

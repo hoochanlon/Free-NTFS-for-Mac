@@ -40,7 +40,8 @@
           resetLogsDailyCheckbox.checked = settings.resetLogsDaily || false;
         }
         if (languageSelect) {
-          languageSelect.value = settings.language || 'zh-CN';
+          // 如果没有设置或设置为空，默认使用跟随系统
+          languageSelect.value = settings.language || 'system';
         }
 
         // 检查是否有保存的密码
@@ -69,14 +70,18 @@
 
         // 删除保存的密码
         deletePasswordBtn.addEventListener('click', async () => {
-          if (confirm('确定要删除保存的密码吗？')) {
+          const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
+          const confirmText = t('settings.deletePasswordConfirm') || '确定要删除保存的密码吗？';
+          if (confirm(confirmText)) {
             try {
               await electronAPI.deleteSavedPassword();
               deletePasswordBtn.style.display = 'none';
-              alert('已删除保存的密码');
+              const successText = t('settings.deletePasswordSuccess') || '已删除保存的密码';
+              alert(successText);
             } catch (error) {
               console.error('删除密码失败:', error);
-              alert('删除密码失败，请重试');
+              const errorText = t('settings.deletePasswordError') || '删除密码失败，请重试';
+              alert(errorText);
             }
           }
         });
@@ -118,7 +123,7 @@
         if (languageSelect) {
           languageSelect.addEventListener('change', async () => {
             try {
-              const newLanguage = languageSelect.value as 'zh-CN' | 'ja' | 'en';
+              const newLanguage = languageSelect.value as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system';
               await electronAPI.saveSettings({ language: newLanguage });
               // 切换语言
               if (AppUtils && AppUtils.I18n) {

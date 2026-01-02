@@ -7,12 +7,19 @@
     "dependencies": "系统依赖",
     "devices": "NTFS 设备",
     "logs": "操作日志",
-    "help": "帮助说明",
+    "help": "指南手册",
     "settings": "设置"
   },
   "status": {
     "checking": "正在检查...",
-    "ready": "就绪"
+    "ready": "就绪",
+    "systemReady": "系统就绪",
+    "missingDeps": "缺少依赖",
+    "checkFailed": "检查失败",
+    "waitingDevices": "等待设备",
+    "devicesReadOnly": "{count} 个设备只读",
+    "devicesReady": "{count} 个设备就绪",
+    "detectFailed": "检测失败"
   },
   "dependencies": {
     "title": "系统依赖",
@@ -22,7 +29,32 @@
     "missing": "未安装",
     "installGuide": "安装指引",
     "installGuideIntro": "如需安装或重新安装依赖，请按照以下指引在终端中手动安装：",
-    "copyCommand": "复制命令"
+    "copyCommand": "复制命令",
+    "allInstalled": "所有依赖已安装",
+    "missingDepsDetected": "检测到缺失的依赖，请查看下方安装指引",
+    "checkFailed": "检查依赖失败: {error}",
+    "checkTimeout": "检查超时，请重试",
+    "installCommandLabel": "安装命令：",
+    "swift": {
+      "name": "Swift (Xcode Command Line Tools)",
+      "description": "Apple 官方开发工具，提供 Swift 编译器和基础开发库",
+      "installGuide": "在终端运行上述命令，会弹出安装窗口，按照提示完成安装。安装过程可能需要几分钟到几十分钟，请耐心等待。"
+    },
+    "brew": {
+      "name": "Homebrew",
+      "description": "macOS 的包管理器，用于安装和管理软件包",
+      "installGuide": "在终端运行上述命令，按照提示完成安装。如果网络较慢，可以使用国内镜像源。"
+    },
+    "macfuse": {
+      "name": "MacFUSE",
+      "description": "文件系统用户空间框架，ntfs-3g 需要此依赖",
+      "installGuide": "需要先安装 Homebrew。在终端运行上述命令即可安装。"
+    },
+    "ntfs3g": {
+      "name": "ntfs-3g",
+      "description": "NTFS 文件系统驱动，提供 NTFS 读写支持",
+      "installGuide": "需要先安装 Homebrew 和 MacFUSE。在终端运行上述命令即可安装。"
+    }
   },
   "devices": {
     "title": "NTFS 设备",
@@ -40,6 +72,9 @@
     "readOnly": "只读",
     "readWrite": "可读写",
     "unmounted": "已卸载",
+    "deviceLabel": "设备:",
+    "mountPointLabel": "挂载点:",
+    "notMounted": "未挂载",
     "mountConfirm": "确定要将 {name} 配置为可读写模式吗？",
     "mountConfirmNote": "注意：\n• 这需要管理员权限，系统会弹出密码输入对话框\n• 如果设备在 Windows 中使用了快速启动，可能需要先在 Windows 中完全关闭设备",
     "unmountConfirm": "确定要卸载 {name} 吗？",
@@ -55,16 +90,30 @@
     "export": "导出",
     "exportSuccess": "日志已导出",
     "exportError": "导出失败",
-    "noLogsToExport": "没有日志可导出"
+    "noLogsToExport": "没有日志可导出",
+    "clearConfirm": "确定要清空所有日志吗？",
+    "exportPath": "日志已导出到: {path}",
+    "exportHeader": "Free NTFS for Mac - 操作日志",
+    "exportTime": "导出时间: {time}",
+    "exportCount": "共 {count} 条日志",
+    "logTypes": {
+      "info": "信息",
+      "success": "成功",
+      "error": "错误",
+      "warning": "警告"
+    }
   },
   "help": {
-    "title": "帮助说明"
+    "title": "指南手册"
   },
   "settings": {
     "title": "应用设置",
     "savePassword": "保存管理员密码",
     "savePasswordDesc": "启用后，应用将使用 macOS Keychain 安全保存您的管理员密码，以便自动输入",
     "deletePassword": "删除保存的密码",
+    "deletePasswordConfirm": "确定要删除保存的密码吗？",
+    "deletePasswordSuccess": "已删除保存的密码",
+    "deletePasswordError": "删除密码失败，请重试",
     "startupTab": "启动时打开的标签页",
     "startupTabDesc": "选择应用启动时默认显示的标签页",
     "enableLogs": "启用操作日志",
@@ -76,7 +125,9 @@
     "language": "语言",
     "languageDesc": "选择应用界面语言",
     "languages": {
+      "system": "跟随系统",
       "zh-CN": "简体中文",
+      "zh-TW": "繁體中文",
       "ja": "日本語",
       "en": "English"
     }
@@ -110,6 +161,11 @@
     "ejectAllError": "失败 {count} 个设备",
     "restoreAllStart": "开始还原 {count} 个设备为只读模式...",
     "restoreAllSuccess": "成功还原 {count} 个设备为只读模式",
-    "restoreAllError": "失败 {count} 个设备"
+    "restoreAllError": "失败 {count} 个设备",
+    "noDevicesDetected": "未检测到 NTFS 设备",
+    "devicesDetected": "检测到 {count} 个设备（{readOnly} 个只读，{readWrite} 个读写）",
+    "devicesDetectedAllReadOnly": "检测到 {count} 个 NTFS 设备（全部只读）",
+    "devicesDetectedAllReadWrite": "检测到 {count} 个 NTFS 设备（全部可读写）",
+    "refreshFailed": "刷新设备列表失败: {error}"
   }
 }

@@ -84,7 +84,7 @@
     AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
     startAutoRefresh();
 
-    // 初始化时加载帮助说明的 markdown 内容
+    // 初始化时加载指南手册的 markdown 内容
     if (helpTab) {
       AppUtils.Markdown.loadMarkdown('help.md', helpTab);
     }

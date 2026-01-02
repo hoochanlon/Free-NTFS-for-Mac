@@ -13,7 +13,28 @@
   const electronAPI = (window as any).electronAPI;
   const AppUtils = (window as any).AppUtils;
 
-  // 依赖信息和安装指引
+  // 获取翻译文本的辅助函数
+  function t(key: string, params?: Record<string, string | number>): string {
+    if (AppUtils && AppUtils.I18n) {
+      return AppUtils.I18n.t(key, params);
+    }
+    return key; // 如果 i18n 未初始化，返回 key
+  }
+
+  // 获取依赖信息（动态从国际化文件获取）
+  function getDependencyInfo(key: string) {
+    return {
+      name: t(`dependencies.${key}.name`),
+      description: t(`dependencies.${key}.description`),
+      installCommand: key === 'swift' ? 'xcode-select --install' :
+                     key === 'brew' ? '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"' :
+                     key === 'macfuse' ? 'brew install --cask macfuse' :
+                     'brew tap gromgit/homebrew-fuse && brew install ntfs-3g-mac',
+      installGuide: t(`dependencies.${key}.installGuide`)
+    };
+  }
+
+  // 依赖信息和安装指引（保留用于向后兼容，但实际使用动态获取）
   const DEPENDENCY_INFO = {
     swift: {
       name: 'Swift (Xcode Command Line Tools)',
@@ -55,11 +76,11 @@
     ): Promise<void> {
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
-        AppUtils.UI.updateStatus('active', '正在检查...', statusDot, statusText);
+        AppUtils.UI.updateStatus('active', t('status.checking'), statusDot, statusText);
 
         // 添加超时保护
         const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('检查超时，请重试')), 15000);
+          setTimeout(() => reject(new Error(t('dependencies.checkTimeout'))), 15000);
         });
 
         AppModules.Dependencies.dependencies = await Promise.race([
@@ -75,16 +96,16 @@
                             AppModules.Dependencies.dependencies.ntfs3g;
 
         if (allInstalled) {
-          AppUtils.UI.updateStatus('active', '系统就绪', statusDot, statusText);
-          await AppUtils.Logs.addLog('所有依赖已安装', 'success');
+          AppUtils.UI.updateStatus('active', t('status.systemReady'), statusDot, statusText);
+          await AppUtils.Logs.addLog(t('dependencies.allInstalled'), 'success');
         } else {
-          AppUtils.UI.updateStatus('error', '缺少依赖', statusDot, statusText);
-          await AppUtils.Logs.addLog('检测到缺失的依赖，请查看下方安装指引', 'warning');
+          AppUtils.UI.updateStatus('error', t('status.missingDeps'), statusDot, statusText);
+          await AppUtils.Logs.addLog(t('dependencies.missingDepsDetected'), 'warning');
         }
       } catch (error) {
-        AppUtils.UI.updateStatus('error', '检查失败', statusDot, statusText);
+        AppUtils.UI.updateStatus('error', t('status.checkFailed'), statusDot, statusText);
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await AppUtils.Logs.addLog(`检查依赖失败: ${errorMessage}`, 'error');
+        await AppUtils.Logs.addLog(t('dependencies.checkFailed', { error: errorMessage }), 'error');
         console.error('检查依赖错误:', error);
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
@@ -108,34 +129,34 @@
         const item = document.createElement('div');
         item.className = 'dep-item';
         item.setAttribute('data-dep-key', dep.key);
+        const info = getDependencyInfo(dep.key);
         item.innerHTML = `
           <span class="dep-name">
             <span class="dep-number ${dep.status ? 'installed' : 'missing'}">${index + 1}</span>
             <span class="dep-expand-icon">▶</span>
-            ${dep.name}
+            ${info.name}
           </span>
           <span class="dep-status ${dep.status ? 'installed' : 'missing'}">
-            ${dep.status ? '✓ 已安装' : '✗ 未安装'}
+            ${dep.status ? `✓ ${t('dependencies.installed')}` : `✗ ${t('dependencies.missing')}`}
           </span>
         `;
         depsList.appendChild(item);
 
         // 创建对应的安装指引卡片（默认折叠）
-        const info = DEPENDENCY_INFO[dep.key as keyof typeof DEPENDENCY_INFO];
         const guideCard = document.createElement('div');
         guideCard.className = 'install-guide-card collapsed';
         guideCard.setAttribute('data-dep-key', dep.key);
         guideCard.innerHTML = `
           <div class="guide-header">
             <h3>${info.name}</h3>
-            <span class="guide-status ${dep.status ? 'installed' : 'missing'}">${dep.status ? '已安装' : '未安装'}</span>
+            <span class="guide-status ${dep.status ? 'installed' : 'missing'}">${dep.status ? t('dependencies.installed') : t('dependencies.missing')}</span>
           </div>
           <p class="guide-description">${info.description}</p>
           <div class="guide-command">
-            <label>安装命令：</label>
+            <label>${t('dependencies.installCommandLabel')}</label>
             <div class="command-box">
               <code class="command-text">${info.installCommand}</code>
-              <button class="btn-copy" data-command="${info.installCommand.replace(/"/g, '&quot;')}" title="复制命令">
+              <button class="btn-copy" data-command="${info.installCommand.replace(/"/g, '&quot;')}" title="${t('dependencies.copyCommand')}">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M5.5 3.5H3.5C2.67 3.5 2 4.17 2 5V12.5C2 13.33 2.67 14 3.5 14H9.5C10.33 14 11 13.33 11 12.5V10.5M11 5.5H13.5C14.33 5.5 15 6.17 15 7V12.5C15 13.33 14.33 14 13.5 14H11M11 5.5V3.5C11 2.67 10.33 2 9.5 2H7M11 5.5H9.5C8.67 5.5 8 6.17 8 7V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>

@@ -7,12 +7,19 @@
     "dependencies": "システム依存",
     "devices": "NTFS デバイス",
     "logs": "操作ログ",
-    "help": "ヘルプ",
+    "help": "ガイド",
     "settings": "設定"
   },
   "status": {
     "checking": "チェック中...",
-    "ready": "準備完了"
+    "ready": "準備完了",
+    "systemReady": "システム準備完了",
+    "missingDeps": "依存関係が不足",
+    "checkFailed": "チェック失敗",
+    "waitingDevices": "デバイス待機中",
+    "devicesReadOnly": "{count} 個のデバイスが読み取り専用",
+    "devicesReady": "{count} 個のデバイス準備完了",
+    "detectFailed": "検出失敗"
   },
   "dependencies": {
     "title": "システム依存",
@@ -22,7 +29,32 @@
     "missing": "未インストール",
     "installGuide": "インストールガイド",
     "installGuideIntro": "依存関係をインストールまたは再インストールする場合は、以下のガイドに従ってターミナルで手動でインストールしてください：",
-    "copyCommand": "コマンドをコピー"
+    "copyCommand": "コマンドをコピー",
+    "allInstalled": "すべての依存関係がインストール済み",
+    "missingDepsDetected": "不足している依存関係が検出されました。以下のインストールガイドを参照してください",
+    "checkFailed": "依存関係の確認に失敗しました: {error}",
+    "checkTimeout": "チェックがタイムアウトしました。もう一度お試しください",
+    "installCommandLabel": "インストールコマンド：",
+    "swift": {
+      "name": "Swift (Xcode Command Line Tools)",
+      "description": "Apple公式開発ツール、Swiftコンパイラと基本開発ライブラリを提供",
+      "installGuide": "ターミナルで上記のコマンドを実行すると、インストールウィンドウが表示されます。プロンプトに従ってインストールを完了してください。インストールプロセスには数分から数十分かかる場合がありますので、お待ちください。"
+    },
+    "brew": {
+      "name": "Homebrew",
+      "description": "macOSのパッケージマネージャー、ソフトウェアパッケージのインストールと管理に使用",
+      "installGuide": "ターミナルで上記のコマンドを実行し、プロンプトに従ってインストールを完了してください。ネットワークが遅い場合は、国内ミラーソースを使用できます。"
+    },
+    "macfuse": {
+      "name": "MacFUSE",
+      "description": "ファイルシステムユーザー空間フレームワーク、ntfs-3gに必要",
+      "installGuide": "まずHomebrewをインストールする必要があります。ターミナルで上記のコマンドを実行してインストールします。"
+    },
+    "ntfs3g": {
+      "name": "ntfs-3g",
+      "description": "NTFSファイルシステムドライバー、NTFS読み書きサポートを提供",
+      "installGuide": "まずHomebrewとMacFUSEをインストールする必要があります。ターミナルで上記のコマンドを実行してインストールします。"
+    }
   },
   "devices": {
     "title": "NTFS デバイス",
@@ -40,6 +72,9 @@
     "readOnly": "読み取り専用",
     "readWrite": "読み書き可能",
     "unmounted": "アンマウント済み",
+    "deviceLabel": "デバイス:",
+    "mountPointLabel": "マウントポイント:",
+    "notMounted": "マウントされていません",
     "mountConfirm": "{name} を読み書き可能モードに設定しますか？",
     "mountConfirmNote": "注意：\n• これには管理者権限が必要で、システムがパスワード入力ダイアログを表示します\n• デバイスが Windows で高速スタートアップを使用している場合、先に Windows でデバイスを完全にシャットダウンする必要がある場合があります",
     "unmountConfirm": "{name} をアンマウントしますか？",
@@ -55,16 +90,30 @@
     "export": "エクスポート",
     "exportSuccess": "ログをエクスポートしました",
     "exportError": "エクスポートに失敗しました",
-    "noLogsToExport": "エクスポートするログがありません"
+    "noLogsToExport": "エクスポートするログがありません",
+    "clearConfirm": "すべてのログをクリアしてもよろしいですか？",
+    "exportPath": "ログをエクスポートしました: {path}",
+    "exportHeader": "Free NTFS for Mac - 操作ログ",
+    "exportTime": "エクスポート時間: {time}",
+    "exportCount": "合計 {count} ログ",
+    "logTypes": {
+      "info": "情報",
+      "success": "成功",
+      "error": "エラー",
+      "warning": "警告"
+    }
   },
   "help": {
-    "title": "ヘルプ"
+    "title": "ガイド"
   },
   "settings": {
     "title": "アプリケーション設定",
     "savePassword": "管理者パスワードを保存",
     "savePasswordDesc": "有効にすると、アプリは macOS Keychain を使用して管理者パスワードを安全に保存し、自動入力できるようにします",
     "deletePassword": "保存されたパスワードを削除",
+    "deletePasswordConfirm": "保存されたパスワードを削除してもよろしいですか？",
+    "deletePasswordSuccess": "保存されたパスワードを削除しました",
+    "deletePasswordError": "パスワードの削除に失敗しました。もう一度お試しください",
     "startupTab": "起動時に開くタブ",
     "startupTabDesc": "アプリ起動時にデフォルトで表示されるタブを選択します",
     "enableLogs": "操作ログを有効化",
@@ -76,7 +125,9 @@
     "language": "言語",
     "languageDesc": "アプリケーションのインターフェース言語を選択します",
     "languages": {
+      "system": "システムに従う",
       "zh-CN": "简体中文",
+      "zh-TW": "繁體中文",
       "ja": "日本語",
       "en": "English"
     }
@@ -110,6 +161,11 @@
     "ejectAllError": "{count} 個のデバイスが失敗",
     "restoreAllStart": "{count} 個のデバイスを読み取り専用モードに戻す開始...",
     "restoreAllSuccess": "{count} 個のデバイスを読み取り専用モードに戻す成功",
-    "restoreAllError": "{count} 個のデバイスが失敗"
+    "restoreAllError": "{count} 個のデバイスが失敗",
+    "noDevicesDetected": "NTFS デバイスが検出されませんでした",
+    "devicesDetected": "{count} 個のデバイスを検出（{readOnly} 個読み取り専用、{readWrite} 個読み書き可能）",
+    "devicesDetectedAllReadOnly": "{count} 個の NTFS デバイスを検出（すべて読み取り専用）",
+    "devicesDetectedAllReadWrite": "{count} 個の NTFS デバイスを検出（すべて読み書き可能）",
+    "refreshFailed": "デバイスリストの更新に失敗しました: {error}"
   }
 }
