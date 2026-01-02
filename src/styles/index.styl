@@ -77,13 +77,24 @@
 // 标签页内容区域
 .tab-content
   flex 1
-  overflow-y auto
+  overflow hidden
   display none
   padding 0
   animation fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+  min-height 0
 
   &.active
-    display block
+    display flex
+    flex-direction column
+
+  // 设备标签页特殊处理
+  &#devicesTab
+    display none
+    padding 0
+
+    &.active
+      display flex
+      flex-direction column
 
 // 淡入动画
 @keyframes fadeIn
@@ -204,3 +215,78 @@ body.light-theme
 
     blockquote
       background var(--light-bg-tertiary)
+
+// 设置界面样式
+.settings-content
+  padding 24px 0
+
+.setting-item
+  display flex
+  justify-content space-between
+  align-items flex-start
+  padding 20px 0
+  border-bottom 1px solid var(--border)
+
+  &:last-child
+    border-bottom none
+
+.setting-label
+  flex 1
+  margin-right 24px
+
+  label
+    display block
+    font-size 15px
+    font-weight 500
+    color var(--text-primary)
+    margin-bottom 8px
+
+  .setting-description
+    font-size 13px
+    color var(--text-secondary)
+    line-height 1.5
+    margin 0
+
+.setting-control
+  display flex
+  align-items center
+  gap 12px
+
+  #deletePasswordBtn
+    color #E83C3C
+    font-size 13px
+    padding 6px 12px
+    border-radius 6px
+    transition all 0.2s ease
+
+    &:hover
+      background rgba(232, 60, 60, 0.1)
+      color #D32F2F
+
+    &:active
+      background rgba(232, 60, 60, 0.15)
+
+.setting-checkbox
+  width 18px
+  height 18px
+  cursor pointer
+  accent-color var(--accent)
+
+.setting-select
+  padding 8px 12px
+  border 1px solid var(--border)
+  border-radius 6px
+  background var(--bg-primary)
+  color var(--text-primary)
+  font-size 14px
+  cursor pointer
+  min-width 160px
+  transition all 0.2s ease
+
+  &:hover
+    border-color var(--accent)
+
+  &:focus
+    outline none
+    border-color var(--accent)
+    box-shadow 0 0 0 3px var(--accent-alpha)

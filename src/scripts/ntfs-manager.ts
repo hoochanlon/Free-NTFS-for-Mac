@@ -5,6 +5,8 @@ import { fileExists, execAsync, ExecResult } from './ntfs-manager/utils';
 import { spawn } from 'child_process';
 import * as fs from 'fs/promises';
 import type { NTFSDevice } from '../types/electron';
+import { KeychainManager } from './utils/keychain';
+import { SettingsManager } from './utils/settings';
 
 class NTFSManager {
   private pathFinder: PathFinder;
@@ -119,6 +121,24 @@ class NTFSManager {
 
   // 获取管理员密码
   async getPassword(prompt: string = '需要管理员权限'): Promise<string> {
+    // 先检查设置，看是否允许使用保存的密码
+    const settings = await SettingsManager.getSettings();
+
+    if (settings.savePassword) {
+      try {
+        const savedPassword = await KeychainManager.getPassword();
+        if (savedPassword && savedPassword.length > 0) {
+          // 直接返回保存的密码，在实际使用时验证
+          // 这样可以避免预验证可能的问题
+          console.log('使用保存的密码');
+          return savedPassword;
+        }
+      } catch (error) {
+        console.warn('读取保存的密码失败:', error);
+      }
+    }
+
+    // 如果没有保存的密码或密码无效，提示用户输入
     try {
       const escapedPrompt = prompt.replace(/"/g, '\\"').replace(/\n/g, ' ');
       const scriptPath = `/tmp/ntfs_password_${Date.now()}.scpt`;
@@ -135,16 +155,30 @@ end tell`;
       try {
         const result = await execAsync(`osascript "${scriptPath}"`) as { stdout: string };
         const match = result.stdout.match(/text returned:(.+)/i);
+        let password: string;
+
         if (match && match[1]) {
-          return match[1].trim();
+          password = match[1].trim();
+        } else {
+          const trimmed = result.stdout.trim();
+          if (trimmed && !trimmed.toLowerCase().includes('error')) {
+            password = trimmed;
+          } else {
+            throw new Error('无法解析密码输入结果');
+          }
         }
 
-        const trimmed = result.stdout.trim();
-        if (trimmed && !trimmed.toLowerCase().includes('error')) {
-          return trimmed;
+        // 如果设置允许保存密码，保存新输入的密码
+        if (settings.savePassword && password) {
+          try {
+            await KeychainManager.savePassword(password);
+            console.log('密码已保存到 Keychain');
+          } catch (error) {
+            console.warn('保存密码失败:', error);
+          }
         }
 
-        throw new Error('无法解析密码输入结果');
+        return password;
       } finally {
         fs.unlink(scriptPath).catch(() => {});
       }
@@ -185,12 +219,23 @@ end tell`;
         reject(new Error('操作超时'));
       }, 30000);
 
-      process.on('close', (code) => {
+      process.on('close', async (code) => {
         clearTimeout(timeout);
         if (code === 0) {
           resolve({ stdout, stderr });
         } else {
-          if (stderr.includes('password is incorrect') || stderr.includes('Sorry, try again')) {
+          // 检查是否是密码错误
+          if (stderr.includes('password is incorrect') || stderr.includes('Sorry, try again') || stderr.includes('incorrect password')) {
+            // 如果密码错误，删除保存的密码
+            const settings = await SettingsManager.getSettings();
+            if (settings.savePassword) {
+              try {
+                await KeychainManager.deletePassword();
+                console.log('密码错误，已删除保存的密码');
+              } catch (error) {
+                console.warn('删除保存的密码失败:', error);
+              }
+            }
             reject(new Error('密码错误，请重试'));
           } else {
             reject(new Error(stderr.trim() || stdout.trim() || `退出码 ${code}`));
@@ -214,6 +259,19 @@ end tell`;
       fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
       return `设备 ${device.volumeName} 已卸载`;
     } catch (error: any) {
+      // 如果密码错误，重新获取密码并重试
+      if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
+        try {
+          // 删除保存的密码后，重新获取
+          const password = await this.getPassword(`卸载设备 ${device.volumeName}`);
+          await this.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
+          this.mountedDevices.delete(device.disk);
+          fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
+          return `设备 ${device.volumeName} 已卸载`;
+        } catch (retryError) {
+          throw retryError;
+        }
+      }
       if (error.message?.includes('密码') || error.message?.includes('password')) {
         throw error;
       }
@@ -266,12 +324,22 @@ end tell`;
     }
 
     try {
-      const password = await this.getPassword(`挂载设备 ${device.volumeName} 为读写模式`);
+      let password = await this.getPassword(`挂载设备 ${device.volumeName} 为读写模式`);
 
       try {
         await this.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
-      } catch {
-        // 卸载失败可能因为已经卸载，继续
+      } catch (error: any) {
+        // 如果密码错误，重新获取密码
+        if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
+          password = await this.getPassword(`挂载设备 ${device.volumeName} 为读写模式`);
+          try {
+            await this.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
+          } catch {
+            // 卸载失败可能因为已经卸载，继续
+          }
+        } else {
+          // 卸载失败可能因为已经卸载，继续
+        }
       }
 
       const mountArgs = [
@@ -286,12 +354,26 @@ end tell`;
         device.volume
       ];
 
-      const mountPromise = this.executeSudoWithPassword(mountArgs, password);
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('挂载超时（10秒）。可能是 Windows 快速启动导致文件系统处于脏状态。建议在 Windows 中完全关闭（而非休眠），或禁用快速启动功能。')), 10000);
-      });
+      try {
+        const mountPromise = this.executeSudoWithPassword(mountArgs, password);
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('挂载超时（10秒）。可能是 Windows 快速启动导致文件系统处于脏状态。建议在 Windows 中完全关闭（而非休眠），或禁用快速启动功能。')), 10000);
+        });
 
-      await Promise.race([mountPromise, timeoutPromise]);
+        await Promise.race([mountPromise, timeoutPromise]);
+      } catch (error: any) {
+        // 如果密码错误，重新获取密码并重试
+        if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
+          password = await this.getPassword(`挂载设备 ${device.volumeName} 为读写模式`);
+          const mountPromise = this.executeSudoWithPassword(mountArgs, password);
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('挂载超时（10秒）。可能是 Windows 快速启动导致文件系统处于脏状态。建议在 Windows 中完全关闭（而非休眠），或禁用快速启动功能。')), 10000);
+          });
+          await Promise.race([mountPromise, timeoutPromise]);
+        } else {
+          throw error;
+        }
+      }
 
       this.mountedDevices.add(device.disk);
       fs.writeFile(`/tmp/ntfs_mounted_${device.disk}`, '').catch(() => {});

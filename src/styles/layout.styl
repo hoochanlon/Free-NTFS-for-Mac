@@ -17,6 +17,7 @@
   flex-direction column
   gap 20px
   background var(--bg-primary)
+  min-height 0
 
   // 隐藏滚动条
   &::-webkit-scrollbar
@@ -24,6 +25,16 @@
 
   scrollbar-width none
   -ms-overflow-style none
+
+  // 设备标签页激活时，主内容区域不滚动
+  &.devices-tab-active
+    overflow hidden
+
+  // 设备标签页不需要 padding
+  #devicesTab
+    margin -32px
+    padding 0
+    height 100%
 
 // 区域样式（macOS 风格）
 .section

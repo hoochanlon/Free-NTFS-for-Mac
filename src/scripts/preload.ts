@@ -21,7 +21,11 @@ const electronAPI: ElectronAPI = {
   broadcastThemeChange: (isLightMode: boolean) => ipcRenderer.invoke('broadcast-theme-change', isLightMode),
   onThemeChange: (callback: (isLightMode: boolean) => void) => {
     ipcRenderer.on('theme-changed', (event, isLightMode: boolean) => callback(isLightMode));
-  }
+  },
+  getSettings: () => ipcRenderer.invoke('get-settings'),
+  saveSettings: (settings: Partial<import('../types/electron').AppSettings>) => ipcRenderer.invoke('save-settings', settings),
+  hasSavedPassword: () => ipcRenderer.invoke('has-saved-password'),
+  deleteSavedPassword: () => ipcRenderer.invoke('delete-saved-password')
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

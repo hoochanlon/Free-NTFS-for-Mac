@@ -183,7 +183,7 @@
     // 渲染已可读写的设备列表
     renderReadWriteDevices(readWriteDevicesList: HTMLElement): void {
       const readWriteDevices = AppModules.Devices.devices.filter(
-        (device: any) => device.isMounted && !device.isReadOnly
+        (device: any) => !device.isReadOnly
       );
 
       if (readWriteDevices.length === 0) {
@@ -338,6 +338,80 @@
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         AppUtils.Logs.addLog(`卸载失败: ${errorMessage}`, 'error');
+      } finally {
+        AppUtils.UI.showLoading(loadingOverlay, false);
+      }
+    },
+
+    // 卸载所有NTFS设备
+    async unmountAllDevices(
+      devicesList: HTMLElement,
+      readWriteDevicesList: HTMLElement,
+      statusDot: HTMLElement,
+      statusText: HTMLElement
+    ): Promise<void> {
+      // 获取所有已挂载为读写模式的设备
+      const readWriteDevices = AppModules.Devices.devices.filter((d: any) => !d.isReadOnly);
+
+      if (readWriteDevices.length === 0) {
+        AppUtils.Logs.addLog('没有已挂载为读写模式的设备', 'info');
+        return;
+      }
+
+      const deviceNames = readWriteDevices.map((d: any) => d.volumeName).join('、');
+      const message = `确定要卸载所有已挂载的 NTFS 设备吗？\n\n` +
+                      `将卸载以下设备：\n${deviceNames}\n\n` +
+                      `注意：这需要管理员权限，系统会弹出密码输入对话框`;
+
+      if (!confirm(message)) {
+        return;
+      }
+
+      const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
+
+      try {
+        AppUtils.UI.showLoading(loadingOverlay, true);
+        AppUtils.Logs.addLog(`开始卸载 ${readWriteDevices.length} 个设备...`, 'info');
+        AppUtils.Logs.addLog('提示：请在弹出的对话框中输入管理员密码', 'info');
+
+        let successCount = 0;
+        let failCount = 0;
+
+        // 逐个卸载设备
+        for (const device of readWriteDevices) {
+          try {
+            AppUtils.Logs.addLog(`正在卸载 ${device.volumeName}...`, 'info');
+            const result = await electronAPI.unmountDevice(device);
+
+            if (result.success) {
+              successCount++;
+              if (result.result) {
+                AppUtils.Logs.addLog(result.result, 'success');
+              }
+            } else {
+              failCount++;
+              AppUtils.Logs.addLog(`卸载 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
+            }
+          } catch (error) {
+            failCount++;
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            AppUtils.Logs.addLog(`卸载 ${device.volumeName} 失败: ${errorMessage}`, 'error');
+          }
+        }
+
+        // 刷新设备列表
+        await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+
+        // 显示总结
+        if (successCount > 0) {
+          AppUtils.Logs.addLog(`成功卸载 ${successCount} 个设备`, 'success');
+        }
+        if (failCount > 0) {
+          AppUtils.Logs.addLog(`失败 ${failCount} 个设备`, 'warning');
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        AppUtils.Logs.addLog(`卸载所有设备失败: ${errorMessage}`, 'error');
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
       }

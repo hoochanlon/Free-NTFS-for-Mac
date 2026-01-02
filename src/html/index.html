@@ -63,6 +63,10 @@
         <img src="../imgs/svg/help.svg" alt="帮助说明" class="tab-icon">
         <span>帮助说明</span>
       </button>
+      <button class="tab" data-tab="settings">
+        <img src="../imgs/svg/setting.svg" alt="设置" class="tab-icon">
+        <span>设置</span>
+      </button>
     </div>
 
     <!-- 标签页内容 -->
@@ -89,28 +93,31 @@
 
       <!-- NTFS 设备标签页 -->
       <div class="tab-content" id="devicesTab">
-        <div class="section">
-          <div class="section-header">
-            <h2>NTFS 设备</h2>
-            <button class="btn btn-secondary" id="refreshBtn">刷新</button>
-          </div>
-          <div class="devices-list" id="devicesList">
-            <div class="empty-state">
-              <div class="empty-icon"></div>
-              <p>未检测到 NTFS 设备</p>
-              <p class="empty-hint">请插入 NTFS 格式的移动存储设备</p>
+        <div class="devices-layout">
+          <div class="devices-column">
+            <div class="section-header">
+              <h2>NTFS 设备</h2>
+              <button class="btn btn-secondary" id="refreshBtn">刷新</button>
+            </div>
+            <div class="devices-list" id="devicesList">
+              <div class="empty-state">
+                <div class="empty-icon"></div>
+                <p>未检测到 NTFS 设备</p>
+                <p class="empty-hint">请插入 NTFS 格式的移动存储设备</p>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="section">
-          <div class="section-header">
-            <h2>已可读写的设备</h2>
-          </div>
-          <div class="read-write-devices-list" id="readWriteDevicesList">
-            <div class="empty-state">
-              <div class="empty-icon"></div>
-              <p>暂无已可读写的设备</p>
-              <p class="empty-hint">已挂载为读写模式的设备将显示在这里</p>
+          <div class="devices-column">
+            <div class="section-header">
+              <h2>已可读写的设备</h2>
+              <button class="btn btn-danger" id="unmountAllBtn">卸载所有NTFS设备</button>
+            </div>
+            <div class="read-write-devices-list" id="readWriteDevicesList">
+              <div class="empty-state">
+                <div class="empty-icon"></div>
+                <p>暂无已可读写的设备</p>
+                <p class="empty-hint">已挂载为读写模式的设备将显示在这里</p>
+              </div>
             </div>
           </div>
         </div>
@@ -135,6 +142,41 @@
           <p>加载中...</p>
         </div>
       </div>
+
+      <!-- 设置标签页 -->
+      <div class="tab-content" id="settingsTab">
+        <div class="section">
+          <div class="section-header">
+            <h2>应用设置</h2>
+          </div>
+          <div class="settings-content" id="settingsContent">
+            <div class="setting-item">
+              <div class="setting-label">
+                <label for="savePasswordCheckbox">保存管理员密码</label>
+                <p class="setting-description">启用后，应用将使用 macOS Keychain 安全保存您的管理员密码，以便自动输入</p>
+              </div>
+              <div class="setting-control">
+                <input type="checkbox" id="savePasswordCheckbox" class="setting-checkbox">
+                <button class="btn btn-text" id="deletePasswordBtn" style="display: none;">删除保存的密码</button>
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-label">
+                <label for="startupTabSelect">启动时打开的标签页</label>
+                <p class="setting-description">选择应用启动时默认显示的标签页</p>
+              </div>
+              <div class="setting-control">
+                <select id="startupTabSelect" class="setting-select">
+                  <option value="dependencies">系统依赖</option>
+                  <option value="devices">NTFS 设备</option>
+                  <option value="logs">操作日志</option>
+                  <option value="help">帮助说明</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -154,6 +196,7 @@
   <script src="../../scripts/modules/devices.js"></script>
   <script src="../../scripts/modules/tabs.js"></script>
   <script src="../../scripts/modules/about.js"></script>
+  <script src="../../scripts/modules/settings.js"></script>
   <!-- 主入口 -->
   <script src="../../scripts/renderer.js"></script>
 </body>

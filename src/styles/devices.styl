@@ -1,19 +1,57 @@
 // macOS 风格 NTFS 设备标签页样式
 @import 'variables'
 
+// 设备布局容器（左右两栏）- 统一滚动容器
+.devices-layout
+  display flex
+  gap 0
+  flex 1
+  min-height 0
+  overflow-y auto
+  overflow-x hidden
+  align-items flex-start
+
+  // 滚动条样式
+  &::-webkit-scrollbar
+    width 6px
+
+  &::-webkit-scrollbar-track
+    background transparent
+
+  &::-webkit-scrollbar-thumb
+    background var(--border)
+    border-radius 3px
+
+    &:hover
+      background var(--accent)
+
+// 设备列（左右两栏）
+.devices-column
+  flex 1
+  display flex
+  flex-direction column
+  padding 24px
+  overflow visible
+  position relative
+  min-width 0
+
+  // 右侧栏添加左边框作为分隔
+  &:last-child
+    border-left 1px solid var(--border)
+
+  // 标题区域
+  .section-header
+    margin-bottom 20px
+    flex-shrink 0
+
 // 设备列表容器
 .devices-list,
 .read-write-devices-list
   display flex
   flex-direction column
   gap 12px
-
-  // 隐藏滚动条（如果内容溢出）
-  &::-webkit-scrollbar
-    display none
-
-  scrollbar-width none
-  -ms-overflow-style none
+  flex-shrink 0
+  min-height 100%
 
 // 设备项样式（macOS 风格）
 .device-item
@@ -156,12 +194,12 @@
   display flex
   gap 8px
   flex-wrap wrap
+  justify-content flex-end
 
   .mount-btn,
   .unmount-btn
-    flex 1
-    min-width 120px
-    padding 8px 16px
+    flex 0 0 auto
+    padding 8px 20px
     font-size 13px
     font-weight 500
     border-radius 6px
@@ -169,6 +207,7 @@
     position relative
     overflow hidden
     letter-spacing -0.01em
+    white-space nowrap
 
     // 点击效果
     &:active
@@ -179,6 +218,11 @@
   text-align center
   padding 60px 20px
   color var(--text-secondary)
+  flex 1
+  display flex
+  flex-direction column
+  justify-content center
+  align-items center
 
   .empty-icon
     width 64px

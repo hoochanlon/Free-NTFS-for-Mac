@@ -11,6 +11,8 @@ import {
   mainWindow
 } from './window-manager';
 import { openAboutWindow, getAboutWindow } from './about-window';
+import { SettingsManager, AppSettings } from './utils/settings';
+import { KeychainManager } from './utils/keychain';
 
 // NTFS 相关 IPC handlers
 export function setupNTFSHandlers(): void {
@@ -151,10 +153,36 @@ export function setupSystemHandlers(): void {
   });
 }
 
+// 设置相关 IPC handlers
+export function setupSettingsHandlers(): void {
+  // 获取设置
+  ipcMain.handle('get-settings', async () => {
+    return await SettingsManager.getSettings();
+  });
+
+  // 保存设置
+  ipcMain.handle('save-settings', async (event, settings: Partial<AppSettings>) => {
+    await SettingsManager.saveSettings(settings);
+    return { success: true };
+  });
+
+  // 检查是否有保存的密码
+  ipcMain.handle('has-saved-password', async () => {
+    return await KeychainManager.hasPassword();
+  });
+
+  // 删除保存的密码
+  ipcMain.handle('delete-saved-password', async () => {
+    await KeychainManager.deletePassword();
+    return { success: true };
+  });
+}
+
 // 初始化所有 IPC handlers
 export function setupIpcHandlers(): void {
   setupNTFSHandlers();
   setupWindowHandlers();
   setupFileHandlers();
   setupSystemHandlers();
+  setupSettingsHandlers();
 }

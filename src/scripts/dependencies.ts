@@ -90,15 +90,15 @@
     const deps = [
       { name: 'Swift (Xcode Command Line Tools)', status: dependencies.swift },
       { name: 'Homebrew', status: dependencies.brew },
-      { name: 'MacFUSE', status: dependencies.macfuse },
-      { name: 'ntfs-3g', status: dependencies.ntfs3g }
+      { name: 'ntfs-3g', status: dependencies.ntfs3g },
+      { name: 'MacFUSE', status: dependencies.macfuse }
     ];
 
-    deps.forEach(dep => {
+    deps.forEach((dep, index) => {
       const item = document.createElement('div');
       item.className = 'dep-item';
       item.innerHTML = `
-        <span class="dep-name">${dep.name}</span>
+        <span class="dep-name"><span class="dep-number ${dep.status ? 'installed' : 'missing'}">${index + 1}</span> ${dep.name}</span>
         <span class="dep-status ${dep.status ? 'installed' : 'missing'}">
           ${dep.status ? '✓ 已安装' : '✗ 未安装'}
         </span>

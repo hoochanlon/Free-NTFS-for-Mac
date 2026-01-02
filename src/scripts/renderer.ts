@@ -37,6 +37,7 @@
   const devicesList = document.getElementById('devicesList')!;
   const readWriteDevicesList = document.getElementById('readWriteDevicesList')!;
   const refreshBtn = document.getElementById('refreshBtn') as HTMLButtonElement;
+  const unmountAllBtn = document.getElementById('unmountAllBtn') as HTMLButtonElement;
   const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
   const logContainer = document.getElementById('logContainer')!;
   const clearLogBtn = document.getElementById('clearLogBtn') as HTMLButtonElement;
@@ -49,12 +50,25 @@
   let autoRefreshInterval: NodeJS.Timeout | null = null;
 
   // 初始化
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     // 初始化主题（在 DOM 加载前设置，避免闪烁）
     AppUtils.Theme.initializeTheme(docBody, themeToggleButton);
 
     // 初始化标签页
     AppModules.Tabs.initTabs(logContainer, helpTab);
+
+    // 初始化设置
+    await AppModules.Settings.initSettings();
+
+    // 根据设置打开启动标签页
+    try {
+      const settings = await window.electronAPI.getSettings();
+      if (settings.startupTab) {
+        AppModules.Tabs.switchToTab(settings.startupTab, logContainer, helpTab);
+      }
+    } catch (error) {
+      console.error('加载启动标签页设置失败:', error);
+    }
 
     // 初始化功能模块
     AppModules.Dependencies.checkDependencies(
@@ -103,6 +117,20 @@
     refreshBtn.addEventListener('click', () => {
       AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
     });
+
+    if (unmountAllBtn) {
+      unmountAllBtn.addEventListener('click', () => {
+        AppModules.Devices.unmountAllDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+      });
+    }
+
+    // 同步设备列表的滚动（确保两栏内容高度一致）
+    const devicesLayout = document.querySelector('.devices-layout') as HTMLElement;
+    if (devicesLayout) {
+      // 监听滚动，确保两栏内容同步
+      // 由于现在使用统一的滚动容器，两栏会自然同步
+      // 这里可以添加额外的逻辑来确保内容高度一致（如果需要）
+    }
 
     clearLogBtn.addEventListener('click', () => {
       AppUtils.Logs.clearLog(logContainer);
