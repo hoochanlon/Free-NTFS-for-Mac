@@ -30,7 +30,7 @@
   flex 1
   display flex
   flex-direction column
-  padding 24px
+  padding 16px
   overflow visible
   position relative
   min-width 0
@@ -41,7 +41,7 @@
 
   // 标题区域
   .section-header
-    margin-bottom 20px
+    margin-bottom 12px
     flex-shrink 0
 
 // 设备列表容器
@@ -49,7 +49,7 @@
 .read-write-devices-list
   display flex
   flex-direction column
-  gap 12px
+  gap 8px
   flex-shrink 0
   min-height 100%
 
@@ -57,8 +57,8 @@
 .device-item
   background var(--bg-secondary)
   border 1px solid var(--border)
-  border-radius 10px
-  padding 20px
+  border-radius 8px
+  padding 14px
   transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
   position relative
   overflow hidden
@@ -93,32 +93,32 @@
   display flex
   justify-content space-between
   align-items center
-  margin-bottom 16px
+  margin-bottom 10px
 
 .device-name
   display flex
   align-items center
-  gap 10px
-  font-size 15px
+  gap 8px
+  font-size 14px
   font-weight 600
   color var(--text-primary)
   letter-spacing -0.01em
 
   .device-icon
-    width 28px
-    height 28px
+    width 24px
+    height 24px
     display flex
     align-items center
     justify-content center
     background var(--bg-tertiary)
-    border-radius 6px
+    border-radius 5px
     flex-shrink 0
 
     // 使用 SVG 图标
     &::before
       content ''
-      width 20px
-      height 20px
+      width 18px
+      height 18px
       background-image url('src/imgs/svg/flash-drive.svg')
       background-size contain
       background-repeat no-repeat
@@ -129,10 +129,10 @@
 .device-status
   display inline-flex
   align-items center
-  gap 6px
-  padding 4px 12px
-  border-radius 6px
-  font-size 12px
+  gap 4px
+  padding 3px 10px
+  border-radius 5px
+  font-size 11px
   font-weight 500
   transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
   letter-spacing 0.01em
@@ -151,8 +151,8 @@
 
     &::before
       content ''
-      width 12px
-      height 12px
+      width 10px
+      height 10px
       background-image url('src/imgs/svg/check.svg')
       background-size contain
       background-repeat no-repeat
@@ -163,30 +163,30 @@
 .device-info
   display flex
   flex-direction column
-  gap 8px
-  margin-bottom 16px
-  padding 14px
+  gap 6px
+  margin-bottom 10px
+  padding 10px
   background var(--bg-tertiary)
-  border-radius 8px
+  border-radius 6px
   border 1px solid var(--border)
 
 .device-info-item
   display flex
   align-items center
-  gap 10px
-  font-size 13px
+  gap 8px
+  font-size 12px
   color var(--text-secondary)
 
   .device-info-label
     font-weight 500
     color var(--text-primary)
-    min-width 70px
+    min-width 60px
     flex-shrink 0
 
   span:not(.device-info-label)
     color var(--text-secondary)
     font-family 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace
-    font-size 12px
+    font-size 11px
     word-break break-all
 
 // 设备操作按钮
@@ -199,10 +199,10 @@
   .mount-btn,
   .unmount-btn
     flex 0 0 auto
-    padding 8px 20px
-    font-size 13px
+    padding 6px 16px
+    font-size 12px
     font-weight 500
-    border-radius 6px
+    border-radius 5px
     transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
     position relative
     overflow hidden
