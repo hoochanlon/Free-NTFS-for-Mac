@@ -133,11 +133,31 @@
       overflow-x hidden
       display flex
       flex-direction column
+      // 自定义滚动条样式，默认透明，悬停时显示
+      &::-webkit-scrollbar
+        width 6px
+
+      &::-webkit-scrollbar-track
+        background transparent
+
+      &::-webkit-scrollbar-thumb
+        background transparent
+        border-radius 3px
+        transition background 0.2s ease
+
+      // 悬停时显示滚动条
+      &:hover::-webkit-scrollbar-thumb
+        background var(--border)
+
+        &:hover
+          background var(--accent)
 
     .section
       display flex
       flex-direction column
-      min-height 100%
+      min-height 0
+      // 根据内容自适应高度，确保所有设置项都能显示
+      flex-shrink 0
 
 // 淡入动画
 @keyframes fadeIn
@@ -261,7 +281,11 @@ body.light-theme
 
 // 设置界面样式
 .settings-content
-  padding 24px 0
+  padding 24px 0 32px 0
+  // 确保内容自然流动，不强制高度
+  flex 1
+  min-height 0
+  // 确保最后一个设置项能够完全显示，即使窗口尺寸最小时也能滚动到底部
 
 .setting-item
   display flex
@@ -276,6 +300,7 @@ body.light-theme
 .setting-label
   flex 1
   margin-right 24px
+  min-width 0
 
   label
     display block
@@ -295,7 +320,9 @@ body.light-theme
   align-items flex-start
   gap 12px
   flex-shrink 0
-  margin-top 2px
+  min-width 180px
+  justify-content flex-end
+  padding-top 2px
 
   #deletePasswordBtn
     color #E83C3C
@@ -326,9 +353,9 @@ body.light-theme
   font-size 14px
   cursor pointer
   min-width 160px
+  max-width 200px
   transition all 0.2s ease
-  align-self flex-start
-  margin-top 0
+  height fit-content
 
   &:hover
     border-color var(--accent)
