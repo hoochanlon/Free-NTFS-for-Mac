@@ -129,6 +129,8 @@
     restoreToReadOnly: Operations.restoreToReadOnly,
     restoreAllToReadOnly: Operations.restoreAllToReadOnly,
     unmountAllDevices: Operations.unmountAllDevices,
+    ejectDevice: Operations.ejectDevice,
+    ejectAllDevices: Operations.ejectAllDevices,
     bindDeviceEvents: Events.bindDeviceEvents
   });
 

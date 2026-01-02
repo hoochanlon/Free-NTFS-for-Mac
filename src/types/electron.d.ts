@@ -10,6 +10,7 @@ export interface ElectronAPI {
   mountDevice: (device: NTFSDevice) => Promise<OperationResult>;
   unmountDevice: (device: NTFSDevice) => Promise<OperationResult>;
   restoreToReadOnly: (device: NTFSDevice) => Promise<OperationResult>;
+  ejectDevice: (device: NTFSDevice) => Promise<OperationResult>;
   // 已移除自动安装功能
   // installDependencies: () => Promise<OperationResult>;
   requestSudoPassword: () => Promise<void>;

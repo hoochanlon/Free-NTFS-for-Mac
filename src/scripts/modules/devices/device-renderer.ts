@@ -98,19 +98,28 @@
             <button class="btn btn-success mount-btn" data-disk="${device.disk}">
               重新配置为可读写
             </button>
+            <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
+              推出
+            </button>
           ` : device.isReadOnly ? `
             <button class="btn btn-success mount-btn" data-disk="${device.disk}">
               配置为可读写
             </button>
-            <button class="btn btn-danger unmount-btn" data-disk="${device.disk}">
+            <button class="btn btn-info unmount-btn" data-disk="${device.disk}">
               卸载
+            </button>
+            <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
+              推出
             </button>
           ` : `
             <button class="btn btn-secondary restore-readonly-btn" data-disk="${device.disk}">
               还原为只读
             </button>
-            <button class="btn btn-danger unmount-btn" data-disk="${device.disk}">
+            <button class="btn btn-info unmount-btn" data-disk="${device.disk}">
               卸载
+            </button>
+            <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
+              推出
             </button>
           `}
         </div>

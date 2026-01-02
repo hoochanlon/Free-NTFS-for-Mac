@@ -93,6 +93,24 @@ export class MountOperations {
     }
   }
 
+  // 推出设备（完全断开）
+  async ejectDevice(device: NTFSDevice): Promise<string> {
+    try {
+      // 先清理标记文件
+      this.mountedDevices.delete(device.disk);
+      fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
+      this.unmountedDevices.delete(device.disk);
+
+      // 使用 diskutil eject 推出设备
+      // 这会卸载所有卷并完全断开设备
+      await execAsync(`diskutil eject ${device.devicePath}`);
+      return `设备 ${device.volumeName} 已推出，可以安全拔出`;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`推出设备失败: ${errorMessage}`);
+    }
+  }
+
   // 还原设备为只读模式
   async restoreToReadOnly(device: NTFSDevice): Promise<string> {
     try {

@@ -315,6 +315,130 @@
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
       }
+    },
+
+    // 推出设备
+    async ejectDevice(
+      device: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      devicesList: HTMLElement,
+      readWriteDevicesList: HTMLElement,
+      statusDot: HTMLElement,
+      statusText: HTMLElement
+    ): Promise<void> {
+      const message = `确定要推出 ${device.volumeName} 吗？\n\n` +
+                      `注意：\n` +
+                      `• 推出后设备将从系统中完全断开\n` +
+                      `• 设备将从列表中移除，需要重新插入才能使用\n` +
+                      `• 请确保没有程序正在使用该设备`;
+
+      if (!confirm(message)) {
+        return;
+      }
+
+      const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
+
+      try {
+        AppUtils.UI.showLoading(loadingOverlay, true);
+        AppUtils.Logs.addLog(`正在推出 ${device.volumeName}...`, 'info');
+
+        const result = await electronAPI.ejectDevice(device);
+
+        if (result.success) {
+          if (result.result) {
+            AppUtils.Logs.addLog(result.result, 'success');
+          }
+          // 等待一小段时间，让系统完全断开设备
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+        } else {
+          AppUtils.Logs.addLog(`推出失败: ${result.error || '未知错误'}`, 'error');
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        AppUtils.Logs.addLog(`推出失败: ${errorMessage}`, 'error');
+      } finally {
+        AppUtils.UI.showLoading(loadingOverlay, false);
+      }
+    },
+
+    // 推出所有设备
+    async ejectAllDevices(
+      devicesList: HTMLElement,
+      readWriteDevicesList: HTMLElement,
+      statusDot: HTMLElement,
+      statusText: HTMLElement
+    ): Promise<void> {
+      // 获取所有已挂载的设备
+      const devices = AppModules.Devices.devices || [];
+      const mountedDevices = devices.filter((d: any) => !d.isUnmounted);
+
+      if (mountedDevices.length === 0) {
+        AppUtils.Logs.addLog('没有已挂载的设备', 'info');
+        return;
+      }
+
+      const deviceNames = mountedDevices.map((d: any) => d.volumeName).join('、');
+      const message = `确定要推出所有 NTFS 设备吗？\n\n` +
+                      `将推出以下设备：\n${deviceNames}\n\n` +
+                      `注意：\n` +
+                      `• 推出后设备将从系统中完全断开\n` +
+                      `• 设备将从列表中移除，需要重新插入才能使用\n` +
+                      `• 请确保没有程序正在使用这些设备`;
+
+      if (!confirm(message)) {
+        return;
+      }
+
+      const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
+
+      try {
+        AppUtils.UI.showLoading(loadingOverlay, true);
+        AppUtils.Logs.addLog(`开始推出 ${mountedDevices.length} 个设备...`, 'info');
+
+        let successCount = 0;
+        let failCount = 0;
+
+        // 逐个推出设备
+        for (const device of mountedDevices) {
+          try {
+            AppUtils.Logs.addLog(`正在推出 ${device.volumeName}...`, 'info');
+            const result = await electronAPI.ejectDevice(device);
+
+            if (result.success) {
+              successCount++;
+              if (result.result) {
+                AppUtils.Logs.addLog(result.result, 'success');
+              }
+            } else {
+              failCount++;
+              AppUtils.Logs.addLog(`推出 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
+            }
+          } catch (error) {
+            failCount++;
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            AppUtils.Logs.addLog(`推出 ${device.volumeName} 失败: ${errorMessage}`, 'error');
+          }
+        }
+
+        // 等待一小段时间，让系统完全断开设备
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // 刷新设备列表
+        await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+
+        // 显示总结
+        if (successCount > 0) {
+          AppUtils.Logs.addLog(`成功推出 ${successCount} 个设备`, 'success');
+        }
+        if (failCount > 0) {
+          AppUtils.Logs.addLog(`失败 ${failCount} 个设备`, 'warning');
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        AppUtils.Logs.addLog(`推出所有设备失败: ${errorMessage}`, 'error');
+      } finally {
+        AppUtils.UI.showLoading(loadingOverlay, false);
+      }
     }
   };
 

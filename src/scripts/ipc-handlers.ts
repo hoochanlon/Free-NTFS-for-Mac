@@ -54,6 +54,16 @@ export function setupNTFSHandlers(): void {
     }
   });
 
+  ipcMain.handle('eject-device', async (event, device) => {
+    try {
+      const result = await ntfsManager.ejectDevice(device);
+      return { success: true, result };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { success: false, error: errorMessage };
+    }
+  });
+
   // 已移除自动安装功能，改为仅检测和提供安装指引
   // ipcMain.handle('install-dependencies', async () => {
   //   try {

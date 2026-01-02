@@ -34,9 +34,9 @@
   const devicesList = document.getElementById('devicesList')!;
   // readWriteDevicesList 已整合到 devicesList 中，保留变量以兼容现有代码
   const readWriteDevicesList = devicesList;
-  const refreshBtn = document.getElementById('refreshBtn') as HTMLButtonElement;
   const unmountAllBtn = document.getElementById('unmountAllBtn') as HTMLButtonElement;
   const restoreAllReadOnlyBtn = document.getElementById('restoreAllReadOnlyBtn') as HTMLButtonElement;
+  const ejectAllBtn = document.getElementById('ejectAllBtn') as HTMLButtonElement;
   const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
   const logContainer = document.getElementById('logContainer')!;
   const clearLogBtn = document.getElementById('clearLogBtn') as HTMLButtonElement;
@@ -99,10 +99,6 @@
       );
     });
 
-    refreshBtn.addEventListener('click', () => {
-      AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
-    });
-
     if (restoreAllReadOnlyBtn) {
       restoreAllReadOnlyBtn.addEventListener('click', () => {
         AppModules.Devices.restoreAllToReadOnly(devicesList, readWriteDevicesList, statusDot, statusText);
@@ -112,6 +108,12 @@
     if (unmountAllBtn) {
       unmountAllBtn.addEventListener('click', () => {
         AppModules.Devices.unmountAllDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+      });
+    }
+
+    if (ejectAllBtn) {
+      ejectAllBtn.addEventListener('click', () => {
+        AppModules.Devices.ejectAllDevices(devicesList, readWriteDevicesList, statusDot, statusText);
       });
     }
 

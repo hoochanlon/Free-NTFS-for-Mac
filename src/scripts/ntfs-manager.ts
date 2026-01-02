@@ -64,6 +64,11 @@ class NTFSManager {
   async cleanupOldMounts(): Promise<void> {
     return await this.mountOperations.cleanupOldMounts();
   }
+
+  // 推出设备
+  async ejectDevice(device: NTFSDevice): Promise<string> {
+    return await this.mountOperations.ejectDevice(device);
+  }
 }
 
 export default new NTFSManager();
