@@ -14,8 +14,8 @@ export function createMainWindow(): BrowserWindow {
   mainWindow = new BrowserWindow({
     width: 900,
     height: 700,
-    minWidth: 800,
-    minHeight: 600,
+    minWidth: 840,
+    minHeight: 660,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,

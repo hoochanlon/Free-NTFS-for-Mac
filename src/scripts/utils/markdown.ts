@@ -72,6 +72,33 @@
             // 先渲染 markdown 为 HTML
             let html = marked.parse(result.content);
 
+            // 先处理代码块：添加复制按钮（在 help-section 处理之前，避免嵌套问题）
+            // marked 库会将代码块渲染为 <pre><code>...</code></pre>
+            // 匹配所有代码块，包括带语言标识的
+            html = html.replace(
+              /<pre><code(?: class="language-(\w+)")?>([\s\S]*?)<\/code><\/pre>/g,
+              (match: string, lang: string, code: string) => {
+                // marked 库已经将代码中的 HTML 转义了，我们需要解码
+                // 创建一个临时元素来解码 HTML 实体
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = code;
+                const decodedCode = tempDiv.textContent || tempDiv.innerText || code;
+
+                // 转义用于 data 属性（避免在 HTML 属性中出现问题）
+                const escapedForAttr = decodedCode
+                  .replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;')
+                  .replace(/'/g, '&#39;')
+                  .replace(/\n/g, '&#10;');
+
+                const langClass = lang ? ` class="language-${lang}"` : '';
+                const copyText = t('dependencies.copyCommand');
+                return `<div class="code-block-wrapper"><pre><code${langClass}>${code}</code></pre><button class="code-copy-btn" data-code="${escapedForAttr}" title="${copyText}" aria-label="${copyText}"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 3.5H3.5C2.67 3.5 2 4.17 2 5V12.5C2 13.33 2.67 14 3.5 14H9.5C10.33 14 11 13.33 11 12.5V10.5M11 5.5H13.5C14.33 5.5 15 6.17 15 7V12.5C15 13.33 14.33 14 13.5 14H11M11 5.5V3.5C11 2.67 10.33 2 9.5 2H7M11 5.5H9.5C8.67 5.5 8 6.17 8 7V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>`;
+              }
+            );
+
             // 如果是关于页面，不使用 help-section 包装，但保留标题
             if (filename === 'about.md') {
               // 保留 h1 标题，但转换为较小的样式
@@ -94,32 +121,6 @@
                 html = '<div class="help-section">' + html;
               }
             }
-
-            // 处理代码块：添加复制按钮
-            // marked 库会将代码块渲染为 <pre><code>...</code></pre>
-            html = html.replace(
-              /<pre><code(?: class="language-(\w+)")?>([\s\S]*?)<\/code><\/pre>/g,
-              (match: string, lang: string, code: string) => {
-                // marked 库已经将代码中的 HTML 转义了，我们需要解码
-                // 创建一个临时元素来解码 HTML 实体
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = code;
-                const decodedCode = tempDiv.textContent || tempDiv.innerText || code;
-
-                // 转义用于 data 属性（避免在 HTML 属性中出现问题）
-                const escapedForAttr = decodedCode
-                  .replace(/&/g, '&amp;')
-                  .replace(/</g, '&lt;')
-                  .replace(/>/g, '&gt;')
-                  .replace(/"/g, '&quot;')
-                  .replace(/'/g, '&#39;')
-                  .replace(/\n/g, '&#10;');
-
-                const langClass = lang ? ` class="language-${lang}"` : '';
-                const copyText = t('dependencies.copyCommand');
-                return `<div class="code-block-wrapper"><pre><code${langClass}>${code}</code></pre><button class="code-copy-btn" data-code="${escapedForAttr}" title="${copyText}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 3.5H3.5C2.67 3.5 2 4.17 2 5V12.5C2 13.33 2.67 14 3.5 14H9.5C10.33 14 11 13.33 11 12.5V10.5M11 5.5H13.5C14.33 5.5 15 6.17 15 7V12.5C15 13.33 14.33 14 13.5 14H11M11 5.5V3.5C11 2.67 10.33 2 9.5 2H7M11 5.5H9.5C8.67 5.5 8 6.17 8 7V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>`;
-              }
-            );
 
             // 处理警告框：将包含 ⚠️ 的段落和后续列表包裹在 help-warning 中
             html = html.replace(
