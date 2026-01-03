@@ -143,10 +143,10 @@
               <div class="setting-label">
                 <label for="savePasswordCheckbox">保存管理员密码</label>
                 <p class="setting-description">启用后，应用将使用 macOS Keychain 安全保存您的管理员密码，以便自动输入</p>
+                <button class="btn btn-text btn-delete-password" id="deletePasswordBtn" style="display: none;">删除保存的密码</button>
               </div>
               <div class="setting-control">
                 <input type="checkbox" id="savePasswordCheckbox" class="setting-checkbox">
-                <button class="btn btn-text" id="deletePasswordBtn" style="display: none;">删除保存的密码</button>
               </div>
             </div>
             <div class="setting-item">
@@ -166,19 +166,10 @@
             <div class="setting-item">
               <div class="setting-label">
                 <label for="enableLogsCheckbox">启用操作日志</label>
-                <p class="setting-description">启用后，应用会记录所有操作日志。关闭后，将不再记录新的日志，但已记录的日志仍会保留。默认最长保存30天</p>
+                <p class="setting-description">默认关闭，需要手动开启。启用后，应用会记录所有操作日志。关闭后，将不再记录新的日志，但已记录的日志仍会保留。默认最长保存30天</p>
               </div>
               <div class="setting-control">
                 <input type="checkbox" id="enableLogsCheckbox" class="setting-checkbox">
-              </div>
-            </div>
-            <div class="setting-item">
-              <div class="setting-label">
-                <label for="resetLogsDailyCheckbox">每天自动重置日志</label>
-                <p class="setting-description">启用后，应用会在每天首次启动时自动清空前一天的日志</p>
-              </div>
-              <div class="setting-control">
-                <input type="checkbox" id="resetLogsDailyCheckbox" class="setting-checkbox">
               </div>
             </div>
             <div class="setting-item">
@@ -194,6 +185,25 @@
                   <option value="ja">日本語</option>
                   <option value="en">English</option>
                 </select>
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-label">
+                <label>窗口尺寸</label>
+                <p class="setting-description">自定义应用窗口的宽度和高度（单位：像素）。修改后需要重启应用生效</p>
+                <button class="btn btn-text btn-reset-size" id="resetWindowSizeBtn">重置为默认值</button>
+              </div>
+              <div class="setting-control setting-size-control">
+                <div class="size-input-group">
+                  <label for="windowWidthInput" class="size-label">宽度</label>
+                  <input type="text" id="windowWidthInput" class="setting-size-input" inputmode="numeric" pattern="[0-9]*" placeholder="900">
+                  <span class="size-unit" data-i18n="settings.pixel">像素</span>
+                </div>
+                <div class="size-input-group">
+                  <label for="windowHeightInput" class="size-label">高度</label>
+                  <input type="text" id="windowHeightInput" class="setting-size-input" inputmode="numeric" pattern="[0-9]*" placeholder="680">
+                  <span class="size-unit" data-i18n="settings.pixel">像素</span>
+                </div>
               </div>
             </div>
           </div>

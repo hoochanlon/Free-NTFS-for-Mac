@@ -3,14 +3,68 @@ import type { Dependencies } from '../../types/electron';
 import { commandExists, execAsync } from './utils';
 import { PathFinder } from './path-finder';
 
+// 检查macOS版本是否满足要求（macOS 14 Sonoma或更高版本）
+async function checkMacOSVersion(): Promise<{ satisfied: boolean; version: string }> {
+  let macosVersionString = '未知';
+  let satisfied = false;
+
+  try {
+    // 使用 sw_vers 命令获取macOS版本
+    const { stdout } = await execAsync('sw_vers -productVersion');
+    macosVersionString = stdout.trim();
+
+    // 解析版本号
+    const versionParts = macosVersionString.split('.');
+    const major = parseInt(versionParts[0] || '0', 10);
+    const minor = parseInt(versionParts[1] || '0', 10);
+
+    // 要求至少 macOS 14.0 (Sonoma) 或更高版本
+    satisfied = major >= 14;
+  } catch (error) {
+    // 如果 sw_vers 失败，假设版本满足要求（避免误报）
+    console.warn('无法使用 sw_vers 获取版本:', error);
+    satisfied = true;
+    macosVersionString = '未知';
+  }
+
+  return { satisfied, version: macosVersionString };
+}
+
 export async function checkDependencies(): Promise<Dependencies> {
   const result: Dependencies = {
     swift: false,
     brew: false,
     macfuse: false,
     ntfs3g: false,
-    ntfs3gPath: null
+    ntfs3gPath: null,
+    macosVersion: false,
+    macosVersionString: undefined
   };
+
+  // 检查macOS版本（带超时）
+  try {
+    const macosCheck = await Promise.race([
+      checkMacOSVersion(),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+    ]);
+    result.macosVersion = macosCheck.satisfied;
+    result.macosVersionString = macosCheck.version;
+  } catch (error) {
+    // 如果检查失败，尝试直接获取版本号（不检查是否满足要求）
+    try {
+      const { stdout } = await execAsync('sw_vers -productVersion');
+      result.macosVersionString = stdout.trim();
+      // 解析版本号判断是否满足要求
+      const versionParts = result.macosVersionString.split('.');
+      const major = parseInt(versionParts[0] || '0', 10);
+      result.macosVersion = major >= 14;
+    } catch {
+      // 如果都失败了，设置为未知
+      console.warn('无法获取macOS版本:', error);
+      result.macosVersion = false;
+      result.macosVersionString = '未知';
+    }
+  }
 
   try {
     // 并行检查 swift 和 brew，提高速度

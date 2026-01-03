@@ -521,6 +521,44 @@ body.light-theme
     &:active
       background rgba(232, 60, 60, 0.15)
 
+.btn-delete-password
+  margin-top 8px
+  color #E83C3C
+  font-size 13px
+  padding 6px 12px
+  border-radius 6px
+  transition all 0.2s ease
+  display inline-block
+  background transparent
+  border none
+  cursor pointer
+
+  &:hover
+    background rgba(232, 60, 60, 0.1)
+    color #D32F2F
+
+  &:active
+    background rgba(232, 60, 60, 0.15)
+
+.btn-reset-size
+  margin-top 8px
+  color var(--accent)
+  font-size 12px
+  padding 6px 12px
+  border-radius 6px
+  transition all 0.2s ease
+  display inline-block
+  background transparent
+  border none
+  cursor pointer
+
+  &:hover
+    background rgba(0, 122, 255, 0.1)
+    color var(--accent)
+
+  &:active
+    background rgba(0, 122, 255, 0.15)
+
 .setting-checkbox
   width 18px
   height 18px
@@ -543,7 +581,91 @@ body.light-theme
   &:hover
     border-color var(--accent)
 
+.setting-size-control
+  display flex
+  gap 16px
+  align-items flex-start
+  flex-wrap wrap
+
+.size-input-group
+  display flex
+  flex-direction column
+  gap 8px
+  min-width 85px
+  align-items center
+
+.size-label
+  font-size 12px
+  font-weight 600
+  color var(--text-secondary)
+  white-space nowrap
+  user-select none
+  letter-spacing 0.2px
+  transition color 0.2s ease
+
+.setting-size-input
+  width 85px
+  padding 10px 8px
+  border 1.5px solid var(--border)
+  border-radius 10px
+  background var(--bg-secondary)
+  color var(--text-primary)
+  font-size 14px
+  font-weight 600
+  text-align center
+  letter-spacing 0.3px
+  transition all 0.25s cubic-bezier(0.4, 0, 0.2, 1)
+  appearance none
+  -webkit-appearance none
+  box-shadow 0 1px 2px rgba(0, 0, 0, 0.05)
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button
+    -webkit-appearance none
+    margin 0
+    display none
+
+  &[type="number"]
+    -moz-appearance textfield
+
+  &::placeholder
+    color var(--text-tertiary)
+    opacity 0.4
+    font-weight 400
+    letter-spacing normal
+
+  &:hover
+    border-color var(--accent)
+    background var(--bg-primary)
+    box-shadow 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 122, 255, 0.1)
+
   &:focus
     outline none
     border-color var(--accent)
-    box-shadow 0 0 0 3px var(--accent-alpha)
+    background var(--bg-primary)
+    box-shadow 0 0 0 4px rgba(0, 122, 255, 0.12), 0 4px 12px rgba(0, 0, 0, 0.15)
+
+  &:active
+    box-shadow 0 1px 3px rgba(0, 0, 0, 0.1)
+
+  &:disabled
+    opacity 0.5
+    cursor not-allowed
+    transform none
+
+  // 输入验证失败时的样式
+  &.invalid
+    border-color #ff3b30
+    background rgba(255, 59, 48, 0.05)
+    box-shadow 0 0 0 3px rgba(255, 59, 48, 0.1)
+
+.size-unit
+  font-size 10px
+  color var(--text-tertiary)
+  white-space nowrap
+  text-align center
+  margin-top -4px
+  opacity 0.65
+  font-weight 500
+  letter-spacing 0.5px
+  text-transform uppercase

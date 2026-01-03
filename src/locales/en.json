@@ -27,6 +27,8 @@
     "checking": "Checking...",
     "installed": "Installed",
     "missing": "Not Installed",
+    "versionSatisfied": "Meets Requirements",
+    "versionUnsatisfied": "Does Not Meet Requirements",
     "installGuide": "Installation Guide",
     "installGuideIntro": "To install or reinstall dependencies, please follow the instructions below to install manually in the terminal:",
     "copyCommand": "Copy Command",
@@ -54,6 +56,11 @@
       "name": "ntfs-3g",
       "description": "NTFS file system driver, providing NTFS read-write support",
       "installGuide": "Homebrew and MacFUSE must be installed first. Run the above command in the terminal to install."
+    },
+    "macosVersion": {
+      "name": "macOS Version ({version})",
+      "description": "System version check to ensure macOS version meets requirements (macOS 14 or higher required)",
+      "installGuide": "If your macOS version is too low, please upgrade your system through System Settings > Software Update. This tool requires macOS 14 (Sonoma) or higher to run properly."
     }
   },
   "devices": {
@@ -76,7 +83,7 @@
     "mountPointLabel": "Mount Point:",
     "notMounted": "Not Mounted",
     "mountConfirm": "Are you sure you want to configure {name} as read-write mode?",
-    "mountConfirmNote": "Note:\n• This requires administrator privileges, and the system will prompt for a password\n• If the device uses Fast Startup in Windows, you may need to fully shut down the device in Windows first",
+    "mountConfirmNote": "Note:\n• This requires administrator privileges, and the system will prompt for a password\n• If this NTFS device was previously used on a Windows computer with Fast Startup enabled, you may need to plug it back into the Windows computer and fully shut down before trying",
     "unmountConfirm": "Are you sure you want to unmount {name}?",
     "ejectConfirm": "Are you sure you want to eject {name}?",
     "ejectConfirmNote": "Note:\n• After ejecting, the device will be completely disconnected from the system\n• The device will be removed from the list and needs to be reinserted to use\n• Please ensure no programs are using the device",
@@ -119,13 +126,19 @@
     "startupTab": "Tab to Open on Startup",
     "startupTabDesc": "Select the default tab to display when the app starts",
     "enableLogs": "Enable Operation Logs",
-    "enableLogsDesc": "When enabled, the app will record all operation logs. When disabled, new logs will not be recorded, but previously recorded logs will still be retained. Logs are saved for a maximum of 30 days by default",
+    "enableLogsDesc": "Disabled by default, requires manual activation. When enabled, the app will record all operation logs. When disabled, new logs will not be recorded, but previously recorded logs will still be retained. Logs are saved for a maximum of 30 days by default",
     "resetLogsDaily": "Automatically Reset Logs Daily",
     "resetLogsDailyDesc": "When enabled, the app will automatically clear the previous day's logs on the first launch each day",
     "exportLogs": "Export Operation Logs",
     "exportLogsDesc": "Export all operation logs as a text file",
     "language": "Language",
     "languageDesc": "Select the application interface language",
+    "windowSize": "Window Size",
+    "windowSizeDesc": "Customize the width and height of the application window (in pixels). Changes will take effect after restarting the application",
+    "width": "Width",
+    "height": "Height",
+    "pixel": "px",
+    "resetToDefault": "Reset to Default",
     "languages": {
       "system": "Follow System",
       "zh-CN": "简体中文",

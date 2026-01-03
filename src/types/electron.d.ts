@@ -3,8 +3,9 @@ export interface AppSettings {
   savePassword: boolean;
   startupTab: 'dependencies' | 'devices' | 'logs' | 'help';
   enableLogs: boolean;
-  resetLogsDaily: boolean;
   language: 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system';
+  windowWidth: number;
+  windowHeight: number;
 }
 
 export interface ElectronAPI {
@@ -40,6 +41,8 @@ export interface Dependencies {
   macfuse: boolean;
   ntfs3g: boolean;
   ntfs3gPath: string | null;
+  macosVersion: boolean;
+  macosVersionString?: string;
 }
 
 export interface NTFSDevice {

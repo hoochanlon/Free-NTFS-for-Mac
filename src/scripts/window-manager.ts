@@ -1,5 +1,6 @@
-import { BrowserWindow, app } from 'electron';
+import { BrowserWindow, app, Event } from 'electron';
 import * as path from 'path';
+import { SettingsManager } from './utils/settings';
 
 // 窗口引用
 export let mainWindow: BrowserWindow | null = null;
@@ -8,14 +9,19 @@ export let aboutWindow: BrowserWindow | null = null;
 export const moduleWindows: Map<string, BrowserWindow> = new Map();
 
 // 创建主窗口
-export function createMainWindow(): BrowserWindow {
+export async function createMainWindow(): Promise<BrowserWindow> {
   const appPath = app.getAppPath();
 
+  // 从设置中读取窗口尺寸
+  const settings = await SettingsManager.getSettings();
+  const windowWidth = settings.windowWidth || 900;
+  const windowHeight = settings.windowHeight || 680;
+
   mainWindow = new BrowserWindow({
-    width: 900,
-    height: 700,
-    minWidth: 840,
-    minHeight: 660,
+    width: windowWidth,
+    height: windowHeight,
+    minWidth: 900,
+    minHeight: 680,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
@@ -29,14 +35,14 @@ export function createMainWindow(): BrowserWindow {
 
   const htmlPath = path.join(appPath, 'src', 'html', 'index.html');
 
-  mainWindow.loadFile(htmlPath).catch((error) => {
+  mainWindow.loadFile(htmlPath).catch((error: Error) => {
     console.error('Failed to load HTML:', error);
     console.error('App path:', appPath);
     console.error('HTML path:', htmlPath);
     console.error('__dirname:', __dirname);
   });
 
-  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+  mainWindow.webContents.on('did-fail-load', (event: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
     console.error('Failed to load page:', errorCode, errorDescription, validatedURL);
   });
 
@@ -50,6 +56,24 @@ export function createMainWindow(): BrowserWindow {
   if (process.argv.includes('--dev')) {
     mainWindow.webContents.openDevTools();
   }
+
+  // 监听窗口大小改变，自动保存设置
+  let resizeTimeout: NodeJS.Timeout | null = null;
+  mainWindow.on('resize', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      // 防抖：延迟保存，避免频繁写入
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+      resizeTimeout = setTimeout(async () => {
+        const [width, height] = mainWindow!.getSize();
+        await SettingsManager.saveSettings({
+          windowWidth: width,
+          windowHeight: height
+        });
+      }, 500); // 500ms 后保存
+    }
+  });
 
   return mainWindow;
 }

@@ -21,7 +21,6 @@
       const deletePasswordBtn = document.getElementById('deletePasswordBtn') as HTMLButtonElement;
       const startupTabSelect = document.getElementById('startupTabSelect') as HTMLSelectElement;
       const enableLogsCheckbox = document.getElementById('enableLogsCheckbox') as HTMLInputElement;
-      const resetLogsDailyCheckbox = document.getElementById('resetLogsDailyCheckbox') as HTMLInputElement;
       const languageSelect = document.getElementById('languageSelect') as HTMLSelectElement;
 
       if (!savePasswordCheckbox || !deletePasswordBtn || !startupTabSelect) {
@@ -34,14 +33,21 @@
         savePasswordCheckbox.checked = settings.savePassword;
         startupTabSelect.value = settings.startupTab;
         if (enableLogsCheckbox) {
-          enableLogsCheckbox.checked = settings.enableLogs !== false; // 默认启用
-        }
-        if (resetLogsDailyCheckbox) {
-          resetLogsDailyCheckbox.checked = settings.resetLogsDaily || false;
+          enableLogsCheckbox.checked = settings.enableLogs === true; // 默认关闭，需要手动开启
         }
         if (languageSelect) {
           // 如果没有设置或设置为空，默认使用跟随系统
           languageSelect.value = settings.language || 'system';
+        }
+
+        // 窗口尺寸设置
+        const windowWidthInput = document.getElementById('windowWidthInput') as HTMLInputElement;
+        const windowHeightInput = document.getElementById('windowHeightInput') as HTMLInputElement;
+        if (windowWidthInput) {
+          windowWidthInput.value = String(settings.windowWidth || 900);
+        }
+        if (windowHeightInput) {
+          windowHeightInput.value = String(settings.windowHeight || 680);
         }
 
         // 检查是否有保存的密码
@@ -107,18 +113,6 @@
           });
         }
 
-        // 每天重置日志复选框变化
-        if (resetLogsDailyCheckbox) {
-          resetLogsDailyCheckbox.addEventListener('change', async () => {
-            try {
-              await electronAPI.saveSettings({ resetLogsDaily: resetLogsDailyCheckbox.checked });
-            } catch (error) {
-              console.error('保存设置失败:', error);
-              resetLogsDailyCheckbox.checked = !resetLogsDailyCheckbox.checked;
-            }
-          });
-        }
-
         // 语言选择变化
         if (languageSelect) {
           languageSelect.addEventListener('change', async () => {
@@ -132,6 +126,137 @@
             } catch (error) {
               console.error('保存设置失败:', error);
             }
+          });
+        }
+
+        // 窗口尺寸输入验证（只在失去焦点时验证）
+        const validateSizeOnBlur = async (input: HTMLInputElement, min: number, max: number, defaultValue: number) => {
+          const value = input.value.trim();
+
+          // 如果为空，恢复为当前设置值
+          if (value === '') {
+            const settings = await electronAPI.getSettings();
+            if (input.id === 'windowWidthInput') {
+              input.value = String(settings.windowWidth || defaultValue);
+            } else {
+              input.value = String(settings.windowHeight || defaultValue);
+            }
+            return false;
+          }
+
+          // 只允许数字
+          if (!/^\d+$/.test(value)) {
+            // 如果不是纯数字，恢复为当前设置值
+            const settings = await electronAPI.getSettings();
+            if (input.id === 'windowWidthInput') {
+              input.value = String(settings.windowWidth || defaultValue);
+            } else {
+              input.value = String(settings.windowHeight || defaultValue);
+            }
+            return false;
+          }
+
+          const numValue = parseInt(value, 10);
+          // 验证范围
+          if (numValue < min || numValue > max) {
+            // 超出范围，恢复为当前设置值
+            const settings = await electronAPI.getSettings();
+            if (input.id === 'windowWidthInput') {
+              input.value = String(settings.windowWidth || defaultValue);
+            } else {
+              input.value = String(settings.windowHeight || defaultValue);
+            }
+            return false;
+          }
+
+          return true;
+        };
+
+        // 保存窗口尺寸（防抖保存）
+        let sizeTimeout: NodeJS.Timeout | null = null;
+        const saveWindowSize = async () => {
+          if (sizeTimeout) {
+            clearTimeout(sizeTimeout);
+          }
+          sizeTimeout = setTimeout(async () => {
+            try {
+              const widthValue = windowWidthInput?.value.trim() || '';
+              const heightValue = windowHeightInput?.value.trim() || '';
+
+              // 如果输入为空，不保存
+              if (!widthValue || !heightValue) {
+                return;
+              }
+
+              // 验证输入
+              if (!/^\d+$/.test(widthValue) || !/^\d+$/.test(heightValue)) {
+                return;
+              }
+
+              const width = parseInt(widthValue, 10);
+              const height = parseInt(heightValue, 10);
+
+              // 验证范围
+              if (width >= 840 && width <= 2000 && height >= 660 && height <= 2000) {
+                await electronAPI.saveSettings({
+                  windowWidth: width,
+                  windowHeight: height
+                });
+              }
+            } catch (error) {
+              console.error('保存窗口尺寸失败:', error);
+            }
+          }, 1000); // 1秒后保存
+        };
+
+        // 只允许输入数字
+        const allowOnlyNumbers = (e: KeyboardEvent) => {
+          const char = e.key;
+          // 允许：数字、退格、删除、Tab、方向键、Home、End、Enter
+          if (!/[\d\b\Delete\Tab\ArrowLeft\ArrowRight\ArrowUp\ArrowDown\Home\End\Enter]/.test(char) && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+          }
+        };
+
+        // 重置窗口尺寸为默认值
+        const resetWindowSizeBtn = document.getElementById('resetWindowSizeBtn') as HTMLButtonElement;
+        if (resetWindowSizeBtn) {
+          resetWindowSizeBtn.addEventListener('click', async () => {
+            try {
+              const defaultWidth = 900;
+              const defaultHeight = 680;
+
+              if (windowWidthInput) {
+                windowWidthInput.value = String(defaultWidth);
+              }
+              if (windowHeightInput) {
+                windowHeightInput.value = String(defaultHeight);
+              }
+
+              await electronAPI.saveSettings({
+                windowWidth: defaultWidth,
+                windowHeight: defaultHeight
+              });
+            } catch (error) {
+              console.error('重置窗口尺寸失败:', error);
+            }
+          });
+        }
+
+        if (windowWidthInput) {
+          windowWidthInput.addEventListener('keydown', allowOnlyNumbers);
+          windowWidthInput.addEventListener('input', saveWindowSize);
+          windowWidthInput.addEventListener('blur', async () => {
+            await validateSizeOnBlur(windowWidthInput, 840, 2000, 900);
+            saveWindowSize();
+          });
+        }
+        if (windowHeightInput) {
+          windowHeightInput.addEventListener('keydown', allowOnlyNumbers);
+          windowHeightInput.addEventListener('input', saveWindowSize);
+          windowHeightInput.addEventListener('blur', async () => {
+            await validateSizeOnBlur(windowHeightInput, 660, 2000, 680);
+            saveWindowSize();
           });
         }
       } catch (error) {

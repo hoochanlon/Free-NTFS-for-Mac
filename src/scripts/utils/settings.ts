@@ -12,17 +12,19 @@ function getSettingsPath(): string {
 const DEFAULT_SETTINGS = {
   savePassword: false,
   startupTab: 'dependencies' as 'dependencies' | 'devices' | 'logs' | 'help',
-  enableLogs: true,
-  resetLogsDaily: false,
-  language: 'system' as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system'
+  enableLogs: false,
+  language: 'system' as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system',
+  windowWidth: 900,
+  windowHeight: 680
 };
 
 export interface AppSettings {
   savePassword: boolean;
   startupTab: 'dependencies' | 'devices' | 'logs' | 'help';
   enableLogs: boolean;
-  resetLogsDaily: boolean;
   language: 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system';
+  windowWidth: number;
+  windowHeight: number;
 }
 
 /**

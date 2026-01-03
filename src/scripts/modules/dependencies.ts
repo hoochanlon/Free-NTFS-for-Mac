@@ -22,7 +22,16 @@
   }
 
   // 获取依赖信息（动态从国际化文件获取）
-  function getDependencyInfo(key: string) {
+  function getDependencyInfo(key: string, dependencies?: any) {
+    if (key === 'macosVersion') {
+      const versionString = dependencies?.macosVersionString || '未知';
+      return {
+        name: t(`dependencies.${key}.name`, { version: versionString }),
+        description: t(`dependencies.${key}.description`),
+        installCommand: '',
+        installGuide: t(`dependencies.${key}.installGuide`)
+      };
+    }
     return {
       name: t(`dependencies.${key}.name`),
       description: t(`dependencies.${key}.description`),
@@ -93,7 +102,8 @@
         const allInstalled = AppModules.Dependencies.dependencies.swift &&
                             AppModules.Dependencies.dependencies.brew &&
                             AppModules.Dependencies.dependencies.macfuse &&
-                            AppModules.Dependencies.dependencies.ntfs3g;
+                            AppModules.Dependencies.dependencies.ntfs3g &&
+                            AppModules.Dependencies.dependencies.macosVersion;
 
         if (allInstalled) {
           AppUtils.UI.updateStatus('active', t('status.systemReady'), statusDot, statusText);
@@ -118,7 +128,10 @@
 
       depsList.innerHTML = '';
 
+      // 确保版本号有值，如果没有则尝试获取
+      const versionString = AppModules.Dependencies.dependencies?.macosVersionString || '未知';
       const deps = [
+        { key: 'macosVersion', name: '', status: AppModules.Dependencies.dependencies.macosVersion, isVersion: true },
         { key: 'swift', name: DEPENDENCY_INFO.swift.name, status: AppModules.Dependencies.dependencies.swift },
         { key: 'brew', name: DEPENDENCY_INFO.brew.name, status: AppModules.Dependencies.dependencies.brew },
         { key: 'macfuse', name: DEPENDENCY_INFO.macfuse.name, status: AppModules.Dependencies.dependencies.macfuse },
@@ -129,15 +142,22 @@
         const item = document.createElement('div');
         item.className = 'dep-item';
         item.setAttribute('data-dep-key', dep.key);
-        const info = getDependencyInfo(dep.key);
+        const info = getDependencyInfo(dep.key, AppModules.Dependencies.dependencies);
+        // macOS版本使用不同的状态文本
+        const statusText = dep.isVersion
+          ? (dep.status ? t('dependencies.versionSatisfied') : t('dependencies.versionUnsatisfied'))
+          : (dep.status ? t('dependencies.installed') : t('dependencies.missing'));
+
+        // 如果dep.name为空，使用info.name（用于macOS版本）
+        const displayName = dep.name || info.name;
         item.innerHTML = `
           <span class="dep-name">
             <span class="dep-number ${dep.status ? 'installed' : 'missing'}">${index + 1}</span>
             <span class="dep-expand-icon">▶</span>
-            ${info.name}
+            ${displayName}
           </span>
           <span class="dep-status ${dep.status ? 'installed' : 'missing'}">
-            ${dep.status ? `✓ ${t('dependencies.installed')}` : `✗ ${t('dependencies.missing')}`}
+            ${dep.status ? `✓ ${statusText}` : `✗ ${statusText}`}
           </span>
         `;
         depsList.appendChild(item);
@@ -149,9 +169,10 @@
         guideCard.innerHTML = `
           <div class="guide-header">
             <h3>${info.name}</h3>
-            <span class="guide-status ${dep.status ? 'installed' : 'missing'}">${dep.status ? t('dependencies.installed') : t('dependencies.missing')}</span>
+            <span class="guide-status ${dep.status ? 'installed' : 'missing'}">${dep.isVersion ? (dep.status ? t('dependencies.versionSatisfied') : t('dependencies.versionUnsatisfied')) : (dep.status ? t('dependencies.installed') : t('dependencies.missing'))}</span>
           </div>
           <p class="guide-description">${info.description}</p>
+          ${info.installCommand ? `
           <div class="guide-command">
             <label>${t('dependencies.installCommandLabel')}</label>
             <div class="command-box">
@@ -163,6 +184,7 @@
               </button>
             </div>
           </div>
+          ` : ''}
           <p class="guide-instructions">${info.installGuide}</p>
         `;
         depsList.appendChild(guideCard);

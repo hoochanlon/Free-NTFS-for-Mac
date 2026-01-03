@@ -217,7 +217,7 @@ export class MountOperations {
       try {
         const mountPromise = this.sudoExecutor.executeSudoWithPassword(mountArgs, password);
         const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('挂载超时（10秒）。可能是 Windows 快速启动导致文件系统处于脏状态。建议在 Windows 中完全关闭（而非休眠），或禁用快速启动功能。')), 10000);
+          setTimeout(() => reject(new Error('挂载操作超时（10秒），操作已取消以防止卡死。可能的原因：1) 文件系统处于脏状态（如果该 NTFS 设备之前在 Windows 电脑上使用过，且 Windows 启用了快速启动功能，请将设备插回 Windows 电脑并完全关闭后再试）；2) 设备被其他程序占用；3) 系统权限问题。')), 10000);
         });
 
         await Promise.race([mountPromise, timeoutPromise]);

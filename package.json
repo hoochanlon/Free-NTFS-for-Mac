@@ -6,14 +6,14 @@
   "scripts": {
     "build:ts": "tsc",
     "build:stylus": "stylus src/styles/main.styl -o styles.css",
-    "build:all": "npm run build:stylus && npm run build:ts",
+    "build:all": "pnpm run build:stylus && pnpm run build:ts",
     "watch:ts": "tsc --watch",
     "watch:stylus": "stylus -w src/styles/main.styl -o styles.css",
-    "watch:all": "npm run watch:stylus & npm run watch:ts",
-    "start": "npm run build:all && electron .",
-    "dev": "npm run watch:all & npm run build:all && electron . --dev",
-    "dev:reload": "npm install --save-dev electron-reloader && npm run dev",
-    "build": "npm run build:all && electron-builder"
+    "watch:all": "pnpm run watch:stylus & pnpm run watch:ts",
+    "start": "pnpm run build:all && electron .",
+    "dev": "pnpm run watch:all & pnpm run build:all && electron . --dev",
+    "dev:reload": "pnpm add -D electron-reloader && pnpm run dev",
+    "build": "pnpm run build:all && electron-builder"
   },
   "keywords": [
     "ntfs",
@@ -32,17 +32,69 @@
   },
   "dependencies": {
     "marked": "^17.0.1",
-    "node-pty": "^1.0.0",
+    "node-pty": "^1.1.0",
     "pnpm": "^10.27.0"
   },
   "build": {
     "appId": "com.freentfs.mac",
     "productName": "Free NTFS for Mac",
-    "icon": "src/ico/flash.svg",
+    "icon": "src/ico/flash.png",
+    "npmRebuild": false,
+    "electronDownload": {
+      "cache": ".electron-cache"
+    },
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "scripts/**/*",
+      "src/**/*",
+      "styles.css",
+      "package.json"
+    ],
     "mac": {
       "category": "public.app-category.utilities",
+      "target": [
+        {
       "target": "dmg",
-      "icon": "src/ico/flash.svg"
+          "arch": ["arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["arm64"]
+        }
+      ],
+      "icon": "src/ico/flash.png",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "NSHighResolutionCapable": true,
+        "NSRequiresAquaSystemAppearance": false
+      }
+    },
+    "dmg": {
+      "title": "${productName} ${version}",
+      "icon": "src/ico/flash.png",
+      "background": null,
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
     }
   }
 }

@@ -82,7 +82,10 @@ For devices in read-only status, you can click the "Configure as Read-Write" but
 **Notes:**
 
 - Mounting requires administrator privileges, please have your system password ready
-- If the device uses Fast Startup in Windows, you may need to fully shut down the device in Windows first
+- If mounting fails, possible reasons include:
+  - The device file system is in a dirty state (if this NTFS device was previously used on a Windows computer with Fast Startup enabled, please plug it back into the Windows computer and fully shut down before trying again)
+  - The device is being used by other programs
+  - System permission issues
 - Please safely eject the device after mounting to avoid data loss
 
 ### Unmount Device
@@ -137,12 +140,13 @@ This is macOS's default behavior. macOS mounts NTFS devices in read-only mode by
 
 ### What to do if mounting fails?
 
-Please check the following:
+If the mounting operation fails or times out, please check the following:
 
-- Ensure all system dependencies are installed
-- Ensure the administrator password entered is correct
-- If the device was used in Windows, please fully shut down the device in Windows first
-- Check if other programs are using the device
+- **System Dependencies**: Ensure all system dependencies are installed (Xcode Command Line Tools, Homebrew, MacFUSE, ntfs-3g)
+- **Administrator Privileges**: Ensure the administrator password entered is correct
+- **File System State**: If this NTFS device was previously used on a Windows computer with Fast Startup enabled, the file system may be in a dirty state. Please plug it back into the Windows computer and fully shut down (not sleep/hibernate), then try mounting again
+- **Device Usage**: Check if other programs are using the device, close related programs and try again
+- **Operation Timeout**: If the operation times out, the application will automatically cancel the operation to prevent hanging. Please check the above reasons and try again
 
 ### What to do if dependency installation fails?
 
@@ -184,3 +188,7 @@ In the "Operation Logs" tab, you can view records of all operations, including:
 - Error messages and warnings
 
 Logs can help you troubleshoot issues and track operation history. You can click the "Clear" button at any time to clear all log records.
+
+## More Troubleshooting
+
+If you encounter other issues (such as "file damaged" warnings, device busy errors, driver conflicts, etc.), please refer to our [Troubleshooting Center](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/9), which contains detailed troubleshooting steps and solutions.

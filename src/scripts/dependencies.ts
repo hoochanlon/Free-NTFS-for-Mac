@@ -63,7 +63,8 @@
       renderDependencies();
 
       const allInstalled = dependencies.swift && dependencies.brew &&
-                          dependencies.macfuse && dependencies.ntfs3g;
+                          dependencies.macfuse && dependencies.ntfs3g &&
+                          dependencies.macosVersion;
 
       if (allInstalled) {
         installSection.classList.remove('visible');
@@ -91,7 +92,11 @@
       { name: 'Swift (Xcode Command Line Tools)', status: dependencies.swift },
       { name: 'Homebrew', status: dependencies.brew },
       { name: 'ntfs-3g', status: dependencies.ntfs3g },
-      { name: 'MacFUSE', status: dependencies.macfuse }
+      { name: 'MacFUSE', status: dependencies.macfuse },
+      {
+        name: `macOS 版本 (${dependencies.macosVersionString || '未知'})`,
+        status: dependencies.macosVersion
+      }
     ];
 
     deps.forEach((dep, index) => {

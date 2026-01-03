@@ -151,16 +151,6 @@
       enableLogsDesc.textContent = t('settings.enableLogsDesc');
     }
 
-    // 每天自动重置日志
-    const resetLogsDailyLabel = document.querySelector('label[for="resetLogsDailyCheckbox"]');
-    if (resetLogsDailyLabel) {
-      resetLogsDailyLabel.textContent = t('settings.resetLogsDaily');
-    }
-    const resetLogsDailyDesc = document.querySelector('#resetLogsDailyCheckbox')?.closest('.setting-item')?.querySelector('.setting-description');
-    if (resetLogsDailyDesc) {
-      resetLogsDailyDesc.textContent = t('settings.resetLogsDailyDesc');
-    }
-
     // 语言
     const languageLabel = document.querySelector('label[for="languageSelect"]');
     if (languageLabel) {
@@ -169,6 +159,34 @@
     const languageDesc = document.querySelector('#languageSelect')?.closest('.setting-item')?.querySelector('.setting-description');
     if (languageDesc) {
       languageDesc.textContent = t('settings.languageDesc');
+    }
+
+    // 窗口尺寸
+    const windowSizeLabel = document.querySelector('.setting-item:has(#windowWidthInput) label');
+    if (windowSizeLabel) {
+      windowSizeLabel.textContent = t('settings.windowSize');
+    }
+    const windowSizeDesc = document.querySelector('.setting-item:has(#windowWidthInput) .setting-description');
+    if (windowSizeDesc) {
+      windowSizeDesc.textContent = t('settings.windowSizeDesc');
+    }
+    const widthLabel = document.querySelector('label[for="windowWidthInput"]');
+    if (widthLabel) {
+      widthLabel.textContent = t('settings.width');
+    }
+    const heightLabel = document.querySelector('label[for="windowHeightInput"]');
+    if (heightLabel) {
+      heightLabel.textContent = t('settings.height');
+    }
+    // 更新单位文字
+    const sizeUnits = document.querySelectorAll('.size-unit[data-i18n="settings.pixel"]');
+    sizeUnits.forEach((unit) => {
+      unit.textContent = t('settings.pixel');
+    });
+    // 重置按钮
+    const resetSizeBtn = document.getElementById('resetWindowSizeBtn');
+    if (resetSizeBtn) {
+      resetSizeBtn.textContent = t('settings.resetToDefault');
     }
     // 更新语言选择器的选项文本
     const languageSelect = document.getElementById('languageSelect') as HTMLSelectElement;

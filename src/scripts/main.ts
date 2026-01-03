@@ -8,14 +8,14 @@ import { setupAppConfig } from './app-config';
 setupHotReload();
 
 // 应用生命周期管理
-app.whenReady().then(() => {
-  createMainWindow();
+app.whenReady().then(async () => {
+  await createMainWindow();
   setupAppConfig();
   setupIpcHandlers();
 
-  app.on('activate', () => {
+  app.on('activate', async () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createMainWindow();
+      await createMainWindow();
     }
   });
 });

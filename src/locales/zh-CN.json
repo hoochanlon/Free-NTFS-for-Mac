@@ -27,6 +27,8 @@
     "checking": "正在检查...",
     "installed": "已安装",
     "missing": "未安装",
+    "versionSatisfied": "符合要求",
+    "versionUnsatisfied": "不符合要求",
     "installGuide": "安装指引",
     "installGuideIntro": "如需安装或重新安装依赖，请按照以下指引在终端中手动安装：",
     "copyCommand": "复制命令",
@@ -54,6 +56,11 @@
       "name": "ntfs-3g",
       "description": "NTFS 文件系统驱动，提供 NTFS 读写支持",
       "installGuide": "需要先安装 Homebrew 和 MacFUSE。在终端运行上述命令即可安装。"
+    },
+    "macosVersion": {
+      "name": "macOS 版本 ({version})",
+      "description": "系统版本检查，确保 macOS 版本满足要求（需要 macOS 14 或更高版本）",
+      "installGuide": "如果您的 macOS 版本过低，请通过系统设置 > 软件更新来升级系统。本工具需要 macOS 14 (Sonoma) 或更高版本才能正常运行。"
     }
   },
   "devices": {
@@ -76,7 +83,7 @@
     "mountPointLabel": "挂载点:",
     "notMounted": "未挂载",
     "mountConfirm": "确定要将 {name} 配置为可读写模式吗？",
-    "mountConfirmNote": "注意：\n• 这需要管理员权限，系统会弹出密码输入对话框\n• 如果设备在 Windows 中使用了快速启动，可能需要先在 Windows 中完全关闭设备",
+    "mountConfirmNote": "注意：\n• 这需要管理员权限，系统会弹出密码输入对话框\n• 如果该 NTFS 设备之前在 Windows 电脑上使用过，且 Windows 启用了快速启动功能，可能需要将设备插回 Windows 电脑并完全关闭后再试",
     "unmountConfirm": "确定要卸载 {name} 吗？",
     "ejectConfirm": "确定要推出 {name} 吗？",
     "ejectConfirmNote": "注意：\n• 推出后设备将从系统中完全断开\n• 设备将从列表中移除，需要重新插入才能使用\n• 请确保没有程序正在使用该设备",
@@ -119,13 +126,19 @@
     "startupTab": "启动时打开的标签页",
     "startupTabDesc": "选择应用启动时默认显示的标签页",
     "enableLogs": "启用操作日志",
-    "enableLogsDesc": "启用后，应用会记录所有操作日志。关闭后，将不再记录新的日志，但已记录的日志仍会保留。默认最长保存30天",
+    "enableLogsDesc": "默认关闭，需要手动开启。启用后，应用会记录所有操作日志。关闭后，将不再记录新的日志，但已记录的日志仍会保留。默认最长保存30天",
     "resetLogsDaily": "每天自动重置日志",
     "resetLogsDailyDesc": "启用后，应用会在每天首次启动时自动清空前一天的日志",
     "exportLogs": "导出操作日志",
     "exportLogsDesc": "将所有操作日志导出为文本文件",
     "language": "语言",
     "languageDesc": "选择应用界面语言",
+    "windowSize": "窗口尺寸",
+    "windowSizeDesc": "自定义应用窗口的宽度和高度（单位：像素）。修改后需要重启应用生效",
+    "width": "宽度",
+    "height": "高度",
+    "pixel": "像素",
+    "resetToDefault": "重置为默认值",
     "languages": {
       "system": "跟随系统",
       "zh-CN": "简体中文",

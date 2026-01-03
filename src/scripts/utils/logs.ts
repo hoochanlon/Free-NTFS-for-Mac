@@ -37,32 +37,17 @@
 
     // 检查并执行每天重置
     async checkAndResetDaily(): Promise<void> {
-      try {
-        const settings = await (window as any).electronAPI?.getSettings();
-        if (!settings || !settings.resetLogsDaily) {
-          return;
-        }
-
-        const today = new Date().toDateString();
-        const lastReset = localStorage.getItem('lastLogResetDate');
-
-        if (lastReset !== today) {
-          localStorage.setItem('appLogs', '[]');
-          localStorage.setItem('lastLogResetDate', today);
-          AppUtils.Logs.lastResetDate = today;
-        }
-      } catch (error) {
-        console.error('检查日志重置失败:', error);
-      }
+      // 每日自动重置功能已移除
+      // 此函数保留为空，避免破坏现有代码结构
     },
 
     // 检查日志是否启用
     async isEnabled(): Promise<boolean> {
       try {
         const settings = await (window as any).electronAPI?.getSettings();
-        return settings?.enableLogs !== false; // 默认启用
+        return settings?.enableLogs === true; // 默认关闭，需要手动开启
       } catch {
-        return true; // 默认启用
+        return false; // 默认关闭
       }
     },
 
