@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Free NTFS for Mac",
+    "title": "Nigate",
     "about": "About"
   },
   "menu": {
@@ -99,6 +99,7 @@
     "unmount": "Unmount",
     "eject": "Eject",
     "restoreReadOnly": "Restore to Read-Only",
+    "autoMount": "Auto Mount on Insert",
     "readOnly": "Read-Only",
     "readWrite": "Read-Write",
     "unmounted": "Unmounted",
@@ -118,12 +119,13 @@
     "empty": "No logs",
     "clear": "Clear",
     "export": "Export",
+    "enable": "Enable Operation Logs",
     "exportSuccess": "Logs exported successfully",
     "exportError": "Export failed",
     "noLogsToExport": "No logs to export",
     "clearConfirm": "Are you sure you want to clear all logs?",
     "exportPath": "Logs exported to: {path}",
-    "exportHeader": "Free NTFS for Mac - Operation Logs",
+    "exportHeader": "Nigate - Operation Logs",
     "exportTime": "Export time: {time}",
     "exportCount": "Total {count} logs",
     "logTypes": {

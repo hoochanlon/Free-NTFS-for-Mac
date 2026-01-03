@@ -1,6 +1,7 @@
 // Electron API 类型定义
 export interface AppSettings {
   savePassword: boolean;
+  autoMount: boolean;
   startupTab: 'dependencies' | 'devices' | 'logs' | 'help';
   enableLogs: boolean;
   language: 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system';
@@ -35,6 +36,10 @@ export interface ElectronAPI {
   exportLogs: (content: string) => Promise<{ success: boolean; path?: string; error?: string }>;
   switchToTab: (tabName: string) => Promise<void>;
   onSwitchTab: (callback: (tabName: string) => void) => void;
+  showConfirmDialog: (title: string, message: string) => Promise<boolean>;
+  showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => Promise<void>;
+  readLogsFile: () => Promise<{ success: boolean; content?: string; error?: string }>;
+  writeLogsFile: (content: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 export interface Dependencies {

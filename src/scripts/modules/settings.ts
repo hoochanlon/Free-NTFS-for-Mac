@@ -32,7 +32,6 @@
       const savePasswordCheckbox = document.getElementById('savePasswordCheckbox') as HTMLInputElement;
       const deletePasswordBtn = document.getElementById('deletePasswordBtn') as HTMLButtonElement;
       const startupTabSelect = document.getElementById('startupTabSelect') as HTMLSelectElement;
-      const enableLogsCheckbox = document.getElementById('enableLogsCheckbox') as HTMLInputElement;
       const languageSelect = document.getElementById('languageSelect') as HTMLSelectElement;
 
       if (!savePasswordCheckbox || !deletePasswordBtn || !startupTabSelect) {
@@ -44,9 +43,6 @@
         const settings = await electronAPI.getSettings();
         savePasswordCheckbox.checked = settings.savePassword;
         startupTabSelect.value = settings.startupTab;
-        if (enableLogsCheckbox) {
-          enableLogsCheckbox.checked = settings.enableLogs === true; // 默认关闭，需要手动开启
-        }
         if (languageSelect) {
           // 如果没有设置或设置为空，默认使用跟随系统
           languageSelect.value = settings.language || 'system';
@@ -57,9 +53,11 @@
         const windowHeightInput = document.getElementById('windowHeightInput') as HTMLInputElement;
         if (windowWidthInput) {
           windowWidthInput.value = String(settings.windowWidth || WINDOW_SIZE_CONFIG.defaultWidth);
+          windowWidthInput.placeholder = String(WINDOW_SIZE_CONFIG.defaultWidth);
         }
         if (windowHeightInput) {
           windowHeightInput.value = String(settings.windowHeight || WINDOW_SIZE_CONFIG.defaultHeight);
+          windowHeightInput.placeholder = String(WINDOW_SIZE_CONFIG.defaultHeight);
         }
 
         // 检查是否有保存的密码
@@ -90,16 +88,17 @@
         deletePasswordBtn.addEventListener('click', async () => {
           const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
           const confirmText = t('settings.deletePasswordConfirm') || '确定要删除保存的密码吗？';
-          if (confirm(confirmText)) {
+          const confirmed = await AppUtils.UI.showConfirm('确认', confirmText);
+          if (confirmed) {
             try {
               await electronAPI.deleteSavedPassword();
               deletePasswordBtn.style.display = 'none';
               const successText = t('settings.deletePasswordSuccess') || '已删除保存的密码';
-              alert(successText);
+              await AppUtils.UI.showMessage('成功', successText, 'info');
             } catch (error) {
               console.error('删除密码失败:', error);
               const errorText = t('settings.deletePasswordError') || '删除密码失败，请重试';
-              alert(errorText);
+              await AppUtils.UI.showMessage('错误', errorText, 'error');
             }
           }
         });
@@ -112,18 +111,6 @@
             console.error('保存设置失败:', error);
           }
         });
-
-        // 启用日志复选框变化
-        if (enableLogsCheckbox) {
-          enableLogsCheckbox.addEventListener('change', async () => {
-            try {
-              await electronAPI.saveSettings({ enableLogs: enableLogsCheckbox.checked });
-            } catch (error) {
-              console.error('保存设置失败:', error);
-              enableLogsCheckbox.checked = !enableLogsCheckbox.checked;
-            }
-          });
-        }
 
         // 语言选择变化
         if (languageSelect) {

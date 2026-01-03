@@ -67,6 +67,14 @@
       unmountAllBtn.textContent = t('devices.unmountAll');
     }
 
+    const autoMountCheckbox = document.getElementById('autoMountCheckbox');
+    if (autoMountCheckbox) {
+      const label = autoMountCheckbox.parentElement?.querySelector('span');
+      if (label) {
+        label.textContent = t('devices.autoMount');
+      }
+    }
+
     const ejectAllBtn = document.getElementById('ejectAllBtn');
     if (ejectAllBtn) {
       ejectAllBtn.textContent = t('devices.ejectAll');
@@ -141,14 +149,13 @@
       });
     }
 
-    // 启用操作日志
-    const enableLogsLabel = document.querySelector('label[for="enableLogsCheckbox"]');
-    if (enableLogsLabel) {
-      enableLogsLabel.textContent = t('settings.enableLogs');
-    }
-    const enableLogsDesc = document.querySelector('#enableLogsCheckbox')?.closest('.setting-item')?.querySelector('.setting-description');
-    if (enableLogsDesc) {
-      enableLogsDesc.textContent = t('settings.enableLogsDesc');
+    // 启用操作日志复选框（在操作日志标签页）
+    const enableLogsCheckbox = document.getElementById('enableLogsCheckbox');
+    if (enableLogsCheckbox) {
+      const label = enableLogsCheckbox.parentElement?.querySelector('span');
+      if (label) {
+        label.textContent = t('logs.enable') || '启用操作日志';
+      }
     }
 
     // 语言
@@ -297,7 +304,7 @@
       // 重新渲染日志
       const logContainer = document.getElementById('logContainer');
       if (logContainer && (window as any).AppUtils && (window as any).AppUtils.Logs) {
-        (window as any).AppUtils.Logs.renderLogs(logContainer, true);
+        (window as any).AppUtils.Logs.renderLogs(logContainer, true).catch((err: any) => console.error('渲染日志失败:', err));
       }
 
       // 如果当前在指南手册标签页，重新加载 markdown（会根据新语言加载对应文件）

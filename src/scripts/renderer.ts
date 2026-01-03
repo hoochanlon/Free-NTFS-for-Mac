@@ -44,6 +44,7 @@
   const docBody = document.body;
   const helpTab = document.getElementById('helpTab') as HTMLElement;
   const aboutBtn = document.getElementById('aboutBtn') as HTMLButtonElement;
+  const autoMountCheckbox = document.getElementById('autoMountCheckbox') as HTMLInputElement;
 
   // 自动刷新间隔
   let autoRefreshInterval: NodeJS.Timeout | null = null;
@@ -59,21 +60,46 @@
     // 初始化设置
     await AppModules.Settings.initSettings();
 
+    // 初始化功能模块
+    // 检查并执行每天重置日志，并清理过期日志
+    AppUtils.Logs.checkAndResetDaily();
+    // 清理超过一个月的日志（getLogs 内部会自动清理）
+    AppUtils.Logs.getLogs().catch((err: any) => console.error('加载日志失败:', err));
+
     // 根据设置打开启动标签页
     try {
       const settings = await window.electronAPI.getSettings();
       if (settings.startupTab) {
         AppModules.Tabs.switchToTab(settings.startupTab, logContainer, helpTab);
+      } else {
+        // 如果没有设置启动标签页，默认显示第一个标签页，并确保日志已渲染
+        const firstTab = document.querySelector('.tab') as HTMLElement;
+        if (firstTab) {
+          const tabName = firstTab.getAttribute('data-tab');
+          if (tabName) {
+            AppModules.Tabs.switchToTab(tabName, logContainer, helpTab);
+          }
+        }
+      }
+
+      // 确保如果当前在日志标签页，日志已正确渲染
+      const logsTab = document.getElementById('logsTab');
+      if (logsTab && logsTab.classList.contains('active')) {
+        // 延迟一点渲染，确保 DOM 已完全加载
+        setTimeout(() => {
+          AppUtils.Logs.renderLogs(logContainer, true).catch((err: any) => console.error('渲染日志失败:', err));
+        }, 100);
       }
     } catch (error) {
       console.error('加载启动标签页设置失败:', error);
+      // 即使出错也尝试渲染日志（如果当前在日志标签页）
+      const logsTab = document.getElementById('logsTab');
+      if (logsTab && logsTab.classList.contains('active')) {
+        setTimeout(() => {
+          AppUtils.Logs.renderLogs(logContainer, true).catch((err: any) => console.error('渲染日志失败:', err));
+        }, 100);
+      }
     }
-
-    // 初始化功能模块
-    // 检查并执行每天重置日志，并清理过期日志
-    AppUtils.Logs.checkAndResetDaily();
-    // 清理超过一个月的日志（getLogs 内部会自动清理）
-    AppUtils.Logs.getLogs();
 
     AppModules.Dependencies.checkDependencies(
       depsList,
@@ -92,6 +118,21 @@
     // 初始化关于按钮
     if (aboutBtn) {
       AppModules.About.initAboutButton(aboutBtn);
+    }
+
+    // 初始化自动挂载复选框
+    if (autoMountCheckbox) {
+      window.electronAPI.getSettings().then((settings: any) => {
+        autoMountCheckbox.checked = settings.autoMount || false;
+      });
+
+      autoMountCheckbox.addEventListener('change', async () => {
+        try {
+          await window.electronAPI.saveSettings({ autoMount: autoMountCheckbox.checked });
+        } catch (error) {
+          console.error('保存自动挂载设置失败:', error);
+        }
+      });
     }
 
     // 监听从菜单切换标签页的事件
@@ -144,8 +185,8 @@
       // 这里可以添加额外的逻辑来确保内容高度一致（如果需要）
     }
 
-    clearLogBtn.addEventListener('click', () => {
-      AppUtils.Logs.clearLog(logContainer);
+    clearLogBtn.addEventListener('click', async () => {
+      await AppUtils.Logs.clearLog(logContainer);
     });
 
     const exportLogBtn = document.getElementById('exportLogBtn') as HTMLButtonElement;
@@ -153,6 +194,41 @@
       exportLogBtn.addEventListener('click', () => {
         AppUtils.Logs.exportLogs();
       });
+    }
+
+    // 初始化启用操作日志复选框
+    const enableLogsCheckbox = document.getElementById('enableLogsCheckbox') as HTMLInputElement;
+    if (enableLogsCheckbox) {
+      // 检查日志是否已启用
+      const checkLogsStatus = async () => {
+        const isEnabled = await AppUtils.Logs.isEnabled();
+        enableLogsCheckbox.checked = isEnabled;
+      };
+
+      checkLogsStatus();
+
+      enableLogsCheckbox.addEventListener('change', async () => {
+        try {
+          await window.electronAPI.saveSettings({ enableLogs: enableLogsCheckbox.checked });
+          if (enableLogsCheckbox.checked) {
+            await AppUtils.Logs.addLog('操作日志已启用', 'success');
+          }
+        } catch (error) {
+          console.error('保存操作日志设置失败:', error);
+          enableLogsCheckbox.checked = !enableLogsCheckbox.checked;
+        }
+      });
+
+      // 定期检查日志状态（当切换到日志标签页时）
+      const logsTab = document.getElementById('logsTab');
+      if (logsTab) {
+        const observer = new MutationObserver(() => {
+          if (logsTab.classList.contains('active')) {
+            checkLogsStatus();
+          }
+        });
+        observer.observe(logsTab, { attributes: true, attributeFilter: ['class'] });
+      }
     }
 
     if (themeToggleButton) {
@@ -167,7 +243,7 @@
       const logsTab = document.getElementById('logsTab');
       if (logsTab && logsTab.classList.contains('active')) {
         // 只在日志标签页可见时才更新，且不强制更新
-        AppUtils.Logs.renderLogs(logContainer, false);
+        AppUtils.Logs.renderLogs(logContainer, false).catch((err: any) => console.error('渲染日志失败:', err));
       }
     }, 2000);
   });

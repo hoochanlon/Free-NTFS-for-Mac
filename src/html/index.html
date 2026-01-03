@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self';">
-  <title>Free NTFS for Mac</title>
+  <title>Nigate</title>
   <link rel="stylesheet" href="../../styles.css?v=11">
   <script src="../../scripts/theme-init.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
@@ -15,7 +15,7 @@
     <div class="titlebar">
       <div class="titlebar-traffic-lights"></div>
       <div class="titlebar-content">
-        <h1 class="app-title">Free NTFS for Mac</h1>
+        <h1 class="app-title">Nigate（Free NTFS for Mac）</h1>
         <div class="titlebar-right">
           <button class="btn-about" id="aboutBtn" title="关于">
             <img src="../imgs/svg/info.svg" alt="关于" class="btn-about-icon">
@@ -93,6 +93,10 @@
           <div class="section-header">
             <h2>NTFS 设备</h2>
             <div class="header-actions">
+              <label class="auto-mount-checkbox">
+                <input type="checkbox" id="autoMountCheckbox">
+                <span>自动读写接入</span>
+              </label>
               <button class="btn btn-primary" id="mountAllBtn">全读写</button>
               <button class="btn btn-warning" id="restoreAllReadOnlyBtn">全只读</button>
               <button class="btn btn-info" id="unmountAllBtn">全卸载</button>
@@ -115,8 +119,12 @@
           <div class="section-header">
             <h2>操作日志</h2>
             <div class="header-actions">
+              <label class="enable-logs-checkbox">
+                <input type="checkbox" id="enableLogsCheckbox">
+                <span>启用操作日志</span>
+              </label>
               <button class="btn btn-secondary" id="exportLogBtn">导出</button>
-              <button class="btn btn-text" id="clearLogBtn">清空</button>
+              <button class="btn btn-danger" id="clearLogBtn">清空</button>
             </div>
           </div>
           <div class="log-container" id="logContainer">
@@ -165,15 +173,6 @@
             </div>
             <div class="setting-item">
               <div class="setting-label">
-                <label for="enableLogsCheckbox">启用操作日志</label>
-                <p class="setting-description">默认关闭，需要手动开启。启用后，应用会记录所有操作日志。关闭后，将不再记录新的日志，但已记录的日志仍会保留。默认最长保存30天</p>
-              </div>
-              <div class="setting-control">
-                <input type="checkbox" id="enableLogsCheckbox" class="setting-checkbox">
-              </div>
-            </div>
-            <div class="setting-item">
-              <div class="setting-label">
                 <label for="languageSelect">语言</label>
                 <p class="setting-description">选择应用界面语言</p>
               </div>
@@ -196,12 +195,12 @@
               <div class="setting-control setting-size-control">
                 <div class="size-input-group">
                   <label for="windowWidthInput" class="size-label">宽度</label>
-                  <input type="text" id="windowWidthInput" class="setting-size-input" inputmode="numeric" pattern="[0-9]*" placeholder="900">
+                  <input type="text" id="windowWidthInput" class="setting-size-input" inputmode="numeric" pattern="[0-9]*">
                   <span class="size-unit" data-i18n="settings.pixel">像素</span>
                 </div>
                 <div class="size-input-group">
                   <label for="windowHeightInput" class="size-label">高度</label>
-                  <input type="text" id="windowHeightInput" class="setting-size-input" inputmode="numeric" pattern="[0-9]*" placeholder="680">
+                  <input type="text" id="windowHeightInput" class="setting-size-input" inputmode="numeric" pattern="[0-9]*">
                   <span class="size-unit" data-i18n="settings.pixel">像素</span>
                 </div>
               </div>

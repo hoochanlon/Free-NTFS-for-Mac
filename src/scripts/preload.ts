@@ -33,7 +33,11 @@ const electronAPI: ElectronAPI = {
   switchToTab: (tabName: string) => ipcRenderer.invoke('switch-to-tab', tabName),
   onSwitchTab: (callback: (tabName: string) => void) => {
     ipcRenderer.on('switch-tab', (event, tabName: string) => callback(tabName));
-  }
+  },
+  showConfirmDialog: (title: string, message: string) => ipcRenderer.invoke('show-confirm-dialog', { title, message }),
+  showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => ipcRenderer.invoke('show-message-dialog', { title, message, type }),
+  readLogsFile: () => ipcRenderer.invoke('read-logs-file'),
+  writeLogsFile: (content: string) => ipcRenderer.invoke('write-logs-file', content)
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

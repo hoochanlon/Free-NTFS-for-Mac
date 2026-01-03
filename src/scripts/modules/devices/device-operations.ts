@@ -39,13 +39,6 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
-      const message = t('devices.mountConfirm', { name: device.volumeName }) + '\n\n' +
-                      t('devices.mountConfirmNote');
-
-      if (!confirm(message)) {
-        return;
-      }
-
       const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
 
       try {
@@ -86,13 +79,6 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
-      const message = t('devices.restoreConfirm', { name: device.volumeName }) + '\n\n' +
-                      t('devices.restoreConfirmNote');
-
-      if (!confirm(message)) {
-        return;
-      }
-
       const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
 
       try {
@@ -142,11 +128,11 @@
       }
 
       const deviceNames = readWriteDevices.map((d: any) => d.volumeName).join('、');
-      const message = t('devices.restoreAllReadOnly') + '?\n\n' +
-                      `将还原以下设备：\n${deviceNames}\n\n` +
-                      t('devices.restoreConfirmNote');
+      const title = t('devices.restoreAllReadOnly') + '？';
+      const message = `将还原以下设备：\n${deviceNames}\n\n*注意：*\n* 设备将恢复为只读模式，无法写入文件\n* 已写入的文件不会丢失，但后续只能读取`;
 
-      if (!confirm(message)) {
+      const confirmed = await AppUtils.UI.showConfirm(title, message);
+      if (!confirmed) {
         return;
       }
 
@@ -211,13 +197,6 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
-      const message = t('devices.unmountConfirm', { name: device.volumeName }) + '\n\n' +
-                      t('devices.restoreConfirmNote');
-
-      if (!confirm(message)) {
-        return;
-      }
-
       const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
 
       try {
@@ -265,11 +244,11 @@
       }
 
       const deviceNames = readOnlyDevices.map((d: any) => d.volumeName).join('、');
-      const message = t('devices.mountAll') + '?\n\n' +
-                      `将配置以下设备：\n${deviceNames}\n\n` +
-                      t('devices.mountConfirmNote');
+      const title = t('devices.mountAll') + '？';
+      const message = `将配置以下设备：\n${deviceNames}\n\n*注意：*\n* 配置后设备将支持读写，可以正常保存文件\n* 如果设备之前在 Windows 上使用过，可能需要先在 Windows 上完全关闭后再试`;
 
-      if (!confirm(message)) {
+      const confirmed = await AppUtils.UI.showConfirm(title, message);
+      if (!confirmed) {
         return;
       }
 
@@ -330,21 +309,21 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
-      // 获取所有已挂载为读写模式的设备
+      // 获取所有已挂载的设备（排除已卸载的设备）
       const devices = AppModules.Devices.devices || [];
-      const readWriteDevices = devices.filter((d: any) => !d.isReadOnly);
+      const mountedDevices = devices.filter((d: any) => !d.isUnmounted);
 
-      if (readWriteDevices.length === 0) {
-        await AppUtils.Logs.addLog('没有已挂载为读写模式的设备', 'info');
+      if (mountedDevices.length === 0) {
+        await AppUtils.Logs.addLog(t('messages.noDevicesToUnmount') || '没有已挂载的设备', 'info');
         return;
       }
 
-      const deviceNames = readWriteDevices.map((d: any) => d.volumeName).join('、');
-      const message = `确定要卸载所有已挂载的 NTFS 设备吗？\n\n` +
-                      `将卸载以下设备：\n${deviceNames}\n\n` +
-                      `注意：这需要管理员权限，系统会弹出密码输入对话框`;
+      const deviceNames = mountedDevices.map((d: any) => d.volumeName).join('、');
+      const title = '确定要卸载所有已挂载的 NTFS 设备吗？';
+      const message = `将卸载以下设备：\n${deviceNames}\n\n*注意：*\n* 卸载后设备将无法访问，需要重新挂载才能使用\n* 请确保没有程序正在使用这些设备`;
 
-      if (!confirm(message)) {
+      const confirmed = await AppUtils.UI.showConfirm(title, message);
+      if (!confirmed) {
         return;
       }
 
@@ -352,14 +331,14 @@
 
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
-        await AppUtils.Logs.addLog(`开始卸载 ${readWriteDevices.length} 个设备...`, 'info');
+        await AppUtils.Logs.addLog(`开始卸载 ${mountedDevices.length} 个设备...`, 'info');
         await AppUtils.Logs.addLog('提示：请在弹出的对话框中输入管理员密码', 'info');
 
         let successCount = 0;
         let failCount = 0;
 
         // 逐个卸载设备
-        for (const device of readWriteDevices) {
+        for (const device of mountedDevices) {
           try {
             await AppUtils.Logs.addLog(`正在卸载 ${device.volumeName}...`, 'info');
             const result = await electronAPI.unmountDevice(device);
@@ -406,16 +385,6 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
-      const message = `确定要推出 ${device.volumeName} 吗？\n\n` +
-                      `注意：\n` +
-                      `• 推出后设备将从系统中完全断开\n` +
-                      `• 设备将从列表中移除，需要重新插入才能使用\n` +
-                      `• 请确保没有程序正在使用该设备`;
-
-      if (!confirm(message)) {
-        return;
-      }
-
       const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
 
       try {
@@ -459,14 +428,11 @@
       }
 
       const deviceNames = mountedDevices.map((d: any) => d.volumeName).join('、');
-      const message = `确定要推出所有 NTFS 设备吗？\n\n` +
-                      `将推出以下设备：\n${deviceNames}\n\n` +
-                      `注意：\n` +
-                      `• 推出后设备将从系统中完全断开\n` +
-                      `• 设备将从列表中移除，需要重新插入才能使用\n` +
-                      `• 请确保没有程序正在使用这些设备`;
+      const title = '确定要推出所有 NTFS 设备吗？';
+      const message = `将推出以下设备：\n${deviceNames}\n\n*注意：*\n* 推出后设备将完全断开，无法访问\n* 设备将从列表中移除，需要重新插入才能使用\n* 请确保没有程序正在使用这些设备，否则可能导致数据丢失`;
 
-      if (!confirm(message)) {
+      const confirmed = await AppUtils.UI.showConfirm(title, message);
+      if (!confirmed) {
         return;
       }
 

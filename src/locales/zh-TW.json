@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Free NTFS for Mac",
+    "title": "Nigate",
     "about": "關於"
   },
   "menu": {
@@ -99,6 +99,7 @@
     "unmount": "卸載",
     "eject": "推出",
     "restoreReadOnly": "還原為只讀",
+    "autoMount": "自動讀寫接入",
     "readOnly": "只讀",
     "readWrite": "可讀寫",
     "unmounted": "已卸載",
@@ -118,12 +119,13 @@
     "empty": "暫無日誌",
     "clear": "清空",
     "export": "匯出",
+    "enable": "啟用操作日誌",
     "exportSuccess": "日誌已匯出",
     "exportError": "匯出失敗",
     "noLogsToExport": "沒有日誌可匯出",
     "clearConfirm": "確定要清空所有日誌嗎？",
     "exportPath": "日誌已匯出到: {path}",
-    "exportHeader": "Free NTFS for Mac - 操作日誌",
+    "exportHeader": "Nigate - 操作日誌",
     "exportTime": "匯出時間: {time}",
     "exportCount": "共 {count} 條日誌",
     "logTypes": {

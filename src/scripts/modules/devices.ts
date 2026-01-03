@@ -58,6 +58,7 @@
     devices: AppModules.Devices.devices || [] as any[],
     lastDeviceCount: AppModules.Devices.lastDeviceCount || 0,
     lastDeviceState: AppModules.Devices.lastDeviceState || '',
+    lastDevicePaths: AppModules.Devices.lastDevicePaths || [] as string[],
 
     // 刷新设备列表
     async refreshDevices(
@@ -67,12 +68,49 @@
       statusText: HTMLElement
     ): Promise<void> {
       try {
+        const previousDevices = AppModules.Devices.devices || [];
+        const previousDevicePaths = previousDevices.map((d: any) => d.devicePath);
+        
         AppModules.Devices.devices = await electronAPI.getNTFSDevices();
         Renderer.renderDevices(devicesList, readWriteDevicesList);
 
         const currentDeviceCount = AppModules.Devices.devices.length;
         const readOnlyCount = AppModules.Devices.devices.filter((d: any) => d.isReadOnly).length;
         const currentState = `${currentDeviceCount}-${readOnlyCount}`;
+        
+        // 检测新插入的设备并自动挂载
+        const currentDevicePaths = AppModules.Devices.devices.map((d: any) => d.devicePath);
+        const newDevices = AppModules.Devices.devices.filter((d: any) => 
+          !previousDevicePaths.includes(d.devicePath) && d.isReadOnly && !d.isUnmounted
+        );
+        
+        if (newDevices.length > 0) {
+          try {
+            const settings = await electronAPI.getSettings();
+            if (settings.autoMount) {
+              // 自动挂载新插入的只读设备
+              for (const device of newDevices) {
+                try {
+                  await AppUtils.Logs.addLog(`检测到新设备 ${device.volumeName}，正在自动配置为可读写...`, 'info');
+                  const result = await electronAPI.mountDevice(device);
+                  if (result.success) {
+                    await AppUtils.Logs.addLog(`设备 ${device.volumeName} 自动配置成功`, 'success');
+                  } else {
+                    await AppUtils.Logs.addLog(`设备 ${device.volumeName} 自动配置失败: ${result.error || '未知错误'}`, 'error');
+                  }
+                } catch (error) {
+                  const errorMessage = error instanceof Error ? error.message : String(error);
+                  await AppUtils.Logs.addLog(`设备 ${device.volumeName} 自动配置失败: ${errorMessage}`, 'error');
+                }
+              }
+              // 重新刷新设备列表以更新状态
+              AppModules.Devices.devices = await electronAPI.getNTFSDevices();
+              Renderer.renderDevices(devicesList, readWriteDevicesList);
+            }
+          } catch (error) {
+            console.error('自动挂载失败:', error);
+          }
+        }
 
         // 只在设备状态变化时添加日志
         const stateChanged = currentDeviceCount !== AppModules.Devices.lastDeviceCount ||
@@ -126,6 +164,7 @@
 
         AppModules.Devices.lastDeviceCount = currentDeviceCount;
         AppModules.Devices.lastDeviceState = currentState;
+        AppModules.Devices.lastDevicePaths = currentDevicePaths;
       } catch (error) {
         // 获取翻译文本的辅助函数
         function t(key: string, params?: Record<string, string | number>): string {

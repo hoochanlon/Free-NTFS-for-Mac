@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Free NTFS for Mac",
+    "title": "Nigate",
     "about": "について"
   },
   "menu": {
@@ -99,6 +99,7 @@
     "unmount": "アンマウント",
     "eject": "イジェクト",
     "restoreReadOnly": "読み取り専用に戻す",
+    "autoMount": "自動読み書き接続",
     "readOnly": "読み取り専用",
     "readWrite": "読み書き可能",
     "unmounted": "アンマウント済み",
@@ -118,12 +119,13 @@
     "empty": "ログがありません",
     "clear": "クリア",
     "export": "エクスポート",
+    "enable": "操作ログを有効化",
     "exportSuccess": "ログをエクスポートしました",
     "exportError": "エクスポートに失敗しました",
     "noLogsToExport": "エクスポートするログがありません",
     "clearConfirm": "すべてのログをクリアしてもよろしいですか？",
     "exportPath": "ログをエクスポートしました: {path}",
-    "exportHeader": "Free NTFS for Mac - 操作ログ",
+    "exportHeader": "Nigate - 操作ログ",
     "exportTime": "エクスポート時間: {time}",
     "exportCount": "合計 {count} ログ",
     "logTypes": {

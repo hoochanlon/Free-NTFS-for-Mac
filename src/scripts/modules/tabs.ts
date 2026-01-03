@@ -50,7 +50,7 @@
 
       // 如果切换到日志标签页，刷新日志显示
       if (targetTab === 'logs') {
-        AppUtils.Logs.renderLogs(logContainer, true);
+        AppUtils.Logs.renderLogs(logContainer, true).catch((err: any) => console.error('渲染日志失败:', err));
       }
       // 如果切换到指南手册标签页，加载 markdown（会自动根据当前语言加载对应文件）
       else if (targetTab === 'help' && helpTab) {

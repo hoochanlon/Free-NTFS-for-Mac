@@ -121,6 +121,73 @@ export function setupNTFSHandlers(): void {
       }
     });
   });
+
+  // 自定义确认对话框
+  ipcMain.handle('show-confirm-dialog', async (event, options: { title: string; message: string }) => {
+    if (mainWindow) {
+      const result = await dialog.showMessageBox(mainWindow, {
+        type: 'question',
+        title: options.title,
+        message: options.title,
+        detail: options.message,
+        buttons: ['取消', '确定'],
+        defaultId: 1,
+        cancelId: 0,
+        noLink: true
+      });
+      return result.response === 1; // 1 是"确定"按钮
+    }
+    return false;
+  });
+
+  // 显示消息对话框（替换 alert）
+  ipcMain.handle('show-message-dialog', async (event, options: { title: string; message: string; type?: 'info' | 'warning' | 'error' }) => {
+    if (mainWindow) {
+      await dialog.showMessageBox(mainWindow, {
+        type: options.type || 'info',
+        title: options.title,
+        message: options.title,
+        detail: options.message,
+        buttons: ['确定'],
+        defaultId: 0,
+        noLink: true
+      });
+    }
+  });
+
+  // 读取日志文件
+  ipcMain.handle('read-logs-file', async () => {
+    try {
+      const userDataPath = app.getPath('userData');
+      const logsFilePath = path.join(userDataPath, 'logs.json');
+      
+      if (fs.existsSync(logsFilePath)) {
+        const content = await fs.promises.readFile(logsFilePath, 'utf-8');
+        // 确保返回的内容不为空
+        return { success: true, content: content || '[]' };
+      }
+      // 文件不存在时返回空数组
+      return { success: true, content: '[]' };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('读取日志文件失败:', errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  });
+
+  // 保存日志文件
+  ipcMain.handle('write-logs-file', async (event, content: string) => {
+    try {
+      const userDataPath = app.getPath('userData');
+      const logsFilePath = path.join(userDataPath, 'logs.json');
+      
+      await fs.promises.writeFile(logsFilePath, content, 'utf-8');
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { success: false, error: errorMessage };
+    }
+  });
 }
 
 // 窗口相关 IPC handlers

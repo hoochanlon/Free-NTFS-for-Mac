@@ -190,7 +190,7 @@ export async function openAboutWindow(): Promise<void> {
     }
   });
 
-  // 如果 ready-to-show 没有触发，延迟显示窗口
+  // 备用方案：延迟显示（如果 ready-to-show 没有触发）
   setTimeout(() => {
     if (aboutWindow && !aboutWindow.isDestroyed() && !aboutWindow.isVisible()) {
       console.log('关于窗口延迟显示（备用方案）');

@@ -164,14 +164,7 @@
 
   // 挂载设备
   async function mountDevice(device: any): Promise<void> {
-    const message = `确定要将 ${device.volumeName} 挂载为读写模式吗？\n\n` +
-                    `⚠️ 注意：\n` +
-                    `• 这需要管理员权限，系统会弹出密码输入对话框\n` +
-                    `• 如果设备在 Windows 中使用了快速启动，可能需要先在 Windows 中完全关闭设备`;
-
-    if (!confirm(message)) {
-      return;
-    }
+    // 单个设备操作不需要确认弹窗（根据用户要求）
 
     try {
       showLoading(true);
@@ -203,12 +196,7 @@
 
   // 卸载设备
   async function unmountDevice(device: any): Promise<void> {
-    const message = `确定要卸载 ${device.volumeName} 吗？\n\n` +
-                    `⚠️ 注意：这需要管理员权限，系统会弹出密码输入对话框`;
-
-    if (!confirm(message)) {
-      return;
-    }
+    // 单个设备操作不需要确认弹窗（根据用户要求）
 
     try {
       showLoading(true);

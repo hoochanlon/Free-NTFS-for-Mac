@@ -28,10 +28,19 @@
   }
 
   // 清空日志
-  function clearLogs() {
-    if (confirm('确定要清空所有日志吗？')) {
-      localStorage.setItem('appLogs', '[]');
-      loadLogs();
+  async function clearLogs() {
+    if ((window as any).AppUtils && (window as any).AppUtils.UI) {
+      const confirmed = await (window as any).AppUtils.UI.showConfirm('确认', '确定要清空所有日志吗？');
+      if (confirmed) {
+        localStorage.setItem('appLogs', '[]');
+        loadLogs();
+      }
+    } else {
+      // 回退方案（不应该发生）
+      if (confirm('确定要清空所有日志吗？')) {
+        localStorage.setItem('appLogs', '[]');
+        loadLogs();
+      }
     }
   }
 

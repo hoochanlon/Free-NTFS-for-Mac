@@ -41,7 +41,7 @@
   },
   "build": {
     "appId": "com.freentfs.mac",
-    "productName": "Free NTFS for Mac",
+    "productName": "Nigate",
     "icon": "src/ico/flash.icns",
     "npmRebuild": false,
     "electronDownload": {

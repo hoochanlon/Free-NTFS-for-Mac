@@ -25,7 +25,8 @@ export const WINDOW_SIZE_CONFIG = {
 
 // 默认设置
 const DEFAULT_SETTINGS = {
-  savePassword: false,
+  savePassword: true,
+  autoMount: false,
   startupTab: 'dependencies' as 'dependencies' | 'devices' | 'logs' | 'help',
   enableLogs: false,
   language: 'system' as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system',
@@ -35,6 +36,7 @@ const DEFAULT_SETTINGS = {
 
 export interface AppSettings {
   savePassword: boolean;
+  autoMount: boolean;
   startupTab: 'dependencies' | 'devices' | 'logs' | 'help';
   enableLogs: boolean;
   language: 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system';

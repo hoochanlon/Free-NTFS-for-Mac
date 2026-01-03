@@ -187,7 +187,33 @@ In the "Operation Logs" tab, you can view records of all operations, including:
 - Mount/unmount operation results
 - Error messages and warnings
 
-Logs can help you troubleshoot issues and track operation history. You can click the "Clear" button at any time to clear all log records.
+**Enable Operation Logs:**
+
+Operation logs are disabled by default and need to be manually enabled. Check the "Enable Operation Logs" checkbox in the "Operation Logs" tab to enable logging. When enabled, the app will record all operation logs. When disabled, new logs will not be recorded, but previously recorded logs will still be retained.
+
+**Log Storage:**
+
+Logs are saved in JSON format to the file system at the following location:
+
+```
+~/Library/Application Support/Nigate/logs.json
+```
+
+The log file uses formatted JSON format and can be opened directly with a text editor for viewing. When you uninstall the app, the log file will not be automatically deleted, making it easy to view or backup later.
+
+**Log Limits:**
+
+To ensure application performance and stability, the logging system has the following limits:
+
+- **Retention Period**: Logs are saved for a maximum of 30 days by default. Logs older than 30 days will be automatically cleaned up
+- **Record Count Limit**: A maximum of 500 log entries are retained. When the limit is exceeded, the oldest entries are automatically deleted, keeping only the latest 500 entries
+- **File Size Limit**: The log file has a maximum size of 500KB. When the limit is exceeded, old entries are automatically deleted to keep the file size within the limit
+- **Display Limit**: The interface displays a maximum of 300 log entries (the latest 300) to improve rendering performance
+
+**Log Management:**
+
+- **Clear Logs**: Click the "Clear" button to clear all log records
+- **Export Logs**: Click the "Export" button to export logs as a text file for backup or sharing
 
 ## More Troubleshooting
 
