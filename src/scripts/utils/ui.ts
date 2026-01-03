@@ -44,6 +44,9 @@
     // 确认对话框（自定义 HTML 对话框，文字不可选中）
     async showConfirm(title: string, message: string): Promise<boolean> {
       return new Promise((resolve) => {
+        // 获取翻译函数
+        const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
+
         // 创建遮罩层
         const overlay = document.createElement('div');
         overlay.className = 'confirm-dialog-overlay';
@@ -139,7 +142,7 @@
         // 取消按钮
         const cancelBtn = document.createElement('button');
         cancelBtn.className = 'btn btn-secondary';
-        cancelBtn.textContent = '取消';
+        cancelBtn.textContent = t('dialog.cancel') || '取消';
         cancelBtn.addEventListener('click', () => {
           document.body.removeChild(overlay);
           resolve(false);
@@ -148,7 +151,7 @@
         // 确定按钮
         const confirmBtn = document.createElement('button');
         confirmBtn.className = 'btn btn-primary';
-        confirmBtn.textContent = '确定';
+        confirmBtn.textContent = t('dialog.confirm') || '确定';
         confirmBtn.addEventListener('click', () => {
           document.body.removeChild(overlay);
           resolve(true);
@@ -193,6 +196,9 @@
     // 消息对话框（自定义 HTML 对话框，文字不可选中）
     async showMessage(title: string, message: string, type: 'info' | 'warning' | 'error' = 'info'): Promise<void> {
       return new Promise((resolve) => {
+        // 获取翻译函数
+        const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
+
         // 创建遮罩层
         const overlay = document.createElement('div');
         overlay.className = 'confirm-dialog-overlay';
@@ -218,7 +224,160 @@
         // 确定按钮
         const okBtn = document.createElement('button');
         okBtn.className = 'btn btn-primary';
-        okBtn.textContent = '确定';
+        okBtn.textContent = t('dialog.ok') || '确定';
+        okBtn.addEventListener('click', () => {
+          document.body.removeChild(overlay);
+          resolve();
+        });
+
+        buttonsEl.appendChild(okBtn);
+
+        dialog.appendChild(titleEl);
+        dialog.appendChild(contentEl);
+        dialog.appendChild(buttonsEl);
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+
+        // 点击遮罩层关闭对话框
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) {
+            document.body.removeChild(overlay);
+            resolve();
+          }
+        });
+
+        // ESC 键关闭
+        const handleKeyDown = (e: KeyboardEvent) => {
+          if (e.key === 'Escape') {
+            document.body.removeChild(overlay);
+            document.removeEventListener('keydown', handleKeyDown);
+            resolve();
+          }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+
+        // 聚焦到确定按钮
+        setTimeout(() => {
+          okBtn.focus();
+        }, 100);
+      });
+    },
+
+    // 关于对话框（自定义 HTML 对话框）
+    async showAbout(): Promise<void> {
+      return new Promise((resolve) => {
+        // 获取翻译函数
+        const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
+
+        // 创建遮罩层
+        const overlay = document.createElement('div');
+        overlay.className = 'confirm-dialog-overlay';
+
+        // 创建对话框
+        const dialog = document.createElement('div');
+        dialog.className = 'confirm-dialog about-dialog';
+
+        // 创建标题
+        const titleEl = document.createElement('div');
+        titleEl.className = 'confirm-dialog-title';
+        titleEl.textContent = t('about.title') || '关于';
+
+        // 创建内容区域
+        const contentEl = document.createElement('div');
+        contentEl.className = 'confirm-dialog-content about-dialog-content';
+
+        // 创建关于内容
+        const aboutContent = document.createElement('div');
+        aboutContent.className = 'about-content';
+
+        // 标题
+        const h1 = document.createElement('h1');
+        h1.className = 'about-title';
+        h1.textContent = 'Nigate';
+        aboutContent.appendChild(h1);
+
+        // 描述
+        const p1 = document.createElement('p');
+        p1.textContent = t('about.description') || 'Nigate 是基于 ntfs-3g 驱动制作的免费读写 NTFS 格式存储设备工具。';
+        aboutContent.appendChild(p1);
+
+        // 软件信息标题
+        const h2 = document.createElement('h2');
+        h2.textContent = t('about.softwareInfo') || '软件信息';
+        aboutContent.appendChild(h2);
+
+        // 软件信息列表
+        const ul = document.createElement('ul');
+        const items = [
+          { label: t('about.author') || '作者：', value: 'Hoochanlon' },
+          { label: t('about.version') || '软件版本：', value: 'Nigate v1.3.0' },
+          { label: t('about.technology') || '基于技术：', value: 'Electron + Shell + TypeScript + Stylus' }
+        ];
+        items.forEach(item => {
+          const li = document.createElement('li');
+          const strong = document.createElement('strong');
+          strong.textContent = item.label;
+          li.appendChild(strong);
+          li.appendChild(document.createTextNode(' ' + item.value));
+          ul.appendChild(li);
+        });
+        aboutContent.appendChild(ul);
+
+        // 图标行
+        const iconsRow = document.createElement('div');
+        iconsRow.className = 'about-icons-row';
+
+        const links = [
+          { href: 'https://github.com/hoochanlon/Free-NTFS-for-Mac', icon: '../imgs/svg/github.svg', title: t('about.projectLink') || '项目地址' },
+          { href: 'mailto:hoochanlon@outlook.com', icon: '../imgs/svg/email.svg', title: t('about.email') || '邮箱' },
+          { href: 'https://bsky.app/profile/hoochanlon', icon: '../imgs/svg/bluesky.svg', title: t('about.bluesky') || 'Bluesky' }
+        ];
+
+        links.forEach(linkData => {
+          const link = document.createElement('a');
+          link.href = linkData.href;
+          link.className = 'about-icon-link';
+          // 移除 title 属性，不需要悬浮提示
+          if (linkData.href.startsWith('http')) {
+            link.target = '_blank';
+          }
+
+          const img = document.createElement('img');
+          img.src = linkData.icon;
+          img.alt = ''; // 移除 alt 属性，不需要悬浮提示
+          img.className = 'about-icon';
+          img.onerror = function() {
+            (this as HTMLImageElement).style.display = 'none';
+          };
+
+          link.appendChild(img);
+          iconsRow.appendChild(link);
+
+          // 处理链接点击
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const href = link.getAttribute('href');
+            if (href) {
+              if ((window as any).electronAPI && (window as any).electronAPI.openExternal) {
+                (window as any).electronAPI.openExternal(href);
+              } else {
+                window.open(href, '_blank');
+              }
+            }
+          });
+        });
+
+        aboutContent.appendChild(iconsRow);
+        contentEl.appendChild(aboutContent);
+
+        // 创建按钮容器
+        const buttonsEl = document.createElement('div');
+        buttonsEl.className = 'confirm-dialog-buttons';
+
+        // 确定按钮
+        const okBtn = document.createElement('button');
+        okBtn.className = 'btn btn-primary';
+        okBtn.textContent = t('about.ok') || '确定';
         okBtn.addEventListener('click', () => {
           document.body.removeChild(overlay);
           resolve();

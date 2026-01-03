@@ -24,7 +24,7 @@
     "minimize": "最小化",
     "help": "說明",
     "guide": "指南手冊",
-    "github": "GitHub 倉庫地址"
+    "github": "回饋到 GitHub Issue"
   },
   "tabs": {
     "dependencies": "系統依賴",
@@ -112,7 +112,14 @@
     "ejectConfirm": "確定要推出 {name} 嗎？",
     "ejectConfirmNote": "注意：\n• 推出後設備將從系統中完全斷開\n• 設備將從列表中移除，需要重新插入才能使用\n• 請確保沒有程式正在使用該設備",
     "restoreConfirm": "確定要將 {name} 還原為只讀模式嗎？",
-    "restoreConfirmNote": "注意：這需要管理員權限，系統會彈出密碼輸入對話框"
+    "restoreConfirmNote": "注意：這需要管理員權限，系統會彈出密碼輸入對話框",
+    "ejectAllConfirm": "確定要推出所有 NTFS 設備嗎？",
+    "ejectAllConfirmNote": "將推出以下設備：\n{devices}\n\n*注意：*\n* 推出後設備將完全斷開，無法訪問\n* 設備將從列表中移除，需要重新插入才能使用\n* 請確保沒有程式正在使用這些設備，否則可能導致資料遺失"
+  },
+  "dialog": {
+    "cancel": "取消",
+    "confirm": "確定",
+    "ok": "確定"
   },
   "logs": {
     "title": "操作日誌",
@@ -206,6 +213,19 @@
     "devicesDetected": "檢測到 {count} 個設備（{readOnly} 個只讀，{readWrite} 個讀寫）",
     "devicesDetectedAllReadOnly": "檢測到 {count} 個 NTFS 設備（全部只讀）",
     "devicesDetectedAllReadWrite": "檢測到 {count} 個 NTFS 設備（全部可讀寫）",
-    "refreshFailed": "重新整理設備列表失敗: {error}"
+    "refreshFailed": "重新整理設備列表失敗: {error}",
+    "unknownError": "未知錯誤"
+  },
+  "about": {
+    "title": "關於",
+    "description": "Nigate 是基於 ntfs-3g 驅動製作的免費讀寫 NTFS 格式儲存設備工具。",
+    "softwareInfo": "軟體資訊",
+    "author": "作者：",
+    "version": "軟體版本：",
+    "technology": "基於技術：",
+    "projectLink": "專案地址",
+    "email": "郵箱",
+    "bluesky": "Bluesky",
+    "ok": "確定"
   }
 }

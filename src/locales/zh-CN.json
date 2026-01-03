@@ -24,7 +24,7 @@
     "minimize": "最小化",
     "help": "帮助",
     "guide": "指南手册",
-    "github": "GitHub 仓库地址"
+    "github": "反馈到 GitHub Issue"
   },
   "tabs": {
     "dependencies": "系统依赖",
@@ -112,7 +112,14 @@
     "ejectConfirm": "确定要推出 {name} 吗？",
     "ejectConfirmNote": "注意：\n• 推出后设备将从系统中完全断开\n• 设备将从列表中移除，需要重新插入才能使用\n• 请确保没有程序正在使用该设备",
     "restoreConfirm": "确定要将 {name} 还原为只读模式吗？",
-    "restoreConfirmNote": "注意：这需要管理员权限，系统会弹出密码输入对话框"
+    "restoreConfirmNote": "注意：这需要管理员权限，系统会弹出密码输入对话框",
+    "ejectAllConfirm": "确定要推出所有 NTFS 设备吗？",
+    "ejectAllConfirmNote": "将推出以下设备：\n{devices}\n\n*注意：*\n* 推出后设备将完全断开，无法访问\n* 设备将从列表中移除，需要重新插入才能使用\n* 请确保没有程序正在使用这些设备，否则可能导致数据丢失"
+  },
+  "dialog": {
+    "cancel": "取消",
+    "confirm": "确定",
+    "ok": "确定"
   },
   "logs": {
     "title": "操作日志",
@@ -206,6 +213,19 @@
     "devicesDetected": "检测到 {count} 个设备（{readOnly} 个只读，{readWrite} 个读写）",
     "devicesDetectedAllReadOnly": "检测到 {count} 个 NTFS 设备（全部只读）",
     "devicesDetectedAllReadWrite": "检测到 {count} 个 NTFS 设备（全部可读写）",
-    "refreshFailed": "刷新设备列表失败: {error}"
+    "refreshFailed": "刷新设备列表失败: {error}",
+    "unknownError": "未知错误"
+  },
+  "about": {
+    "title": "关于",
+    "description": "Nigate 是基于 ntfs-3g 驱动制作的免费读写 NTFS 格式存储设备工具。",
+    "softwareInfo": "软件信息",
+    "author": "作者：",
+    "version": "软件版本：",
+    "technology": "基于技术：",
+    "projectLink": "项目地址",
+    "email": "邮箱",
+    "bluesky": "Bluesky",
+    "ok": "确定"
   }
 }

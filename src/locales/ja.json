@@ -24,7 +24,7 @@
     "minimize": "最小化",
     "help": "ヘルプ",
     "guide": "ガイド",
-    "github": "GitHub リポジトリ"
+    "github": "GitHub Issue にフィードバック"
   },
   "tabs": {
     "dependencies": "システム依存",
@@ -112,7 +112,14 @@
     "ejectConfirm": "{name} をイジェクトしますか？",
     "ejectConfirmNote": "注意：\n• イジェクト後、デバイスはシステムから完全に切断されます\n• デバイスはリストから削除され、再度接続する必要があります\n• デバイスを使用しているプログラムがないことを確認してください",
     "restoreConfirm": "{name} を読み取り専用モードに戻しますか？",
-    "restoreConfirmNote": "注意：これには管理者権限が必要で、システムがパスワード入力ダイアログを表示します"
+    "restoreConfirmNote": "注意：これには管理者権限が必要で、システムがパスワード入力ダイアログを表示します",
+    "ejectAllConfirm": "すべての NTFS デバイスをイジェクトしてもよろしいですか？",
+    "ejectAllConfirmNote": "以下のデバイスがイジェクトされます：\n{devices}\n\n*注意：*\n* イジェクト後、デバイスは完全に切断され、アクセスできなくなります\n* デバイスはリストから削除され、再度接続する必要があります\n* これらのデバイスを使用しているプログラムがないことを確認してください。そうしないと、データ損失が発生する可能性があります"
+  },
+  "dialog": {
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "ok": "OK"
   },
   "logs": {
     "title": "操作ログ",
@@ -206,6 +213,19 @@
     "devicesDetected": "{count} 個のデバイスを検出（{readOnly} 個読み取り専用、{readWrite} 個読み書き可能）",
     "devicesDetectedAllReadOnly": "{count} 個の NTFS デバイスを検出（すべて読み取り専用）",
     "devicesDetectedAllReadWrite": "{count} 個の NTFS デバイスを検出（すべて読み書き可能）",
-    "refreshFailed": "デバイスリストの更新に失敗しました: {error}"
+    "refreshFailed": "デバイスリストの更新に失敗しました: {error}",
+    "unknownError": "不明なエラー"
+  },
+  "about": {
+    "title": "について",
+    "description": "Nigate は ntfs-3g ドライバーに基づいて作成された、NTFS 形式のストレージデバイスを無料で読み書きするツールです。",
+    "softwareInfo": "ソフトウェア情報",
+    "author": "作者：",
+    "version": "バージョン：",
+    "technology": "技術：",
+    "projectLink": "プロジェクトリポジトリ",
+    "email": "メール",
+    "bluesky": "Bluesky",
+    "ok": "OK"
   }
 }

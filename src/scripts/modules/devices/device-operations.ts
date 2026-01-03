@@ -422,14 +422,17 @@
       const devices = AppModules.Devices.devices || [];
       const mountedDevices = devices.filter((d: any) => !d.isUnmounted);
 
+      // 获取翻译函数
+      const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string, params?: Record<string, string | number>) => key);
+
       if (mountedDevices.length === 0) {
-        await AppUtils.Logs.addLog('没有已挂载的设备', 'info');
+        await AppUtils.Logs.addLog(t('messages.noDevicesToUnmount') || '没有已挂载的设备', 'info');
         return;
       }
 
       const deviceNames = mountedDevices.map((d: any) => d.volumeName).join('、');
-      const title = '确定要推出所有 NTFS 设备吗？';
-      const message = `将推出以下设备：\n${deviceNames}\n\n*注意：*\n* 推出后设备将完全断开，无法访问\n* 设备将从列表中移除，需要重新插入才能使用\n* 请确保没有程序正在使用这些设备，否则可能导致数据丢失`;
+      const title = t('devices.ejectAllConfirm');
+      const message = t('devices.ejectAllConfirmNote', { devices: deviceNames });
 
       const confirmed = await AppUtils.UI.showConfirm(title, message);
       if (!confirmed) {
@@ -440,7 +443,7 @@
 
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
-        await AppUtils.Logs.addLog(`开始推出 ${mountedDevices.length} 个设备...`, 'info');
+        await AppUtils.Logs.addLog(t('messages.ejectAllStart', { count: mountedDevices.length }), 'info');
 
         let successCount = 0;
         let failCount = 0;
@@ -448,7 +451,7 @@
         // 逐个推出设备
         for (const device of mountedDevices) {
           try {
-            await AppUtils.Logs.addLog(`正在推出 ${device.volumeName}...`, 'info');
+            await AppUtils.Logs.addLog(t('messages.ejecting', { name: device.volumeName }), 'info');
             const result = await electronAPI.ejectDevice(device);
 
             if (result.success) {
@@ -458,12 +461,12 @@
               }
             } else {
               failCount++;
-              await AppUtils.Logs.addLog(`推出 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
+              await AppUtils.Logs.addLog(t('messages.ejectError', { name: device.volumeName }) + `: ${result.error || t('messages.unknownError') || '未知错误'}`, 'error');
             }
           } catch (error) {
             failCount++;
             const errorMessage = error instanceof Error ? error.message : String(error);
-            await AppUtils.Logs.addLog(`推出 ${device.volumeName} 失败: ${errorMessage}`, 'error');
+            await AppUtils.Logs.addLog(t('messages.ejectError', { name: device.volumeName }) + `: ${errorMessage}`, 'error');
           }
         }
 
@@ -482,7 +485,7 @@
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await AppUtils.Logs.addLog(`${t('messages.ejectError')}: ${errorMessage}`, 'error');
+        await AppUtils.Logs.addLog(`${t('messages.ejectAllError', { count: 0 })}: ${errorMessage}`, 'error');
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
       }

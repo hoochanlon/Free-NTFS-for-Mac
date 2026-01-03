@@ -120,26 +120,18 @@
     padding 6px 16px
     font-size 13px
     font-weight 500
-    transition all 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+    transition none
 
     &.btn-primary
       box-shadow 0 2px 8px rgba(0, 122, 255, 0.3)
 
-      &:hover
-        box-shadow 0 4px 12px rgba(0, 122, 255, 0.4)
-        transform translateY(-1px)
-
       &:active
-        transform translateY(0)
+        transform scale(0.98)
         box-shadow 0 1px 4px rgba(0, 122, 255, 0.3)
 
     &.btn-secondary
-      &:hover
-        transform translateY(-1px)
-        box-shadow 0 2px 8px rgba(0, 0, 0, 0.1)
-
       &:active
-        transform translateY(0)
+        transform scale(0.98)
 
 @keyframes fadeIn
   from
@@ -154,6 +146,104 @@
   to
     transform translateY(0) scale(1)
     opacity 1
+
+// 关于对话框样式
+.about-dialog
+  min-width 400px
+  max-width 500px
+
+  .confirm-dialog-buttons
+    justify-content center
+
+.about-dialog-content
+  .about-content
+    h1,
+    .about-title
+      font-size 18px
+      font-weight 600
+      color var(--text-primary)
+      margin 0 0 12px 0
+      letter-spacing -0.01em
+
+    h2
+      font-size 15px
+      font-weight 600
+      color var(--text-primary)
+      margin 16px 0 10px 0
+      letter-spacing -0.01em
+
+    p
+      color var(--text-primary)
+      line-height 1.6
+      margin 0 0 14px 0
+      font-size 13px
+
+    ul
+      color var(--text-primary)
+      line-height 1.6
+      margin 10px 0 16px 0
+      padding-left 0
+      list-style none
+      font-size 13px
+
+    li
+      margin 6px 0
+      position relative
+      padding-left 16px
+
+      &::before
+        content '•'
+        position absolute
+        left 4px
+        color var(--text-secondary)
+        font-weight 600
+        font-size 14px
+
+      strong
+        font-weight 600
+        color var(--text-primary)
+
+    .about-icons-row
+      display flex
+      align-items center
+      justify-content center
+      gap 12px
+      margin-top 18px
+      padding-top 18px
+      border-top 1px solid var(--border)
+      flex-wrap nowrap
+
+    .about-icon-link
+      display flex
+      align-items center
+      justify-content center
+      width 40px
+      height 40px
+      border-radius 6px
+      background transparent
+      border none
+      text-decoration none
+      cursor pointer
+      flex-shrink 0
+      transition none
+
+      &:active
+        transform scale(0.95)
+
+      .about-icon
+        width 24px
+        height 24px
+        opacity 0.8
+        display block
+        object-fit contain
+        max-width 24px
+        max-height 24px
+
+        img
+          width 24px
+          height 24px
+          max-width 24px
+          max-height 24px
 
 // 浅色模式
 body.light-theme

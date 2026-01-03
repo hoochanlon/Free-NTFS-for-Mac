@@ -120,6 +120,15 @@
       AppModules.About.initAboutButton(aboutBtn);
     }
 
+    // 监听菜单中的关于对话框事件
+    if (window.electronAPI && window.electronAPI.onShowAboutDialog) {
+      window.electronAPI.onShowAboutDialog(async () => {
+        if (AppUtils && AppUtils.UI && AppUtils.UI.showAbout) {
+          await AppUtils.UI.showAbout();
+        }
+      });
+    }
+
     // 初始化自动挂载复选框
     if (autoMountCheckbox) {
       window.electronAPI.getSettings().then((settings: any) => {

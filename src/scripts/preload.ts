@@ -34,6 +34,9 @@ const electronAPI: ElectronAPI = {
   onSwitchTab: (callback: (tabName: string) => void) => {
     ipcRenderer.on('switch-tab', (event, tabName: string) => callback(tabName));
   },
+  onShowAboutDialog: (callback: () => void) => {
+    ipcRenderer.on('show-about-dialog', () => callback());
+  },
   showConfirmDialog: (title: string, message: string) => ipcRenderer.invoke('show-confirm-dialog', { title, message }),
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => ipcRenderer.invoke('show-message-dialog', { title, message, type }),
   readLogsFile: () => ipcRenderer.invoke('read-logs-file'),

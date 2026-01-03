@@ -36,6 +36,7 @@ export interface ElectronAPI {
   exportLogs: (content: string) => Promise<{ success: boolean; path?: string; error?: string }>;
   switchToTab: (tabName: string) => Promise<void>;
   onSwitchTab: (callback: (tabName: string) => void) => void;
+  onShowAboutDialog: (callback: () => void) => void;
   showConfirmDialog: (title: string, message: string) => Promise<boolean>;
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => Promise<void>;
   readLogsFile: () => Promise<{ success: boolean; content?: string; error?: string }>;

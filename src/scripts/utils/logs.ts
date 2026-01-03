@@ -301,16 +301,14 @@
 
     // 清空日志
     async clearLog(logContainer: HTMLElement): Promise<void> {
-      const confirmed = await AppUtils.UI.showConfirm('确认', t('logs.clearConfirm'));
-      if (confirmed) {
-        // 清空文件系统中的日志
-        if ((window as any).electronAPI?.writeLogsFile) {
-          await (window as any).electronAPI.writeLogsFile('[]');
-        } else {
-          localStorage.setItem('appLogs', '[]');
-        }
-        await AppUtils.Logs.renderLogs(logContainer, true);
+      // 直接清空，不需要确认弹窗
+      // 清空文件系统中的日志
+      if ((window as any).electronAPI?.writeLogsFile) {
+        await (window as any).electronAPI.writeLogsFile('[]');
+      } else {
+        localStorage.setItem('appLogs', '[]');
       }
+      await AppUtils.Logs.renderLogs(logContainer, true);
     },
 
     // 导出日志
@@ -318,7 +316,7 @@
       try {
         const logs = await AppUtils.Logs.getLogs();
         if (logs.length === 0) {
-          await AppUtils.UI.showMessage('提示', t('logs.noLogsToExport'), 'info');
+          // 没有日志时不显示弹窗，静默返回
           return;
         }
 
@@ -349,20 +347,11 @@
         const header = `${t('logs.exportHeader')}\n${t('logs.exportTime', { time: exportDate })}\n${t('logs.exportCount', { count: logs.length })}\n${'='.repeat(50)}\n\n`;
         const fullContent = header + logText;
 
-        // 使用 electronAPI 保存文件
-        const result = await (window as any).electronAPI?.exportLogs(fullContent);
-        if (result?.success) {
-          await AppUtils.UI.showMessage('成功', t('logs.exportPath', { path: result.path }), 'info');
-        } else {
-          // 用户取消时不显示错误提示
-          if (result?.error === '用户取消') {
-            return;
-          }
-          throw new Error(result?.error || t('logs.exportError'));
-        }
+        // 使用 electronAPI 保存文件（不显示弹窗）
+        await (window as any).electronAPI?.exportLogs(fullContent);
       } catch (error) {
+        // 静默处理错误，不显示弹窗
         console.error('导出日志失败:', error);
-        await AppUtils.UI.showMessage('错误', `${t('logs.exportError')}: ${error instanceof Error ? error.message : String(error)}`, 'error');
       }
     }
   };

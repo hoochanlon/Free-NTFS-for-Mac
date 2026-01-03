@@ -76,8 +76,7 @@ export async function checkDependencies(): Promise<Dependencies> {
     result.swift = swiftExists;
     result.brew = brewExists;
 
-    // 检查 MacFUSE（带超时）
-    // 优先使用 brew list --cask 检查（更快），如果失败则使用 brew info
+    // 检查 MacFUSE（使用 brew info 方法，最准确且不需要网络）
     if (result.brew) {
       try {
         // 确保 PATH 包含 Homebrew 路径
@@ -93,30 +92,23 @@ export async function checkDependencies(): Promise<Dependencies> {
           ].join(':')
         };
 
-        // 先尝试快速检查
+        // 使用 brew info 检查（带超时保护）
         try {
-          await Promise.race([
-            execAsync('brew list --cask macfuse 2>/dev/null', { env }),
-            new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+          const infoResult = await Promise.race([
+            execAsync('brew info macfuse 2>/dev/null', { env }),
+            new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000))
           ]);
-          result.macfuse = true;
+          // 检查输出中是否包含 "Installed" 字符串
+          const output = (infoResult as { stdout: string }).stdout || '';
+          result.macfuse = output.includes('Installed') || output.includes('installed');
         } catch {
-          // 如果 brew list 失败，尝试使用 brew info 检查
-          try {
-            const infoResult = await Promise.race([
-              execAsync('brew info macfuse 2>/dev/null', { env }),
-              new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
-            ]);
-            // 检查输出中是否包含 "Installed" 字符串
-            const output = (infoResult as { stdout: string }).stdout || '';
-            result.macfuse = output.includes('Installed');
-          } catch {
-            result.macfuse = false;
-          }
+          result.macfuse = false;
         }
       } catch {
         result.macfuse = false;
       }
+    } else {
+      result.macfuse = false;
     }
 
     // 检查 ntfs-3g（带超时）

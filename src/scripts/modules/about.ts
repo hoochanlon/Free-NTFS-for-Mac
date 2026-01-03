@@ -12,7 +12,7 @@
   const AppModules = (window as any).AppModules;
   const electronAPI = (window as any).electronAPI;
 
-  // 关于窗口管理
+  // 关于对话框管理
   AppModules.About = {
     // 初始化关于按钮
     initAboutButton(aboutBtn: HTMLElement): void {
@@ -21,22 +21,20 @@
         return;
       }
 
-      console.log('初始化关于按钮', aboutBtn, electronAPI);
+      const AppUtils = (window as any).AppUtils;
 
-      // 打开关于窗口
+      // 打开关于对话框
       aboutBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('关于按钮被点击');
         try {
-          if (electronAPI && electronAPI.openAboutWindow) {
-            console.log('调用 openAboutWindow');
-            await electronAPI.openAboutWindow();
+          if (AppUtils && AppUtils.UI && AppUtils.UI.showAbout) {
+            await AppUtils.UI.showAbout();
           } else {
-            console.error('electronAPI.openAboutWindow 未定义', electronAPI);
+            console.error('AppUtils.UI.showAbout 未定义');
           }
         } catch (error) {
-          console.error('打开关于窗口失败:', error);
+          console.error('打开关于对话框失败:', error);
         }
       });
     }

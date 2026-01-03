@@ -47,7 +47,7 @@ async function loadTranslations(lang: string): Promise<void> {
         minimize: '最小化',
         help: '帮助',
         guide: '指南手册',
-        github: 'GitHub 仓库地址'
+        github: '反馈到 GitHub Issue'
       }
     };
   }
@@ -107,7 +107,10 @@ export async function setupApplicationMenu(): Promise<void> {
         {
           label: t('menu.about') || t('app.about') || '关于',
           click: async () => {
-            await openAboutWindow();
+            // 通过 IPC 发送事件到渲染进程显示关于对话框
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              mainWindow.webContents.send('show-about-dialog');
+            }
           }
         },
         { type: 'separator' },
