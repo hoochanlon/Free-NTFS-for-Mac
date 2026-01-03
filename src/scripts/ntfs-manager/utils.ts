@@ -11,10 +11,27 @@ export interface ExecResult {
 }
 
 // 检查命令是否存在（带超时）
+// 打包后的应用需要确保 PATH 环境变量包含系统路径
 export async function commandExists(command: string): Promise<boolean> {
   try {
     return new Promise<boolean>((resolve) => {
-      const childProcess = exec(`which ${command}`, { timeout: 3000 }, (error) => {
+      // 确保 PATH 包含常见的 Homebrew 路径
+      const env = {
+        ...process.env,
+        PATH: process.env.PATH || [
+          '/usr/local/bin',
+          '/opt/homebrew/bin',
+          '/usr/bin',
+          '/bin',
+          '/usr/sbin',
+          '/sbin'
+        ].join(':')
+      };
+
+      const childProcess = exec(`which ${command}`, {
+        timeout: 3000,
+        env: env
+      }, (error) => {
         clearTimeout(timeout);
         resolve(!error);
       });

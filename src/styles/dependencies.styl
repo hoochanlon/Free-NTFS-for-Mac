@@ -65,14 +65,27 @@
   letter-spacing -0.01em
   cursor pointer
   user-select none
+  position relative
 
   .dep-expand-icon
     font-size 10px
     color var(--text-secondary)
     transition transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)
     flex-shrink 0
-    width 14px
+    width 16px
+    height 16px
+    min-width 16px
     text-align center
+    cursor pointer
+    user-select none
+    pointer-events auto
+    display inline-flex
+    align-items center
+    justify-content center
+    line-height 1
+    font-family 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace
+    direction ltr
+    unicode-bidi bidi-override
 
 .dep-number
   display inline-flex

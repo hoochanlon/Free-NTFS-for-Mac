@@ -213,8 +213,13 @@
   }
 
   // 监听语言变更事件
-  window.addEventListener('languageChanged', () => {
+  window.addEventListener('languageChanged', async () => {
+    // 先应用静态翻译
     applyTranslations();
+
+    // 等待一小段时间确保翻译已加载
+    await new Promise(resolve => setTimeout(resolve, 50));
+
     // 重新渲染动态内容
     if ((window as any).AppModules) {
       // 触发设备列表刷新
@@ -248,8 +253,45 @@
 
       // 重新渲染依赖列表
       const depsList = document.getElementById('depsList');
-      if (depsList && (window as any).AppModules.Dependencies && (window as any).AppModules.Dependencies.renderDependencies) {
-        (window as any).AppModules.Dependencies.renderDependencies(depsList);
+      if (depsList && (window as any).AppModules.Dependencies) {
+        // 确保依赖数据存在，如果不存在则重新检查
+        const dependencies = (window as any).AppModules.Dependencies.dependencies;
+        if (!dependencies) {
+          // 如果没有依赖数据，触发重新检查
+          const checkDepsBtn = document.getElementById('checkDepsBtn');
+          if (checkDepsBtn && (window as any).AppModules.Dependencies.checkDependencies) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+              (window as any).AppModules.Dependencies.checkDependencies(
+                depsList,
+                loadingOverlay,
+                statusDot,
+                statusText
+              );
+            }
+          }
+        } else {
+          // 重新渲染依赖列表
+          if ((window as any).AppModules.Dependencies.renderDependencies) {
+            (window as any).AppModules.Dependencies.renderDependencies(depsList);
+          }
+
+          // 更新状态文本（根据当前依赖状态）
+          if (statusDot && statusText) {
+            const t = AppUtils.I18n.t;
+            const allInstalled = dependencies.swift &&
+                                dependencies.brew &&
+                                dependencies.macfuse &&
+                                dependencies.ntfs3g &&
+                                dependencies.macosVersion;
+
+            if (allInstalled) {
+              (window as any).AppUtils.UI.updateStatus('active', t('status.systemReady'), statusDot, statusText);
+            } else {
+              (window as any).AppUtils.UI.updateStatus('error', t('status.missingDeps'), statusDot, statusText);
+            }
+          }
+        }
       }
 
       // 重新渲染日志

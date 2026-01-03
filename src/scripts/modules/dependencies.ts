@@ -153,7 +153,7 @@
         item.innerHTML = `
           <span class="dep-name">
             <span class="dep-number ${dep.status ? 'installed' : 'missing'}">${index + 1}</span>
-            <span class="dep-expand-icon">▶</span>
+            <span class="dep-expand-icon" aria-expanded="false" role="button" tabindex="0">▶</span>
             ${displayName}
           </span>
           <span class="dep-status ${dep.status ? 'installed' : 'missing'}">
@@ -197,40 +197,98 @@
       AppModules.Dependencies.setupCopyButtons(depsList);
     },
 
-    // 设置展开/折叠功能
-    setupExpandCollapse(container: HTMLElement): void {
-      container.addEventListener('click', (e) => {
-        const target = e.target as HTMLElement;
-        const depItem = target.closest('.dep-item') as HTMLElement;
-        if (depItem && !target.closest('.dep-status') && !target.closest('.btn-copy')) {
-          const depKey = depItem.getAttribute('data-dep-key');
-          if (depKey) {
-            const guideCard = container.querySelector(`.install-guide-card[data-dep-key="${depKey}"]`) as HTMLElement;
-            const expandIcon = depItem.querySelector('.dep-expand-icon') as HTMLElement;
+    // 切换展开/折叠状态
+    toggleExpandCollapse(depItem: HTMLElement, container: HTMLElement): void {
+      const depKey = depItem.getAttribute('data-dep-key');
+      if (!depKey) {
+        return;
+      }
 
-            if (guideCard) {
-              const isCollapsed = guideCard.classList.contains('collapsed');
+      const guideCard = container.querySelector(`.install-guide-card[data-dep-key="${depKey}"]`) as HTMLElement;
+      const expandIcon = depItem.querySelector('.dep-expand-icon') as HTMLElement;
 
-              if (isCollapsed) {
-                guideCard.classList.remove('collapsed');
-                if (expandIcon) {
-                  expandIcon.textContent = '▼';
-                }
-              } else {
-                guideCard.classList.add('collapsed');
-                if (expandIcon) {
-                  expandIcon.textContent = '▶';
-                }
-              }
-            }
+      if (guideCard) {
+        const isCollapsed = guideCard.classList.contains('collapsed');
+
+        if (isCollapsed) {
+          guideCard.classList.remove('collapsed');
+          if (expandIcon) {
+            expandIcon.textContent = '▼';
+            expandIcon.setAttribute('aria-expanded', 'true');
+          }
+        } else {
+          guideCard.classList.add('collapsed');
+          if (expandIcon) {
+            expandIcon.textContent = '▶';
+            expandIcon.setAttribute('aria-expanded', 'false');
           }
         }
-      });
+      }
     },
+
+    // 展开/折叠点击处理器（使用闭包保存 container 引用）
+    expandCollapseClickHandler: null as ((e: MouseEvent) => void) | null,
+    expandCollapseKeyHandler: null as ((e: KeyboardEvent) => void) | null,
+
+    // 设置展开/折叠功能
+    setupExpandCollapse(container: HTMLElement): void {
+      // 先移除旧的事件监听器（如果存在）
+      if (AppModules.Dependencies.expandCollapseClickHandler) {
+        container.removeEventListener('click', AppModules.Dependencies.expandCollapseClickHandler);
+      }
+      if (AppModules.Dependencies.expandCollapseKeyHandler) {
+        container.removeEventListener('keydown', AppModules.Dependencies.expandCollapseKeyHandler);
+      }
+
+      // 创建新的事件处理器
+      AppModules.Dependencies.expandCollapseClickHandler = (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+
+        // 检查是否点击在状态标签或复制按钮上，如果是则忽略
+        if (target.closest('.dep-status') || target.closest('.btn-copy')) {
+          return;
+        }
+
+        // 检查是否点击在依赖项上
+        const depItem = target.closest('.dep-item') as HTMLElement;
+        if (depItem) {
+          AppModules.Dependencies.toggleExpandCollapse(depItem, container);
+        }
+      };
+
+      AppModules.Dependencies.expandCollapseKeyHandler = (e: KeyboardEvent) => {
+        const target = e.target as HTMLElement;
+
+        // 只处理 Enter 和 Space 键
+        if (e.key !== 'Enter' && e.key !== ' ') {
+          return;
+        }
+
+        // 检查是否在依赖项或展开图标上
+        const depItem = target.closest('.dep-item') as HTMLElement;
+        if (depItem) {
+          e.preventDefault();
+          AppModules.Dependencies.toggleExpandCollapse(depItem, container);
+        }
+      };
+
+      // 绑定新的事件监听器
+      container.addEventListener('click', AppModules.Dependencies.expandCollapseClickHandler);
+      container.addEventListener('keydown', AppModules.Dependencies.expandCollapseKeyHandler);
+    },
+
+    // 复制按钮点击处理器（使用闭包保存 container 引用）
+    copyButtonClickHandler: null as ((e: MouseEvent) => void) | null,
 
     // 复制命令到剪贴板
     setupCopyButtons(container: HTMLElement): void {
-      container.addEventListener('click', (e) => {
+      // 先移除旧的事件监听器（如果存在）
+      if (AppModules.Dependencies.copyButtonClickHandler) {
+        container.removeEventListener('click', AppModules.Dependencies.copyButtonClickHandler);
+      }
+
+      // 创建新的事件处理器
+      AppModules.Dependencies.copyButtonClickHandler = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
         const copyBtn = target.closest('.btn-copy') as HTMLElement;
         if (copyBtn) {
@@ -251,7 +309,10 @@
             });
           }
         }
-      });
+      };
+
+      // 绑定新的事件监听器
+      container.addEventListener('click', AppModules.Dependencies.copyButtonClickHandler);
     }
   };
 

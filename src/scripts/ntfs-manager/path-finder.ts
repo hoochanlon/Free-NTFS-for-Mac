@@ -11,7 +11,19 @@ export class PathFinder {
     }
 
     try {
-      const result = await execAsync('which ntfs-3g') as { stdout: string };
+      // 确保 PATH 包含 Homebrew 路径
+      const env = {
+        ...process.env,
+        PATH: process.env.PATH || [
+          '/usr/local/bin',
+          '/opt/homebrew/bin',
+          '/usr/bin',
+          '/bin',
+          '/usr/sbin',
+          '/sbin'
+        ].join(':')
+      };
+      const result = await execAsync('which ntfs-3g', { env }) as { stdout: string };
       const path = result.stdout.trim();
       if (path && await fileExists(path)) {
         this.ntfs3gPath = path;

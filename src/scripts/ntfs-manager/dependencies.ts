@@ -77,13 +77,43 @@ export async function checkDependencies(): Promise<Dependencies> {
     result.brew = brewExists;
 
     // 检查 MacFUSE（带超时）
+    // 优先使用 brew list --cask 检查（更快），如果失败则使用 brew info
     if (result.brew) {
       try {
-        await Promise.race([
-          execAsync('brew list --cask macfuse 2>/dev/null'),
-          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
-        ]);
-        result.macfuse = true;
+        // 确保 PATH 包含 Homebrew 路径
+        const env = {
+          ...process.env,
+          PATH: process.env.PATH || [
+            '/usr/local/bin',
+            '/opt/homebrew/bin',
+            '/usr/bin',
+            '/bin',
+            '/usr/sbin',
+            '/sbin'
+          ].join(':')
+        };
+
+        // 先尝试快速检查
+        try {
+          await Promise.race([
+            execAsync('brew list --cask macfuse 2>/dev/null', { env }),
+            new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+          ]);
+          result.macfuse = true;
+        } catch {
+          // 如果 brew list 失败，尝试使用 brew info 检查
+          try {
+            const infoResult = await Promise.race([
+              execAsync('brew info macfuse 2>/dev/null', { env }),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+            ]);
+            // 检查输出中是否包含 "Installed" 字符串
+            const output = (infoResult as { stdout: string }).stdout || '';
+            result.macfuse = output.includes('Installed');
+          } catch {
+            result.macfuse = false;
+          }
+        }
       } catch {
         result.macfuse = false;
       }
@@ -144,9 +174,21 @@ export async function installDependencies(): Promise<string> {
   if (await commandExists('brew')) {
     logs.push('正在安装 MacFUSE 和 ntfs-3g...');
     try {
-      await execAsync('brew tap gromgit/homebrew-fuse');
-      await execAsync('brew install --cask macfuse');
-      await execAsync('brew install ntfs-3g-mac');
+      // 确保 PATH 包含 Homebrew 路径
+      const env = {
+        ...process.env,
+        PATH: process.env.PATH || [
+          '/usr/local/bin',
+          '/opt/homebrew/bin',
+          '/usr/bin',
+          '/bin',
+          '/usr/sbin',
+          '/sbin'
+        ].join(':')
+      };
+      await execAsync('brew tap gromgit/homebrew-fuse', { env });
+      await execAsync('brew install --cask macfuse', { env });
+      await execAsync('brew install ntfs-3g-mac', { env });
       logs.push('MacFUSE 和 ntfs-3g 安装完成');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

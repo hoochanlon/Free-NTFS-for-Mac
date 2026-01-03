@@ -13,7 +13,11 @@
     "start": "pnpm run build:all && electron .",
     "dev": "pnpm run watch:all & pnpm run build:all && electron . --dev",
     "dev:reload": "pnpm add -D electron-reloader && pnpm run dev",
-    "build": "pnpm run build:all && electron-builder"
+    "build": "./build.sh",
+    "build:clean": "./build.sh --clean",
+    "build:dmg": "./build.sh --dmg",
+    "build:zip": "./build.sh --zip",
+    "build:arm64": "./build.sh --arm64"
   },
   "keywords": [
     "ntfs",
@@ -38,7 +42,7 @@
   "build": {
     "appId": "com.freentfs.mac",
     "productName": "Free NTFS for Mac",
-    "icon": "src/ico/flash.png",
+    "icon": "src/ico/flash.icns",
     "npmRebuild": false,
     "electronDownload": {
       "cache": ".electron-cache"
@@ -65,7 +69,7 @@
           "arch": ["arm64"]
         }
       ],
-      "icon": "src/ico/flash.png",
+      "icon": "src/ico/flash.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
