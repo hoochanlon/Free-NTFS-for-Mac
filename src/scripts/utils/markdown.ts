@@ -12,12 +12,52 @@
   const AppUtils = (window as any).AppUtils;
   const electronAPI = (window as any).electronAPI;
 
+  // 获取翻译文本的辅助函数
+  function t(key: string, params?: Record<string, string | number>): string {
+    if (AppUtils && AppUtils.I18n) {
+      return AppUtils.I18n.t(key, params);
+    }
+    return key; // 如果 i18n 未初始化，返回 key
+  }
+
+  // 根据当前语言获取文件名
+  function getLocalizedFilename(filename: string): string {
+    // 获取当前语言
+    const currentLang = AppUtils && AppUtils.I18n ? AppUtils.I18n.getLanguage() : 'zh-CN';
+
+    // 如果文件名是 help.md，根据语言返回对应的文件名
+    if (filename === 'help.md') {
+      const langMap: Record<string, string> = {
+        'zh-CN': 'help.zh-CN.md',
+        'zh-TW': 'help.zh-TW.md',
+        'ja': 'help.ja.md',
+        'en': 'help.en.md'
+      };
+      return langMap[currentLang] || 'help.zh-CN.md';
+    }
+
+    // 其他文件保持原样
+    return filename;
+  }
+
   // Markdown 渲染
   AppUtils.Markdown = {
     // 加载并渲染 markdown 文件
     async loadMarkdown(filename: string, container: HTMLElement): Promise<void> {
       try {
-        const result = await electronAPI.readMarkdown(filename);
+        // 根据当前语言获取本地化的文件名
+        const localizedFilename = getLocalizedFilename(filename);
+        let result = await electronAPI.readMarkdown(localizedFilename);
+
+        // 如果本地化文件加载失败，尝试加载默认文件（仅对 help.md）
+        if (!result.success && filename === 'help.md' && localizedFilename !== 'help.md') {
+          const fallbackResult = await electronAPI.readMarkdown('help.md');
+          if (fallbackResult.success) {
+            // 使用默认文件
+            result = fallbackResult;
+          }
+        }
+
         if (result.success && result.content) {
           // 使用 marked 库渲染 markdown
           if (typeof (window as any).marked !== 'undefined') {
@@ -54,6 +94,32 @@
                 html = '<div class="help-section">' + html;
               }
             }
+
+            // 处理代码块：添加复制按钮
+            // marked 库会将代码块渲染为 <pre><code>...</code></pre>
+            html = html.replace(
+              /<pre><code(?: class="language-(\w+)")?>([\s\S]*?)<\/code><\/pre>/g,
+              (match: string, lang: string, code: string) => {
+                // marked 库已经将代码中的 HTML 转义了，我们需要解码
+                // 创建一个临时元素来解码 HTML 实体
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = code;
+                const decodedCode = tempDiv.textContent || tempDiv.innerText || code;
+
+                // 转义用于 data 属性（避免在 HTML 属性中出现问题）
+                const escapedForAttr = decodedCode
+                  .replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;')
+                  .replace(/'/g, '&#39;')
+                  .replace(/\n/g, '&#10;');
+
+                const langClass = lang ? ` class="language-${lang}"` : '';
+                const copyText = t('dependencies.copyCommand');
+                return `<div class="code-block-wrapper"><pre><code${langClass}>${code}</code></pre><button class="code-copy-btn" data-code="${escapedForAttr}" title="${copyText}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 3.5H3.5C2.67 3.5 2 4.17 2 5V12.5C2 13.33 2.67 14 3.5 14H9.5C10.33 14 11 13.33 11 12.5V10.5M11 5.5H13.5C14.33 5.5 15 6.17 15 7V12.5C15 13.33 14.33 14 13.5 14H11M11 5.5V3.5C11 2.67 10.33 2 9.5 2H7M11 5.5H9.5C8.67 5.5 8 6.17 8 7V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>`;
+              }
+            );
 
             // 处理警告框：将包含 ⚠️ 的段落和后续列表包裹在 help-warning 中
             html = html.replace(
@@ -116,17 +182,57 @@
             }
 
             container.innerHTML = `<div class="help-content">${html}</div>`;
+
+            // 绑定代码复制按钮事件
+            AppUtils.Markdown.setupCopyButtons(container);
           } else {
             // 如果没有 marked，使用简单的文本显示
             container.innerHTML = `<div class="help-content"><pre>${result.content}</pre></div>`;
             console.warn('marked 库未加载，使用纯文本显示');
           }
         } else {
-          container.innerHTML = `<div class="help-content"><p class="error">加载失败: ${result.error || '未知错误'}</p></div>`;
+          const errorMsg = t('help.loadError', { error: result.error || t('help.unknownError') });
+          container.innerHTML = `<div class="help-content"><p class="error">${errorMsg}</p></div>`;
         }
       } catch (error) {
-        container.innerHTML = `<div class="help-content"><p class="error">加载失败: ${error instanceof Error ? error.message : String(error)}</p></div>`;
+        const errorMsg = t('help.loadError', { error: error instanceof Error ? error.message : String(error) });
+        container.innerHTML = `<div class="help-content"><p class="error">${errorMsg}</p></div>`;
       }
+    },
+
+    // 设置代码复制按钮
+    setupCopyButtons(container: HTMLElement): void {
+      const copyButtons = container.querySelectorAll('.code-copy-btn');
+      copyButtons.forEach((btn: Element) => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const button = btn as HTMLElement;
+          const escapedCode = button.getAttribute('data-code');
+          if (escapedCode) {
+            try {
+              // 解码 HTML 实体
+              const tempDiv = document.createElement('div');
+              tempDiv.innerHTML = escapedCode
+                .replace(/&#10;/g, '\n');
+              const decodedCode = tempDiv.textContent || tempDiv.innerText || escapedCode;
+
+              await navigator.clipboard.writeText(decodedCode);
+
+              // 临时改变按钮显示已复制
+              const originalHTML = button.innerHTML;
+              button.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 4L6 11L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+              button.classList.add('copied');
+
+              setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.classList.remove('copied');
+              }, 2000);
+            } catch (err) {
+              console.error('复制失败:', err);
+            }
+          }
+        });
+      });
     }
   };
 

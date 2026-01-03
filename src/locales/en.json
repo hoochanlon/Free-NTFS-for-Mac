@@ -104,7 +104,9 @@
     }
   },
   "help": {
-    "title": "Guide"
+    "title": "Guide",
+    "loadError": "Load failed: {error}",
+    "unknownError": "Unknown error"
   },
   "settings": {
     "title": "Application Settings",

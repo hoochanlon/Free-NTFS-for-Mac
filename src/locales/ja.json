@@ -104,7 +104,9 @@
     }
   },
   "help": {
-    "title": "ガイド"
+    "title": "ガイド",
+    "loadError": "読み込み失敗: {error}",
+    "unknownError": "不明なエラー"
   },
   "settings": {
     "title": "アプリケーション設定",

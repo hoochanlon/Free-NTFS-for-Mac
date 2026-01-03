@@ -52,7 +52,7 @@
       if (targetTab === 'logs') {
         AppUtils.Logs.renderLogs(logContainer, true);
       }
-      // 如果切换到指南手册标签页，加载 markdown
+      // 如果切换到指南手册标签页，加载 markdown（会自动根据当前语言加载对应文件）
       else if (targetTab === 'help' && helpTab) {
         AppUtils.Markdown.loadMarkdown('help.md', helpTab);
       }

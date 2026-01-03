@@ -104,7 +104,9 @@
     }
   },
   "help": {
-    "title": "指南手冊"
+    "title": "指南手冊",
+    "loadError": "載入失敗: {error}",
+    "unknownError": "未知錯誤"
   },
   "settings": {
     "title": "應用設定",

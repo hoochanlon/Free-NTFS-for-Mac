@@ -104,7 +104,9 @@
     }
   },
   "help": {
-    "title": "指南手册"
+    "title": "指南手册",
+    "loadError": "加载失败: {error}",
+    "unknownError": "未知错误"
   },
   "settings": {
     "title": "应用设置",

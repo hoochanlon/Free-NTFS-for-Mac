@@ -219,12 +219,12 @@
         }
         // 刷新设备状态
         if ((window as any).AppModules.Devices.refreshDevices) {
-          (window as any).AppModules.Devices.refreshDevices(
-            devicesList,
-            readWriteDevicesList || devicesList,
-            statusDot,
-            statusText
-          );
+        (window as any).AppModules.Devices.refreshDevices(
+          devicesList,
+          readWriteDevicesList || devicesList,
+          statusDot,
+          statusText
+        );
         }
       }
 
@@ -238,6 +238,12 @@
       const logContainer = document.getElementById('logContainer');
       if (logContainer && (window as any).AppUtils && (window as any).AppUtils.Logs) {
         (window as any).AppUtils.Logs.renderLogs(logContainer, true);
+      }
+
+      // 如果当前在指南手册标签页，重新加载 markdown（会根据新语言加载对应文件）
+      const helpTab = document.getElementById('helpTab');
+      if (helpTab && helpTab.classList.contains('active') && (window as any).AppUtils && (window as any).AppUtils.Markdown) {
+        (window as any).AppUtils.Markdown.loadMarkdown('help.md', helpTab);
       }
     }
   });
