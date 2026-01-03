@@ -94,6 +94,13 @@
       AppModules.About.initAboutButton(aboutBtn);
     }
 
+    // 监听从菜单切换标签页的事件
+    if (window.electronAPI && window.electronAPI.onSwitchTab) {
+      window.electronAPI.onSwitchTab((tabName: string) => {
+        AppModules.Tabs.switchToTab(tabName, logContainer, helpTab);
+      });
+    }
+
     // 事件监听
     checkDepsBtn.addEventListener('click', () => {
       AppModules.Dependencies.checkDependencies(

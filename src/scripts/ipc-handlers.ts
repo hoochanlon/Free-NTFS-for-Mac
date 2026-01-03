@@ -13,6 +13,7 @@ import {
 import { openAboutWindow, getAboutWindow } from './about-window';
 import { SettingsManager, AppSettings } from './utils/settings';
 import { KeychainManager } from './utils/keychain';
+import { rebuildApplicationMenu } from './app-config';
 
 // NTFS 相关 IPC handlers
 export function setupNTFSHandlers(): void {
@@ -147,6 +148,12 @@ export function setupWindowHandlers(): void {
     console.log('IPC: open-about-window 被调用');
     await openAboutWindow();
   });
+
+  ipcMain.handle('switch-to-tab', async (event, tabName: string) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('switch-tab', tabName);
+    }
+  });
 }
 
 // 文件相关 IPC handlers
@@ -214,7 +221,12 @@ export function setupSettingsHandlers(): void {
 
   // 保存设置
   ipcMain.handle('save-settings', async (event, settings: Partial<AppSettings>) => {
+    const oldSettings = await SettingsManager.getSettings();
     await SettingsManager.saveSettings(settings);
+    // 如果语言设置发生变化，重新构建菜单
+    if (settings.language && settings.language !== oldSettings.language) {
+      await rebuildApplicationMenu();
+    }
     return { success: true };
   });
 

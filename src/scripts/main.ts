@@ -10,7 +10,7 @@ setupHotReload();
 // 应用生命周期管理
 app.whenReady().then(async () => {
   await createMainWindow();
-  setupAppConfig();
+  await setupAppConfig();
   setupIpcHandlers();
 
   app.on('activate', async () => {

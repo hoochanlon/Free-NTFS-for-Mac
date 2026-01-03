@@ -13,6 +13,18 @@
   const AppUtils = (window as any).AppUtils;
   const electronAPI = (window as any).electronAPI;
 
+  // 窗口尺寸配置常量（与主进程中的 WINDOW_SIZE_CONFIG 保持一致）
+  const WINDOW_SIZE_CONFIG = {
+    defaultWidth: 900,
+    defaultHeight: 700,
+    minWidth: 900,
+    minHeight: 700,
+    minWidthLimit: 900,
+    maxWidthLimit: 2000,
+    minHeightLimit: 700,
+    maxHeightLimit: 2000
+  } as const;
+
   // 设置管理
   AppModules.Settings = {
     // 初始化设置
@@ -44,10 +56,10 @@
         const windowWidthInput = document.getElementById('windowWidthInput') as HTMLInputElement;
         const windowHeightInput = document.getElementById('windowHeightInput') as HTMLInputElement;
         if (windowWidthInput) {
-          windowWidthInput.value = String(settings.windowWidth || 900);
+          windowWidthInput.value = String(settings.windowWidth || WINDOW_SIZE_CONFIG.defaultWidth);
         }
         if (windowHeightInput) {
-          windowHeightInput.value = String(settings.windowHeight || 680);
+          windowHeightInput.value = String(settings.windowHeight || WINDOW_SIZE_CONFIG.defaultHeight);
         }
 
         // 检查是否有保存的密码
@@ -197,7 +209,8 @@
               const height = parseInt(heightValue, 10);
 
               // 验证范围
-              if (width >= 840 && width <= 2000 && height >= 660 && height <= 2000) {
+              if (width >= WINDOW_SIZE_CONFIG.minWidthLimit && width <= WINDOW_SIZE_CONFIG.maxWidthLimit &&
+                  height >= WINDOW_SIZE_CONFIG.minHeightLimit && height <= WINDOW_SIZE_CONFIG.maxHeightLimit) {
                 await electronAPI.saveSettings({
                   windowWidth: width,
                   windowHeight: height
@@ -223,19 +236,16 @@
         if (resetWindowSizeBtn) {
           resetWindowSizeBtn.addEventListener('click', async () => {
             try {
-              const defaultWidth = 900;
-              const defaultHeight = 680;
-
               if (windowWidthInput) {
-                windowWidthInput.value = String(defaultWidth);
+                windowWidthInput.value = String(WINDOW_SIZE_CONFIG.defaultWidth);
               }
               if (windowHeightInput) {
-                windowHeightInput.value = String(defaultHeight);
+                windowHeightInput.value = String(WINDOW_SIZE_CONFIG.defaultHeight);
               }
 
               await electronAPI.saveSettings({
-                windowWidth: defaultWidth,
-                windowHeight: defaultHeight
+                windowWidth: WINDOW_SIZE_CONFIG.defaultWidth,
+                windowHeight: WINDOW_SIZE_CONFIG.defaultHeight
               });
             } catch (error) {
               console.error('重置窗口尺寸失败:', error);
@@ -247,7 +257,7 @@
           windowWidthInput.addEventListener('keydown', allowOnlyNumbers);
           windowWidthInput.addEventListener('input', saveWindowSize);
           windowWidthInput.addEventListener('blur', async () => {
-            await validateSizeOnBlur(windowWidthInput, 840, 2000, 900);
+            await validateSizeOnBlur(windowWidthInput, WINDOW_SIZE_CONFIG.minWidthLimit, WINDOW_SIZE_CONFIG.maxWidthLimit, WINDOW_SIZE_CONFIG.defaultWidth);
             saveWindowSize();
           });
         }
@@ -255,7 +265,7 @@
           windowHeightInput.addEventListener('keydown', allowOnlyNumbers);
           windowHeightInput.addEventListener('input', saveWindowSize);
           windowHeightInput.addEventListener('blur', async () => {
-            await validateSizeOnBlur(windowHeightInput, 660, 2000, 680);
+            await validateSizeOnBlur(windowHeightInput, WINDOW_SIZE_CONFIG.minHeightLimit, WINDOW_SIZE_CONFIG.maxHeightLimit, WINDOW_SIZE_CONFIG.defaultHeight);
             saveWindowSize();
           });
         }

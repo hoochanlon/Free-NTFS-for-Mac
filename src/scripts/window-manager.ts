@@ -1,6 +1,6 @@
 import { BrowserWindow, app, Event } from 'electron';
 import * as path from 'path';
-import { SettingsManager } from './utils/settings';
+import { SettingsManager, WINDOW_SIZE_CONFIG } from './utils/settings';
 
 // 窗口引用
 export let mainWindow: BrowserWindow | null = null;
@@ -14,14 +14,14 @@ export async function createMainWindow(): Promise<BrowserWindow> {
 
   // 从设置中读取窗口尺寸
   const settings = await SettingsManager.getSettings();
-  const windowWidth = settings.windowWidth || 900;
-  const windowHeight = settings.windowHeight || 680;
+  const windowWidth = settings.windowWidth || WINDOW_SIZE_CONFIG.defaultWidth;
+  const windowHeight = settings.windowHeight || WINDOW_SIZE_CONFIG.defaultHeight;
 
   mainWindow = new BrowserWindow({
     width: windowWidth,
     height: windowHeight,
-    minWidth: 900,
-    minHeight: 680,
+    minWidth: WINDOW_SIZE_CONFIG.minWidth,
+    minHeight: WINDOW_SIZE_CONFIG.minHeight,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,

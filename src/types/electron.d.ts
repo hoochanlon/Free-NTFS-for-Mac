@@ -33,6 +33,8 @@ export interface ElectronAPI {
   hasSavedPassword: () => Promise<boolean>;
   deleteSavedPassword: () => Promise<{ success: boolean }>;
   exportLogs: (content: string) => Promise<{ success: boolean; path?: string; error?: string }>;
+  switchToTab: (tabName: string) => Promise<void>;
+  onSwitchTab: (callback: (tabName: string) => void) => void;
 }
 
 export interface Dependencies {

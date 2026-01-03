@@ -29,7 +29,11 @@ const electronAPI: ElectronAPI = {
   saveSettings: (settings: Partial<import('../types/electron').AppSettings>) => ipcRenderer.invoke('save-settings', settings),
   hasSavedPassword: () => ipcRenderer.invoke('has-saved-password'),
   deleteSavedPassword: () => ipcRenderer.invoke('delete-saved-password'),
-  exportLogs: (content: string) => ipcRenderer.invoke('export-logs', content)
+  exportLogs: (content: string) => ipcRenderer.invoke('export-logs', content),
+  switchToTab: (tabName: string) => ipcRenderer.invoke('switch-to-tab', tabName),
+  onSwitchTab: (callback: (tabName: string) => void) => {
+    ipcRenderer.on('switch-tab', (event, tabName: string) => callback(tabName));
+  }
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

@@ -1,6 +1,6 @@
-# Free NTFS for Mac
+# Nigate
 
-这是 Free NTFS for Mac 的 Electron 图形界面版本，在保留原有极客终端版本（Nigate）的同时，提供了现代化、直观的操作界面，让 NTFS 设备管理更加简单便捷。[^1]
+这是 Nigate 的 Electron 图形界面版本，在保留原有极客终端版本的同时，提供了现代化、直观的操作界面，让 NTFS 设备管理更加简单便捷。[^1]
 
 ## 功能特性
 

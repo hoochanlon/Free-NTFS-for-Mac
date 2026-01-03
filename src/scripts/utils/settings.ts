@@ -8,14 +8,29 @@ function getSettingsPath(): string {
   return path.join(userDataPath, 'settings.json');
 }
 
+// 窗口尺寸配置常量
+export const WINDOW_SIZE_CONFIG = {
+  // 默认尺寸
+  defaultWidth: 900,
+  defaultHeight: 680,
+  // 最小尺寸
+  minWidth: 900,
+  minHeight: 680,
+  // 尺寸范围
+  minWidthLimit: 840,
+  maxWidthLimit: 2000,
+  minHeightLimit: 660,
+  maxHeightLimit: 2000
+} as const;
+
 // 默认设置
 const DEFAULT_SETTINGS = {
   savePassword: false,
   startupTab: 'dependencies' as 'dependencies' | 'devices' | 'logs' | 'help',
   enableLogs: false,
   language: 'system' as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system',
-  windowWidth: 900,
-  windowHeight: 680
+  windowWidth: WINDOW_SIZE_CONFIG.defaultWidth,
+  windowHeight: WINDOW_SIZE_CONFIG.defaultHeight
 };
 
 export interface AppSettings {
