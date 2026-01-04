@@ -15,11 +15,7 @@
 
     const t = AppUtils.I18n.t;
 
-    // 标题栏
-    const aboutBtn = document.getElementById('aboutBtn');
-    if (aboutBtn) {
-      aboutBtn.title = t('app.about');
-    }
+    // 标题栏（关于按钮不需要 tooltip）
 
     const statusText = document.querySelector('.status-text');
     if (statusText) {
@@ -72,6 +68,15 @@
       const label = autoMountCheckbox.parentElement?.querySelector('span');
       if (label) {
         label.textContent = t('devices.autoMount');
+      }
+    }
+
+    // 托盘模式（在设备标签页）
+    const trayModeCheckbox = document.getElementById('trayModeCheckbox');
+    if (trayModeCheckbox) {
+      const label = trayModeCheckbox.parentElement?.querySelector('span');
+      if (label) {
+        label.textContent = t('settings.trayMode');
       }
     }
 
@@ -158,14 +163,14 @@
       }
     }
 
-    // 托盘模式
-    const trayModeLabel = document.querySelector('label[for="trayModeCheckbox"]');
-    if (trayModeLabel) {
-      trayModeLabel.textContent = t('settings.trayMode');
+    // 系统自启
+    const autoStartLabel = document.querySelector('label[for="autoStartCheckbox"]');
+    if (autoStartLabel) {
+      autoStartLabel.textContent = t('settings.autoStart');
     }
-    const trayModeDesc = document.querySelector('#trayModeCheckbox')?.closest('.setting-item')?.querySelector('.setting-description');
-    if (trayModeDesc) {
-      trayModeDesc.textContent = t('settings.trayModeDesc');
+    const autoStartDesc = document.querySelector('#autoStartCheckbox')?.closest('.setting-item')?.querySelector('.setting-description');
+    if (autoStartDesc) {
+      autoStartDesc.textContent = t('settings.autoStartDesc');
     }
 
     // 语言

@@ -356,6 +356,14 @@ export function setupSettingsHandlers(): void {
         destroyTray();
       }
     }
+    // 如果系统自启设置发生变化，更新登录项设置
+    if (settings.autoStart !== undefined && settings.autoStart !== oldSettings.autoStart) {
+      app.setLoginItemSettings({
+        openAtLogin: settings.autoStart,
+        openAsHidden: false
+      });
+      console.log('系统自启设置已更新:', settings.autoStart);
+    }
     return { success: true };
   });
 

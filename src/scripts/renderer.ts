@@ -46,6 +46,7 @@
   const helpTab = document.getElementById('helpTab') as HTMLElement;
   const aboutBtn = document.getElementById('aboutBtn') as HTMLButtonElement;
   const autoMountCheckbox = document.getElementById('autoMountCheckbox') as HTMLInputElement;
+  const trayModeCheckbox = document.getElementById('trayModeCheckbox') as HTMLInputElement;
 
   // 自动刷新间隔
   let autoRefreshInterval: NodeJS.Timeout | null = null;
@@ -141,6 +142,23 @@
           await window.electronAPI.saveSettings({ autoMount: autoMountCheckbox.checked });
         } catch (error) {
           console.error('保存自动挂载设置失败:', error);
+        }
+      });
+    }
+
+    // 初始化托盘模式复选框
+    if (trayModeCheckbox) {
+      window.electronAPI.getSettings().then((settings: any) => {
+        trayModeCheckbox.checked = settings.trayMode || false;
+      });
+
+      trayModeCheckbox.addEventListener('change', async () => {
+        try {
+          await window.electronAPI.saveSettings({ trayMode: trayModeCheckbox.checked });
+        } catch (error) {
+          console.error('保存托盘模式设置失败:', error);
+          // 恢复复选框状态
+          trayModeCheckbox.checked = !trayModeCheckbox.checked;
         }
       });
     }

@@ -29,6 +29,13 @@ app.whenReady().then(async () => {
     console.log('托盘模式未启用，请在设置中启用');
   }
 
+  // 应用系统自启设置
+  app.setLoginItemSettings({
+    openAtLogin: settings.autoStart || false,
+    openAsHidden: false
+  });
+  console.log('系统自启设置已应用:', settings.autoStart);
+
   app.on('activate', async () => {
     const settings = await SettingsManager.getSettings();
     // 在托盘模式下，点击托盘图标不应该自动显示窗口

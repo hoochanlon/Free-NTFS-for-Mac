@@ -182,7 +182,9 @@
       "en": "English"
     },
     "trayMode": "Tray Mode",
-    "trayModeDesc": "When enabled, closing the window will minimize to the system tray instead of quitting the app. You can quickly manage NTFS devices through the tray icon."
+    "trayModeDesc": "When enabled, closing the window will minimize to the system tray instead of quitting the app. You can quickly manage NTFS devices through the tray icon.",
+    "autoStart": "Launch at Login",
+    "autoStartDesc": "When enabled, the app will automatically launch when the system starts"
   },
   "tray": {
     "showWindow": "Show Window",

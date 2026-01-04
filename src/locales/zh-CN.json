@@ -182,7 +182,9 @@
       "en": "English"
     },
     "trayMode": "托盘模式",
-    "trayModeDesc": "启用后，关闭窗口时不会退出应用，而是最小化到系统托盘。可以通过托盘图标快速管理 NTFS 设备。"
+    "trayModeDesc": "启用后，关闭窗口时不会退出应用，而是最小化到系统托盘。可以通过托盘图标快速管理 NTFS 设备。",
+    "autoStart": "系统自启",
+    "autoStartDesc": "启用后，应用将在系统启动时自动运行"
   },
   "tray": {
     "showWindow": "显示窗口",

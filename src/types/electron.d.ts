@@ -7,6 +7,8 @@ export interface AppSettings {
   language: 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system';
   windowWidth: number;
   windowHeight: number;
+  trayMode: boolean;
+  autoStart: boolean;
 }
 
 export interface ElectronAPI {

@@ -182,7 +182,9 @@
       "en": "English"
     },
     "trayMode": "托盤模式",
-    "trayModeDesc": "啟用後，關閉視窗時不會退出應用，而是最小化到系統托盤。可以通過托盤圖標快速管理 NTFS 設備。"
+    "trayModeDesc": "啟用後，關閉視窗時不會退出應用，而是最小化到系統托盤。可以通過托盤圖標快速管理 NTFS 設備。",
+    "autoStart": "系統自啟",
+    "autoStartDesc": "啟用後，應用將在系統啟動時自動運行"
   },
   "tray": {
     "showWindow": "顯示視窗",

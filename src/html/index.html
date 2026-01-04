@@ -17,7 +17,7 @@
       <div class="titlebar-content">
         <h1 class="app-title">Nigate（Free NTFS for Mac）</h1>
         <div class="titlebar-right">
-          <button class="btn-about" id="aboutBtn" title="关于">
+          <button class="btn-about" id="aboutBtn">
             <img src="../imgs/svg/info.svg" alt="关于" class="btn-about-icon">
           </button>
           <button class="theme-toggle" id="theme-toggle-btn" role="switch" aria-checked="false" aria-label="切换到浅色主题">
@@ -96,6 +96,10 @@
               <label class="auto-mount-checkbox">
                 <input type="checkbox" id="autoMountCheckbox">
                 <span>自动读写接入</span>
+              </label>
+              <label class="auto-mount-checkbox">
+                <input type="checkbox" id="trayModeCheckbox">
+                <span data-i18n="settings.trayMode">托盘模式</span>
               </label>
               <button class="btn btn-primary" id="mountAllBtn">全读写</button>
               <button class="btn btn-warning" id="restoreAllReadOnlyBtn">全只读</button>
@@ -188,11 +192,11 @@
             </div>
             <div class="setting-item">
               <div class="setting-label">
-                <label for="trayModeCheckbox" data-i18n="settings.trayMode">托盘模式</label>
-                <p class="setting-description" data-i18n="settings.trayModeDesc">启用后，关闭窗口时不会退出应用，而是最小化到系统托盘。可以通过托盘图标快速管理 NTFS 设备。</p>
+                <label for="autoStartCheckbox" data-i18n="settings.autoStart">系统自启</label>
+                <p class="setting-description" data-i18n="settings.autoStartDesc">启用后，应用将在系统启动时自动运行</p>
               </div>
               <div class="setting-control">
-                <input type="checkbox" id="trayModeCheckbox" class="setting-checkbox">
+                <input type="checkbox" id="autoStartCheckbox" class="setting-checkbox">
               </div>
             </div>
             <div class="setting-item">
