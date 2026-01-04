@@ -31,6 +31,7 @@
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1",
     "electron-reloader": "^1.2.3",
+    "sharp": "^0.34.5",
     "stylus": "^0.63.0",
     "typescript": "^5.0.0"
   },
@@ -61,12 +62,16 @@
       "category": "public.app-category.utilities",
       "target": [
         {
-      "target": "dmg",
-          "arch": ["arm64"]
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["arm64"]
+          "arch": [
+            "arm64"
+          ]
         }
       ],
       "icon": "src/ico/flash.icns",

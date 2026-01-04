@@ -31,12 +31,15 @@ export interface ElectronAPI {
   onThemeChange: (callback: (isLightMode: boolean) => void) => void;
   getSettings: () => Promise<AppSettings>;
   saveSettings: (settings: Partial<AppSettings>) => Promise<{ success: boolean }>;
+  onSettingsChange: (callback: (settings: Partial<AppSettings>) => void) => void;
   hasSavedPassword: () => Promise<boolean>;
   deleteSavedPassword: () => Promise<{ success: boolean }>;
   exportLogs: (content: string) => Promise<{ success: boolean; path?: string; error?: string }>;
   switchToTab: (tabName: string) => Promise<void>;
   onSwitchTab: (callback: (tabName: string) => void) => void;
   onShowAboutDialog: (callback: () => void) => void;
+  onTrayAction: (callback: (action: string) => void) => void;
+  onTrayDeviceAction: (callback: (data: { action: string; device: any }) => void) => void;
   showConfirmDialog: (title: string, message: string) => Promise<boolean>;
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => Promise<void>;
   readLogsFile: () => Promise<{ success: boolean; content?: string; error?: string }>;

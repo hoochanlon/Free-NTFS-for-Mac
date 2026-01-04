@@ -27,6 +27,9 @@ const electronAPI: ElectronAPI = {
   },
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings: Partial<import('../types/electron').AppSettings>) => ipcRenderer.invoke('save-settings', settings),
+  onSettingsChange: (callback: (settings: Partial<import('../types/electron').AppSettings>) => void) => {
+    ipcRenderer.on('settings-changed', (event, settings: Partial<import('../types/electron').AppSettings>) => callback(settings));
+  },
   hasSavedPassword: () => ipcRenderer.invoke('has-saved-password'),
   deleteSavedPassword: () => ipcRenderer.invoke('delete-saved-password'),
   exportLogs: (content: string) => ipcRenderer.invoke('export-logs', content),
@@ -36,6 +39,12 @@ const electronAPI: ElectronAPI = {
   },
   onShowAboutDialog: (callback: () => void) => {
     ipcRenderer.on('show-about-dialog', () => callback());
+  },
+  onTrayAction: (callback: (action: string) => void) => {
+    ipcRenderer.on('tray-action', (event, action: string) => callback(action));
+  },
+  onTrayDeviceAction: (callback: (data: { action: string; device: any }) => void) => {
+    ipcRenderer.on('tray-device-action', (event, data: { action: string; device: any }) => callback(data));
   },
   showConfirmDialog: (title: string, message: string) => ipcRenderer.invoke('show-confirm-dialog', { title, message }),
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => ipcRenderer.invoke('show-message-dialog', { title, message, type }),

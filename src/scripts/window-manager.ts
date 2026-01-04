@@ -1,11 +1,13 @@
-import { BrowserWindow, app, Event } from 'electron';
+import { BrowserWindow, app, Event, screen } from 'electron';
 import * as path from 'path';
 import { SettingsManager, WINDOW_SIZE_CONFIG } from './utils/settings';
+import { isTrayInitialized, getTrayBounds } from './utils/tray-manager';
 
 // 窗口引用
 export let mainWindow: BrowserWindow | null = null;
 export let logsWindow: BrowserWindow | null = null;
 export let aboutWindow: BrowserWindow | null = null;
+export let trayDevicesWindow: BrowserWindow | null = null;
 export const moduleWindows: Map<string, BrowserWindow> = new Map();
 
 // 创建主窗口
@@ -48,6 +50,8 @@ export async function createMainWindow(): Promise<BrowserWindow> {
 
   mainWindow.once('ready-to-show', () => {
     if (mainWindow) {
+      // 首次创建窗口时总是显示
+      // 只有在托盘模式下，用户关闭窗口后，再次通过 activate 事件创建时才隐藏
       mainWindow.show();
     }
   });
@@ -73,6 +77,17 @@ export async function createMainWindow(): Promise<BrowserWindow> {
         });
       }, 500); // 500ms 后保存
     }
+  });
+
+  // 监听窗口关闭事件，如果启用托盘模式则最小化到托盘
+  mainWindow.on('close', async (event) => {
+    const settings = await SettingsManager.getSettings();
+    if (settings.trayMode && isTrayInitialized()) {
+      // 如果启用托盘模式，隐藏窗口而不是关闭
+      event.preventDefault();
+      mainWindow?.hide();
+    }
+    // 否则正常关闭窗口
   });
 
   return mainWindow;
@@ -127,6 +142,35 @@ export function closeLogsWindow(): void {
   }
 }
 
+// 获取主题背景色
+function getThemeBackgroundColor(): string {
+  // 默认返回深色背景，实际主题会在页面加载后通过JavaScript同步
+  return '#1e1e1e';
+}
+
+// 更新窗口背景色以匹配主题
+function updateWindowBackgroundColor(window: BrowserWindow): void {
+  if (!window || window.isDestroyed()) return;
+
+  window.webContents.executeJavaScript(`
+    (function() {
+      try {
+        const savedTheme = localStorage.getItem('app-theme');
+        const isLight = savedTheme === 'light';
+        return isLight ? '#ffffff' : '#1e1e1e';
+      } catch (e) {
+        return '#1e1e1e';
+      }
+    })();
+  `).then((bgColor: string) => {
+    if (window && !window.isDestroyed()) {
+      window.setBackgroundColor(bgColor);
+    }
+  }).catch(() => {
+    // 静默处理错误
+  });
+}
+
 // 创建模块窗口
 export async function createModuleWindow(moduleName: string): Promise<BrowserWindow> {
   if (moduleWindows.has(moduleName)) {
@@ -151,10 +195,10 @@ export async function createModuleWindow(moduleName: string): Promise<BrowserWin
   }
 
   const moduleWindow = new BrowserWindow({
-    width: 900,
-    height: 700,
-    minWidth: 800,
-    minHeight: 600,
+    width: 600,
+    height: 500,
+    minWidth: 500,
+    minHeight: 400,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
@@ -162,13 +206,18 @@ export async function createModuleWindow(moduleName: string): Promise<BrowserWin
     },
     titleBarStyle: 'hidden',
     frame: false,
-    backgroundColor: '#1e1e1e',
+    backgroundColor: getThemeBackgroundColor(),
     parent: mainWindow || undefined,
     show: false
   });
 
   const modulePath = path.join(appPath, htmlFile);
   await moduleWindow.loadFile(modulePath);
+
+  // 在页面加载完成后更新背景色
+  moduleWindow.webContents.once('did-finish-load', () => {
+    updateWindowBackgroundColor(moduleWindow);
+  });
 
   moduleWindow.once('ready-to-show', () => {
     if (moduleWindow && !moduleWindow.isDestroyed()) {
@@ -187,4 +236,190 @@ export async function createModuleWindow(moduleName: string): Promise<BrowserWin
 // 关闭模块窗口
 export function closeModuleWindow(window: BrowserWindow): void {
   window.close();
+}
+
+// 创建托盘设备窗口（替代菜单，实现真正的实时更新）
+export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
+  // 如果窗口已存在且未销毁，切换显示/隐藏
+  if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
+    if (trayDevicesWindow.isVisible()) {
+      trayDevicesWindow.hide();
+    } else {
+      trayDevicesWindow.show();
+      trayDevicesWindow.focus();
+    }
+    return trayDevicesWindow;
+  }
+
+  const appPath = app.getAppPath();
+
+  // 获取主显示器的工作区域
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
+  const { x: screenX, y: screenY } = primaryDisplay.workArea;
+
+  // 使用更小的窗口尺寸，适合托盘弹出
+  const windowWidth = 321;
+  const windowHeight = Math.min(456, screenHeight - 80);
+
+  // 计算窗口位置（在托盘下方）
+  let windowX: number;
+  let windowY: number;
+
+  // 尝试获取托盘图标的位置
+  const trayBounds = getTrayBounds();
+  console.log('托盘位置信息:', trayBounds);
+  console.log('屏幕信息:', { screenX, screenY, screenWidth, screenHeight });
+  console.log('窗口尺寸:', { windowWidth, windowHeight });
+
+  if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {
+    // 将窗口放在托盘图标下方，水平居中对齐，完全贴合
+    const trayCenterX = trayBounds.x + (trayBounds.width / 2);
+    windowX = Math.round(trayCenterX - (windowWidth / 2));
+    windowY = Math.round(trayBounds.y + trayBounds.height); // 完全贴合托盘底部，0间距
+
+    console.log('窗口位置（贴合托盘）:', {
+      windowX,
+      windowY,
+      trayCenterX,
+      trayBounds: {
+        x: trayBounds.x,
+        y: trayBounds.y,
+        width: trayBounds.width,
+        height: trayBounds.height
+      }
+    });
+  } else {
+    // 如果无法获取托盘位置，使用屏幕顶部中央
+    console.warn('无法获取托盘位置，使用屏幕顶部中央');
+    console.warn('托盘位置信息:', trayBounds);
+    windowX = screenX + (screenWidth - windowWidth) / 2;
+    windowY = screenY;
+  }
+
+  trayDevicesWindow = new BrowserWindow({
+    width: windowWidth,
+    height: windowHeight,
+    minWidth: 321,
+    minHeight: 456,
+    maxWidth: 321,
+    maxHeight: 456,
+    x: windowX,
+    y: windowY,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true
+    },
+    frame: false, // 无边框窗口
+    transparent: false,
+    backgroundColor: getThemeBackgroundColor(), // 动态主题背景
+    resizable: false, // 固定大小，像系统菜单
+    alwaysOnTop: false,
+    skipTaskbar: true, // 不在任务栏显示
+    show: false,
+    hasShadow: true,
+    // macOS 特定设置
+    ...(process.platform === 'darwin' ? {
+      titleBarStyle: 'hiddenInset', // 隐藏标题栏和控制按钮
+      vibrancy: 'sidebar', // 毛玻璃效果
+      visualEffectState: 'active'
+    } : {})
+  });
+
+  // 直接使用主窗口的设备页面，保持界面一致性
+  const trayDevicesPath = path.join(appPath, 'src', 'html', 'devices.html');
+
+  // 监听加载错误
+  trayDevicesWindow.webContents.on('did-fail-load', (event: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
+    console.error('托盘设备窗口加载失败:', errorCode, errorDescription, validatedURL);
+  });
+
+  await trayDevicesWindow.loadFile(trayDevicesPath).catch((error: Error) => {
+    console.error('加载托盘设备窗口失败:', error);
+    console.error('App path:', appPath);
+    console.error('HTML path:', trayDevicesPath);
+  });
+
+  // 在页面加载完成后更新背景色
+  trayDevicesWindow.webContents.once('did-finish-load', () => {
+    if (trayDevicesWindow) {
+      updateWindowBackgroundColor(trayDevicesWindow);
+
+      // 在窗口加载完成后，尝试重新获取托盘位置并调整窗口位置
+      // 因为在 macOS 上，托盘位置可能在窗口创建时还未完全初始化
+      setTimeout(() => {
+        if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
+          const trayBounds = getTrayBounds();
+          if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {
+            const [currentWidth] = trayDevicesWindow.getSize();
+            const trayCenterX = trayBounds.x + (trayBounds.width / 2);
+            // 窗口水平居中对齐托盘图标，顶部紧贴托盘底部（像系统菜单）
+            const newX = Math.round(trayCenterX - (currentWidth / 2));
+            const newY = Math.round(trayBounds.y + trayBounds.height);
+
+            console.log('窗口加载后重新调整位置（贴合托盘，像系统菜单）:', { newX, newY, trayBounds });
+            trayDevicesWindow.setPosition(newX, newY, false);
+          }
+        }
+      }, 100); // 延迟100ms，确保托盘位置已初始化
+    }
+  });
+
+  trayDevicesWindow.once('ready-to-show', () => {
+    if (trayDevicesWindow) {
+      // 在显示前重新计算位置，确保贴合托盘（像系统菜单一样）
+      const trayBounds = getTrayBounds();
+      if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {
+        const [currentWidth] = trayDevicesWindow.getSize();
+        // 计算托盘中心点
+        const trayCenterX = trayBounds.x + (trayBounds.width / 2);
+        // 窗口水平居中对齐托盘图标
+        const newX = Math.round(trayCenterX - (currentWidth / 2));
+        // 窗口顶部紧贴托盘底部（0间距，像系统菜单）
+        const newY = Math.round(trayBounds.y + trayBounds.height);
+        trayDevicesWindow.setPosition(newX, newY, false);
+        console.log('显示前调整位置（贴合托盘，像系统菜单）:', {
+          newX,
+          newY,
+          trayCenterX,
+          trayBounds
+        });
+      }
+      trayDevicesWindow.show();
+      trayDevicesWindow.focus();
+    }
+  });
+
+  // 窗口关闭时清理引用
+  trayDevicesWindow.on('closed', () => {
+    trayDevicesWindow = null;
+  });
+
+  return trayDevicesWindow;
+}
+
+// 切换托盘设备窗口显示/隐藏
+export async function toggleTrayDevicesWindow(): Promise<void> {
+  if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
+    if (trayDevicesWindow.isVisible()) {
+      trayDevicesWindow.hide();
+    } else {
+      // 每次显示时都重新计算位置，确保贴合托盘（像系统菜单一样）
+      const trayBounds = getTrayBounds();
+      if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {
+        const [currentWidth] = trayDevicesWindow.getSize();
+        const trayCenterX = trayBounds.x + (trayBounds.width / 2);
+        // 窗口水平居中对齐托盘图标，顶部紧贴托盘底部（像系统菜单）
+        const newX = Math.round(trayCenterX - (currentWidth / 2));
+        const newY = Math.round(trayBounds.y + trayBounds.height);
+        trayDevicesWindow.setPosition(newX, newY, false);
+        console.log('切换显示时调整位置（贴合托盘，像系统菜单）:', { newX, newY, trayBounds });
+      }
+      trayDevicesWindow.show();
+      trayDevicesWindow.focus();
+    }
+  } else {
+    await createTrayDevicesWindow();
+  }
 }

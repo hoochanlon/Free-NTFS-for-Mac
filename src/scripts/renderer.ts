@@ -34,6 +34,7 @@
   const devicesList = document.getElementById('devicesList')!;
   // readWriteDevicesList 已整合到 devicesList 中，保留变量以兼容现有代码
   const readWriteDevicesList = devicesList;
+  const mountAllBtn = document.getElementById('mountAllBtn') as HTMLButtonElement;
   const unmountAllBtn = document.getElementById('unmountAllBtn') as HTMLButtonElement;
   const restoreAllReadOnlyBtn = document.getElementById('restoreAllReadOnlyBtn') as HTMLButtonElement;
   const ejectAllBtn = document.getElementById('ejectAllBtn') as HTMLButtonElement;
@@ -161,7 +162,6 @@
       );
     });
 
-    const mountAllBtn = document.getElementById('mountAllBtn') as HTMLButtonElement;
     if (mountAllBtn) {
       mountAllBtn.addEventListener('click', () => {
         AppModules.Devices.mountAllDevices(devicesList, readWriteDevicesList, statusDot, statusText);
@@ -263,6 +263,60 @@
     autoRefreshInterval = setInterval(() => {
       AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
     }, 5000);
+  }
+
+  // 监听托盘操作
+  if (window.electronAPI && window.electronAPI.onTrayAction) {
+    window.electronAPI.onTrayAction((action: string) => {
+      switch (action) {
+        case 'refresh-devices':
+          AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+          break;
+        case 'mount-all':
+          if (mountAllBtn) {
+            mountAllBtn.click();
+          }
+          break;
+        case 'unmount-all':
+          if (unmountAllBtn) {
+            unmountAllBtn.click();
+          }
+          break;
+        case 'eject-all':
+          if (ejectAllBtn) {
+            ejectAllBtn.click();
+          }
+          break;
+      }
+    });
+  }
+
+  // 监听托盘设备操作
+  if (window.electronAPI && window.electronAPI.onTrayDeviceAction) {
+    window.electronAPI.onTrayDeviceAction((data: { action: string; device: any }) => {
+      const { action, device } = data;
+      // 切换到设备标签页
+      AppModules.Tabs.switchToTab('devices', logContainer, helpTab);
+      // 刷新设备列表
+      AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText).then(() => {
+        // 根据操作类型执行相应的操作
+        switch (action) {
+          case 'mount':
+            // 找到对应的设备并执行挂载操作
+            AppModules.Devices.mountDevice(device, devicesList, readWriteDevicesList, statusDot, statusText);
+            break;
+          case 'unmount':
+            AppModules.Devices.unmountDevice(device, devicesList, readWriteDevicesList, statusDot, statusText);
+            break;
+          case 'eject':
+            AppModules.Devices.ejectDevice(device, devicesList, readWriteDevicesList, statusDot, statusText);
+            break;
+          case 'restore':
+            AppModules.Devices.restoreToReadOnly(device, devicesList, readWriteDevicesList, statusDot, statusText);
+            break;
+        }
+      });
+    });
   }
 
   // 清理

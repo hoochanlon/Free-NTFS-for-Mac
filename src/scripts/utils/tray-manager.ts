@@ -1,0 +1,146 @@
+import { Tray, nativeImage, app } from 'electron';
+import * as path from 'path';
+import * as fs from 'fs';
+import { createTrayIcon } from './tray-icons';
+import { toggleTrayDevicesWindow } from '../window-manager';
+
+// 托盘图标引用
+let tray: Tray | null = null;
+
+// 注意：托盘菜单已完全替换为 BrowserWindow
+// 点击托盘图标时会显示 BrowserWindow 窗口，实现真正的实时更新
+
+/**
+ * 初始化托盘
+ */
+export async function initTray(): Promise<void> {
+  if (tray) {
+    console.log('托盘已经初始化');
+    return; // 已经初始化
+  }
+
+  try {
+    console.log('开始初始化托盘...');
+    let icon = createTrayIcon();
+
+    // 如果图标为空，尝试使用应用图标
+    if (icon.isEmpty()) {
+      console.log('默认图标为空，尝试加载应用图标...');
+      const appPath = app.getAppPath();
+      // 尝试多个可能的应用图标路径
+      const appIconPaths = [
+        path.join(appPath, '..', '..', 'Contents', 'Resources', 'app.icns'),
+        path.join(appPath, '..', '..', 'Resources', 'app.icns'),
+        path.join(appPath, 'app.icns')
+      ];
+
+      for (const appIconPath of appIconPaths) {
+        if (fs.existsSync(appIconPath)) {
+          try {
+            const appIconImage = nativeImage.createFromPath(appIconPath);
+            if (!appIconImage.isEmpty()) {
+              icon = appIconImage.resize({ width: 22, height: 22 });
+              console.log('成功加载应用图标:', appIconPath);
+              break;
+            }
+          } catch (error) {
+            console.warn('加载应用图标失败:', appIconPath, error);
+          }
+        }
+      }
+    }
+
+    // 创建托盘（即使图标为空，Electron 也会使用默认图标）
+    tray = new Tray(icon);
+    console.log('托盘对象已创建');
+
+    // 在 macOS 上，确保图标被设置为模板图标（单色图标，会自动显示为白色）
+    if (process.platform === 'darwin' && !icon.isEmpty()) {
+      // 在 macOS 上，单色图标会自动作为模板图标处理
+      // 模板图标会根据菜单栏的深浅色模式自动调整颜色（浅色菜单栏显示黑色，深色菜单栏显示白色）
+      // 从 flash-white.svg 生成的图标是白色的，系统会自动识别为模板图标
+      // 如果图标显示为红色，可能是旧的彩色图标，需要重新生成
+      try {
+        // 确保使用正确的图标尺寸
+        const templateIcon = icon.resize({ width: 22, height: 22 });
+        tray.setImage(templateIcon);
+        console.log('已设置托盘图标为模板图标（白色）');
+      } catch (error) {
+        console.warn('设置模板图标失败:', error);
+      }
+    }
+
+    // 设置托盘提示
+    tray.setToolTip('Nigate - NTFS 设备管理\n点击显示设备列表');
+
+    // 点击托盘图标时显示 BrowserWindow 窗口（替代菜单，实现真正的实时更新）
+    tray.on('click', async () => {
+      try {
+        await toggleTrayDevicesWindow();
+      } catch (error) {
+        console.error('显示设备窗口失败:', error);
+      }
+    });
+
+    // 在 macOS 上，设置忽略双击事件，只响应单击
+    if (process.platform === 'darwin') {
+      tray.setIgnoreDoubleClickEvents(true);
+    }
+
+    console.log('托盘已成功初始化');
+  } catch (error) {
+    console.error('初始化托盘失败:', error);
+    // 清理可能创建的部分托盘对象
+    if (tray) {
+      try {
+        tray.destroy();
+      } catch (e) {
+        // 忽略销毁错误
+      }
+      tray = null;
+    }
+    // 即使失败也不抛出错误，避免影响应用启动
+  }
+}
+
+/**
+ * 更新托盘（已替换为 BrowserWindow，此函数保留用于兼容性）
+ * BrowserWindow 会自动实时更新，无需手动调用
+ */
+export async function updateTrayMenu(forceRefresh: boolean = false): Promise<void> {
+  // BrowserWindow 会自动更新，无需手动刷新
+  console.log('托盘已使用 BrowserWindow，自动实时更新');
+}
+
+/**
+ * 销毁托盘
+ */
+export function destroyTray(): void {
+  if (tray) {
+    tray.destroy();
+    tray = null;
+  }
+}
+
+/**
+ * 检查托盘是否已初始化
+ */
+export function isTrayInitialized(): boolean {
+  return tray !== null;
+}
+
+/**
+ * 获取托盘图标的位置（bounds）
+ * 返回托盘图标的 x, y, width, height
+ */
+export function getTrayBounds(): { x: number; y: number; width: number; height: number } | null {
+  if (!tray) {
+    return null;
+  }
+  try {
+    return tray.getBounds();
+  } catch (error) {
+    console.warn('获取托盘位置失败:', error);
+    return null;
+  }
+}

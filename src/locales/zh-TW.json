@@ -114,7 +114,9 @@
     "restoreConfirm": "確定要將 {name} 還原為只讀模式嗎？",
     "restoreConfirmNote": "注意：這需要管理員權限，系統會彈出密碼輸入對話框",
     "ejectAllConfirm": "確定要推出所有 NTFS 設備嗎？",
-    "ejectAllConfirmNote": "將推出以下設備：\n{devices}\n\n*注意：*\n* 推出後設備將完全斷開，無法訪問\n* 設備將從列表中移除，需要重新插入才能使用\n* 請確保沒有程式正在使用這些設備，否則可能導致資料遺失"
+    "ejectAllConfirmNote": "請確保沒有程式正在使用這些設備",
+    "noDevicesToRestore": "沒有需要還原的設備",
+    "noDevicesToEject": "沒有需要推出的設備"
   },
   "dialog": {
     "cancel": "取消",
@@ -177,7 +179,22 @@
       "zh-TW": "繁體中文",
       "ja": "日本語",
       "en": "English"
-    }
+    },
+    "trayMode": "托盤模式",
+    "trayModeDesc": "啟用後，關閉視窗時不會退出應用，而是最小化到系統托盤。可以通過托盤圖標快速管理 NTFS 設備。"
+  },
+  "tray": {
+    "showWindow": "顯示視窗",
+    "ntfsDevices": "NTFS 設備",
+    "refreshDevices": "重新整理設備列表",
+    "mountAll": "全讀寫",
+    "unmountAll": "全卸載",
+    "ejectAll": "全推出",
+    "quickActions": "一鍵操作",
+    "settings": "設定",
+    "logs": "操作日誌",
+    "about": "關於",
+    "quit": "退出"
   },
   "messages": {
     "mounting": "正在掛載 {name}...",

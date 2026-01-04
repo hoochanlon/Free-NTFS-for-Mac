@@ -33,6 +33,7 @@
       const deletePasswordBtn = document.getElementById('deletePasswordBtn') as HTMLButtonElement;
       const startupTabSelect = document.getElementById('startupTabSelect') as HTMLSelectElement;
       const languageSelect = document.getElementById('languageSelect') as HTMLSelectElement;
+      const trayModeCheckbox = document.getElementById('trayModeCheckbox') as HTMLInputElement;
 
       if (!savePasswordCheckbox || !deletePasswordBtn || !startupTabSelect) {
         return;
@@ -46,6 +47,9 @@
         if (languageSelect) {
           // 如果没有设置或设置为空，默认使用跟随系统
           languageSelect.value = settings.language || 'system';
+        }
+        if (trayModeCheckbox) {
+          trayModeCheckbox.checked = settings.trayMode || false;
         }
 
         // 窗口尺寸设置
@@ -124,6 +128,19 @@
               }
             } catch (error) {
               console.error('保存设置失败:', error);
+            }
+          });
+        }
+
+        // 托盘模式复选框变化
+        if (trayModeCheckbox) {
+          trayModeCheckbox.addEventListener('change', async () => {
+            try {
+              await electronAPI.saveSettings({ trayMode: trayModeCheckbox.checked });
+            } catch (error) {
+              console.error('保存设置失败:', error);
+              // 恢复复选框状态
+              trayModeCheckbox.checked = !trayModeCheckbox.checked;
             }
           });
         }

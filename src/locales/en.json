@@ -114,7 +114,9 @@
     "restoreConfirm": "Are you sure you want to restore {name} to read-only mode?",
     "restoreConfirmNote": "Note: This requires administrator privileges, and the system will prompt for a password",
     "ejectAllConfirm": "Are you sure you want to eject all NTFS devices?",
-    "ejectAllConfirmNote": "The following devices will be ejected:\n{devices}\n\n*Note:*\n* After ejecting, devices will be completely disconnected and inaccessible\n* Devices will be removed from the list and need to be reinserted to use\n* Please ensure no programs are using these devices, otherwise data loss may occur"
+    "ejectAllConfirmNote": "Please ensure no programs are using these devices",
+    "noDevicesToRestore": "No devices to restore",
+    "noDevicesToEject": "No devices to eject"
   },
   "dialog": {
     "cancel": "Cancel",
@@ -177,7 +179,22 @@
       "zh-TW": "繁體中文",
       "ja": "日本語",
       "en": "English"
-    }
+    },
+    "trayMode": "Tray Mode",
+    "trayModeDesc": "When enabled, closing the window will minimize to the system tray instead of quitting the app. You can quickly manage NTFS devices through the tray icon."
+  },
+  "tray": {
+    "showWindow": "Show Window",
+    "ntfsDevices": "NTFS Devices",
+    "refreshDevices": "Refresh Device List",
+    "mountAll": "All Read-Write",
+    "unmountAll": "All Unmount",
+    "ejectAll": "All Eject",
+    "quickActions": "Quick Actions",
+    "settings": "Settings",
+    "logs": "Operation Logs",
+    "about": "About",
+    "quit": "Quit"
   },
   "messages": {
     "mounting": "Mounting {name}...",

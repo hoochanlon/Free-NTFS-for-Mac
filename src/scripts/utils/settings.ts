@@ -31,7 +31,8 @@ const DEFAULT_SETTINGS = {
   enableLogs: false,
   language: 'system' as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system',
   windowWidth: WINDOW_SIZE_CONFIG.defaultWidth,
-  windowHeight: WINDOW_SIZE_CONFIG.defaultHeight
+  windowHeight: WINDOW_SIZE_CONFIG.defaultHeight,
+  trayMode: false // 托盘模式，默认关闭
 };
 
 export interface AppSettings {
@@ -42,6 +43,7 @@ export interface AppSettings {
   language: 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system';
   windowWidth: number;
   windowHeight: number;
+  trayMode: boolean; // 托盘模式
 }
 
 /**

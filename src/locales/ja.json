@@ -114,7 +114,9 @@
     "restoreConfirm": "{name} を読み取り専用モードに戻しますか？",
     "restoreConfirmNote": "注意：これには管理者権限が必要で、システムがパスワード入力ダイアログを表示します",
     "ejectAllConfirm": "すべての NTFS デバイスをイジェクトしてもよろしいですか？",
-    "ejectAllConfirmNote": "以下のデバイスがイジェクトされます：\n{devices}\n\n*注意：*\n* イジェクト後、デバイスは完全に切断され、アクセスできなくなります\n* デバイスはリストから削除され、再度接続する必要があります\n* これらのデバイスを使用しているプログラムがないことを確認してください。そうしないと、データ損失が発生する可能性があります"
+    "ejectAllConfirmNote": "これらのデバイスを使用しているプログラムがないことを確認してください",
+    "noDevicesToRestore": "還元するデバイスがありません",
+    "noDevicesToEject": "イジェクトするデバイスがありません"
   },
   "dialog": {
     "cancel": "キャンセル",
@@ -177,7 +179,22 @@
       "zh-TW": "繁體中文",
       "ja": "日本語",
       "en": "English"
-    }
+    },
+    "trayMode": "トレイモード",
+    "trayModeDesc": "有効にすると、ウィンドウを閉じたときにアプリが終了せず、システムトレイに最小化されます。トレイアイコンから NTFS デバイスをすばやく管理できます。"
+  },
+  "tray": {
+    "showWindow": "ウィンドウを表示",
+    "ntfsDevices": "NTFS デバイス",
+    "refreshDevices": "デバイスリストを更新",
+    "mountAll": "全読み書き",
+    "unmountAll": "全アンマウント",
+    "ejectAll": "全イジェクト",
+    "quickActions": "クイック操作",
+    "settings": "設定",
+    "logs": "操作ログ",
+    "about": "について",
+    "quit": "終了"
   },
   "messages": {
     "mounting": "{name} をマウント中...",

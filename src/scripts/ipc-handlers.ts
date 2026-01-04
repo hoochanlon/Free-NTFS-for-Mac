@@ -14,6 +14,7 @@ import { openAboutWindow, getAboutWindow } from './about-window';
 import { SettingsManager, AppSettings } from './utils/settings';
 import { KeychainManager } from './utils/keychain';
 import { rebuildApplicationMenu } from './app-config';
+import { initTray, destroyTray, updateTrayMenu } from './utils/tray-manager';
 
 // NTFS 相关 IPC handlers
 export function setupNTFSHandlers(): void {
@@ -28,9 +29,17 @@ export function setupNTFSHandlers(): void {
   ipcMain.handle('mount-device', async (event, device) => {
     try {
       const result = await ntfsManager.mountDevice(device);
+      // 事件驱动：操作完成后立即更新托盘菜单
+      setTimeout(() => {
+        updateTrayMenu(true); // 强制刷新，确保菜单显示最新状态
+      }, 500); // 等待系统状态更新
       return { success: true, result };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
+      // 即使失败也更新菜单，显示当前状态
+      setTimeout(() => {
+        updateTrayMenu(true);
+      }, 300);
       return { success: false, error: errorMessage };
     }
   });
@@ -38,9 +47,16 @@ export function setupNTFSHandlers(): void {
   ipcMain.handle('unmount-device', async (event, device) => {
     try {
       const result = await ntfsManager.unmountDevice(device);
+      // 事件驱动：操作完成后立即更新托盘菜单
+      setTimeout(() => {
+        updateTrayMenu(true);
+      }, 500);
       return { success: true, result };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
+      setTimeout(() => {
+        updateTrayMenu(true);
+      }, 300);
       return { success: false, error: errorMessage };
     }
   });
@@ -48,9 +64,17 @@ export function setupNTFSHandlers(): void {
   ipcMain.handle('restore-to-readonly', async (event, device) => {
     try {
       const result = await ntfsManager.restoreToReadOnly(device);
+      // 事件驱动：操作完成后立即更新托盘菜单
+      // restoreToReadOnly 需要更长时间，等待系统重新挂载
+      setTimeout(() => {
+        updateTrayMenu(true);
+      }, 1500); // 等待系统重新挂载完成
       return { success: true, result };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
+      setTimeout(() => {
+        updateTrayMenu(true);
+      }, 500);
       return { success: false, error: errorMessage };
     }
   });
@@ -58,9 +82,16 @@ export function setupNTFSHandlers(): void {
   ipcMain.handle('eject-device', async (event, device) => {
     try {
       const result = await ntfsManager.ejectDevice(device);
+      // 事件驱动：操作完成后立即更新托盘菜单
+      setTimeout(() => {
+        updateTrayMenu(true);
+      }, 500);
       return { success: true, result };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
+      setTimeout(() => {
+        updateTrayMenu(true);
+      }, 300);
       return { success: false, error: errorMessage };
     }
   });
@@ -160,7 +191,7 @@ export function setupNTFSHandlers(): void {
     try {
       const userDataPath = app.getPath('userData');
       const logsFilePath = path.join(userDataPath, 'logs.json');
-      
+
       if (fs.existsSync(logsFilePath)) {
         const content = await fs.promises.readFile(logsFilePath, 'utf-8');
         // 确保返回的内容不为空
@@ -180,7 +211,7 @@ export function setupNTFSHandlers(): void {
     try {
       const userDataPath = app.getPath('userData');
       const logsFilePath = path.join(userDataPath, 'logs.json');
-      
+
       await fs.promises.writeFile(logsFilePath, content, 'utf-8');
       return { success: true };
     } catch (error) {
@@ -265,14 +296,22 @@ export function setupSystemHandlers(): void {
 
   ipcMain.handle('broadcast-theme-change', async (event, isLightMode: boolean) => {
     const allWindows = BrowserWindow.getAllWindows();
+    const backgroundColor = isLightMode ? '#ffffff' : '#1e1e1e';
     allWindows.forEach(window => {
       if (window && !window.isDestroyed()) {
         window.webContents.send('theme-changed', isLightMode);
-        // 更新窗口背景色（特别是关于窗口）
+        // 更新所有模块窗口和托盘设备窗口的背景色
         const aboutWindow = getAboutWindow();
         if (window === aboutWindow) {
-          const backgroundColor = isLightMode ? '#f5f5f7' : '#1d1d1f';
-          window.setBackgroundColor(backgroundColor);
+          const aboutBgColor = isLightMode ? '#f5f5f7' : '#1d1d1f';
+          window.setBackgroundColor(aboutBgColor);
+        } else {
+          // 检查是否是模块窗口或托盘设备窗口
+          // 这些窗口使用devices.html或dependencies.html
+          const url = window.webContents.getURL();
+          if (url && (url.includes('devices.html') || url.includes('dependencies.html'))) {
+            window.setBackgroundColor(backgroundColor);
+          }
         }
       }
     });
@@ -290,9 +329,27 @@ export function setupSettingsHandlers(): void {
   ipcMain.handle('save-settings', async (event, settings: Partial<AppSettings>) => {
     const oldSettings = await SettingsManager.getSettings();
     await SettingsManager.saveSettings(settings);
-    // 如果语言设置发生变化，重新构建菜单
+
+    // 广播设置变化到所有窗口
+    const allWindows = BrowserWindow.getAllWindows();
+    allWindows.forEach(window => {
+      if (window && !window.isDestroyed()) {
+        window.webContents.send('settings-changed', settings);
+      }
+    });
+
+    // 如果语言设置发生变化，重新构建菜单和托盘菜单
     if (settings.language && settings.language !== oldSettings.language) {
       await rebuildApplicationMenu();
+      await updateTrayMenu();
+    }
+    // 如果托盘模式设置发生变化，初始化或销毁托盘
+    if (settings.trayMode !== undefined && settings.trayMode !== oldSettings.trayMode) {
+      if (settings.trayMode) {
+        await initTray();
+      } else {
+        destroyTray();
+      }
     }
     return { success: true };
   });

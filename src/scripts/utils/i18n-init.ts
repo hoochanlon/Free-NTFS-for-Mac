@@ -158,6 +158,16 @@
       }
     }
 
+    // 托盘模式
+    const trayModeLabel = document.querySelector('label[for="trayModeCheckbox"]');
+    if (trayModeLabel) {
+      trayModeLabel.textContent = t('settings.trayMode');
+    }
+    const trayModeDesc = document.querySelector('#trayModeCheckbox')?.closest('.setting-item')?.querySelector('.setting-description');
+    if (trayModeDesc) {
+      trayModeDesc.textContent = t('settings.trayModeDesc');
+    }
+
     // 语言
     const languageLabel = document.querySelector('label[for="languageSelect"]');
     if (languageLabel) {

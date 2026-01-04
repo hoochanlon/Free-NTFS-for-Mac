@@ -6,21 +6,31 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self';">
   <title>NTFS 设备 - Nigate</title>
   <link rel="stylesheet" href="../../styles.css?v=11">
+  <script src="../../scripts/theme-init.js"></script>
+  <script src="../../scripts/utils/i18n.js"></script>
+  <script src="../../scripts/utils/i18n-init.js"></script>
 </head>
 <body>
   <div class="devices-page">
     <div class="devices-header">
-      <h1>NTFS 设备</h1>
-      <div class="devices-actions">
-        <button class="btn btn-secondary" id="refreshBtn">刷新</button>
-        <button class="btn btn-text" id="closeBtn">关闭</button>
-      </div>
+      <div class="devices-traffic-lights"></div>
     </div>
     <div class="devices-content">
       <div class="section">
+        <div class="devices-section-header">
+          <div class="devices-header-actions">
+            <label class="auto-mount-checkbox">
+              <input type="checkbox" id="autoMountCheckbox">
+              <span>自动读写接入</span>
+            </label>
+            <button class="btn btn-primary" id="mountAllBtn">全读写</button>
+            <button class="btn btn-warning" id="restoreAllReadOnlyBtn">全只读</button>
+            <button class="btn btn-danger" id="ejectAllBtn">全推出</button>
+          </div>
+        </div>
         <div class="devices-list" id="devicesList">
           <div class="empty-state">
-            <div class="empty-icon">💾</div>
+            <div class="empty-icon"></div>
             <p>未检测到 NTFS 设备</p>
             <p class="empty-hint">请插入 NTFS 格式的移动存储设备</p>
           </div>
