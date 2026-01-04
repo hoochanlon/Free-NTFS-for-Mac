@@ -106,6 +106,7 @@
     "unmounted": "Unmounted",
     "deviceLabel": "Device:",
     "mountPointLabel": "Mount Point:",
+    "capacityLabel": "Capacity:",
     "notMounted": "Not Mounted",
     "mountConfirm": "Are you sure you want to configure {name} as read-write mode?",
     "mountConfirmNote": "Note:\n• This requires administrator privileges, and the system will prompt for a password\n• If this NTFS device was previously used on a Windows computer with Fast Startup enabled, you may need to plug it back into the Windows computer and fully shut down before trying",

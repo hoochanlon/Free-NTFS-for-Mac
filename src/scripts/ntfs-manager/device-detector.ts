@@ -14,6 +14,98 @@ export class DeviceDetector {
     this.unmountedDevices = unmountedDevices;
   }
 
+  // 获取磁盘容量信息
+  // 优先从挂载点获取（如果已挂载），否则从设备本身获取（即使未挂载）
+  private async getDiskCapacity(volume: string, devicePath: string): Promise<{ total: number; used: number; available: number } | undefined> {
+    try {
+      // 方法1：尝试从挂载点获取（如果设备已挂载）
+      try {
+        const dfResult = await execAsync(`df -k "${volume}" 2>/dev/null`) as { stdout: string };
+        const dfLines = dfResult.stdout.trim().split('\n').filter(line => line.length > 0);
+
+        if (dfLines.length >= 2) {
+          const dataLine = dfLines[1].trim();
+          const parts = dataLine.split(/\s+/);
+
+          if (parts.length >= 4) {
+            const totalKB = parseInt(parts[1], 10);
+            const usedKB = parseInt(parts[2], 10);
+            const availableKB = parseInt(parts[3], 10);
+
+            if (!isNaN(totalKB) && !isNaN(usedKB) && !isNaN(availableKB) && totalKB > 0) {
+              // 转换为字节
+              return {
+                total: totalKB * 1024,
+                used: usedKB * 1024,
+                available: availableKB * 1024
+              };
+            }
+          }
+        }
+      } catch {
+        // df 命令失败，继续尝试 diskutil
+      }
+
+      // 方法2：从设备本身获取容量（即使未挂载也可以）
+      try {
+        const diskutilResult = await execAsync(`diskutil info "${devicePath}" 2>/dev/null`) as { stdout: string };
+        const info = diskutilResult.stdout;
+
+        // 解析 diskutil 输出
+        // Total Size: 500.1 GB (500107862016 Bytes) (exactly 976773168 512-Byte-Units)
+        // Volume Free Space: 400.0 GB (400000000000 Bytes) (exactly 781250000 512-Byte-Units)
+        // Volume Used Space: 100.1 GB (100107862016 Bytes) (exactly 195523168 512-Byte-Units)
+
+        // 或者使用 Disk Size（如果 Volume 信息不可用）
+        const totalSizeMatch = info.match(/Total Size:\s*[\d.]+ [KMGT]?B\s*\((\d+)\s+Bytes\)/i) ||
+                                 info.match(/Disk Size:\s*[\d.]+ [KMGT]?B\s*\((\d+)\s+Bytes\)/i);
+        const freeSpaceMatch = info.match(/Volume Free Space:\s*[\d.]+ [KMGT]?B\s*\((\d+)\s+Bytes\)/i);
+        const usedSpaceMatch = info.match(/Volume Used Space:\s*[\d.]+ [KMGT]?B\s*\((\d+)\s+Bytes\)/i);
+
+        if (totalSizeMatch) {
+          const total = parseInt(totalSizeMatch[1], 10);
+
+          if (!isNaN(total) && total > 0) {
+            let used = 0;
+            let available = 0;
+
+            if (usedSpaceMatch) {
+              used = parseInt(usedSpaceMatch[1], 10);
+            }
+            if (freeSpaceMatch) {
+              available = parseInt(freeSpaceMatch[1], 10);
+            }
+
+            // 如果无法获取已使用和可用空间，但能获取总容量，至少显示总容量
+            // 已使用 = 总容量 - 可用空间
+            if (available > 0 && used === 0) {
+              used = total - available;
+            } else if (used > 0 && available === 0) {
+              available = total - used;
+            } else if (used === 0 && available === 0) {
+              // 如果都无法获取，至少显示总容量，已使用设为 0
+              used = 0;
+              available = total;
+            }
+
+            return {
+              total,
+              used: used > 0 ? used : 0,
+              available: available > 0 ? available : total
+            };
+          }
+        }
+      } catch {
+        // diskutil 命令失败，返回 undefined
+      }
+
+      return undefined;
+    } catch (error) {
+      // 获取容量失败时返回 undefined，不影响设备列表的显示
+      return undefined;
+    }
+  }
+
   // 获取 NTFS 设备列表
   async getNTFSDevices(): Promise<NTFSDevice[]> {
     try {
@@ -98,6 +190,16 @@ export class DeviceDetector {
         // 否则，使用 mount 命令检测到的实际状态
         const finalIsReadOnly = deviceIsMounted ? false : isReadOnly;
 
+        // 获取磁盘容量信息（无论是否挂载都尝试获取）
+        // 优先从挂载点获取，如果失败则从设备本身获取
+        let capacity: { total: number; used: number; available: number } | undefined;
+        try {
+          capacity = await this.getDiskCapacity(volume, devicePath);
+        } catch (error) {
+          // 获取容量失败时静默处理，不影响设备列表显示
+          capacity = undefined;
+        }
+
         devices.push({
           disk,
           devicePath,
@@ -105,7 +207,8 @@ export class DeviceDetector {
           volumeName,
           isReadOnly: finalIsReadOnly,
           options,
-          isMounted: deviceIsMounted
+          isMounted: deviceIsMounted,
+          capacity
         });
 
         // 如果设备已挂载，从已卸载设备列表中移除
@@ -130,13 +233,22 @@ export class DeviceDetector {
             const volumeNameMatch = result.stdout.match(/Volume Name:\s*(.+)/i);
             const volumeName = volumeNameMatch ? volumeNameMatch[1].trim() : unmountedDevice.volumeName;
 
+            // 尝试获取容量信息（即使设备未挂载）
+            let capacity: { total: number; used: number; available: number } | undefined;
+            try {
+              capacity = await this.getDiskCapacity('', unmountedDevice.devicePath);
+            } catch {
+              capacity = undefined;
+            }
+
             // 设备仍然存在，添加到列表中，标记为已卸载
             devices.push({
               ...unmountedDevice,
               volumeName,
               isUnmounted: true,
               isReadOnly: true, // 已卸载的设备默认显示为只读
-              isMounted: false
+              isMounted: false,
+              capacity
             });
           } else {
             // 设备不存在，从已卸载列表中移除

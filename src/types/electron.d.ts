@@ -68,6 +68,11 @@ export interface NTFSDevice {
   options: string;
   isMounted: boolean;
   isUnmounted?: boolean; // 标记设备是否已卸载但仍在系统中
+  capacity?: {
+    total: number; // 总容量（字节）
+    used: number; // 已使用容量（字节）
+    available: number; // 可用容量（字节）
+  };
 }
 
 export interface OperationResult {

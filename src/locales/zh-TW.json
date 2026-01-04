@@ -106,6 +106,7 @@
     "unmounted": "已卸載",
     "deviceLabel": "設備:",
     "mountPointLabel": "掛載點:",
+    "capacityLabel": "硬碟容量:",
     "notMounted": "未掛載",
     "mountConfirm": "確定要將 {name} 配置為可讀寫模式嗎？",
     "mountConfirmNote": "注意：\n• 這需要管理員權限，系統會彈出密碼輸入對話框\n• 如果該 NTFS 設備之前在 Windows 電腦上使用過，且 Windows 啟用了快速啟動功能，可能需要將設備插回 Windows 電腦並完全關閉後再試",

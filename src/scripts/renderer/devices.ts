@@ -1,4 +1,18 @@
 // 设备管理模块
+
+// 格式化容量显示
+const formatCapacity = (bytes: number): string => {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  } else if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  } else if (bytes < 1024 * 1024 * 1024) {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  } else {
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  }
+};
+
 export function renderDevices(devicesList: HTMLElement, devices: any[], mountDeviceFn: (device: any) => void, unmountDeviceFn: (device: any) => void): void {
   if (devices.length === 0) {
     devicesList.innerHTML = `
@@ -37,6 +51,12 @@ export function renderDevices(devicesList: HTMLElement, devices: any[], mountDev
           <span class="device-info-label">挂载点:</span>
           <span>${device.volume}</span>
         </div>
+        ${device.capacity ? `
+        <div class="device-info-item">
+          <span class="device-info-label">硬盘容量:</span>
+          <span>${formatCapacity(device.capacity.used)} / ${formatCapacity(device.capacity.total)}</span>
+        </div>
+        ` : ''}
       </div>
       <div class="device-actions">
         ${device.isReadOnly ? `

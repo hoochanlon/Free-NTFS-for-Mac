@@ -27,6 +27,19 @@
     return key; // 如果 i18n 未初始化，返回 key
   }
 
+  // 格式化容量显示
+  function formatCapacity(bytes: number): string {
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    } else if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    } else if (bytes < 1024 * 1024 * 1024) {
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    } else {
+      return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+    }
+  }
+
   // 设备渲染功能
   AppModules.Devices.Renderer = {
     // 上次渲染的设备列表（用于比较）
@@ -116,6 +129,12 @@
             <span class="device-info-label">${t('devices.mountPointLabel')}</span>
             <span>${device.isUnmounted ? t('devices.notMounted') : device.volume}</span>
           </div>
+          ${device.capacity ? `
+          <div class="device-info-item">
+            <span class="device-info-label">${t('devices.capacityLabel')}</span>
+            <span>${formatCapacity(device.capacity.used)} / ${formatCapacity(device.capacity.total)}</span>
+          </div>
+          ` : ''}
         </div>
         <div class="device-actions">
           ${device.isUnmounted ? `

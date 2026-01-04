@@ -37,6 +37,19 @@
     return key;
   }
 
+  // 格式化容量显示
+  function formatCapacity(bytes: number): string {
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    } else if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    } else if (bytes < 1024 * 1024 * 1024) {
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    } else {
+      return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+    }
+  }
+
   // 添加日志
   function addLog(message: string, type: LogType = 'info'): void {
     const time = new Date().toLocaleTimeString('zh-CN');
@@ -164,6 +177,12 @@
             <span class="device-info-label">${t('devices.mountPointLabel')}</span>
             <span>${isUnmounted ? t('devices.notMounted') : device.volume}</span>
           </div>
+          ${device.capacity ? `
+          <div class="device-info-item">
+            <span class="device-info-label">${t('devices.capacityLabel')}</span>
+            <span>${formatCapacity(device.capacity.used)} / ${formatCapacity(device.capacity.total)}</span>
+          </div>
+          ` : ''}
         </div>
         <div class="device-actions">
           ${isUnmounted ? `
