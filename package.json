@@ -43,7 +43,7 @@
   "build": {
     "appId": "com.freentfs.mac",
     "productName": "Nigate",
-    "icon": "src/ico/flash.icns",
+    "icon": "src/imgs/ico/flash.icns",
     "npmRebuild": false,
     "electronDownload": {
       "cache": ".electron-cache"
@@ -78,7 +78,7 @@
           ]
         }
       ],
-      "icon": "src/ico/flash.icns",
+      "icon": "src/imgs/ico/flash.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
@@ -90,7 +90,7 @@
     },
     "dmg": {
       "title": "${productName} ${version}",
-      "icon": "src/ico/flash.png",
+      "icon": "src/imgs/ico/flash.svg",
       "background": null,
       "contents": [
         {

@@ -93,28 +93,43 @@ export function createDeviceIcon(): Electron.NativeImage | undefined {
 export function createTrayIcon(): Electron.NativeImage {
   const appPath = app.getAppPath();
 
-  // 优先使用 flash.icns（macOS 最佳格式，包含多种尺寸）
-  const icnsPath = path.join(appPath, 'src', 'ico', 'flash.icns');
+  // 优先使用 iconset 中的单色 PNG（确保是单色的，macOS 能正确识别为模板图标）
+  // 使用 32x32@2x (64x64) 尺寸，适合 Retina 显示
+  const iconsetPaths = [
+    path.join(appPath, 'src', 'imgs', 'ico', 'flash-white.iconset', 'icon_32x32@2x.png'),
+    path.join(appPath, 'src', 'imgs', 'ico', 'flash-white.iconset', 'icon_32x32.png'),
+    path.join(appPath, 'src', 'imgs', 'ico', 'flash-white.iconset', 'icon_16x16@2x.png'),
+    path.join(appPath, 'src', 'imgs', 'ico', 'flash-white.iconset', 'icon_16x16.png')
+  ];
+
+  for (const iconsetPath of iconsetPaths) {
+    if (fs.existsSync(iconsetPath)) {
+      try {
+        const image = nativeImage.createFromPath(iconsetPath);
+        if (!image.isEmpty()) {
+          const resized = image.resize({ width: 22, height: 22 });
+          if (!resized.isEmpty()) {
+            return resized;
+          }
+          return image;
+        }
+      } catch (error) {
+        // 继续尝试下一个
+        continue;
+      }
+    }
+  }
+
+  // 备用：使用 flash-white.icns
+  const icnsPath = path.join(appPath, 'src', 'imgs', 'ico', 'flash-white.icns');
   if (fs.existsSync(icnsPath)) {
     try {
       const image = nativeImage.createFromPath(icnsPath);
       if (!image.isEmpty()) {
-        // icns 文件已经包含多种尺寸，直接使用，系统会自动选择合适的大小
-        // 在 macOS 上，单色图标会自动作为模板图标处理，显示为白色
         const resized = image.resize({ width: 22, height: 22 });
         if (!resized.isEmpty()) {
-          // 成功加载托盘图标
-          // 在 macOS 上，将图标设置为模板图标（会自动显示为白色）
-          if (process.platform === 'darwin') {
-            // 创建模板图标：将图标转换为单色（黑白），系统会自动处理为白色
-            const templateImage = resized;
-            // Electron 会自动识别单色图标为模板图标
-            return templateImage;
-          }
           return resized;
         }
-        // 如果调整大小失败，直接返回原图
-        // 成功加载托盘图标（原始尺寸）
         return image;
       }
     } catch (error) {
@@ -122,49 +137,8 @@ export function createTrayIcon(): Electron.NativeImage {
     }
   }
 
-  // 备用：尝试使用 flash.svg（需要转换为位图）
-  const svgPath = path.join(appPath, 'src', 'ico', 'flash.svg');
-  if (fs.existsSync(svgPath)) {
-    try {
-      // Electron 的 nativeImage 不支持直接加载 SVG，需要先转换为位图
-      // 这里尝试读取 SVG 并转换为 PNG
-      const image = nativeImage.createFromPath(svgPath);
-      if (!image.isEmpty()) {
-        const resized = image.resize({ width: 22, height: 22 });
-        if (!resized.isEmpty()) {
-          // 成功加载托盘图标: flash.svg
-          return resized;
-        }
-      }
-    } catch (error) {
-      console.warn(`无法加载图标 ${svgPath}:`, error);
-    }
-  }
-
-  // 备用：尝试使用 iconset 中的图标
-  const possiblePaths = [
-    path.join(appPath, 'src', 'ico', 'flash.iconset', 'icon_16x16@2x.png'),
-    path.join(appPath, 'src', 'ico', 'flash.iconset', 'icon_32x32.png'),
-    path.join(appPath, 'src', 'ico', 'flash.iconset', 'icon_16x16.png'),
-    path.join(appPath, 'src', 'imgs', 'icon-tray.png'),
-    path.join(appPath, 'src', 'imgs', 'icon.png')
-  ];
-
-  for (const iconPath of possiblePaths) {
-    if (fs.existsSync(iconPath)) {
-      try {
-        const image = nativeImage.createFromPath(iconPath);
-        const resized = image.resize({ width: 22, height: 22 });
-        if (!resized.isEmpty()) {
-          // 成功加载托盘图标
-          return resized;
-        }
-      } catch (error) {
-        console.warn(`无法加载图标 ${iconPath}:`, error);
-        continue;
-      }
-    }
-  }
+  // 注意：不再使用 flash.svg 或 flash.iconset，因为它们可能是彩色的
+  // 只使用 flash-white.iconset 中的单色图标，确保 macOS 能正确识别为模板图标
 
   // 如果所有图标都加载失败，尝试使用应用图标
   try {

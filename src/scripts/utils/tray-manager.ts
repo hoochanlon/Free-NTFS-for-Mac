@@ -51,16 +51,14 @@ export async function initTray(): Promise<void> {
 
     // 在 macOS 上，确保图标被设置为模板图标（单色图标，会自动显示为白色）
     if (process.platform === 'darwin' && !icon.isEmpty()) {
-      // 在 macOS 上，单色图标会自动作为模板图标处理
-      // 模板图标会根据菜单栏的深浅色模式自动调整颜色（浅色菜单栏显示黑色，深色菜单栏显示白色）
-      // 从 flash-white.svg 生成的图标是白色的，系统会自动识别为模板图标
-      // 如果图标显示为红色，可能是旧的彩色图标，需要重新生成
       try {
-        // 确保使用正确的图标尺寸
+        // 确保使用正确的图标尺寸（macOS 菜单栏标准尺寸）
         const templateIcon = icon.resize({ width: 22, height: 22 });
+        // 在 macOS 上，使用 setImage 方法
+        // 如果图标是单色的（黑白），系统会自动识别为模板图标并显示为白色
         tray.setImage(templateIcon);
       } catch (error) {
-        // 静默处理模板图标设置失败
+        // 静默处理图标设置失败
       }
     }
 
