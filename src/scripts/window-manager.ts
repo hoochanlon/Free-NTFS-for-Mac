@@ -245,6 +245,9 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     if (trayDevicesWindow.isVisible()) {
       trayDevicesWindow.hide();
     } else {
+      // 确保背景色已更新，避免残影
+      updateWindowBackgroundColor(trayDevicesWindow);
+      trayDevicesWindow.setOpacity(1);
       trayDevicesWindow.show();
       trayDevicesWindow.focus();
     }
@@ -319,6 +322,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     skipTaskbar: true, // 不在任务栏显示
     show: false,
     hasShadow: true,
+    opacity: 0, // 初始透明度为0，避免残影
     // macOS 特定设置
     ...(process.platform === 'darwin' ? {
       titleBarStyle: 'hiddenInset', // 隐藏标题栏和控制按钮
@@ -344,6 +348,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
   // 在页面加载完成后更新背景色
   trayDevicesWindow.webContents.once('did-finish-load', () => {
     if (trayDevicesWindow) {
+      // 立即更新背景色，避免残影
       updateWindowBackgroundColor(trayDevicesWindow);
 
       // 在窗口加载完成后，尝试重新获取托盘位置并调整窗口位置
@@ -366,8 +371,15 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     }
   });
 
-  trayDevicesWindow.once('ready-to-show', () => {
+  trayDevicesWindow.once('ready-to-show', async () => {
     if (trayDevicesWindow) {
+      // 在显示前确保背景色已更新，避免残影
+      await new Promise<void>((resolve) => {
+        updateWindowBackgroundColor(trayDevicesWindow!);
+        // 给一点时间让背景色更新完成
+        setTimeout(() => resolve(), 50);
+      });
+
       // 在显示前重新计算位置，确保贴合托盘（像系统菜单一样）
       const trayBounds = getTrayBounds();
       if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {
@@ -386,6 +398,8 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
           trayBounds
         });
       }
+      // 先设置不透明，再显示，避免残影
+      trayDevicesWindow.setOpacity(1);
       trayDevicesWindow.show();
       trayDevicesWindow.focus();
     }
@@ -416,6 +430,9 @@ export async function toggleTrayDevicesWindow(): Promise<void> {
         trayDevicesWindow.setPosition(newX, newY, false);
         console.log('切换显示时调整位置（贴合托盘，像系统菜单）:', { newX, newY, trayBounds });
       }
+      // 确保背景色已更新，避免残影
+      updateWindowBackgroundColor(trayDevicesWindow);
+      trayDevicesWindow.setOpacity(1);
       trayDevicesWindow.show();
       trayDevicesWindow.focus();
     }
