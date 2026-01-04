@@ -7,8 +7,8 @@
     "build:ts": "tsc",
     "build:stylus": "stylus src/styles/main.styl -o styles.css",
     "build:all": "pnpm run build:stylus && pnpm run build:ts",
-    "watch:ts": "tsc --watch",
-    "watch:stylus": "stylus -w src/styles/main.styl -o styles.css",
+    "watch:ts": "tsc --watch 2>&1 | node filter-tsc-output.js || true",
+    "watch:stylus": "stylus -w src/styles/main.styl -o styles.css --quiet",
     "watch:all": "pnpm run watch:stylus & pnpm run watch:ts",
     "start": "pnpm run build:all && electron .",
     "dev": "pnpm run watch:all & pnpm run build:all && electron . --dev",
@@ -54,7 +54,11 @@
     },
     "files": [
       "scripts/**/*",
-      "src/**/*",
+      "src/html/**/*",
+      "src/imgs/**/*",
+      "src/locales/**/*",
+      "src/ico/**/*",
+      "src/docs/**/*",
       "styles.css",
       "package.json"
     ],

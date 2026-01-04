@@ -244,7 +244,6 @@ export function setupWindowHandlers(): void {
   });
 
   ipcMain.handle('open-about-window', async () => {
-    console.log('IPC: open-about-window 被调用');
     await openAboutWindow();
   });
 
@@ -362,7 +361,6 @@ export function setupSettingsHandlers(): void {
         openAtLogin: settings.autoStart,
         openAsHidden: false
       });
-      console.log('系统自启设置已更新:', settings.autoStart);
     }
     return { success: true };
   });

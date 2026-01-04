@@ -16,11 +16,9 @@ export function setupHotReload(): void {
       watchRenderer: true,
       ignore: ['node_modules', 'scripts', '*.log']
     });
-    console.log('✅ 热重载已启用 (electron-reloader)');
+    // 热重载已启用，静默模式
   } catch (err) {
     // 方法2: 手动实现热重载（监听 HTML/CSS/JS 文件变化）
-    console.log('⚠️ electron-reloader 未安装，使用手动热重载');
-    console.log('💡 提示: 运行 npm install --save-dev electron-reloader 以获得更好的热重载体验');
 
     const appPath = app.getAppPath();
     const watchFiles = [
@@ -32,7 +30,6 @@ export function setupHotReload(): void {
     watchFiles.forEach(file => {
       if (fs.existsSync(file)) {
         fs.watchFile(file, { interval: 500 }, () => {
-          console.log(`🔄 检测到文件变化: ${path.basename(file)}`);
           if (mainWindow && !mainWindow.isDestroyed()) {
             mainWindow.reload();
           }

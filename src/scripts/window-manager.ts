@@ -271,31 +271,14 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
 
   // 尝试获取托盘图标的位置
   const trayBounds = getTrayBounds();
-  console.log('托盘位置信息:', trayBounds);
-  console.log('屏幕信息:', { screenX, screenY, screenWidth, screenHeight });
-  console.log('窗口尺寸:', { windowWidth, windowHeight });
 
   if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {
     // 将窗口放在托盘图标下方，水平居中对齐，完全贴合
     const trayCenterX = trayBounds.x + (trayBounds.width / 2);
     windowX = Math.round(trayCenterX - (windowWidth / 2));
     windowY = Math.round(trayBounds.y + trayBounds.height); // 完全贴合托盘底部，0间距
-
-    console.log('窗口位置（贴合托盘）:', {
-      windowX,
-      windowY,
-      trayCenterX,
-      trayBounds: {
-        x: trayBounds.x,
-        y: trayBounds.y,
-        width: trayBounds.width,
-        height: trayBounds.height
-      }
-    });
   } else {
     // 如果无法获取托盘位置，使用屏幕顶部中央
-    console.warn('无法获取托盘位置，使用屏幕顶部中央');
-    console.warn('托盘位置信息:', trayBounds);
     windowX = screenX + (screenWidth - windowWidth) / 2;
     windowY = screenY;
   }
@@ -363,7 +346,6 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
             const newX = Math.round(trayCenterX - (currentWidth / 2));
             const newY = Math.round(trayBounds.y + trayBounds.height);
 
-            console.log('窗口加载后重新调整位置（贴合托盘，像系统菜单）:', { newX, newY, trayBounds });
             trayDevicesWindow.setPosition(newX, newY, false);
           }
         }
@@ -391,12 +373,6 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
         // 窗口顶部紧贴托盘底部（0间距，像系统菜单）
         const newY = Math.round(trayBounds.y + trayBounds.height);
         trayDevicesWindow.setPosition(newX, newY, false);
-        console.log('显示前调整位置（贴合托盘，像系统菜单）:', {
-          newX,
-          newY,
-          trayCenterX,
-          trayBounds
-        });
       }
       // 先设置不透明，再显示，避免残影
       trayDevicesWindow.setOpacity(1);
@@ -428,7 +404,6 @@ export async function toggleTrayDevicesWindow(): Promise<void> {
         const newX = Math.round(trayCenterX - (currentWidth / 2));
         const newY = Math.round(trayBounds.y + trayBounds.height);
         trayDevicesWindow.setPosition(newX, newY, false);
-        console.log('切换显示时调整位置（贴合托盘，像系统菜单）:', { newX, newY, trayBounds });
       }
       // 确保背景色已更新，避免残影
       updateWindowBackgroundColor(trayDevicesWindow);

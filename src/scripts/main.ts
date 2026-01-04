@@ -17,16 +17,12 @@ app.whenReady().then(async () => {
 
   // 检查是否启用托盘模式
   const settings = await SettingsManager.getSettings();
-  console.log('托盘模式设置:', settings.trayMode);
   if (settings.trayMode) {
     try {
       await initTray();
-      console.log('托盘初始化成功');
     } catch (error) {
       console.error('托盘初始化失败:', error);
     }
-  } else {
-    console.log('托盘模式未启用，请在设置中启用');
   }
 
   // 应用系统自启设置
@@ -34,7 +30,6 @@ app.whenReady().then(async () => {
     openAtLogin: settings.autoStart || false,
     openAsHidden: false
   });
-  console.log('系统自启设置已应用:', settings.autoStart);
 
   app.on('activate', async () => {
     const settings = await SettingsManager.getSettings();

@@ -53,7 +53,7 @@ export async function createTrayMenu(
             mainWindow.show();
             mainWindow.focus();
           } else {
-            console.log('主窗口已被销毁，重新创建窗口...');
+            // 主窗口已被销毁，重新创建窗口
             await createMainWindow();
           }
         } catch (error) {
@@ -288,7 +288,6 @@ export async function createTrayMenu(
             const devices = await ntfsManager.getNTFSDevices();
             const readOnlyDevices = devices.filter(d => d.isReadOnly && !d.isUnmounted);
             if (readOnlyDevices.length === 0) {
-              console.log('没有需要配置为可读写的设备');
               return;
             }
             for (const device of readOnlyDevices) {
@@ -323,7 +322,6 @@ export async function createTrayMenu(
             const devices = await ntfsManager.getNTFSDevices();
             const mountedDevices = devices.filter(d => !d.isReadOnly && !d.isUnmounted);
             if (mountedDevices.length === 0) {
-              console.log('没有需要卸载的设备');
               return;
             }
             for (const device of mountedDevices) {
@@ -356,7 +354,6 @@ export async function createTrayMenu(
           try {
             const devices = await ntfsManager.getNTFSDevices();
             if (devices.length === 0) {
-              console.log('没有需要推出的设备');
               return;
             }
             for (const device of devices) {
@@ -390,7 +387,6 @@ export async function createTrayMenu(
             const devices = await ntfsManager.getNTFSDevices();
             const readWriteDevices = devices.filter(d => !d.isReadOnly && !d.isUnmounted);
             if (readWriteDevices.length === 0) {
-              console.log('没有需要还原为只读的设备');
               return;
             }
             for (const device of readWriteDevices) {

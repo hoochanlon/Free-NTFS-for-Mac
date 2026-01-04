@@ -103,7 +103,7 @@ export function createTrayIcon(): Electron.NativeImage {
         // 在 macOS 上，单色图标会自动作为模板图标处理，显示为白色
         const resized = image.resize({ width: 22, height: 22 });
         if (!resized.isEmpty()) {
-          console.log('成功加载托盘图标: flash.icns');
+          // 成功加载托盘图标
           // 在 macOS 上，将图标设置为模板图标（会自动显示为白色）
           if (process.platform === 'darwin') {
             // 创建模板图标：将图标转换为单色（黑白），系统会自动处理为白色
@@ -114,7 +114,7 @@ export function createTrayIcon(): Electron.NativeImage {
           return resized;
         }
         // 如果调整大小失败，直接返回原图
-        console.log('成功加载托盘图标: flash.icns (原始尺寸)');
+        // 成功加载托盘图标（原始尺寸）
         return image;
       }
     } catch (error) {
@@ -132,7 +132,7 @@ export function createTrayIcon(): Electron.NativeImage {
       if (!image.isEmpty()) {
         const resized = image.resize({ width: 22, height: 22 });
         if (!resized.isEmpty()) {
-          console.log('成功加载托盘图标: flash.svg');
+          // 成功加载托盘图标: flash.svg
           return resized;
         }
       }
@@ -156,7 +156,7 @@ export function createTrayIcon(): Electron.NativeImage {
         const image = nativeImage.createFromPath(iconPath);
         const resized = image.resize({ width: 22, height: 22 });
         if (!resized.isEmpty()) {
-          console.log(`成功加载托盘图标: ${iconPath}`);
+          // 成功加载托盘图标
           return resized;
         }
       } catch (error) {
@@ -173,7 +173,7 @@ export function createTrayIcon(): Electron.NativeImage {
     if (fs.existsSync(appIconPath)) {
       const appIcon = nativeImage.createFromPath(appIconPath);
       if (!appIcon.isEmpty()) {
-        console.log('使用应用图标作为托盘图标');
+        // 使用应用图标作为托盘图标
         return appIcon.resize({ width: 22, height: 22 });
       }
     }

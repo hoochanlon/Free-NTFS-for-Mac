@@ -15,17 +15,14 @@ let tray: Tray | null = null;
  */
 export async function initTray(): Promise<void> {
   if (tray) {
-    console.log('托盘已经初始化');
     return; // 已经初始化
   }
 
   try {
-    console.log('开始初始化托盘...');
     let icon = createTrayIcon();
 
     // 如果图标为空，尝试使用应用图标
     if (icon.isEmpty()) {
-      console.log('默认图标为空，尝试加载应用图标...');
       const appPath = app.getAppPath();
       // 尝试多个可能的应用图标路径
       const appIconPaths = [
@@ -40,11 +37,10 @@ export async function initTray(): Promise<void> {
             const appIconImage = nativeImage.createFromPath(appIconPath);
             if (!appIconImage.isEmpty()) {
               icon = appIconImage.resize({ width: 22, height: 22 });
-              console.log('成功加载应用图标:', appIconPath);
               break;
             }
           } catch (error) {
-            console.warn('加载应用图标失败:', appIconPath, error);
+            // 静默处理图标加载失败
           }
         }
       }
@@ -52,7 +48,6 @@ export async function initTray(): Promise<void> {
 
     // 创建托盘（即使图标为空，Electron 也会使用默认图标）
     tray = new Tray(icon);
-    console.log('托盘对象已创建');
 
     // 在 macOS 上，确保图标被设置为模板图标（单色图标，会自动显示为白色）
     if (process.platform === 'darwin' && !icon.isEmpty()) {
@@ -64,9 +59,8 @@ export async function initTray(): Promise<void> {
         // 确保使用正确的图标尺寸
         const templateIcon = icon.resize({ width: 22, height: 22 });
         tray.setImage(templateIcon);
-        console.log('已设置托盘图标为模板图标（白色）');
       } catch (error) {
-        console.warn('设置模板图标失败:', error);
+        // 静默处理模板图标设置失败
       }
     }
 
@@ -94,8 +88,6 @@ export async function initTray(): Promise<void> {
     if (process.platform === 'darwin') {
       tray.setIgnoreDoubleClickEvents(true);
     }
-
-    console.log('托盘已成功初始化');
   } catch (error) {
     console.error('初始化托盘失败:', error);
     // 清理可能创建的部分托盘对象
@@ -117,7 +109,6 @@ export async function initTray(): Promise<void> {
  */
 export async function updateTrayMenu(forceRefresh: boolean = false): Promise<void> {
   // BrowserWindow 会自动更新，无需手动刷新
-  console.log('托盘已使用 BrowserWindow，自动实时更新');
 }
 
 /**
