@@ -44,6 +44,7 @@ export interface ElectronAPI {
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => Promise<void>;
   readLogsFile: () => Promise<{ success: boolean; content?: string; error?: string }>;
   writeLogsFile: (content: string) => Promise<{ success: boolean; error?: string }>;
+  showMainWindow: () => Promise<void>;
 }
 
 export interface Dependencies {

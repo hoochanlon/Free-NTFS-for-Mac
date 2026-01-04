@@ -90,6 +90,7 @@
     "title": "NTFS 設備",
     "emptyState": "未檢測到 NTFS 設備",
     "emptyHint": "請插入 NTFS 格式的移動儲存設備",
+    "showMainWindow": "主界面",
     "mountAll": "全讀寫",
     "restoreAllReadOnly": "全只讀",
     "unmountAll": "全卸載",

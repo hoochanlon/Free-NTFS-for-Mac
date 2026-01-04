@@ -2,7 +2,7 @@ import { Tray, nativeImage, app } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import { createTrayIcon } from './tray-icons';
-import { toggleTrayDevicesWindow } from '../window-manager';
+import { toggleTrayDevicesWindow, mainWindow } from '../window-manager';
 
 // 托盘图标引用
 let tray: Tray | null = null;
@@ -73,12 +73,20 @@ export async function initTray(): Promise<void> {
     // 设置托盘提示
     tray.setToolTip('Nigate - NTFS 设备管理\n点击显示设备列表');
 
-    // 点击托盘图标时显示 BrowserWindow 窗口（替代菜单，实现真正的实时更新）
+    // 点击托盘图标时的处理逻辑：如果主窗口显示则聚焦主窗口，否则显示托盘设备窗口
     tray.on('click', async () => {
       try {
-        await toggleTrayDevicesWindow();
+        // 检查主窗口是否显示
+        if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible()) {
+          // 如果主窗口已显示，则聚焦主窗口
+          mainWindow.show();
+          mainWindow.focus();
+        } else {
+          // 如果主窗口未显示，则显示托盘设备窗口
+          await toggleTrayDevicesWindow();
+        }
       } catch (error) {
-        console.error('显示设备窗口失败:', error);
+        console.error('处理托盘点击失败:', error);
       }
     });
 

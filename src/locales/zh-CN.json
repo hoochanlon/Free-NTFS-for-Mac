@@ -90,6 +90,7 @@
     "title": "NTFS 设备",
     "emptyState": "未检测到 NTFS 设备",
     "emptyHint": "请插入 NTFS 格式的移动存储设备",
+    "showMainWindow": "主界面",
     "mountAll": "全读写",
     "restoreAllReadOnly": "全只读",
     "unmountAll": "全卸载",

@@ -23,9 +23,12 @@
               <input type="checkbox" id="autoMountCheckbox">
               <span>自动读写接入</span>
             </label>
-            <button class="btn btn-primary" id="mountAllBtn">全读写</button>
-            <button class="btn btn-warning" id="restoreAllReadOnlyBtn">全只读</button>
-            <button class="btn btn-danger" id="ejectAllBtn">全推出</button>
+            <div class="devices-action-buttons">
+              <button class="btn btn-secondary" id="showMainWindowBtn">主界面</button>
+              <button class="btn btn-primary" id="mountAllBtn">全读写</button>
+              <button class="btn btn-warning" id="restoreAllReadOnlyBtn">全只读</button>
+              <button class="btn btn-danger" id="ejectAllBtn">全推出</button>
+            </div>
           </div>
         </div>
         <div class="devices-list" id="devicesList">

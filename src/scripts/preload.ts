@@ -49,7 +49,8 @@ const electronAPI: ElectronAPI = {
   showConfirmDialog: (title: string, message: string) => ipcRenderer.invoke('show-confirm-dialog', { title, message }),
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => ipcRenderer.invoke('show-message-dialog', { title, message, type }),
   readLogsFile: () => ipcRenderer.invoke('read-logs-file'),
-  writeLogsFile: (content: string) => ipcRenderer.invoke('write-logs-file', content)
+  writeLogsFile: (content: string) => ipcRenderer.invoke('write-logs-file', content),
+  showMainWindow: () => ipcRenderer.invoke('show-main-window')
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

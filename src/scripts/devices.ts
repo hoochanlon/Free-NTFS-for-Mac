@@ -14,6 +14,7 @@
   const devicesList = document.getElementById('devicesList')!;
   const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
   const autoMountCheckbox = document.getElementById('autoMountCheckbox') as HTMLInputElement | null;
+  const showMainWindowBtn = document.getElementById('showMainWindowBtn') as HTMLButtonElement | null;
   const mountAllBtn = document.getElementById('mountAllBtn') as HTMLButtonElement | null;
   const restoreAllReadOnlyBtn = document.getElementById('restoreAllReadOnlyBtn') as HTMLButtonElement | null;
   const ejectAllBtn = document.getElementById('ejectAllBtn') as HTMLButtonElement | null;
@@ -561,6 +562,17 @@
           }
         } catch (e) {
           // 静默处理
+        }
+      });
+    }
+    if (showMainWindowBtn) {
+      showMainWindowBtn.addEventListener('click', async () => {
+        try {
+          if (electronAPI.showMainWindow) {
+            await electronAPI.showMainWindow();
+          }
+        } catch (error) {
+          console.error('显示主窗口失败:', error);
         }
       });
     }

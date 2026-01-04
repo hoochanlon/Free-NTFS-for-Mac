@@ -90,6 +90,7 @@
     "title": "NTFS Devices",
     "emptyState": "No NTFS devices detected",
     "emptyHint": "Please insert an NTFS formatted removable storage device",
+    "showMainWindow": "Main Window",
     "mountAll": "All Read-Write",
     "restoreAllReadOnly": "All Read-Only",
     "unmountAll": "All Unmount",

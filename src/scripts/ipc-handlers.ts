@@ -8,7 +8,8 @@ import {
   closeLogsWindow,
   createModuleWindow,
   closeModuleWindow,
-  mainWindow
+  mainWindow,
+  showMainWindowAndCloseTray
 } from './window-manager';
 import { openAboutWindow, getAboutWindow } from './about-window';
 import { SettingsManager, AppSettings } from './utils/settings';
@@ -251,6 +252,10 @@ export function setupWindowHandlers(): void {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('switch-tab', tabName);
     }
+  });
+
+  ipcMain.handle('show-main-window', async () => {
+    await showMainWindowAndCloseTray();
   });
 }
 

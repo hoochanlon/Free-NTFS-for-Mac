@@ -260,7 +260,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
 
   // 使用更小的窗口尺寸，适合托盘弹出
   const windowWidth = 321;
-  const windowHeight = Math.min(456, screenHeight - 80);
+  const windowHeight = Math.min(480, screenHeight - 80);
 
   // 计算窗口位置（在托盘下方）
   let windowX: number;
@@ -300,10 +300,10 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
   trayDevicesWindow = new BrowserWindow({
     width: windowWidth,
     height: windowHeight,
-    minWidth: 321,
-    minHeight: 456,
-    maxWidth: 321,
-    maxHeight: 456,
+    minWidth: 340,
+    minHeight: 480,
+    maxWidth: 340,
+    maxHeight: 480,
     x: windowX,
     y: windowY,
     webPreferences: {
@@ -421,5 +421,21 @@ export async function toggleTrayDevicesWindow(): Promise<void> {
     }
   } else {
     await createTrayDevicesWindow();
+  }
+}
+
+// 显示主窗口并关闭托盘窗口
+export async function showMainWindowAndCloseTray(): Promise<void> {
+  // 关闭托盘设备窗口
+  if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
+    trayDevicesWindow.hide();
+  }
+
+  // 显示或创建主窗口
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.show();
+    mainWindow.focus();
+  } else {
+    await createMainWindow();
   }
 }

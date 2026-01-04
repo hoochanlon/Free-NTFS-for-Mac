@@ -90,6 +90,7 @@
     "title": "NTFS デバイス",
     "emptyState": "NTFS デバイスが検出されませんでした",
     "emptyHint": "NTFS 形式の移動ストレージデバイスを接続してください",
+    "showMainWindow": "メインウィンドウ",
     "mountAll": "全読み書き",
     "restoreAllReadOnly": "全読み取り専用",
     "unmountAll": "全アンマウント",
