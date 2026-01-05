@@ -100,7 +100,7 @@
     "unmount": "卸载",
     "eject": "推出",
     "restoreReadOnly": "还原为只读",
-    "autoMount": "自动读写接入",
+    "autoMount": "自动读写",
     "readOnly": "只读",
     "readWrite": "可读写",
     "unmounted": "已卸载",

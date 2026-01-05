@@ -425,9 +425,9 @@ export async function createTrayMenu(
 
   template.push({ type: 'separator' });
 
-  // 自动读写接入开关
+  // 自动读写开关
   template.push({
-    label: t('devices.autoMount') || '自动读写接入',
+    label: t('devices.autoMount') || '自动读写',
     type: 'checkbox',
     checked: settings.autoMount || false,
     click: async (menuItem) => {
@@ -445,7 +445,7 @@ export async function createTrayMenu(
         // 立即更新托盘菜单，确保状态同步（不需要强制刷新，因为设置项本身已经更新）
         await updateMenuCallback(false);
       } catch (error) {
-        console.error('保存自动读写接入设置失败:', error);
+        console.error('保存自动读写设置失败:', error);
         // 如果保存失败，恢复原状态
         const currentSettings = await SettingsManager.getSettings();
         menuItem.checked = currentSettings.autoMount;
