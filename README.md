@@ -55,6 +55,10 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 下载使用，见[tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags)
 
+![ ](src/imgs/example/2026-01-05-12.54.22.png)
+
+![ ](src/imgs/example/2026-01-05-13.06.27.png)
+
 
 ## 运维
 
