@@ -1,8 +1,0 @@
-
-直接挂载到桌面目录，不美观，显示别扭，以及有图标显示bug，但可以通过重启解决
-
-sudo mount_ntfs /dev/disk4s1 ~/Desktop/mnt/test
-
-美观好看，但忽略显示了NTFS已有文件
-
-sudo ntfs-3g /dev/disk4s1 ~/Desktop/mnt
