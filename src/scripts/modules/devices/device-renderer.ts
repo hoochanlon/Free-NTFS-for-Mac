@@ -235,12 +235,12 @@
               // 如果共享函数不存在，使用本地实现（向后兼容）
               const isUnmounted = device.isUnmounted || false;
               return `
-                ${device.capacity ? `
-                <div class="device-info-item">
-                  <span class="device-info-label">${t('devices.capacityLabel')}</span>
+            ${device.capacity ? `
+            <div class="device-info-item">
+              <span class="device-info-label">${t('devices.capacityLabel')}</span>
                   <span>${formatCapacity(device.capacity.used)}/${formatCapacity(device.capacity.total)}</span>
-                </div>
-                ` : ''}
+            </div>
+            ` : ''}
                 <div class="device-info-item">
                   <span class="device-info-label">${t('devices.deviceMountPointLabel')}</span>
                   <span>${device.devicePath}${isUnmounted ? ` (${t('devices.notMounted')})` : ` → ${device.volume}`}</span>
