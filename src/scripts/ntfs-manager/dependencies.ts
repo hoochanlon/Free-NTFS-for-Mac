@@ -79,17 +79,23 @@ export async function checkDependencies(): Promise<Dependencies> {
     // 检查 MacFUSE（使用 brew info 方法，最准确且不需要网络）
     if (result.brew) {
       try {
-        // 确保 PATH 包含 Homebrew 路径
+        // 确保 PATH 包含 Homebrew 路径（合并现有 PATH 和默认路径）
+        const defaultPaths = [
+          '/usr/local/bin',
+          '/opt/homebrew/bin',
+          '/usr/bin',
+          '/bin',
+          '/usr/sbin',
+          '/sbin'
+        ];
+        const existingPath = process.env.PATH || '';
+        const pathArray = existingPath ? existingPath.split(':') : [];
+        // 合并并去重
+        const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
+
         const env = {
           ...process.env,
-          PATH: process.env.PATH || [
-            '/usr/local/bin',
-            '/opt/homebrew/bin',
-            '/usr/bin',
-            '/bin',
-            '/usr/sbin',
-            '/sbin'
-          ].join(':')
+          PATH: mergedPaths.join(':')
         };
 
         // 使用 brew info 检查（带超时保护）
@@ -166,17 +172,23 @@ export async function installDependencies(): Promise<string> {
   if (await commandExists('brew')) {
     logs.push('正在安装 MacFUSE 和 ntfs-3g...');
     try {
-      // 确保 PATH 包含 Homebrew 路径
+      // 确保 PATH 包含 Homebrew 路径（合并现有 PATH 和默认路径）
+      const defaultPaths = [
+        '/usr/local/bin',
+        '/opt/homebrew/bin',
+        '/usr/bin',
+        '/bin',
+        '/usr/sbin',
+        '/sbin'
+      ];
+      const existingPath = process.env.PATH || '';
+      const pathArray = existingPath ? existingPath.split(':') : [];
+      // 合并并去重
+      const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
+
       const env = {
         ...process.env,
-        PATH: process.env.PATH || [
-          '/usr/local/bin',
-          '/opt/homebrew/bin',
-          '/usr/bin',
-          '/bin',
-          '/usr/sbin',
-          '/sbin'
-        ].join(':')
+        PATH: mergedPaths.join(':')
       };
       await execAsync('brew tap gromgit/homebrew-fuse', { env });
       await execAsync('brew install --cask macfuse', { env });
