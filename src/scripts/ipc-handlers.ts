@@ -9,7 +9,8 @@ import {
   createModuleWindow,
   closeModuleWindow,
   mainWindow,
-  showMainWindowAndCloseTray
+  showMainWindowAndCloseTray,
+  adjustTrayWindowHeightByDeviceCount
 } from './window-manager';
 import { openAboutWindow, getAboutWindow } from './about-window';
 import { SettingsManager, AppSettings } from './utils/settings';
@@ -255,6 +256,11 @@ export function setupWindowHandlers(): void {
 
   ipcMain.handle('show-main-window', async () => {
     await showMainWindowAndCloseTray();
+  });
+
+  // 根据设备数量调整托盘窗口高度
+  ipcMain.handle('adjust-tray-window-height-by-device-count', async (event, deviceCount: number) => {
+    adjustTrayWindowHeightByDeviceCount(deviceCount);
   });
 }
 

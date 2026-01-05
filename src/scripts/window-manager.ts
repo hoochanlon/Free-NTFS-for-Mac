@@ -20,9 +20,12 @@ const LOGS_WINDOW_CONFIG = {
 
 const TRAY_DEVICES_WINDOW_CONFIG = {
   minWidth: 350,  // 初始宽度使用最小宽度（因为窗口是固定大小的）
-  minHeight: 420,
+  minHeight: 460,
   maxWidth: 350,
-  maxHeight: 420
+  maxHeight: 460,
+  // 根据设备数量的硬编码高度
+  heightFor1Device: 230,  // 1个设备时的高度
+  heightFor2Devices: 350  // 2个设备时的高度
 };
 
 // 窗口引用
@@ -307,7 +310,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     width: windowWidth,
     height: windowHeight,
     minWidth: TRAY_DEVICES_WINDOW_CONFIG.minWidth,
-    minHeight: TRAY_DEVICES_WINDOW_CONFIG.minHeight,
+    minHeight: TRAY_DEVICES_WINDOW_CONFIG.heightFor1Device, // 使用1个设备的高度作为最小高度，允许窗口更小
     maxWidth: TRAY_DEVICES_WINDOW_CONFIG.maxWidth,
     maxHeight: TRAY_DEVICES_WINDOW_CONFIG.maxHeight,
     x: windowX,
@@ -487,6 +490,57 @@ export async function toggleTrayDevicesWindow(): Promise<void> {
     }
   } else {
     await createTrayDevicesWindow();
+  }
+}
+
+// 根据设备数量调整托盘窗口高度
+export function adjustTrayWindowHeightByDeviceCount(deviceCount: number): void {
+  if (!trayDevicesWindow || trayDevicesWindow.isDestroyed()) {
+    console.log('[调整窗口高度] 窗口不存在或已销毁');
+    return;
+  }
+
+  let targetHeight: number;
+
+  if (deviceCount === 1) {
+    // 1个设备：使用硬编码的较小高度
+    targetHeight = TRAY_DEVICES_WINDOW_CONFIG.heightFor1Device;
+  } else if (deviceCount === 2) {
+    // 2个设备：使用硬编码的中等高度
+    targetHeight = TRAY_DEVICES_WINDOW_CONFIG.heightFor2Devices;
+  } else {
+    // 3个设备及以上：使用配置的最大高度
+    targetHeight = TRAY_DEVICES_WINDOW_CONFIG.maxHeight;
+  }
+
+  // 获取屏幕高度，确保窗口不会超出屏幕
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { height: screenHeight } = primaryDisplay.workAreaSize;
+  const maxAllowedHeight = screenHeight - 80; // 留出一些边距
+  targetHeight = Math.min(targetHeight, maxAllowedHeight);
+
+  // 注意：不强制使用 minHeight，允许窗口更小（1个或2个设备时）
+  // 但确保不超过 maxHeight
+  targetHeight = Math.min(targetHeight, TRAY_DEVICES_WINDOW_CONFIG.maxHeight);
+
+  // 调整窗口高度
+  const [currentWidth, currentHeight] = trayDevicesWindow.getSize();
+
+  console.log('[调整窗口高度]', {
+    deviceCount,
+    currentHeight,
+    targetHeight,
+    heightFor1Device: TRAY_DEVICES_WINDOW_CONFIG.heightFor1Device,
+    heightFor2Devices: TRAY_DEVICES_WINDOW_CONFIG.heightFor2Devices,
+    maxHeight: TRAY_DEVICES_WINDOW_CONFIG.maxHeight
+  });
+
+  // 只有当目标高度与当前高度不同时才调整
+  if (Math.abs(targetHeight - currentHeight) > 5) {
+    trayDevicesWindow.setSize(currentWidth, targetHeight, false);
+    console.log('[调整窗口高度] 已调整到:', targetHeight);
+  } else {
+    console.log('[调整窗口高度] 高度无需调整，当前高度:', currentHeight);
   }
 }
 

@@ -50,7 +50,8 @@ const electronAPI: ElectronAPI = {
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => ipcRenderer.invoke('show-message-dialog', { title, message, type }),
   readLogsFile: () => ipcRenderer.invoke('read-logs-file'),
   writeLogsFile: (content: string) => ipcRenderer.invoke('write-logs-file', content),
-  showMainWindow: () => ipcRenderer.invoke('show-main-window')
+  showMainWindow: () => ipcRenderer.invoke('show-main-window'),
+  adjustTrayWindowHeightByDeviceCount: (deviceCount: number) => ipcRenderer.invoke('adjust-tray-window-height-by-device-count', deviceCount)
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

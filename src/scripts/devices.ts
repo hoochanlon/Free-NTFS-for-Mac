@@ -78,6 +78,23 @@
       renderDevices();
 
       const currentDeviceCount = devices.length;
+
+      // 如果是托盘窗口，根据设备数量调整窗口高度
+      if (document.body && document.body.classList.contains('tray-window')) {
+        // 延迟执行，确保 DOM 已完全渲染
+        setTimeout(async () => {
+          try {
+            console.log('[设备列表更新] 设备数量:', currentDeviceCount, '准备调整窗口高度');
+            if (electronAPI.adjustTrayWindowHeightByDeviceCount) {
+              await electronAPI.adjustTrayWindowHeightByDeviceCount(currentDeviceCount);
+            } else {
+              console.warn('[设备列表更新] adjustTrayWindowHeightByDeviceCount API 不存在');
+            }
+          } catch (error) {
+            console.error('[设备列表更新] 调整窗口高度失败:', error);
+          }
+        }, 150);
+      }
       const readOnlyCount = devices.filter(d => d.isReadOnly).length;
       const currentState = `${currentDeviceCount}-${readOnlyCount}`;
 
@@ -826,6 +843,25 @@
       }
       const t = AppUtils.I18n.t;
 
+      // 测试翻译是否已加载（通过尝试翻译一个已知的键）
+      const testTranslation = t('devices.title');
+      if (testTranslation === 'devices.title') {
+        // 翻译数据还未加载，延迟重试
+        setTimeout(updateButtonTexts, 100);
+        return;
+      }
+
+      if (showMainWindowBtn) {
+        const translatedText = t('devices.showMainWindow');
+        // 如果返回的是键名本身，说明翻译未找到
+        if (translatedText === 'devices.showMainWindow') {
+          console.warn('翻译键 devices.showMainWindow 未找到');
+          // 不设置默认值，等待翻译加载完成
+          setTimeout(updateButtonTexts, 100);
+        } else {
+          showMainWindowBtn.textContent = translatedText;
+        }
+      }
       if (mountAllBtn) {
         mountAllBtn.textContent = t('devices.mountAll');
       }
