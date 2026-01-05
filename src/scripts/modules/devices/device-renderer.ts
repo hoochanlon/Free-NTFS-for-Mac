@@ -183,10 +183,10 @@
               <div class="device-name-large">${device.volumeName}</div>
               ${device.capacity ? `
               <div class="device-capacity-info-windows">
-                <span class="capacity-text-windows">${availableText} 可用, 共 ${totalText}</span>
+                <span class="capacity-text-windows">${availableText} ${t('devices.available')}, ${t('devices.total')} ${totalText}</span>
               </div>
               <div class="capacity-bar-windows">
-                <div class="capacity-bar-fill-windows" style="width: ${capacityPercent}%; min-width: ${capacityPercent > 0 ? '2px' : '0'};"></div>
+                <div class="capacity-bar-fill-windows" style="width: ${capacityPercent}%; min-width: ${capacityPercent > 0 ? '2px' : '0'};" title="${t('devices.usageRate')}: ${capacityPercent}%"></div>
               </div>
               ` : ''}
               <div class="device-actions-tray">
@@ -226,20 +226,27 @@
             <span class="device-status ${statusClass}">${statusText}</span>
           </div>
           <div class="device-info">
-            <div class="device-info-item">
-              <span class="device-info-label">${t('devices.deviceLabel')}</span>
-              <span>${device.devicePath}</span>
-            </div>
-            <div class="device-info-item">
-              <span class="device-info-label">${t('devices.mountPointLabel')}</span>
-              <span>${device.isUnmounted ? t('devices.notMounted') : device.volume}</span>
-            </div>
-            ${device.capacity ? `
-            <div class="device-info-item">
-              <span class="device-info-label">${t('devices.capacityLabel')}</span>
-              <span>${formatCapacity(device.capacity.used)} / ${formatCapacity(device.capacity.total)}</span>
-            </div>
-            ` : ''}
+            ${(() => {
+              // 使用共享的设备信息渲染函数（统一管理，避免重复代码）
+              const Utils = AppModules.Devices?.Utils;
+              if (Utils && Utils.renderDeviceInfoHTML) {
+                return Utils.renderDeviceInfoHTML(device, t, formatCapacity);
+              }
+              // 如果共享函数不存在，使用本地实现（向后兼容）
+              const isUnmounted = device.isUnmounted || false;
+              return `
+                ${device.capacity ? `
+                <div class="device-info-item">
+                  <span class="device-info-label">${t('devices.capacityLabel')}</span>
+                  <span>${formatCapacity(device.capacity.used)}/${formatCapacity(device.capacity.total)}</span>
+                </div>
+                ` : ''}
+                <div class="device-info-item">
+                  <span class="device-info-label">${t('devices.deviceMountPointLabel')}</span>
+                  <span>${device.devicePath}${isUnmounted ? ` (${t('devices.notMounted')})` : ` → ${device.volume}`}</span>
+                </div>
+              `;
+            })()}
           </div>
         `;
       }

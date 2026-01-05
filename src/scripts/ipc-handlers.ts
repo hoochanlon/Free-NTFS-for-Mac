@@ -14,6 +14,7 @@ import {
 } from './window-manager';
 import { openAboutWindow, getAboutWindow } from './about-window';
 import { SettingsManager, AppSettings } from './utils/settings';
+import { WINDOW_SIZE_CONFIG } from '../config/window-config';
 import { KeychainManager } from './utils/keychain';
 import { rebuildApplicationMenu } from './app-config';
 import { initTray, destroyTray, updateTrayMenu } from './utils/tray-manager';
@@ -333,6 +334,11 @@ export function setupSettingsHandlers(): void {
   // 获取设置
   ipcMain.handle('get-settings', async () => {
     return await SettingsManager.getSettings();
+  });
+
+  // 获取窗口尺寸配置
+  ipcMain.handle('get-window-size-config', async () => {
+    return WINDOW_SIZE_CONFIG;
   });
 
   // 保存设置

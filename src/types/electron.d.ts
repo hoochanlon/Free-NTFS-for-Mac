@@ -34,6 +34,16 @@ export interface ElectronAPI {
   getSettings: () => Promise<AppSettings>;
   saveSettings: (settings: Partial<AppSettings>) => Promise<{ success: boolean }>;
   onSettingsChange: (callback: (settings: Partial<AppSettings>) => void) => void;
+  getWindowSizeConfig: () => Promise<{
+    defaultWidth: number;
+    defaultHeight: number;
+    minWidth: number;
+    minHeight: number;
+    minWidthLimit: number;
+    maxWidthLimit: number;
+    minHeightLimit: number;
+    maxHeightLimit: number;
+  }>;
   hasSavedPassword: () => Promise<boolean>;
   deleteSavedPassword: () => Promise<{ success: boolean }>;
   exportLogs: (content: string) => Promise<{ success: boolean; path?: string; error?: string }>;

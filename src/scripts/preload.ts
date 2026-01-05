@@ -27,6 +27,7 @@ const electronAPI: ElectronAPI = {
   },
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings: Partial<import('../types/electron').AppSettings>) => ipcRenderer.invoke('save-settings', settings),
+  getWindowSizeConfig: () => ipcRenderer.invoke('get-window-size-config'),
   onSettingsChange: (callback: (settings: Partial<import('../types/electron').AppSettings>) => void) => {
     ipcRenderer.on('settings-changed', (event, settings: Partial<import('../types/electron').AppSettings>) => callback(settings));
   },

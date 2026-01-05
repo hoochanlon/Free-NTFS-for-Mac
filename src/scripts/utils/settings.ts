@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { app } from 'electron';
+import { WINDOW_SIZE_CONFIG } from '../../config/window-config';
 
 // 设置文件路径
 function getSettingsPath(): string {
@@ -8,20 +9,8 @@ function getSettingsPath(): string {
   return path.join(userDataPath, 'settings.json');
 }
 
-// 窗口尺寸配置常量
-export const WINDOW_SIZE_CONFIG = {
-  // 默认尺寸
-  defaultWidth: 900,
-  defaultHeight: 680,
-  // 最小尺寸
-  minWidth: 900,
-  minHeight: 680,
-  // 尺寸范围
-  minWidthLimit: 840,
-  maxWidthLimit: 2000,
-  minHeightLimit: 660,
-  maxHeightLimit: 2000
-} as const;
+// 导出窗口尺寸配置（从统一配置文件导入）
+export { WINDOW_SIZE_CONFIG };
 
 // 默认设置
 const DEFAULT_SETTINGS = {

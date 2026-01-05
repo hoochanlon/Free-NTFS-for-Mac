@@ -13,18 +13,6 @@
   const AppUtils = (window as any).AppUtils;
   const electronAPI = (window as any).electronAPI;
 
-  // 窗口尺寸配置常量（与主进程中的 WINDOW_SIZE_CONFIG 保持一致）
-  const WINDOW_SIZE_CONFIG = {
-    defaultWidth: 900,
-    defaultHeight: 700,
-    minWidth: 900,
-    minHeight: 700,
-    minWidthLimit: 900,
-    maxWidthLimit: 2000,
-    minHeightLimit: 700,
-    maxHeightLimit: 2000
-  } as const;
-
   // 设置管理
   AppModules.Settings = {
     // 初始化设置
@@ -40,6 +28,9 @@
       }
 
       try {
+        // 从主进程获取窗口尺寸配置（统一管理）
+        const WINDOW_SIZE_CONFIG = await electronAPI.getWindowSizeConfig();
+
         // 加载设置
         const settings = await electronAPI.getSettings();
         savePasswordCheckbox.checked = settings.savePassword;

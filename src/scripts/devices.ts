@@ -380,10 +380,10 @@
               <div class="device-name-large">${device.volumeName}</div>
               ${device.capacity && device.capacity.total > 0 && availableText && totalText ? `
               <div class="device-capacity-info-windows">
-                <span class="capacity-text-windows">${availableText} 可用, 共 ${totalText}</span>
+                <span class="capacity-text-windows">${availableText} ${t('devices.available')}, ${t('devices.total')} ${totalText}</span>
               </div>
               <div class="capacity-bar-windows">
-                <div class="capacity-bar-fill-windows" data-percent="${finalCapacityPercent}" data-width="${finalCapacityPercent}" title="使用率: ${finalCapacityPercent}%"></div>
+                <div class="capacity-bar-fill-windows" data-percent="${finalCapacityPercent}" data-width="${finalCapacityPercent}" title="${t('devices.usageRate')}: ${finalCapacityPercent}%"></div>
               </div>
               ` : ''}
               <div class="device-actions-tray">
@@ -423,20 +423,26 @@
             <span class="device-status ${statusClass}">${statusText}</span>
           </div>
           <div class="device-info">
-            <div class="device-info-item">
-              <span class="device-info-label">${t('devices.deviceLabel')}</span>
-              <span>${device.devicePath}</span>
-            </div>
-            <div class="device-info-item">
-              <span class="device-info-label">${t('devices.mountPointLabel')}</span>
-              <span>${isUnmounted ? t('devices.notMounted') : device.volume}</span>
-            </div>
-            ${device.capacity ? `
-            <div class="device-info-item">
-              <span class="device-info-label">${t('devices.capacityLabel')}</span>
-              <span>${formatCapacity(device.capacity.used)} / ${formatCapacity(device.capacity.total)}</span>
-            </div>
-            ` : ''}
+            ${(() => {
+              // 优先使用共享的设备信息渲染函数（如果存在），避免重复代码
+              const AppModules = (window as any).AppModules;
+              if (AppModules && AppModules.Devices && AppModules.Devices.Utils && AppModules.Devices.Utils.renderDeviceInfoHTML) {
+                return AppModules.Devices.Utils.renderDeviceInfoHTML(device, t, formatCapacity);
+              }
+              // 如果共享函数不存在，使用本地实现（向后兼容）
+              return `
+                ${device.capacity ? `
+                <div class="device-info-item">
+                  <span class="device-info-label">${t('devices.capacityLabel')}</span>
+                  <span>${formatCapacity(device.capacity.used)}/${formatCapacity(device.capacity.total)}</span>
+                </div>
+                ` : ''}
+                <div class="device-info-item">
+                  <span class="device-info-label">${t('devices.deviceMountPointLabel')}</span>
+                  <span>${device.devicePath}${isUnmounted ? ` (${t('devices.notMounted')})` : ` → ${device.volume}`}</span>
+                </div>
+              `;
+            })()}
           </div>
         `;
       }

@@ -2,31 +2,11 @@ import { BrowserWindow, app, Event, screen } from 'electron';
 import * as path from 'path';
 import { SettingsManager, WINDOW_SIZE_CONFIG } from './utils/settings';
 import { isTrayInitialized, getTrayBounds } from './utils/tray-manager';
-
-// 窗口尺寸配置常量（统一管理，避免重复）
-const MODULE_WINDOW_CONFIG = {
-  width: 600,
-  height: 450,
-  minWidth: 500,
-  minHeight: 400
-};
-
-const LOGS_WINDOW_CONFIG = {
-  width: 800,
-  height: 600,
-  minWidth: 600,
-  minHeight: 400
-};
-
-const TRAY_DEVICES_WINDOW_CONFIG = {
-  minWidth: 350,  // 初始宽度使用最小宽度（因为窗口是固定大小的）
-  minHeight: 460,
-  maxWidth: 350,
-  maxHeight: 460,
-  // 根据设备数量的硬编码高度
-  heightFor1Device: 230,  // 1个设备时的高度
-  heightFor2Devices: 350  // 2个设备时的高度
-};
+import {
+  MODULE_WINDOW_CONFIG,
+  LOGS_WINDOW_CONFIG,
+  TRAY_DEVICES_WINDOW_CONFIG
+} from '../config/window-config';
 
 // 窗口引用
 export let mainWindow: BrowserWindow | null = null;
