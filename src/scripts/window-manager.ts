@@ -3,6 +3,28 @@ import * as path from 'path';
 import { SettingsManager, WINDOW_SIZE_CONFIG } from './utils/settings';
 import { isTrayInitialized, getTrayBounds } from './utils/tray-manager';
 
+// 窗口尺寸配置常量（统一管理，避免重复）
+const MODULE_WINDOW_CONFIG = {
+  width: 600,
+  height: 450,
+  minWidth: 500,
+  minHeight: 400
+};
+
+const LOGS_WINDOW_CONFIG = {
+  width: 800,
+  height: 600,
+  minWidth: 600,
+  minHeight: 400
+};
+
+const TRAY_DEVICES_WINDOW_CONFIG = {
+  minWidth: 350,  // 初始宽度使用最小宽度（因为窗口是固定大小的）
+  minHeight: 420,
+  maxWidth: 350,
+  maxHeight: 420
+};
+
 // 窗口引用
 export let mainWindow: BrowserWindow | null = null;
 export let logsWindow: BrowserWindow | null = null;
@@ -102,10 +124,7 @@ export async function createLogsWindow(): Promise<BrowserWindow | null> {
 
   const appPath = app.getAppPath();
   logsWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    minWidth: 600,
-    minHeight: 400,
+    ...LOGS_WINDOW_CONFIG,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
@@ -195,10 +214,11 @@ export async function createModuleWindow(moduleName: string): Promise<BrowserWin
   }
 
   const moduleWindow = new BrowserWindow({
-    width: 600,
-    height: 500,
-    minWidth: 500,
-    minHeight: 400,
+    ...MODULE_WINDOW_CONFIG,
+    // 允许用户自由调整窗口大小，不设置最大尺寸限制
+    resizable: true,
+    // 移除 parent 属性，允许窗口独立调整大小
+    // parent: mainWindow || undefined, // 注释掉，避免子窗口调整大小受限
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
@@ -207,7 +227,6 @@ export async function createModuleWindow(moduleName: string): Promise<BrowserWin
     titleBarStyle: 'hidden',
     frame: false,
     backgroundColor: getThemeBackgroundColor(),
-    parent: mainWindow || undefined,
     show: false
   });
 
@@ -262,8 +281,9 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
   const { x: screenX, y: screenY } = primaryDisplay.workArea;
 
   // 使用更小的窗口尺寸，适合托盘弹出
-  const windowWidth = 321;
-  const windowHeight = Math.min(480, screenHeight - 80);
+  // 初始宽度使用最小宽度（因为窗口是固定大小的）
+  const windowWidth = TRAY_DEVICES_WINDOW_CONFIG.minWidth;
+  const windowHeight = Math.min(TRAY_DEVICES_WINDOW_CONFIG.maxHeight, screenHeight - 80);
 
   // 计算窗口位置（在托盘下方）
   let windowX: number;
@@ -286,10 +306,10 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
   trayDevicesWindow = new BrowserWindow({
     width: windowWidth,
     height: windowHeight,
-    minWidth: 340,
-    minHeight: 480,
-    maxWidth: 340,
-    maxHeight: 480,
+    minWidth: TRAY_DEVICES_WINDOW_CONFIG.minWidth,
+    minHeight: TRAY_DEVICES_WINDOW_CONFIG.minHeight,
+    maxWidth: TRAY_DEVICES_WINDOW_CONFIG.maxWidth,
+    maxHeight: TRAY_DEVICES_WINDOW_CONFIG.maxHeight,
     x: windowX,
     y: windowY,
     webPreferences: {
