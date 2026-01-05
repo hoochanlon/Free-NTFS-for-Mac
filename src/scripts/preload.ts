@@ -54,3 +54,22 @@ const electronAPI: ElectronAPI = {
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
+
+// 在页面加载前就添加 tray-window 类（如果是托盘窗口）
+// 通过检查窗口特征来判断：无边框、固定大小、不在任务栏显示
+// 这些特征在 window-manager.ts 中设置
+if (typeof window !== 'undefined' && window.document) {
+  // 等待 DOM 准备好
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (document.body) {
+        // 检查是否是托盘窗口（通过检查窗口特征）
+        // 托盘窗口通常是无边框、固定大小的
+        // 但更可靠的方法是在 window-manager.ts 中通过 executeJavaScript 添加类
+        // 这里作为备用方案
+      }
+    });
+  } else if (document.body) {
+    // DOM 已经准备好
+  }
+}

@@ -112,61 +112,175 @@
       const statusClass = device.isUnmounted ? 'unmounted' : (device.isReadOnly ? 'read-only' : 'read-write');
       const statusText = device.isUnmounted ? t('devices.unmounted') : (device.isReadOnly ? t('devices.readOnly') : t('devices.readWrite'));
 
-      item.innerHTML = `
-        <div class="device-header">
-          <div class="device-name">
-            <span class="device-icon"></span>
-            ${device.volumeName}
+      // 计算容量百分比和使用空间（Windows 风格）
+      let capacityPercent = 0;
+      let availableText = '';
+      let totalText = '';
+      if (device.capacity && device.capacity.total > 0) {
+        const total = device.capacity.total;
+        let used = device.capacity.used || 0;
+        let available = device.capacity.available || 0;
+
+        // 计算逻辑：始终优先使用 available 来计算 used（更可靠）
+        // 因为 available 通常比 used 更准确，且不容易出错
+        // 注意：即使 available 接近 total（比如 99.9%），也应该使用它来计算
+        if (available > 0) {
+          // 如果 available 存在，直接使用它来计算 used
+          // 这是最可靠的方法，因为 available 通常更准确
+          used = total - available;
+          // 确保 used 不为负数
+          if (used < 0) {
+            used = 0;
+            available = total;
+          }
+        } else if (device.capacity.used && device.capacity.used > 0) {
+          // 如果只有 used 值（available 不存在或无效），使用它
+          used = device.capacity.used;
+          available = total - used;
+          if (available < 0) {
+            available = 0;
+            used = total;
+          }
+        } else {
+          // 如果都无法获取，至少显示总容量
+          used = 0;
+          available = total;
+        }
+
+        // 最终验证：确保 used + available 约等于 total
+        const sum = used + available;
+        const diff = Math.abs(sum - total);
+        if (diff > total * 0.01) {
+          // 如果差异超过 1%，重新计算
+          if (available > 0) {
+            used = total - available;
+          } else if (used > 0) {
+            available = total - used;
+          }
+        }
+
+        // 计算使用率百分比（用于进度条和颜色）
+        // 确保百分比在 0-100 之间
+        capacityPercent = Math.max(0, Math.min(100, Math.round((used / total) * 100)));
+        availableText = formatCapacity(available);
+        totalText = formatCapacity(total);
+        // 设置 data 属性用于样式选择器
+        item.setAttribute('data-capacity-percent', capacityPercent.toString());
+      }
+
+      // 检查是否是托盘窗口
+      const isTrayWindow = document.body && document.body.classList.contains('tray-window');
+
+      // 托盘窗口使用卡片样式，主窗口使用原来的样式
+      if (isTrayWindow) {
+        // 托盘窗口：显示磁盘名称、容量条和操作按钮
+        item.innerHTML = `
+          <div class="device-card-tray">
+            <div class="device-icon-large">
+              <img src="../imgs/ico/drive.svg" alt="${device.volumeName}" class="device-icon-svg">
+            </div>
+            <div class="device-card-content">
+              <div class="device-name-large">${device.volumeName}</div>
+              ${device.capacity ? `
+              <div class="device-capacity-info-windows">
+                <span class="capacity-text-windows">${availableText} 可用, 共 ${totalText}</span>
+              </div>
+              <div class="capacity-bar-windows">
+                <div class="capacity-bar-fill-windows" style="width: ${capacityPercent}%; min-width: ${capacityPercent > 0 ? '2px' : '0'};"></div>
+              </div>
+              ` : ''}
+              <div class="device-actions-tray">
+                ${device.isUnmounted ? `
+                  <button class="btn btn-success mount-btn" data-disk="${device.disk}">
+                    ${t('devices.remount')}
+                  </button>
+                  <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
+                    ${t('devices.eject')}
+                  </button>
+                ` : device.isReadOnly ? `
+                  <button class="btn btn-success mount-btn" data-disk="${device.disk}">
+                    ${t('devices.mount')}
+                  </button>
+                  <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
+                    ${t('devices.eject')}
+                  </button>
+                ` : `
+                  <button class="btn btn-secondary restore-readonly-btn" data-disk="${device.disk}">
+                    ${t('devices.restoreReadOnly')}
+                  </button>
+                  <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
+                    ${t('devices.eject')}
+                  </button>
+                `}
+              </div>
+            </div>
           </div>
-          <span class="device-status ${statusClass}">${statusText}</span>
-        </div>
-        <div class="device-info">
-          <div class="device-info-item">
-            <span class="device-info-label">${t('devices.deviceLabel')}</span>
-            <span>${device.devicePath}</span>
+        `;
+      } else {
+        item.innerHTML = `
+          <div class="device-header">
+            <div class="device-name">
+              <span class="device-icon"></span>
+              ${device.volumeName}
+            </div>
+            <span class="device-status ${statusClass}">${statusText}</span>
           </div>
-          <div class="device-info-item">
-            <span class="device-info-label">${t('devices.mountPointLabel')}</span>
-            <span>${device.isUnmounted ? t('devices.notMounted') : device.volume}</span>
+          <div class="device-info">
+            <div class="device-info-item">
+              <span class="device-info-label">${t('devices.deviceLabel')}</span>
+              <span>${device.devicePath}</span>
+            </div>
+            <div class="device-info-item">
+              <span class="device-info-label">${t('devices.mountPointLabel')}</span>
+              <span>${device.isUnmounted ? t('devices.notMounted') : device.volume}</span>
+            </div>
+            ${device.capacity ? `
+            <div class="device-info-item">
+              <span class="device-info-label">${t('devices.capacityLabel')}</span>
+              <span>${formatCapacity(device.capacity.used)} / ${formatCapacity(device.capacity.total)}</span>
+            </div>
+            ` : ''}
           </div>
-          ${device.capacity ? `
-          <div class="device-info-item">
-            <span class="device-info-label">${t('devices.capacityLabel')}</span>
-            <span>${formatCapacity(device.capacity.used)} / ${formatCapacity(device.capacity.total)}</span>
+        `;
+      }
+
+      // 只在主窗口添加操作按钮，托盘窗口不显示
+      if (!isTrayWindow) {
+        const actionsHTML = `
+          <div class="device-actions">
+            ${device.isUnmounted ? `
+              <button class="btn btn-success mount-btn" data-disk="${device.disk}">
+                ${t('devices.remount')}
+              </button>
+              <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
+                ${t('devices.eject')}
+              </button>
+            ` : device.isReadOnly ? `
+              <button class="btn btn-success mount-btn" data-disk="${device.disk}">
+                ${t('devices.mount')}
+              </button>
+              <button class="btn btn-info unmount-btn" data-disk="${device.disk}">
+                ${t('devices.unmount')}
+              </button>
+              <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
+                ${t('devices.eject')}
+              </button>
+            ` : `
+              <button class="btn btn-secondary restore-readonly-btn" data-disk="${device.disk}">
+                ${t('devices.restoreReadOnly')}
+              </button>
+              <button class="btn btn-info unmount-btn" data-disk="${device.disk}">
+                ${t('devices.unmount')}
+              </button>
+              <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
+                ${t('devices.eject')}
+              </button>
+            `}
           </div>
-          ` : ''}
-        </div>
-        <div class="device-actions">
-          ${device.isUnmounted ? `
-            <button class="btn btn-success mount-btn" data-disk="${device.disk}">
-              ${t('devices.remount')}
-            </button>
-            <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
-              ${t('devices.eject')}
-            </button>
-          ` : device.isReadOnly ? `
-            <button class="btn btn-success mount-btn" data-disk="${device.disk}">
-              ${t('devices.mount')}
-            </button>
-            <button class="btn btn-info unmount-btn" data-disk="${device.disk}">
-              ${t('devices.unmount')}
-            </button>
-            <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
-              ${t('devices.eject')}
-            </button>
-          ` : `
-            <button class="btn btn-secondary restore-readonly-btn" data-disk="${device.disk}">
-              ${t('devices.restoreReadOnly')}
-            </button>
-            <button class="btn btn-info unmount-btn" data-disk="${device.disk}">
-              ${t('devices.unmount')}
-            </button>
-            <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
-              ${t('devices.eject')}
-            </button>
-          `}
-        </div>
-      `;
+        `;
+
+        item.innerHTML += actionsHTML;
+      }
 
       return item;
     }

@@ -314,6 +314,11 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     } : {})
   });
 
+  // 在窗口创建后立即设置一个标识，用于在页面中识别
+  trayDevicesWindow.webContents.on('did-attach-webview', () => {
+    // 这个事件可能不会触发，但保留作为备用
+  });
+
   // 直接使用主窗口的设备页面，保持界面一致性
   const trayDevicesPath = path.join(appPath, 'src', 'html', 'devices.html');
 
@@ -322,15 +327,64 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     console.error('托盘设备窗口加载失败:', errorCode, errorDescription, validatedURL);
   });
 
+  // 在页面开始加载时就注入脚本，确保类在 DOM 准备好之前就添加
+  trayDevicesWindow.webContents.on('dom-ready', () => {
+    if (trayDevicesWindow) {
+      trayDevicesWindow.webContents.executeJavaScript(`
+        if (document.body) {
+          document.body.classList.add('tray-window');
+        } else {
+          // 如果 body 还没准备好，等待一下
+          const observer = new MutationObserver(() => {
+            if (document.body) {
+              document.body.classList.add('tray-window');
+              observer.disconnect();
+            }
+          });
+          observer.observe(document.documentElement, { childList: true });
+        }
+      `).catch(() => {});
+    }
+  });
+
   await trayDevicesWindow.loadFile(trayDevicesPath).catch((error: Error) => {
     console.error('加载托盘设备窗口失败:', error);
     console.error('App path:', appPath);
     console.error('HTML path:', trayDevicesPath);
   });
 
-  // 在页面加载完成后更新背景色
-  trayDevicesWindow.webContents.once('did-finish-load', () => {
+  // 在页面加载完成后更新背景色和添加标识
+  trayDevicesWindow.webContents.once('did-finish-load', async () => {
     if (trayDevicesWindow) {
+      // 确保类已添加
+      await trayDevicesWindow.webContents.executeJavaScript(`
+        if (document.body && !document.body.classList.contains('tray-window')) {
+          document.body.classList.add('tray-window');
+        }
+      `).catch(() => {});
+
+      // 等待一小段时间确保类已添加，然后触发设备列表重新渲染
+      setTimeout(async () => {
+        if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
+          try {
+            await trayDevicesWindow.webContents.executeJavaScript(`
+              // 确保类已添加
+              if (document.body && !document.body.classList.contains('tray-window')) {
+                document.body.classList.add('tray-window');
+              }
+              // 触发设备列表重新渲染以应用新样式
+              if (typeof window !== 'undefined' && window.refreshDevices) {
+                window.refreshDevices();
+              } else if (typeof window !== 'undefined' && window.renderDevices) {
+                window.renderDevices();
+              }
+            `);
+          } catch (error) {
+            // 窗口可能已关闭，静默处理
+          }
+        }
+      }, 200);
+
       // 立即更新背景色，避免残影
       updateWindowBackgroundColor(trayDevicesWindow);
 

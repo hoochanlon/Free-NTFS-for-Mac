@@ -46,6 +46,10 @@
     flex-direction column
     min-height 0
 
+    // 托盘窗口中的 section 更紧凑
+    .tray-window &
+      padding 4px
+
   .devices-section-header
     display flex
     justify-content flex-end
@@ -56,6 +60,11 @@
 
     h2
       display none
+
+    // 托盘窗口中的头部区域样式
+    .tray-window &
+      margin-bottom 4px
+      padding 4px 0
 
   .devices-header-actions
     display flex
@@ -103,44 +112,175 @@
       line-height 1.3
 
   .devices-list
-    gap 5px
+    gap 12px
+    padding 12px
+
+    // 托盘窗口中的列表更紧凑
+    .tray-window &
+      gap 4px
+      padding 8px
 
   .device-item
-    padding 8px 12px
+    padding 0
+    margin-bottom 12px
     transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
 
-  .device-header
+    // 托盘窗口中的设备项更紧凑
+    .tray-window &
+      margin-bottom 2px
+
+  .device-card
+    display flex
+    align-items flex-start
+    padding 12px 16px
+    background var(--bg-secondary)
+    border 1px solid var(--border)
+    border-radius 6px
+    transition all 0.2s ease
+    cursor pointer
+
+    &:hover
+      background var(--bg-hover)
+      border-color var(--accent)
+      box-shadow 0 2px 8px rgba(0, 0, 0, 0.1)
+
+  // 托盘窗口专用样式（类似 Windows 磁盘显示）
+  .device-card-tray
+    display flex
+    align-items center
+    padding 8px 10px
+    background transparent
+    border none
+    border-radius 0
+    transition all 0.2s ease
+    margin-bottom 0
+    width 100%
+
+    &:hover
+      background var(--bg-hover)
+      border-radius 4px
+
+  .device-icon-large
+    margin-right 16px
+    flex-shrink 0
+    width 48px
+    height 48px
+    display flex
+    align-items center
+    justify-content center
+
+    // 托盘窗口中的图标更小
+    .device-card-tray &
+      width 32px
+      height 32px
+      margin-right 12px
+
+  .device-icon-svg
+    width 48px
+    height 48px
+    object-fit contain
+    flex-shrink 0
+    display block
+    // 确保 SVG 颜色可以随主题变化
+    filter none
+
+    // 托盘窗口中的图标更小
+    .device-card-tray &
+      width 32px
+      height 32px
+
+  .device-card-content
+    flex 1
+    min-width 0
+
+  .device-name-large
+    font-size 14px
+    font-weight 600
+    color var(--text-primary)
+    margin-bottom 8px
+    line-height 1.4
+
+    // 托盘窗口中的名称样式
+    .device-card-tray &
+      font-size 12px
+      font-weight 500
+      margin-bottom 3px
+      line-height 1.2
+      color var(--text-primary)
+
+  .device-capacity-info
+    font-size 12px
+    color var(--text-secondary)
     margin-bottom 6px
+    line-height 1.5
 
-  .device-name
-    font-size 11px
-    gap 6px
+  .capacity-available
+    color var(--text-primary)
+    font-weight 500
 
-    .device-icon
-      width 20px
-      height 20px
+  .capacity-separator
+    color var(--text-secondary)
 
-      &::before
-        width 14px
-        height 14px
+  .capacity-total
+    color var(--text-secondary)
 
-  .device-status
-    padding 2px 7px
-    font-size 9px
-
-  .device-info
-    margin-bottom 6px
-    padding 6px 10px
+  // Windows 风格的容量信息显示
+  .device-capacity-info-windows
     font-size 10px
-    transition background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+    color var(--text-secondary)
+    margin-bottom 3px
+    line-height 1.3
 
-  .device-info-item
-    font-size 9px
-    gap 5px
+  .capacity-text-windows
+    color var(--text-secondary)
+    font-weight 400
+    letter-spacing -0.01em
 
-    .device-info-label
-      min-width 45px
-      font-size 9px
+  .capacity-bar-windows
+    width 100%
+    height 16px
+    background-color #e1e1e1
+    border 1px solid #c0c0c0
+    border-radius 2px
+    overflow hidden
+    position relative
+    margin-top 4px
+    box-sizing border-box
+
+    // 托盘窗口中的容量条样式
+    .device-card-tray &
+      height 14px
+      margin-top 3px
+      background-color #f0f0f0
+      border-color #d0d0d0
+
+  .capacity-bar-fill-windows
+    height 100%
+    background-color #0078d4
+    border-radius 1px
+    transition width 0.3s ease-out
+    position absolute
+    left 0
+    top 0
+    min-width 0
+    display block
+    width 0
+
+  // 根据使用率调整颜色（剩余空间越小，颜色越危险）
+  // 使用率 >= 90%（剩余空间 <= 10%）：红色
+  // 使用率 >= 80%（剩余空间 <= 20%）：黄色
+  // 使用率 < 80%（剩余空间 > 20%）：蓝色（默认）
+  .device-item[data-capacity-percent]
+    // 90%及以上：红色
+    &[data-capacity-percent^="9"] .capacity-bar-fill-windows,
+    &[data-capacity-percent="100"] .capacity-bar-fill-windows
+      background-color #d13438
+
+    // 80-89%：黄色
+    &[data-capacity-percent^="8"] .capacity-bar-fill-windows
+      background-color #ffb900
+
+    // 0-79%：蓝色（默认，已在 .capacity-bar-fill-windows 中设置）
 
   .device-actions
     justify-content flex-end
@@ -152,6 +292,21 @@
       font-size 9px
       min-height 20px
       line-height 1.3
+
+  // 托盘窗口中的设备操作按钮
+  .device-actions-tray
+    display flex
+    justify-content flex-end
+    margin-top 6px
+    gap 4px
+    flex-wrap wrap
+
+    .btn
+      padding 3px 8px
+      font-size 8px
+      min-height 20px
+      line-height 1.2
+      white-space nowrap
 
   .empty-state
     padding 30px 12px

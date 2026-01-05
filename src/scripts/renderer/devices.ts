@@ -34,29 +34,35 @@ export function renderDevices(devicesList: HTMLElement, devices: any[], mountDev
     const statusClass = device.isReadOnly ? 'read-only' : 'read-write';
     const statusText = device.isReadOnly ? '只读' : '读写';
 
+    // 计算容量百分比和可用空间
+    let capacityPercent = 0;
+    let availableText = '';
+    if (device.capacity && device.capacity.total > 0) {
+      capacityPercent = Math.round((device.capacity.used / device.capacity.total) * 100);
+      if (device.capacity.available > 0) {
+        availableText = formatCapacity(device.capacity.available);
+      }
+      item.setAttribute('data-capacity-percent', capacityPercent.toString());
+    }
+
     item.innerHTML = `
-      <div class="device-header">
-        <div class="device-name">
-          <span class="device-icon">💿</span>
-          ${device.volumeName}
+      <div class="device-card">
+        <div class="device-icon-large">
+          <img src="../../imgs/ico/drive.svg" alt="${device.volumeName}" class="device-icon-svg">
         </div>
-        <span class="device-status ${statusClass}">${statusText}</span>
-      </div>
-      <div class="device-info">
-        <div class="device-info-item">
-          <span class="device-info-label">设备:</span>
-          <span>${device.devicePath}</span>
+        <div class="device-card-content">
+          <div class="device-name-large">${device.volumeName}</div>
+          ${device.capacity ? `
+          <div class="device-capacity-info">
+            <span class="capacity-available">${availableText} 可用</span>
+            <span class="capacity-separator">，</span>
+            <span class="capacity-total">共 ${formatCapacity(device.capacity.total)}</span>
+          </div>
+          <div class="capacity-bar-windows">
+            <div class="capacity-bar-fill-windows" style="width: ${capacityPercent}%"></div>
+          </div>
+          ` : ''}
         </div>
-        <div class="device-info-item">
-          <span class="device-info-label">挂载点:</span>
-          <span>${device.volume}</span>
-        </div>
-        ${device.capacity ? `
-        <div class="device-info-item">
-          <span class="device-info-label">硬盘容量:</span>
-          <span>${formatCapacity(device.capacity.used)} / ${formatCapacity(device.capacity.total)}</span>
-        </div>
-        ` : ''}
       </div>
       <div class="device-actions">
         ${device.isReadOnly ? `

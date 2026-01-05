@@ -24,26 +24,57 @@ export class DeviceDetector {
         const dfLines = dfResult.stdout.trim().split('\n').filter(line => line.length > 0);
 
         if (dfLines.length >= 2) {
-          const dataLine = dfLines[1].trim();
-          const parts = dataLine.split(/\s+/);
+          // 跳过标题行（第一行），取数据行
+          // 通常最后一行是实际数据，但也要检查是否包含设备路径
+          let dataLine = '';
+          for (let i = dfLines.length - 1; i >= 1; i--) {
+            const line = dfLines[i].trim();
+            // 查找包含设备路径或挂载点的行
+            if (line.includes('/dev/') || line.includes(volume)) {
+              dataLine = line;
+              break;
+            }
+          }
+          // 如果没找到，使用最后一行
+          if (!dataLine && dfLines.length > 1) {
+            dataLine = dfLines[dfLines.length - 1].trim();
+          }
 
-          if (parts.length >= 4) {
-            const totalKB = parseInt(parts[1], 10);
-            const usedKB = parseInt(parts[2], 10);
-            const availableKB = parseInt(parts[3], 10);
+          if (dataLine) {
+            const parts = dataLine.split(/\s+/);
 
-            if (!isNaN(totalKB) && !isNaN(usedKB) && !isNaN(availableKB) && totalKB > 0) {
-              // 转换为字节
-              return {
-                total: totalKB * 1024,
-                used: usedKB * 1024,
-                available: availableKB * 1024
-              };
+            // df -k 输出格式：Filesystem 1024-blocks Used Available Capacity Mounted on
+            // 或者：/dev/disk5s1    30236732 67904  30168828     1%   /Volumes/TOSHIBA
+            // parts[0] = Filesystem/设备路径
+            // parts[1] = 1024-blocks (总容量，KB)
+            // parts[2] = Used (已使用，KB)
+            // parts[3] = Available (可用，KB)
+            if (parts.length >= 4) {
+              const totalKB = parseInt(parts[1], 10);
+              const usedKB = parseInt(parts[2], 10);
+              const availableKB = parseInt(parts[3], 10);
+
+              if (!isNaN(totalKB) && !isNaN(usedKB) && !isNaN(availableKB) && totalKB > 0) {
+                // 转换为字节
+                const result = {
+                  total: totalKB * 1024,
+                  used: usedKB * 1024,
+                  available: availableKB * 1024
+                };
+                // 验证数据合理性：used + available 应该约等于 total（允许一些误差）
+                const sum = result.used + result.available;
+                const diff = Math.abs(sum - result.total);
+                // 如果差异小于 1%，认为数据有效
+                if (diff < result.total * 0.01 || result.used > 0) {
+                  return result;
+                }
+              }
             }
           }
         }
-      } catch {
-        // df 命令失败，继续尝试 diskutil
+      } catch (error) {
+        // df 命令失败是正常情况（设备可能未挂载或只读挂载），静默处理，继续尝试 diskutil
+        // 不输出错误信息，避免控制台噪音
       }
 
       // 方法2：从设备本身获取容量（即使未挂载也可以）
@@ -69,18 +100,20 @@ export class DeviceDetector {
             let used = 0;
             let available = 0;
 
-            if (usedSpaceMatch) {
+            if (usedSpaceMatch && usedSpaceMatch[1]) {
               used = parseInt(usedSpaceMatch[1], 10);
             }
-            if (freeSpaceMatch) {
+            if (freeSpaceMatch && freeSpaceMatch[1]) {
               available = parseInt(freeSpaceMatch[1], 10);
             }
 
             // 如果无法获取已使用和可用空间，但能获取总容量，至少显示总容量
             // 已使用 = 总容量 - 可用空间
             if (available > 0 && used === 0) {
+              // 如果有可用空间但没有已使用空间，计算：已使用 = 总容量 - 可用空间
               used = total - available;
             } else if (used > 0 && available === 0) {
+              // 如果有已使用空间但没有可用空间，计算：可用空间 = 总容量 - 已使用
               available = total - used;
             } else if (used === 0 && available === 0) {
               // 如果都无法获取，至少显示总容量，已使用设为 0
@@ -88,10 +121,23 @@ export class DeviceDetector {
               available = total;
             }
 
+            // 确保数据合理性：used + available 应该约等于 total
+            const sum = used + available;
+            const diff = Math.abs(sum - total);
+            // 如果差异超过 5%，可能需要调整
+            if (diff > total * 0.05) {
+              // 如果差异太大，优先使用 available 来计算 used
+              if (available > 0) {
+                used = total - available;
+              } else if (used > 0) {
+                available = total - used;
+              }
+            }
+
             return {
               total,
-              used: used > 0 ? used : 0,
-              available: available > 0 ? available : total
+              used: Math.max(0, used), // 确保不为负数
+              available: Math.max(0, available) // 确保不为负数
             };
           }
         }
