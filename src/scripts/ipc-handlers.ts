@@ -131,6 +131,7 @@ export function setupNTFSHandlers(): void {
         // 如果已经初始化，立即发送当前设备列表给新窗口
         const currentDevices = await ntfsManager.getNTFSDevices(true);
         if (event && event.sender && !event.sender.isDestroyed()) {
+          console.log('[混合检测] 向新窗口发送当前设备列表，设备数量:', currentDevices.length);
           event.sender.send('hybrid-detection-device-change', currentDevices);
         }
       }
