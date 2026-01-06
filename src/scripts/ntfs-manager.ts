@@ -47,8 +47,8 @@ class NTFSManager {
   }
 
   // 获取 NTFS 设备列表
-  async getNTFSDevices(): Promise<NTFSDevice[]> {
-    return await this.deviceDetector.getNTFSDevices();
+  async getNTFSDevices(forceRefresh: boolean = false): Promise<NTFSDevice[]> {
+    return await this.deviceDetector.getNTFSDevices(forceRefresh);
   }
 
   // 挂载设备

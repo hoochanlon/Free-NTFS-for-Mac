@@ -18,7 +18,8 @@ export async function waitForDeviceStatusUpdate(
 
   while (Date.now() - startTime < maxWaitTime) {
     try {
-      const devices = await ntfsManager.getNTFSDevices();
+      // 强制刷新，确保获取最新状态
+      const devices = await ntfsManager.getNTFSDevices(true);
       const updatedDevice = devices.find(d => d.disk === device.disk);
 
       if (updatedDevice) {
@@ -63,7 +64,8 @@ export async function waitForDeviceStatusUpdate(
   for (let i = 0; i < 3; i++) {
     try {
       await new Promise(resolve => setTimeout(resolve, 200)); // 等待一小段时间
-      const devices = await ntfsManager.getNTFSDevices();
+      // 强制刷新，确保获取最新状态
+      const devices = await ntfsManager.getNTFSDevices(true);
       const updatedDevice = devices.find(d => d.disk === device.disk);
       if (updatedDevice && updatedDevice.isReadOnly === expectedReadOnly) {
         console.log(`设备 ${device.volumeName} 状态已更新为 ${expectedReadOnly ? '只读' : '可读写'}（超时后检测到）`);

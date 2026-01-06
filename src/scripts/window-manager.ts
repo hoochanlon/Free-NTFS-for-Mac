@@ -247,6 +247,17 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     if (trayDevicesWindow.isVisible()) {
       trayDevicesWindow.hide();
     } else {
+      // 在显示窗口前，先强制刷新设备列表（确保显示最新状态）
+      try {
+        await trayDevicesWindow.webContents.executeJavaScript(`
+          if (typeof window !== 'undefined' && window.refreshDevices) {
+            window.refreshDevices(true);
+          }
+        `);
+      } catch (error) {
+        // 忽略错误，继续显示窗口
+      }
+
       // 确保背景色已更新，避免残影
       updateWindowBackgroundColor(trayDevicesWindow);
       trayDevicesWindow.setOpacity(1);
@@ -452,6 +463,17 @@ export async function toggleTrayDevicesWindow(): Promise<void> {
     if (trayDevicesWindow.isVisible()) {
       trayDevicesWindow.hide();
     } else {
+      // 在显示窗口前，先强制刷新设备列表（确保显示最新状态）
+      try {
+        await trayDevicesWindow.webContents.executeJavaScript(`
+          if (typeof window !== 'undefined' && window.refreshDevices) {
+            window.refreshDevices(true);
+          }
+        `);
+      } catch (error) {
+        // 忽略错误，继续显示窗口
+      }
+
       // 每次显示时都重新计算位置，确保贴合托盘（像系统菜单一样）
       const trayBounds = getTrayBounds();
       if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {

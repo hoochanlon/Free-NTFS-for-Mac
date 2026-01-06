@@ -100,14 +100,40 @@ export function setupNTFSHandlers(): void {
   });
 
   // 混合检测相关 IPC handlers
-  ipcMain.handle('start-hybrid-detection', async () => {
+  // 注意：混合检测是全局的，所有窗口共享同一个检测实例
+  // 但是每个窗口都需要注册自己的事件监听器来接收设备变化事件
+  let hybridDetectionInitialized = false;
+
+  ipcMain.handle('start-hybrid-detection', async (event) => {
     try {
-      await ntfsManager.startHybridDetection((devices) => {
-        // 通过事件通知所有窗口
-        BrowserWindow.getAllWindows().forEach(win => {
-          win.webContents.send('hybrid-detection-device-change', devices);
+      // 只在第一次调用时初始化混合检测（避免重复初始化）
+      if (!hybridDetectionInitialized) {
+        await ntfsManager.startHybridDetection((devices) => {
+          // 通过事件通知所有窗口（包括已打开的托盘窗口）
+          const allWindows = BrowserWindow.getAllWindows();
+          console.log(`[混合检测] 设备变化，通知 ${allWindows.length} 个窗口，设备数量:`, devices.length);
+
+          allWindows.forEach((win, index) => {
+            if (!win.isDestroyed()) {
+              try {
+                win.webContents.send('hybrid-detection-device-change', devices);
+                console.log(`[混合检测] 已发送事件到窗口 ${index + 1}`);
+              } catch (error) {
+                // 忽略已关闭窗口的错误
+                console.warn(`[混合检测] 发送事件到窗口 ${index + 1} 失败:`, error);
+              }
+            }
+          });
         });
-      });
+        hybridDetectionInitialized = true;
+        console.log('✅ [混合检测] 全局检测已启动');
+      } else {
+        // 如果已经初始化，立即发送当前设备列表给新窗口
+        const currentDevices = await ntfsManager.getNTFSDevices(true);
+        if (event && event.sender && !event.sender.isDestroyed()) {
+          event.sender.send('hybrid-detection-device-change', currentDevices);
+        }
+      }
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

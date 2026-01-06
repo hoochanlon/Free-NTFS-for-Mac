@@ -3,9 +3,58 @@ import { SettingsManager } from './settings';
 import { loadTranslations, t, detectLanguage } from './tray-translations';
 import { createDeviceIcon } from './tray-icons';
 import { waitForDeviceStatusUpdate } from './tray-device-status';
-import { mainWindow, createMainWindow } from '../window-manager';
+import { mainWindow, createMainWindow, trayDevicesWindow } from '../window-manager';
 import ntfsManager from '../ntfs-manager';
 import type { NTFSDevice } from '../../types/electron';
+
+/**
+ * 刷新所有窗口的设备列表（统一处理）
+ * 优化：增加延迟和重试机制，确保状态更新
+ */
+async function refreshAllWindowsDevices(): Promise<void> {
+  // 等待一小段时间，确保系统状态已更新
+  await new Promise(resolve => setTimeout(resolve, 300));
+
+  // 刷新主窗口
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    try {
+      mainWindow.webContents.send('tray-action', 'refresh-devices');
+    } catch (error) {
+      console.warn('刷新主窗口失败:', error);
+    }
+  }
+
+  // 刷新托盘窗口（重要：确保托盘窗口显示最新状态）
+  if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
+    try {
+      // 先发送事件（如果窗口正在监听）
+      try {
+        trayDevicesWindow.webContents.send('tray-action', 'refresh-devices');
+      } catch (e) {
+        // 忽略事件发送错误
+      }
+
+      // 直接调用刷新函数，强制刷新（更可靠）
+      await trayDevicesWindow.webContents.executeJavaScript(`
+        if (typeof window !== 'undefined' && window.refreshDevices) {
+          window.refreshDevices(true);
+        }
+      `);
+
+      // 如果窗口可见，再等待一小段时间后再次刷新（确保状态同步）
+      if (trayDevicesWindow.isVisible()) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        await trayDevicesWindow.webContents.executeJavaScript(`
+          if (typeof window !== 'undefined' && window.refreshDevices) {
+            window.refreshDevices(true);
+          }
+        `);
+      }
+    } catch (error) {
+      console.warn('刷新托盘窗口设备列表失败:', error);
+    }
+  }
+}
 
 /**
  * 创建托盘菜单
@@ -23,7 +72,8 @@ export async function createTrayMenu(
   // 获取当前连接的 NTFS 设备列表
   let devices: NTFSDevice[] = [];
   try {
-    devices = await ntfsManager.getNTFSDevices();
+    // 强制刷新，确保获取最新状态
+    devices = await ntfsManager.getNTFSDevices(true);
     // 按设备名称排序，保持稳定的顺序
     devices.sort((a, b) => {
       // 先按卷名排序
@@ -116,15 +166,15 @@ export async function createTrayMenu(
                 await new Promise(resolve => setTimeout(resolve, 600));
                 await updateMenuCallback(true);
 
-                // 如果窗口存在，刷新设备列表
-                if (mainWindow && !mainWindow.isDestroyed()) {
-                  mainWindow.webContents.send('tray-action', 'refresh-devices');
-                }
+                // 刷新所有窗口的设备列表（包括托盘窗口）
+                await refreshAllWindowsDevices();
               } catch (error) {
                 console.error('配置设备为可读写失败:', error);
                 // 即使失败也更新菜单，显示当前状态
                 await new Promise(resolve => setTimeout(resolve, 300));
                 await updateMenuCallback(true);
+                // 刷新所有窗口的设备列表（包括托盘窗口）
+                await refreshAllWindowsDevices();
               }
             }
           },
@@ -139,10 +189,8 @@ export async function createTrayMenu(
                 await new Promise(resolve => setTimeout(resolve, 500));
                 // 更新托盘菜单
                 await updateMenuCallback(true);
-                // 如果窗口存在，刷新设备列表
-                if (mainWindow && !mainWindow.isDestroyed()) {
-                  mainWindow.webContents.send('tray-action', 'refresh-devices');
-                }
+                // 刷新所有窗口的设备列表（包括托盘窗口）
+                await refreshAllWindowsDevices();
               } catch (error) {
                 console.error('卸载设备失败:', error);
                 // 即使失败也更新菜单，显示当前状态
@@ -160,10 +208,8 @@ export async function createTrayMenu(
                 await new Promise(resolve => setTimeout(resolve, 500));
                 // 更新托盘菜单
                 await updateMenuCallback(true);
-                // 如果窗口存在，刷新设备列表
-                if (mainWindow && !mainWindow.isDestroyed()) {
-                  mainWindow.webContents.send('tray-action', 'refresh-devices');
-                }
+                // 刷新所有窗口的设备列表（包括托盘窗口）
+                await refreshAllWindowsDevices();
               } catch (error) {
                 console.error('推出设备失败:', error);
                 // 即使失败也更新菜单，显示当前状态
@@ -206,15 +252,15 @@ export async function createTrayMenu(
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 await updateMenuCallback(true);
 
-                // 如果窗口存在，刷新设备列表
-                if (mainWindow && !mainWindow.isDestroyed()) {
-                  mainWindow.webContents.send('tray-action', 'refresh-devices');
-                }
+                // 刷新所有窗口的设备列表（包括托盘窗口）
+                await refreshAllWindowsDevices();
               } catch (error) {
                 console.error('还原设备为只读失败:', error);
                 // 即使失败也更新菜单，显示当前状态
                 await new Promise(resolve => setTimeout(resolve, 500));
                 await updateMenuCallback(true);
+                // 刷新所有窗口的设备列表（包括托盘窗口）
+                await refreshAllWindowsDevices();
               }
             }
           },
@@ -229,10 +275,8 @@ export async function createTrayMenu(
                 await new Promise(resolve => setTimeout(resolve, 500));
                 // 更新托盘菜单
                 await updateMenuCallback(true);
-                // 如果窗口存在，刷新设备列表
-                if (mainWindow && !mainWindow.isDestroyed()) {
-                  mainWindow.webContents.send('tray-action', 'refresh-devices');
-                }
+                // 刷新所有窗口的设备列表（包括托盘窗口）
+                await refreshAllWindowsDevices();
               } catch (error) {
                 console.error('卸载设备失败:', error);
                 // 即使失败也更新菜单，显示当前状态
@@ -250,10 +294,8 @@ export async function createTrayMenu(
                 await new Promise(resolve => setTimeout(resolve, 500));
                 // 更新托盘菜单
                 await updateMenuCallback(true);
-                // 如果窗口存在，刷新设备列表
-                if (mainWindow && !mainWindow.isDestroyed()) {
-                  mainWindow.webContents.send('tray-action', 'refresh-devices');
-                }
+                // 刷新所有窗口的设备列表（包括托盘窗口）
+                await refreshAllWindowsDevices();
               } catch (error) {
                 console.error('推出设备失败:', error);
                 // 即使失败也更新菜单，显示当前状态
@@ -285,7 +327,8 @@ export async function createTrayMenu(
         label: t('tray.mountAll') || '全读写',
         click: async () => {
           try {
-            const devices = await ntfsManager.getNTFSDevices();
+            // 强制刷新，确保获取最新状态
+            const devices = await ntfsManager.getNTFSDevices(true);
             const readOnlyDevices = devices.filter(d => d.isReadOnly && !d.isUnmounted);
             if (readOnlyDevices.length === 0) {
               return;
@@ -305,13 +348,14 @@ export async function createTrayMenu(
             // 再次更新确保状态同步
             await new Promise(resolve => setTimeout(resolve, 200));
             await updateMenuCallback(true);
-            if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send('tray-action', 'refresh-devices');
-            }
+            // 刷新所有窗口的设备列表（包括托盘窗口）
+            await refreshAllWindowsDevices();
           } catch (error) {
             console.error('全读写操作失败:', error);
             // 即使失败也更新菜单
             await updateMenuCallback(true);
+            // 刷新所有窗口的设备列表（包括托盘窗口）
+            await refreshAllWindowsDevices();
           }
         }
       },
@@ -319,7 +363,8 @@ export async function createTrayMenu(
         label: t('tray.unmountAll') || '全卸载',
         click: async () => {
           try {
-            const devices = await ntfsManager.getNTFSDevices();
+            // 强制刷新，确保获取最新状态
+            const devices = await ntfsManager.getNTFSDevices(true);
             const mountedDevices = devices.filter(d => !d.isReadOnly && !d.isUnmounted);
             if (mountedDevices.length === 0) {
               return;
@@ -338,13 +383,14 @@ export async function createTrayMenu(
             // 再次更新确保状态同步
             await new Promise(resolve => setTimeout(resolve, 200));
             await updateMenuCallback(true);
-            if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send('tray-action', 'refresh-devices');
-            }
+            // 刷新所有窗口的设备列表（包括托盘窗口）
+            await refreshAllWindowsDevices();
           } catch (error) {
             console.error('全卸载操作失败:', error);
             // 即使失败也更新菜单
             await updateMenuCallback(true);
+            // 刷新所有窗口的设备列表（包括托盘窗口）
+            await refreshAllWindowsDevices();
           }
         }
       },
@@ -352,7 +398,8 @@ export async function createTrayMenu(
         label: t('tray.ejectAll') || '全推出',
         click: async () => {
           try {
-            const devices = await ntfsManager.getNTFSDevices();
+            // 强制刷新，确保获取最新状态
+            const devices = await ntfsManager.getNTFSDevices(true);
             if (devices.length === 0) {
               return;
             }
@@ -370,13 +417,14 @@ export async function createTrayMenu(
             // 再次更新确保状态同步
             await new Promise(resolve => setTimeout(resolve, 200));
             await updateMenuCallback(true);
-            if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send('tray-action', 'refresh-devices');
-            }
+            // 刷新所有窗口的设备列表（包括托盘窗口）
+            await refreshAllWindowsDevices();
           } catch (error) {
             console.error('全推出操作失败:', error);
             // 即使失败也更新菜单
             await updateMenuCallback(true);
+            // 刷新所有窗口的设备列表（包括托盘窗口）
+            await refreshAllWindowsDevices();
           }
         }
       },
@@ -384,7 +432,8 @@ export async function createTrayMenu(
         label: t('devices.restoreAllReadOnly') || '全只读',
         click: async () => {
           try {
-            const devices = await ntfsManager.getNTFSDevices();
+            // 强制刷新，确保获取最新状态
+            const devices = await ntfsManager.getNTFSDevices(true);
             const readWriteDevices = devices.filter(d => !d.isReadOnly && !d.isUnmounted);
             if (readWriteDevices.length === 0) {
               return;
@@ -405,13 +454,14 @@ export async function createTrayMenu(
             // 再次更新确保状态同步
             await new Promise(resolve => setTimeout(resolve, 200));
             await updateMenuCallback(true);
-            if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send('tray-action', 'refresh-devices');
-            }
+            // 刷新所有窗口的设备列表（包括托盘窗口）
+            await refreshAllWindowsDevices();
           } catch (error) {
             console.error('全只读操作失败:', error);
             // 即使失败也更新菜单
             await updateMenuCallback(true);
+            // 刷新所有窗口的设备列表（包括托盘窗口）
+            await refreshAllWindowsDevices();
           }
         }
       }

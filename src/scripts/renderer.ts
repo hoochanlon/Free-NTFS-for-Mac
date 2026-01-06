@@ -287,8 +287,9 @@
     try {
       if (window.electronAPI && typeof window.electronAPI.startHybridDetection === 'function') {
         await window.electronAPI.startHybridDetection(async (devices: any[]) => {
-          // 设备变化回调
-          await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+          // 设备变化回调（立即使用事件提供的设备列表）
+          console.log('[主界面] 设备变化事件触发，设备数量:', devices.length);
+          await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText, devices);
         });
 
         console.log('✅ [混合检测] 已启动（事件驱动模式）');

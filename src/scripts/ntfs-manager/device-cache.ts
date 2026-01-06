@@ -18,12 +18,12 @@ export class DeviceCacheManager {
   private mountInfoCache: CacheEntry<string> | null = null;
   private diskutilCache: Map<string, CacheEntry<string>> = new Map();
 
-  // 不同数据的缓存TTL
+  // 不同数据的缓存TTL（优化：减少TTL以加快响应速度）
   private readonly ttl = {
-    deviceList: 3000,      // 设备列表：3秒
-    mountInfo: 2000,       // 挂载信息：2秒
-    diskutil: 5000,        // diskutil信息：5秒
-    capacity: 10000        // 容量信息：10秒（变化较慢）
+    deviceList: 500,       // 设备列表：0.5秒（大幅减少，加快响应）
+    mountInfo: 300,        // 挂载信息：0.3秒（大幅减少，加快响应）
+    diskutil: 1000,        // diskutil信息：1秒（减少）
+    capacity: 3000         // 容量信息：3秒（减少）
   };
 
   /**

@@ -807,23 +807,49 @@
       autoRefreshInterval = null;
     }
 
+    // 注意：每个窗口都需要注册自己的事件监听器
+    // 即使混合检测已经全局初始化，每个窗口也需要监听事件
+
     // 尝试使用混合检测（事件驱动优先）
     try {
       if (electronAPI && typeof electronAPI.startHybridDetection === 'function') {
+        const windowType = document.body && document.body.classList.contains('tray-window') ? '托盘窗口' : '主窗口';
+
         await electronAPI.startHybridDetection((newDevices: any[]) => {
-          // 设备变化回调
+          // 设备变化回调（立即更新，不延迟）
+          console.log(`[${windowType}] 设备变化事件触发，设备数量:`, newDevices.length, '设备列表:', newDevices.map(d => d.volumeName));
+
+          // 立即更新设备列表
           devices = newDevices;
+
+          // 强制重新渲染（确保UI更新）
           renderDevices();
           updateDeviceState();
+
+          // 如果是托盘窗口，额外确保更新
+          if (document.body && document.body.classList.contains('tray-window')) {
+            console.log(`[${windowType}] UI已更新，当前显示设备数量:`, devices.length);
+            // 强制触发重排，确保窗口高度正确
+            if (window.electronAPI && typeof window.electronAPI.adjustTrayWindowHeightByDeviceCount === 'function') {
+              window.electronAPI.adjustTrayWindowHeightByDeviceCount(devices.length);
+            }
+          }
         });
 
         hybridDetectionStarted = true;
-        console.log('✅ [混合检测] 已启动（事件驱动模式）');
+        console.log(`✅ [混合检测] 事件监听器已注册 - ${windowType}`);
 
         // 监听窗口可见性变化
         document.addEventListener('visibilitychange', () => {
           if (electronAPI && typeof electronAPI.updateWindowVisibility === 'function') {
             electronAPI.updateWindowVisibility(!document.hidden);
+          }
+
+          // 窗口变为可见时，立即强制刷新设备列表
+          if (!document.hidden) {
+            setTimeout(() => {
+              refreshDevices(true);
+            }, 100);
           }
         });
 
@@ -837,7 +863,7 @@
     console.log('⚠️ [混合检测] 使用智能轮询模式');
     hybridDetectionStarted = false;
 
-    let currentInterval = 1000; // 初始1秒
+    let currentInterval = 500; // 初始0.5秒（加快初始检测）
     let consecutiveChanges = 0;
     let lastDeviceHash = '';
 
@@ -846,7 +872,7 @@
         const oldDeviceCount = devices.length;
         const oldDeviceHash = JSON.stringify(devices.map(d => ({ disk: d.disk, isMounted: d.isMounted, isReadOnly: d.isReadOnly })));
 
-        await refreshDevices(true); // 强制刷新
+        await refreshDevices(true); // 强制刷新（跳过缓存）
 
         const newDeviceCount = devices.length;
         const newDeviceHash = JSON.stringify(devices.map(d => ({ disk: d.disk, isMounted: d.isMounted, isReadOnly: d.isReadOnly })));
@@ -855,7 +881,7 @@
         // 根据状态调整轮询间隔
         if (hasChanged) {
           consecutiveChanges++;
-          currentInterval = 2000; // 变化后使用2秒高频
+          currentInterval = 1000; // 变化后使用1秒高频（加快响应）
         } else {
           if (consecutiveChanges > 0) {
             consecutiveChanges = Math.max(0, consecutiveChanges - 1);
@@ -864,13 +890,13 @@
           if (newDeviceCount === 0) {
             currentInterval = 30000; // 无设备：30秒
           } else if (consecutiveChanges === 0) {
-            currentInterval = 10000; // 稳定状态：10秒
+            currentInterval = 5000; // 稳定状态：5秒（减少到5秒）
           }
         }
 
         if (consecutiveChanges > 3) {
           consecutiveChanges = 0;
-          currentInterval = 10000;
+          currentInterval = 5000; // 减少到5秒
         }
 
         const isVisible = !document.hidden;
@@ -882,7 +908,7 @@
         autoRefreshInterval = setTimeout(poll, currentInterval);
       } catch (error) {
         console.error('[智能轮询] 检测失败:', error);
-        autoRefreshInterval = setTimeout(poll, 10000);
+        autoRefreshInterval = setTimeout(poll, 5000); // 减少到5秒
       }
     };
 

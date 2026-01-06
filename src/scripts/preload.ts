@@ -55,11 +55,27 @@ const electronAPI: ElectronAPI = {
   adjustTrayWindowHeightByDeviceCount: (deviceCount: number) => ipcRenderer.invoke('adjust-tray-window-height-by-device-count', deviceCount),
   // 混合检测相关
   startHybridDetection: (callback: (devices: any[]) => void) => {
+    // 注意：每个窗口都需要注册自己的监听器
+    // 不要移除所有监听器，因为可能有多个窗口需要监听
+
     // 通过 IPC 启动混合检测，回调通过事件传递
-    ipcRenderer.on('hybrid-detection-device-change', (event, devices) => {
-      callback(devices);
+    const listener = (event: any, devices: any[]) => {
+      try {
+        console.log('[preload] 收到设备变化事件，设备数量:', devices.length);
+        callback(devices);
+      } catch (error) {
+        console.error('设备变化回调执行失败:', error);
+      }
+    };
+
+    // 注册事件监听器（每个窗口都有自己的监听器）
+    ipcRenderer.on('hybrid-detection-device-change', listener);
+    console.log('[preload] 已注册设备变化事件监听器');
+
+    return ipcRenderer.invoke('start-hybrid-detection').then((result) => {
+      console.log('[preload] 混合检测启动结果:', result);
+      return result;
     });
-    return ipcRenderer.invoke('start-hybrid-detection');
   },
   stopHybridDetection: () => ipcRenderer.invoke('stop-hybrid-detection'),
   updateWindowVisibility: (isVisible: boolean) => ipcRenderer.invoke('update-window-visibility', isVisible),

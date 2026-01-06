@@ -163,24 +163,31 @@ export class DeviceDetector {
   }
 
   // 获取 NTFS 设备列表（优化版：使用缓存和批量执行）
-  async getNTFSDevices(): Promise<NTFSDevice[]> {
+  async getNTFSDevices(forceRefresh: boolean = false): Promise<NTFSDevice[]> {
     try {
-      // 检查缓存
-      const cached = this.cache.getDeviceList();
-      if (cached) {
-        return cached;
+      // 如果强制刷新，先失效缓存
+      if (forceRefresh) {
+        this.cache.invalidateAll();
       }
 
-      // 检查挂载信息缓存
-      let stdout = this.cache.getMountInfo() || '';
+      // 检查缓存（仅在非强制刷新时使用）
+      if (!forceRefresh) {
+        const cached = this.cache.getDeviceList();
+        if (cached) {
+          return cached;
+        }
+      }
+
+      // 检查挂载信息缓存（仅在非强制刷新时使用）
+      let stdout = forceRefresh ? '' : (this.cache.getMountInfo() || '');
 
       if (!stdout) {
         try {
-          // 使用批量执行器（带缓存）
+          // 使用批量执行器（带缓存，但强制刷新时使用更短的TTL）
           const result = await this.batchExecutor.execute(
             'mount | grep -iE "(ntfs|fuse)"',
             'mount_ntfs_fuse',
-            2000 // 缓存2秒
+            forceRefresh ? 300 : 1000 // 强制刷新时缓存0.3秒，否则1秒
           );
           stdout = result.stdout || '';
 

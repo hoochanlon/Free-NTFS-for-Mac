@@ -65,25 +65,34 @@
       devicesList: HTMLElement,
       readWriteDevicesList: HTMLElement,
       statusDot: HTMLElement,
-      statusText: HTMLElement
+      statusText: HTMLElement,
+      providedDevices?: any[] // 可选的设备列表（来自事件回调）
     ): Promise<void> {
       try {
         const previousDevices = AppModules.Devices.devices || [];
         const previousDevicePaths = previousDevices.map((d: any) => d.devicePath);
-        
-        AppModules.Devices.devices = await electronAPI.getNTFSDevices();
+
+        // 如果提供了新的设备列表（来自事件回调），直接使用；否则重新获取
+        if (providedDevices && Array.isArray(providedDevices)) {
+          console.log('[主界面] 使用事件提供的设备列表，设备数量:', providedDevices.length);
+          AppModules.Devices.devices = providedDevices;
+        } else {
+          console.log('[主界面] 重新获取设备列表');
+          AppModules.Devices.devices = await electronAPI.getNTFSDevices();
+        }
+
         Renderer.renderDevices(devicesList, readWriteDevicesList);
 
         const currentDeviceCount = AppModules.Devices.devices.length;
         const readOnlyCount = AppModules.Devices.devices.filter((d: any) => d.isReadOnly).length;
         const currentState = `${currentDeviceCount}-${readOnlyCount}`;
-        
+
         // 检测新插入的设备并自动挂载
         const currentDevicePaths = AppModules.Devices.devices.map((d: any) => d.devicePath);
-        const newDevices = AppModules.Devices.devices.filter((d: any) => 
+        const newDevices = AppModules.Devices.devices.filter((d: any) =>
           !previousDevicePaths.includes(d.devicePath) && d.isReadOnly && !d.isUnmounted
         );
-        
+
         if (newDevices.length > 0) {
           try {
             const settings = await electronAPI.getSettings();

@@ -13,7 +13,7 @@ export class EventDrivenDetector {
   private isRunning: boolean = false;
   private restartAttempts: number = 0;
   private readonly maxRestartAttempts = 3;
-  private readonly debounceMs = 200; // 防抖200ms
+  private readonly debounceMs = 100; // 防抖100ms（减少延迟）
 
   constructor(deviceDetector: DeviceDetector) {
     this.deviceDetector = deviceDetector;
@@ -181,10 +181,11 @@ export class EventDrivenDetector {
 
     this.debounceTimer = setTimeout(async () => {
       try {
-        // 延迟一小段时间，确保系统完成挂载/卸载操作
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // 延迟一小段时间，确保系统完成挂载/卸载操作（减少延迟）
+        await new Promise(resolve => setTimeout(resolve, 150));
 
-        const devices = await this.deviceDetector.getNTFSDevices();
+        // 强制刷新，失效所有缓存，确保获取最新状态
+        const devices = await this.deviceDetector.getNTFSDevices(true);
 
         if (this.onChangeCallback) {
           this.onChangeCallback(devices);

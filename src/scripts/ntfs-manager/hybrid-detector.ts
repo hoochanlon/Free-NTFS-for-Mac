@@ -28,6 +28,7 @@ export class HybridDetector {
 
     // 尝试使用事件驱动
     const eventSuccess = await this.eventDetector.start((devices) => {
+      // 事件驱动时，立即处理（fromEvent=true）
       this.handleDeviceChange(devices, true);
     });
 
@@ -38,14 +39,15 @@ export class HybridDetector {
       // 降级到智能轮询
       this.useEvents = false;
       this.pollingManager.start(async () => {
-        const devices = await this.deviceDetector.getNTFSDevices();
+        // 轮询时也使用强制刷新，确保获取最新状态
+        const devices = await this.deviceDetector.getNTFSDevices(true);
         this.handleDeviceChange(devices, false);
       });
       console.log('⚠️ [混合检测] 降级到智能轮询模式（fswatch未安装，建议运行: brew install fswatch）');
     }
 
-    // 立即执行一次检测
-    const initialDevices = await this.deviceDetector.getNTFSDevices();
+    // 立即执行一次检测（强制刷新，确保获取最新状态）
+    const initialDevices = await this.deviceDetector.getNTFSDevices(true);
     this.handleDeviceChange(initialDevices, this.useEvents);
   }
 
@@ -129,7 +131,8 @@ export class HybridDetector {
    * 强制立即检测一次
    */
   async forceDetect(): Promise<NTFSDevice[]> {
-    const devices = await this.deviceDetector.getNTFSDevices();
+    // 强制刷新，失效所有缓存
+    const devices = await this.deviceDetector.getNTFSDevices(true);
     this.handleDeviceChange(devices, false);
     return devices;
   }
