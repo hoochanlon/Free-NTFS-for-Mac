@@ -38,6 +38,7 @@
       installCommand: key === 'swift' ? 'xcode-select --install' :
                      key === 'brew' ? '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"' :
                      key === 'macfuse' ? 'brew install --cask macfuse' :
+                     key === 'fswatch' ? t(`dependencies.${key}.installCommand`) :
                      'brew tap gromgit/homebrew-fuse && brew install ntfs-3g-mac',
       installGuide: t(`dependencies.${key}.installGuide`)
     };
@@ -135,7 +136,8 @@
         { key: 'swift', name: DEPENDENCY_INFO.swift.name, status: AppModules.Dependencies.dependencies.swift },
         { key: 'brew', name: DEPENDENCY_INFO.brew.name, status: AppModules.Dependencies.dependencies.brew },
         { key: 'macfuse', name: DEPENDENCY_INFO.macfuse.name, status: AppModules.Dependencies.dependencies.macfuse },
-        { key: 'ntfs3g', name: DEPENDENCY_INFO.ntfs3g.name, status: AppModules.Dependencies.dependencies.ntfs3g }
+        { key: 'ntfs3g', name: DEPENDENCY_INFO.ntfs3g.name, status: AppModules.Dependencies.dependencies.ntfs3g },
+        { key: 'fswatch', name: t('dependencies.fswatch.name'), status: AppModules.Dependencies.dependencies.fswatch || false, isOptional: true }
       ];
 
       deps.forEach((dep, index) => {
@@ -144,9 +146,13 @@
         item.setAttribute('data-dep-key', dep.key);
         const info = getDependencyInfo(dep.key, AppModules.Dependencies.dependencies);
         // macOS版本使用不同的状态文本
+        // 可选依赖（如fswatch）显示不同的提示
+        const isOptional = (dep as any).isOptional === true;
         const statusText = dep.isVersion
           ? (dep.status ? t('dependencies.versionSatisfied') : t('dependencies.versionUnsatisfied'))
-          : (dep.status ? t('dependencies.installed') : t('dependencies.missing'));
+          : (dep.status
+              ? (isOptional ? '已安装（可选）' : t('dependencies.installed'))
+              : (isOptional ? '未安装（可选，建议安装）' : t('dependencies.missing')));
 
         // 如果dep.name为空，使用info.name（用于macOS版本）
         const displayName = dep.name || info.name;

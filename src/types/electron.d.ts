@@ -22,6 +22,12 @@ export interface ElectronAPI {
   // installDependencies: () => Promise<OperationResult>;
   requestSudoPassword: () => Promise<void>;
   onDeviceUpdate: (callback: (data: any) => void) => void;
+  // 混合检测相关
+  startHybridDetection: (callback: (devices: NTFSDevice[]) => void) => Promise<void>;
+  stopHybridDetection: () => Promise<void>;
+  updateWindowVisibility: (isVisible: boolean) => Promise<void>;
+  getDetectionMode: () => Promise<'event-driven' | 'polling' | 'not-started'>;
+  checkEventDrivenAvailable: () => Promise<boolean>;
   openLogsWindow: () => Promise<void>;
   closeLogsWindow: () => Promise<void>;
   openModuleWindow: (moduleName: string) => Promise<void>;
@@ -68,6 +74,7 @@ export interface Dependencies {
   ntfs3gPath: string | null;
   macosVersion: boolean;
   macosVersionString?: string;
+  fswatch?: boolean; // fswatch 用于事件驱动检测（可选）
 }
 
 export interface NTFSDevice {

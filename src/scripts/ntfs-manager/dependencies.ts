@@ -38,7 +38,8 @@ export async function checkDependencies(): Promise<Dependencies> {
     ntfs3g: false,
     ntfs3gPath: null,
     macosVersion: false,
-    macosVersionString: undefined
+    macosVersionString: undefined,
+    fswatch: false
   };
 
   // 检查macOS版本（带超时）
@@ -130,6 +131,19 @@ export async function checkDependencies(): Promise<Dependencies> {
       }
     } catch {
       result.ntfs3g = false;
+    }
+
+    // 检查 fswatch（可选，用于事件驱动检测）
+    if (result.brew) {
+      try {
+        const fswatchResult = await Promise.race([
+          execAsync('which fswatch 2>/dev/null'),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+        ]);
+        result.fswatch = (fswatchResult as { stdout: string }).stdout.trim().length > 0;
+      } catch {
+        result.fswatch = false;
+      }
     }
   } catch (error) {
     console.error('检查依赖时出错:', error);

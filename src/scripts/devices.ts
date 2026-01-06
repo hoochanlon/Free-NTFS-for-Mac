@@ -24,6 +24,7 @@
   let autoRefreshInterval: NodeJS.Timeout | null = null;
   let lastDeviceCount = 0;
   let lastDeviceState = '';
+  let hybridDetectionStarted: boolean = false;
 
   type LogType = 'info' | 'success' | 'error' | 'warning';
 
@@ -71,13 +72,30 @@
     }
   }
 
-  // 刷新设备列表
-  async function refreshDevices(): Promise<void> {
-    try {
-      devices = await electronAPI.getNTFSDevices();
-      renderDevices();
+  // 刷新设备列表（优化版：防抖和增量更新）
+  let refreshDebounceTimer: number | null = null;
+  const REFRESH_DEBOUNCE_MS = 200; // 防抖200ms
 
-      const currentDeviceCount = devices.length;
+  async function refreshDevices(force: boolean = false): Promise<void> {
+    // 防抖：短时间内多次调用只执行最后一次
+    if (!force && refreshDebounceTimer !== null) {
+      clearTimeout(refreshDebounceTimer);
+    }
+
+    const doRefresh = async () => {
+      try {
+        const oldDevices = [...devices];
+        devices = await electronAPI.getNTFSDevices();
+
+        // 增量更新：只更新变化的部分
+        const hasChanged = JSON.stringify(oldDevices.map(d => ({ disk: d.disk, isMounted: d.isMounted }))) !==
+                          JSON.stringify(devices.map(d => ({ disk: d.disk, isMounted: d.isMounted })));
+
+        if (hasChanged || force) {
+          renderDevices();
+        }
+
+        const currentDeviceCount = devices.length;
 
       // 如果是托盘窗口，根据设备数量调整窗口高度
       if (document.body && document.body.classList.contains('tray-window')) {
@@ -123,11 +141,20 @@
         }
       }
 
-      lastDeviceCount = currentDeviceCount;
-      lastDeviceState = currentState;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      addLog(t('messages.refreshFailed', { error: errorMessage }), 'error');
+        lastDeviceCount = currentDeviceCount;
+        lastDeviceState = currentState;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        addLog(t('messages.refreshFailed', { error: errorMessage }), 'error');
+      } finally {
+        showLoading(false);
+      }
+    };
+
+    if (!force) {
+      refreshDebounceTimer = window.setTimeout(doRefresh, REFRESH_DEBOUNCE_MS);
+    } else {
+      doRefresh();
     }
   }
 
@@ -772,12 +799,128 @@
     }
   }
 
-  // 自动刷新
-  function startAutoRefresh(): void {
-    // 每 5 秒刷新一次设备列表
-    autoRefreshInterval = setInterval(() => {
-      refreshDevices();
-    }, 5000);
+  // 自动刷新（优化版：混合检测 - 事件驱动 + 智能轮询备用）
+  async function startAutoRefresh(): Promise<void> {
+    // 停止旧的轮询
+    if (autoRefreshInterval) {
+      clearInterval(autoRefreshInterval);
+      autoRefreshInterval = null;
+    }
+
+    // 尝试使用混合检测（事件驱动优先）
+    try {
+      if (electronAPI && typeof electronAPI.startHybridDetection === 'function') {
+        await electronAPI.startHybridDetection((newDevices: any[]) => {
+          // 设备变化回调
+          devices = newDevices;
+          renderDevices();
+          updateDeviceState();
+        });
+
+        hybridDetectionStarted = true;
+        console.log('✅ [混合检测] 已启动（事件驱动模式）');
+
+        // 监听窗口可见性变化
+        document.addEventListener('visibilitychange', () => {
+          if (electronAPI && typeof electronAPI.updateWindowVisibility === 'function') {
+            electronAPI.updateWindowVisibility(!document.hidden);
+          }
+        });
+
+        return;
+      }
+    } catch (error) {
+      console.warn('[混合检测] 启动失败，降级到轮询模式:', error);
+    }
+
+    // 降级到智能轮询（如果混合检测不可用）
+    console.log('⚠️ [混合检测] 使用智能轮询模式');
+    hybridDetectionStarted = false;
+
+    let currentInterval = 1000; // 初始1秒
+    let consecutiveChanges = 0;
+    let lastDeviceHash = '';
+
+    const poll = async () => {
+      try {
+        const oldDeviceCount = devices.length;
+        const oldDeviceHash = JSON.stringify(devices.map(d => ({ disk: d.disk, isMounted: d.isMounted, isReadOnly: d.isReadOnly })));
+
+        await refreshDevices(true); // 强制刷新
+
+        const newDeviceCount = devices.length;
+        const newDeviceHash = JSON.stringify(devices.map(d => ({ disk: d.disk, isMounted: d.isMounted, isReadOnly: d.isReadOnly })));
+        const hasChanged = oldDeviceHash !== newDeviceHash;
+
+        // 根据状态调整轮询间隔
+        if (hasChanged) {
+          consecutiveChanges++;
+          currentInterval = 2000; // 变化后使用2秒高频
+        } else {
+          if (consecutiveChanges > 0) {
+            consecutiveChanges = Math.max(0, consecutiveChanges - 1);
+          }
+
+          if (newDeviceCount === 0) {
+            currentInterval = 30000; // 无设备：30秒
+          } else if (consecutiveChanges === 0) {
+            currentInterval = 10000; // 稳定状态：10秒
+          }
+        }
+
+        if (consecutiveChanges > 3) {
+          consecutiveChanges = 0;
+          currentInterval = 10000;
+        }
+
+        const isVisible = !document.hidden;
+        if (!isVisible) {
+          currentInterval = 60000; // 窗口不可见：60秒
+        }
+
+        lastDeviceHash = newDeviceHash;
+        autoRefreshInterval = setTimeout(poll, currentInterval);
+      } catch (error) {
+        console.error('[智能轮询] 检测失败:', error);
+        autoRefreshInterval = setTimeout(poll, 10000);
+      }
+    };
+
+    poll();
+  }
+
+  // 更新设备状态（用于日志）
+  function updateDeviceState(): void {
+    const currentDeviceCount = devices.length;
+    const readOnlyCount = devices.filter(d => d.isReadOnly).length;
+    const currentState = `${currentDeviceCount}-${readOnlyCount}`;
+
+    const stateChanged = currentDeviceCount !== lastDeviceCount || currentState !== lastDeviceState;
+
+    if (devices.length === 0) {
+      if (stateChanged) {
+        addLog(t('messages.noDevicesDetected'), 'info');
+      }
+    } else {
+      const readWriteCount = devices.length - readOnlyCount;
+
+      if (readOnlyCount > 0) {
+        if (stateChanged) {
+          if (readWriteCount > 0) {
+            addLog(t('messages.devicesDetected', { count: devices.length, readOnly: readOnlyCount, readWrite: readWriteCount }), 'info');
+          } else {
+            addLog(t('messages.devicesDetectedAllReadOnly', { count: devices.length }), 'warning');
+          }
+        }
+      } else {
+        if (stateChanged) {
+          addLog(t('messages.devicesDetectedAllReadWrite', { count: devices.length }), 'success');
+        }
+      }
+    }
+
+    lastDeviceCount = currentDeviceCount;
+    lastDeviceState = currentState;
   }
 
   // 初始化

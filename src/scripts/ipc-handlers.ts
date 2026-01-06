@@ -99,6 +99,49 @@ export function setupNTFSHandlers(): void {
     }
   });
 
+  // 混合检测相关 IPC handlers
+  ipcMain.handle('start-hybrid-detection', async () => {
+    try {
+      await ntfsManager.startHybridDetection((devices) => {
+        // 通过事件通知所有窗口
+        BrowserWindow.getAllWindows().forEach(win => {
+          win.webContents.send('hybrid-detection-device-change', devices);
+        });
+      });
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { success: false, error: errorMessage };
+    }
+  });
+
+  ipcMain.handle('stop-hybrid-detection', async () => {
+    try {
+      ntfsManager.stopHybridDetection();
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { success: false, error: errorMessage };
+    }
+  });
+
+  ipcMain.handle('update-window-visibility', async (event, isVisible: boolean) => {
+    try {
+      ntfsManager.updateWindowVisibility(isVisible);
+      return { success: true };
+    } catch (error) {
+      return { success: false };
+    }
+  });
+
+  ipcMain.handle('get-detection-mode', async () => {
+    return ntfsManager.getDetectionMode();
+  });
+
+  ipcMain.handle('check-event-driven-available', async () => {
+    return await ntfsManager.checkEventDrivenAvailable();
+  });
+
   ipcMain.handle('export-logs', async (event, content: string) => {
     try {
       const { dialog } = require('electron');

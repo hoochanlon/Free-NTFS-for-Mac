@@ -80,6 +80,12 @@
       "description": "NTFSファイルシステムドライバー、NTFS読み書きサポートを提供",
       "installGuide": "まずHomebrewとMacFUSEをインストールする必要があります。ターミナルで上記のコマンドを実行してインストールします。"
     },
+    "fswatch": {
+      "name": "fswatch (オプション)",
+      "description": "ファイルシステムイベント監視ツール、ゼロレイテンシーのデバイス検出を実現（イベント駆動モード）",
+      "installCommand": "brew install fswatch",
+      "installGuide": "fswatchはオプションのパフォーマンス最適化ツールです。インストール後、ゼロレイテンシーのデバイス検出が可能になり、CPU使用率が90%以上削減されます。上記のコマンドを実行してインストールします。"
+    },
     "macosVersion": {
       "name": "macOS バージョン ({version})",
       "description": "システムバージョンチェック、macOSバージョンが要件を満たしていることを確認（macOS 14以上が必要）",

@@ -52,7 +52,19 @@ const electronAPI: ElectronAPI = {
   readLogsFile: () => ipcRenderer.invoke('read-logs-file'),
   writeLogsFile: (content: string) => ipcRenderer.invoke('write-logs-file', content),
   showMainWindow: () => ipcRenderer.invoke('show-main-window'),
-  adjustTrayWindowHeightByDeviceCount: (deviceCount: number) => ipcRenderer.invoke('adjust-tray-window-height-by-device-count', deviceCount)
+  adjustTrayWindowHeightByDeviceCount: (deviceCount: number) => ipcRenderer.invoke('adjust-tray-window-height-by-device-count', deviceCount),
+  // 混合检测相关
+  startHybridDetection: (callback: (devices: any[]) => void) => {
+    // 通过 IPC 启动混合检测，回调通过事件传递
+    ipcRenderer.on('hybrid-detection-device-change', (event, devices) => {
+      callback(devices);
+    });
+    return ipcRenderer.invoke('start-hybrid-detection');
+  },
+  stopHybridDetection: () => ipcRenderer.invoke('stop-hybrid-detection'),
+  updateWindowVisibility: (isVisible: boolean) => ipcRenderer.invoke('update-window-visibility', isVisible),
+  getDetectionMode: () => ipcRenderer.invoke('get-detection-mode'),
+  checkEventDrivenAvailable: () => ipcRenderer.invoke('check-event-driven-available')
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

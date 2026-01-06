@@ -80,6 +80,12 @@
       "description": "NTFS file system driver, providing NTFS read-write support",
       "installGuide": "Homebrew and MacFUSE must be installed first. Run the above command in the terminal to install."
     },
+    "fswatch": {
+      "name": "fswatch (Optional)",
+      "description": "File system event monitoring tool for zero-latency device detection (event-driven mode)",
+      "installCommand": "brew install fswatch",
+      "installGuide": "fswatch is an optional performance optimization tool. After installation, it enables zero-latency device detection and reduces CPU usage by 90%+. Run the above command to install."
+    },
     "macosVersion": {
       "name": "macOS Version ({version})",
       "description": "System version check to ensure macOS version meets requirements (macOS 14 or higher required)",

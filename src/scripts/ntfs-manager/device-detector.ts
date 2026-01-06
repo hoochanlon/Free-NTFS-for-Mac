@@ -1,17 +1,27 @@
-// 设备检测模块
+// 设备检测模块（性能优化版）
 import { execAsync, fileExists } from './utils';
 import type { NTFSDevice } from '../../types/electron';
+import { DeviceCacheManager } from './device-cache';
+import { BatchExecutor } from './batch-executor';
 
 export class DeviceDetector {
   private mountedDevices: Set<string>;
   private unmountedDevices: Map<string, NTFSDevice>;
+  private cache: DeviceCacheManager;
+  private batchExecutor: BatchExecutor;
+  private lastDeviceList: NTFSDevice[] = [];
+  private lastDeviceHash: string = '';
 
   constructor(
     mountedDevices: Set<string>,
-    unmountedDevices: Map<string, NTFSDevice>
+    unmountedDevices: Map<string, NTFSDevice>,
+    cache?: DeviceCacheManager,
+    batchExecutor?: BatchExecutor
   ) {
     this.mountedDevices = mountedDevices;
     this.unmountedDevices = unmountedDevices;
+    this.cache = cache || new DeviceCacheManager();
+    this.batchExecutor = batchExecutor || new BatchExecutor();
   }
 
   // 获取磁盘容量信息
@@ -152,22 +162,43 @@ export class DeviceDetector {
     }
   }
 
-  // 获取 NTFS 设备列表
+  // 获取 NTFS 设备列表（优化版：使用缓存和批量执行）
   async getNTFSDevices(): Promise<NTFSDevice[]> {
     try {
-      let stdout = '';
-      try {
-        // 同时检查 ntfs 和 ntfs-3g 的挂载信息（ntfs-3g 使用 FUSE）
-        const result = await execAsync('mount | grep -iE "(ntfs|fuse)"') as { stdout: string };
-        stdout = result.stdout || '';
-      } catch (error: any) {
-        if (error.code === 1) {
-          stdout = error.stdout || '';
-          if (!stdout) {
+      // 检查缓存
+      const cached = this.cache.getDeviceList();
+      if (cached) {
+        return cached;
+      }
+
+      // 检查挂载信息缓存
+      let stdout = this.cache.getMountInfo() || '';
+
+      if (!stdout) {
+        try {
+          // 使用批量执行器（带缓存）
+          const result = await this.batchExecutor.execute(
+            'mount | grep -iE "(ntfs|fuse)"',
+            'mount_ntfs_fuse',
+            2000 // 缓存2秒
+          );
+          stdout = result.stdout || '';
+
+          // 更新缓存
+          if (stdout) {
+            this.cache.setMountInfo(stdout);
+          }
+        } catch (error: any) {
+          if (error.code === 1) {
+            stdout = error.stdout || '';
+            if (!stdout) {
+              // 缓存空结果，避免频繁查询
+              this.cache.setDeviceList([]);
+              return [];
+            }
+          } else {
             return [];
           }
-        } else {
-          return [];
         }
       }
 
@@ -272,11 +303,26 @@ export class DeviceDetector {
         }
 
         try {
-          // 检查设备是否仍然存在（通过 diskutil 检查）
-          const result = await execAsync(`diskutil info ${unmountedDevice.devicePath} 2>/dev/null`) as { stdout: string };
-          if (result.stdout && result.stdout.includes('File System Personality:')) {
+          // 检查diskutil缓存
+          let diskutilOutput = this.cache.getDiskutilInfo(unmountedDevice.devicePath);
+
+          if (!diskutilOutput) {
+            // 使用批量执行器（带缓存）
+            const result = await this.batchExecutor.execute(
+              `diskutil info ${unmountedDevice.devicePath} 2>/dev/null`,
+              `diskutil_${unmountedDevice.devicePath}`,
+              5000 // 缓存5秒
+            );
+            diskutilOutput = result.stdout || '';
+
+            if (diskutilOutput) {
+              this.cache.setDiskutilInfo(unmountedDevice.devicePath, diskutilOutput);
+            }
+          }
+
+          if (diskutilOutput && diskutilOutput.includes('File System Personality:')) {
             // 尝试从 diskutil 输出中获取卷名
-            const volumeNameMatch = result.stdout.match(/Volume Name:\s*(.+)/i);
+            const volumeNameMatch = diskutilOutput.match(/Volume Name:\s*(.+)/i);
             const volumeName = volumeNameMatch ? volumeNameMatch[1].trim() : unmountedDevice.volumeName;
 
             // 尝试获取容量信息（即使设备未挂载）
@@ -306,10 +352,51 @@ export class DeviceDetector {
         }
       }
 
+      // 计算设备列表哈希，用于检测变化
+      const deviceHash = this.calculateDeviceHash(devices);
+      const hasChanged = deviceHash !== this.lastDeviceHash;
+
+      // 更新缓存
+      this.cache.setDeviceList(devices);
+      this.lastDeviceList = devices;
+      this.lastDeviceHash = deviceHash;
+
+      // 如果设备列表变化，清理相关缓存
+      if (hasChanged) {
+        this.cache.invalidateMountInfo();
+      }
+
       return devices;
     } catch (error) {
       console.error('获取 NTFS 设备列表失败:', error);
       return [];
     }
+  }
+
+  /**
+   * 计算设备列表哈希（用于快速比较变化）
+   */
+  private calculateDeviceHash(devices: NTFSDevice[]): string {
+    // 使用设备路径和挂载状态的组合作为哈希
+    return devices
+      .map(d => `${d.disk}:${d.isMounted ? '1' : '0'}:${d.isReadOnly ? '1' : '0'}`)
+      .sort()
+      .join('|');
+  }
+
+  /**
+   * 检查设备列表是否有变化
+   */
+  hasDeviceListChanged(newDevices: NTFSDevice[]): boolean {
+    const newHash = this.calculateDeviceHash(newDevices);
+    return newHash !== this.lastDeviceHash;
+  }
+
+  /**
+   * 使缓存失效（设备插拔时调用）
+   */
+  invalidateCache(): void {
+    this.cache.invalidateAll();
+    this.lastDeviceHash = '';
   }
 }

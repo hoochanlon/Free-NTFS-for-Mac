@@ -275,12 +275,83 @@
     }, 2000);
   });
 
-  // 自动刷新
-  function startAutoRefresh(): void {
-    // 每 5 秒刷新一次设备列表
-    autoRefreshInterval = setInterval(() => {
-      AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
-    }, 5000);
+  // 自动刷新（优化版：混合检测 - 事件驱动 + 智能轮询备用）
+  async function startAutoRefresh(): Promise<void> {
+    // 停止旧的轮询
+    if (autoRefreshInterval) {
+      clearInterval(autoRefreshInterval);
+      autoRefreshInterval = null;
+    }
+
+    // 尝试使用混合检测（事件驱动优先）
+    try {
+      if (window.electronAPI && typeof window.electronAPI.startHybridDetection === 'function') {
+        await window.electronAPI.startHybridDetection(async (devices: any[]) => {
+          // 设备变化回调
+          await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+        });
+
+        console.log('✅ [混合检测] 已启动（事件驱动模式）');
+
+        // 监听窗口可见性变化
+        document.addEventListener('visibilitychange', () => {
+          if (window.electronAPI && typeof window.electronAPI.updateWindowVisibility === 'function') {
+            window.electronAPI.updateWindowVisibility(!document.hidden);
+          }
+        });
+
+        return;
+      }
+    } catch (error) {
+      console.warn('[混合检测] 启动失败，降级到轮询模式:', error);
+    }
+
+    // 降级到智能轮询（如果混合检测不可用）
+    console.log('⚠️ [混合检测] 使用智能轮询模式');
+
+    let currentInterval = 1000; // 初始1秒
+    let consecutiveChanges = 0;
+    let lastDeviceCount = 0;
+
+    const poll = async () => {
+      try {
+        const oldDeviceCount = lastDeviceCount;
+        await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+
+        const currentDeviceCount = devicesList?.children.length || 0;
+        const hasChanged = currentDeviceCount !== oldDeviceCount;
+
+        if (hasChanged) {
+          consecutiveChanges++;
+          currentInterval = 2000;
+        } else {
+          consecutiveChanges = Math.max(0, consecutiveChanges - 1);
+
+          if (currentDeviceCount === 0) {
+            currentInterval = 30000;
+          } else if (consecutiveChanges === 0) {
+            currentInterval = 10000;
+          }
+        }
+
+        if (consecutiveChanges > 3) {
+          consecutiveChanges = 0;
+          currentInterval = 10000;
+        }
+
+        if (document.hidden) {
+          currentInterval = 60000;
+        }
+
+        lastDeviceCount = currentDeviceCount;
+        autoRefreshInterval = setTimeout(poll, currentInterval);
+      } catch (error) {
+        console.error('[智能轮询] 检测失败:', error);
+        autoRefreshInterval = setTimeout(poll, 10000);
+      }
+    };
+
+    poll();
   }
 
   // 监听托盘操作

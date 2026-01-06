@@ -80,6 +80,12 @@
       "description": "NTFS 檔案系統驅動，提供 NTFS 讀寫支援",
       "installGuide": "需要先安裝 Homebrew 和 MacFUSE。在終端執行上述命令即可安裝。"
     },
+    "fswatch": {
+      "name": "fswatch (可選)",
+      "description": "檔案系統事件監控工具，用於實現零延遲的設備檢測（事件驅動模式）",
+      "installCommand": "brew install fswatch",
+      "installGuide": "fswatch 是可選的效能優化工具。安裝後可實現零延遲的設備檢測，CPU使用率降低90%+。執行上述命令即可安裝。"
+    },
     "macosVersion": {
       "name": "macOS 版本 ({version})",
       "description": "系統版本檢查，確保 macOS 版本滿足要求（需要 macOS 14 或更高版本）",
