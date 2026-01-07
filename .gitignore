@@ -8,6 +8,7 @@ yarn-error.log*
 dist/
 build/
 out/
+.electron-cache/
 
 # macOS
 .DS_Store
