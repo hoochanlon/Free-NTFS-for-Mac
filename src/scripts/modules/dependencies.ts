@@ -151,8 +151,8 @@
         const statusText = dep.isVersion
           ? (dep.status ? t('dependencies.versionSatisfied') : t('dependencies.versionUnsatisfied'))
           : (dep.status
-              ? (isOptional ? '已安装（可选）' : t('dependencies.installed'))
-              : (isOptional ? '未安装（可选，建议安装）' : t('dependencies.missing')));
+              ? (isOptional ? t('dependencies.installedOptional') : t('dependencies.installed'))
+              : (isOptional ? t('dependencies.missingOptional') : t('dependencies.missing')));
 
         // 如果dep.name为空，使用info.name（用于macOS版本）
         const displayName = dep.name || info.name;
