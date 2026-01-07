@@ -20,11 +20,35 @@ export class EventDrivenDetector {
   }
 
   /**
+   * 获取正确的 PATH 环境变量（包含 Homebrew 路径）
+   */
+  private getEnvWithPath(): NodeJS.ProcessEnv {
+    const defaultPaths = [
+      '/usr/local/bin',
+      '/opt/homebrew/bin',
+      '/usr/bin',
+      '/bin',
+      '/usr/sbin',
+      '/sbin'
+    ];
+    const existingPath = process.env.PATH || '';
+    const pathArray = existingPath ? existingPath.split(':') : [];
+    // 合并并去重
+    const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
+
+    return {
+      ...process.env,
+      PATH: mergedPaths.join(':')
+    };
+  }
+
+  /**
    * 检查 fswatch 是否可用
    */
   async checkFswatchAvailable(): Promise<boolean> {
     return new Promise((resolve) => {
-      const check = spawn('which', ['fswatch']);
+      const env = this.getEnvWithPath();
+      const check = spawn('which', ['fswatch'], { env });
       check.on('close', (code) => {
         resolve(code === 0);
       });
@@ -77,11 +101,12 @@ export class EventDrivenDetector {
         // -1: 只监听一次（配合循环使用）
         // -r: 递归监控
         // -E: 只监控目录创建/删除事件
+        const env = this.getEnvWithPath();
         this.fswatchProcess = spawn('fswatch', [
           '-o',           // 只输出事件数量
           '-1',           // 只监听一次（配合循环使用）
           '/Volumes'      // 监控挂载点目录
-        ]);
+        ], { env });
 
         // 监听标准输出（事件触发）
         this.fswatchProcess.stdout?.on('data', () => {

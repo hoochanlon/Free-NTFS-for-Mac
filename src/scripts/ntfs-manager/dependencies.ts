@@ -136,8 +136,27 @@ export async function checkDependencies(): Promise<Dependencies> {
     // 检查 fswatch（可选，用于事件驱动检测）
     if (result.brew) {
       try {
+        // 确保 PATH 包含 Homebrew 路径（合并现有 PATH 和默认路径）
+        const defaultPaths = [
+          '/usr/local/bin',
+          '/opt/homebrew/bin',
+          '/usr/bin',
+          '/bin',
+          '/usr/sbin',
+          '/sbin'
+        ];
+        const existingPath = process.env.PATH || '';
+        const pathArray = existingPath ? existingPath.split(':') : [];
+        // 合并并去重
+        const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
+
+        const env = {
+          ...process.env,
+          PATH: mergedPaths.join(':')
+        };
+
         const fswatchResult = await Promise.race([
-          execAsync('which fswatch 2>/dev/null'),
+          execAsync('which fswatch 2>/dev/null', { env }),
           new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
         ]);
         result.fswatch = (fswatchResult as { stdout: string }).stdout.trim().length > 0;
