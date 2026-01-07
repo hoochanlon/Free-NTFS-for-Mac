@@ -77,6 +77,19 @@ export function setupAboutPanel(): void {
   });
 }
 
+// 确保窗口可见的辅助函数（如果窗口被最小化或隐藏，先恢复并显示）
+function ensureWindowVisible(): void {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore();
+    }
+    if (!mainWindow.isVisible()) {
+      mainWindow.show();
+    }
+    mainWindow.focus();
+  }
+}
+
 // 配置应用菜单
 export async function setupApplicationMenu(): Promise<void> {
   // 获取当前语言设置
@@ -107,6 +120,8 @@ export async function setupApplicationMenu(): Promise<void> {
         {
           label: t('menu.about') || t('app.about') || '关于',
           click: async () => {
+            // 确保窗口可见（如果被最小化，先恢复）
+            ensureWindowVisible();
             // 通过 IPC 发送事件到渲染进程显示关于对话框
             if (mainWindow && !mainWindow.isDestroyed()) {
               mainWindow.webContents.send('show-about-dialog');
@@ -173,9 +188,10 @@ export async function setupApplicationMenu(): Promise<void> {
         {
           label: t('menu.guide') || t('tabs.help') || '指南手册',
           click: async () => {
+            // 确保窗口可见（如果被最小化，先恢复）
+            ensureWindowVisible();
             if (mainWindow && !mainWindow.isDestroyed()) {
               mainWindow.webContents.send('switch-tab', 'help');
-              mainWindow.focus();
             }
           }
         },
