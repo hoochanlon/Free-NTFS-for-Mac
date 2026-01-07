@@ -1,7 +1,7 @@
 import { app, Menu, shell } from 'electron';
 import { openAboutWindow } from './about-window';
 import { SettingsManager } from './utils/settings';
-import { mainWindow } from './window-manager';
+import { mainWindow, createMainWindow } from './window-manager';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -77,17 +77,65 @@ export function setupAboutPanel(): void {
   });
 }
 
-// 确保窗口可见的辅助函数（如果窗口被最小化或隐藏，先恢复并显示）
-function ensureWindowVisible(): void {
+// 确保窗口可见的辅助函数（如果窗口被最小化或隐藏，先恢复并显示；如果窗口不存在，则创建）
+// 返回 true 表示窗口是新创建的，需要等待页面加载完成
+async function ensureWindowVisible(): Promise<boolean> {
+  const wasNewlyCreated = !mainWindow || mainWindow.isDestroyed();
+
+  // 如果窗口不存在或已销毁，重新创建窗口
+  if (wasNewlyCreated) {
+    await createMainWindow();
+    // 等待页面加载完成，确保可以接收 IPC 消息
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      await new Promise<void>((resolve) => {
+        if (!mainWindow || mainWindow.isDestroyed()) {
+          resolve();
+          return;
+        }
+
+        // 如果页面已经加载完成，立即解析
+        if (!mainWindow.webContents.isLoading()) {
+          // 额外等待一小段时间，确保 DOM 和 JavaScript 都已准备好
+          setTimeout(() => resolve(), 200);
+          return;
+        }
+
+        // 等待 DOM 准备好（比 did-finish-load 更早，但足够接收 IPC 消息）
+        const onDomReady = () => {
+          setTimeout(() => resolve(), 200);
+        };
+
+        // 如果 DOM 已经准备好，立即执行
+        if (mainWindow.webContents.getURL() && !mainWindow.webContents.isLoading()) {
+          onDomReady();
+        } else {
+          mainWindow.webContents.once('dom-ready', onDomReady);
+          // 设置超时，避免无限等待
+          setTimeout(() => {
+            mainWindow?.webContents.removeListener('dom-ready', onDomReady);
+            resolve();
+          }, 3000);
+        }
+      });
+    }
+    return true;
+  }
+
+  // 如果窗口被最小化，先恢复
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isMinimized()) {
+    mainWindow.restore();
+  }
+
+  // 如果窗口被隐藏，显示窗口
+  if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible()) {
+    mainWindow.show();
+  }
+
+  // 聚焦窗口
   if (mainWindow && !mainWindow.isDestroyed()) {
-    if (mainWindow.isMinimized()) {
-      mainWindow.restore();
-    }
-    if (!mainWindow.isVisible()) {
-      mainWindow.show();
-    }
     mainWindow.focus();
   }
+  return false;
 }
 
 // 配置应用菜单
@@ -120,8 +168,10 @@ export async function setupApplicationMenu(): Promise<void> {
         {
           label: t('menu.about') || t('app.about') || '关于',
           click: async () => {
-            // 确保窗口可见（如果被最小化，先恢复）
-            ensureWindowVisible();
+            // 确保窗口可见（如果被最小化或隐藏，先恢复；如果不存在，则创建）
+            await ensureWindowVisible();
+            // 等待一小段时间，确保页面完全准备好
+            await new Promise(resolve => setTimeout(resolve, 100));
             // 通过 IPC 发送事件到渲染进程显示关于对话框
             if (mainWindow && !mainWindow.isDestroyed()) {
               mainWindow.webContents.send('show-about-dialog');
@@ -188,8 +238,10 @@ export async function setupApplicationMenu(): Promise<void> {
         {
           label: t('menu.guide') || t('tabs.help') || '指南手册',
           click: async () => {
-            // 确保窗口可见（如果被最小化，先恢复）
-            ensureWindowVisible();
+            // 确保窗口可见（如果被最小化或隐藏，先恢复；如果不存在，则创建）
+            await ensureWindowVisible();
+            // 等待一小段时间，确保页面完全准备好
+            await new Promise(resolve => setTimeout(resolve, 100));
             if (mainWindow && !mainWindow.isDestroyed()) {
               mainWindow.webContents.send('switch-tab', 'help');
             }
