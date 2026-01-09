@@ -310,7 +310,7 @@
         const ul = document.createElement('ul');
         const items = [
           { label: t('about.author') || '作者：', value: 'Hoochanlon' },
-          { label: t('about.version') || '软件版本：', value: 'Nigate v1.3.1' },
+          { label: t('about.version') || '软件版本：', value: 'Nigate v1.3.2' },
           { label: t('about.technology') || '基于技术：', value: 'Electron + Shell + TypeScript + Stylus' }
         ];
         items.forEach(item => {
@@ -329,8 +329,7 @@
 
         const links = [
           { href: 'https://github.com/hoochanlon/Free-NTFS-for-Mac', icon: '../imgs/svg/github.svg', title: t('about.projectLink') || '项目地址' },
-          { href: 'mailto:hoochanlon@outlook.com', icon: '../imgs/svg/email.svg', title: t('about.email') || '邮箱' },
-          { href: 'https://bsky.app/profile/hoochanlon', icon: '../imgs/svg/bluesky.svg', title: t('about.bluesky') || 'Bluesky' }
+          { href: 'mailto:hoochanlon@outlook.com', icon: '../imgs/svg/email.svg', title: t('about.email') || '邮箱' }
         ];
 
         links.forEach(linkData => {

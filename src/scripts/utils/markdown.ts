@@ -161,15 +161,6 @@
                     });
                   }
 
-                  // 匹配 Bluesky
-                  const blueskyMatch = listHtml.match(/<a href="(https:\/\/bsky\.app\/[^"]+)">([^<]+)<\/a>/);
-                  if (blueskyMatch) {
-                    links.push({
-                      url: blueskyMatch[1],
-                      icon: '../imgs/svg/bluesky.svg',
-                      alt: 'Bluesky'
-                    });
-                  }
 
                   // 生成图标链接 HTML
                   const iconsHtml = links.map(link => {
