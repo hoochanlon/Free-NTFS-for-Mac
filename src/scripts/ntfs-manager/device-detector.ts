@@ -211,10 +211,16 @@ export class DeviceDetector {
 
       const lines = stdout.trim().split('\n').filter(line => line.length > 0 && (line.toLowerCase().includes('ntfs') || line.toLowerCase().includes('fuse')));
 
+      console.log('[设备检测] mount 输出匹配到的行数:', lines.length);
+      console.log('[设备检测] mount 输出匹配到的行:', lines);
+
       const devices: NTFSDevice[] = [];
       for (const line of lines) {
         const parts = line.split(' on ');
-        if (parts.length !== 2) continue;
+        if (parts.length !== 2) {
+          console.warn('[设备检测] 跳过无效行（无法分割）:', line);
+          continue;
+        }
 
         const devicePath = parts[0].trim();
         const rest = parts[1].trim();
@@ -222,7 +228,10 @@ export class DeviceDetector {
         const volumeMatch = rest.match(/^(\/Volumes\/[^\s(]+)/);
         const optionsMatch = rest.match(/\(([^)]+)\)/);
 
-        if (!volumeMatch) continue;
+        if (!volumeMatch) {
+          console.warn('[设备检测] 跳过无效行（无法匹配卷名）:', line);
+          continue;
+        }
 
         const volume = volumeMatch[1].trim();
         const volumeName = volume.replace('/Volumes/', '');
@@ -284,6 +293,16 @@ export class DeviceDetector {
           capacity = undefined;
         }
 
+        console.log('[设备检测] 添加设备:', {
+          disk,
+          volumeName,
+          volume,
+          devicePath,
+          isReadOnly: finalIsReadOnly,
+          isMounted: deviceIsMounted,
+          hasCapacity: !!capacity
+        });
+
         devices.push({
           disk,
           devicePath,
@@ -298,6 +317,9 @@ export class DeviceDetector {
         // 如果设备已挂载，从已卸载设备列表中移除
         this.unmountedDevices.delete(disk);
       }
+
+      console.log('[设备检测] 最终检测到的设备数量:', devices.length);
+      console.log('[设备检测] 设备列表:', devices.map(d => ({ disk: d.disk, volumeName: d.volumeName })));
 
       // 检查已卸载的设备是否仍然存在
       for (const [disk, unmountedDevice] of this.unmountedDevices.entries()) {
