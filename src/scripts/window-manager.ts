@@ -561,3 +561,4 @@ export async function showMainWindowAndCloseTray(): Promise<void> {
     await createMainWindow();
   }
 }
+

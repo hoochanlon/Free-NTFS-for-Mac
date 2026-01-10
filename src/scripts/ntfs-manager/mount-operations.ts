@@ -29,7 +29,7 @@ export class MountOperations {
   // 卸载设备
   async unmountDevice(device: NTFSDevice): Promise<string> {
     try {
-      const password = await this.passwordManager.getPassword(`卸载设备 ${device.volumeName}`);
+      const password = await this.passwordManager.getPassword('messages.passwordDialog.unmountDevice', { name: device.volumeName });
       await this.sudoExecutor.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
       this.mountedDevices.delete(device.disk);
       fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
@@ -46,7 +46,7 @@ export class MountOperations {
       if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
         try {
           // 删除保存的密码后，重新获取
-          const password = await this.passwordManager.getPassword(`卸载设备 ${device.volumeName}`);
+          const password = await this.passwordManager.getPassword('messages.passwordDialog.unmountDevice', { name: device.volumeName });
           await this.sudoExecutor.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
           this.mountedDevices.delete(device.disk);
           fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
@@ -114,7 +114,7 @@ export class MountOperations {
   // 还原设备为只读模式
   async restoreToReadOnly(device: NTFSDevice): Promise<string> {
     try {
-      const password = await this.passwordManager.getPassword(`还原设备 ${device.volumeName} 为只读模式`);
+      const password = await this.passwordManager.getPassword('messages.passwordDialog.restoreToReadOnly', { name: device.volumeName });
 
       // 先卸载当前挂载
       try {
@@ -122,7 +122,7 @@ export class MountOperations {
       } catch (error: any) {
         // 如果密码错误，重新获取密码
         if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
-          const retryPassword = await this.passwordManager.getPassword(`还原设备 ${device.volumeName} 为只读模式`);
+          const retryPassword = await this.passwordManager.getPassword('messages.passwordDialog.restoreToReadOnly', { name: device.volumeName });
           try {
             await this.sudoExecutor.executeSudoWithPassword(['umount', '-f', device.devicePath], retryPassword);
           } catch {
@@ -184,14 +184,14 @@ export class MountOperations {
     }
 
     try {
-      let password = await this.passwordManager.getPassword(`挂载设备 ${device.volumeName} 为读写模式`);
+      let password = await this.passwordManager.getPassword('messages.passwordDialog.mountDevice', { name: device.volumeName });
 
       try {
         await this.sudoExecutor.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
       } catch (error: any) {
         // 如果密码错误，重新获取密码
         if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
-          password = await this.passwordManager.getPassword(`挂载设备 ${device.volumeName} 为读写模式`);
+          password = await this.passwordManager.getPassword('messages.passwordDialog.mountDevice', { name: device.volumeName });
           try {
             await this.sudoExecutor.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
           } catch {
@@ -214,24 +214,39 @@ export class MountOperations {
         device.volume
       ];
 
-      try {
-        const mountPromise = this.sudoExecutor.executeSudoWithPassword(mountArgs, password);
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('挂载操作超时（10秒），操作已取消以防止卡死。可能的原因：1) 文件系统处于脏状态（如果该 NTFS 设备之前在 Windows 电脑上使用过，且 Windows 启用了快速启动功能，请将设备插回 Windows 电脑并完全关闭后再试）；2) 设备被其他程序占用；3) 系统权限问题。')), 10000);
-        });
+      let retryCount = 0;
+      const maxRetries = 1; // 最多重试1次
 
-        await Promise.race([mountPromise, timeoutPromise]);
-      } catch (error: any) {
-        // 如果密码错误，重新获取密码并重试
-        if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
-          password = await this.passwordManager.getPassword(`挂载设备 ${device.volumeName} 为读写模式`);
+      while (retryCount <= maxRetries) {
+        try {
+          console.log(`[MountOperations] 尝试挂载设备 ${device.volumeName} (尝试 ${retryCount + 1}/${maxRetries + 1})`);
           const mountPromise = this.sudoExecutor.executeSudoWithPassword(mountArgs, password);
           const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('挂载超时（10秒）。可能是 Windows 快速启动导致文件系统处于脏状态。建议在 Windows 中完全关闭（而非休眠），或禁用快速启动功能。')), 10000);
+            setTimeout(() => reject(new Error('挂载操作超时（10秒），操作已取消以防止卡死。可能的原因：1) 文件系统处于脏状态（如果该 NTFS 设备之前在 Windows 电脑上使用过，且 Windows 启用了快速启动功能，请将设备插回 Windows 电脑并完全关闭后再试）；2) 设备被其他程序占用；3) 系统权限问题。')), 10000);
           });
+
           await Promise.race([mountPromise, timeoutPromise]);
-        } else {
-          throw error;
+          // 如果成功，跳出循环
+          break;
+        } catch (error: any) {
+          const errorMessage = error.message || String(error);
+          console.error(`[MountOperations] 挂载失败 (尝试 ${retryCount + 1}):`, errorMessage);
+
+          // 检查是否是密码错误
+          const isPasswordError = errorMessage.includes('密码错误') ||
+                                  errorMessage.includes('password is incorrect') ||
+                                  errorMessage.includes('Sorry, try again') ||
+                                  errorMessage.includes('密码不能为空');
+
+          if (isPasswordError && retryCount < maxRetries) {
+            // 如果是密码错误且还有重试次数，重新获取密码
+            console.log('[MountOperations] 密码错误，重新获取密码...');
+            password = await this.passwordManager.getPassword('messages.passwordDialog.mountDeviceRetry', { name: device.volumeName });
+            retryCount++;
+          } else {
+            // 如果不是密码错误，或者已经达到最大重试次数，抛出错误
+            throw error;
+          }
         }
       }
 
