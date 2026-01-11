@@ -87,22 +87,13 @@
 
     const refreshDevicesBtn = document.getElementById('refreshDevicesBtn');
     if (refreshDevicesBtn) {
-      // 更新标题（使用 tray.refreshDevices 作为完整描述，devices.refreshDevices 作为简短文本）
+      // 更新标题（只更新 title，不更新内容，因为只有图标）
       const titleText = t('tray.refreshDevices') || t('devices.refreshDevices');
       refreshDevicesBtn.title = titleText;
-      // 更新文本（保留图标和结构）
+      // 确保只有图标（如果没有图标，添加图标）
       const icon = refreshDevicesBtn.querySelector('.btn-icon');
-      const textSpan = refreshDevicesBtn.querySelector('span[data-i18n], span:not(.btn-icon)');
-      const refreshText = t('devices.refreshDevices');
-      if (textSpan) {
-        textSpan.textContent = refreshText;
-      } else {
-        // 如果没有找到文本span，直接更新整个按钮内容（保留图标）
-        if (icon) {
-          refreshDevicesBtn.innerHTML = icon.outerHTML + ' <span>' + refreshText + '</span>';
-        } else {
-          refreshDevicesBtn.innerHTML = '<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon"> <span>' + refreshText + '</span>';
-        }
+      if (!icon) {
+        refreshDevicesBtn.innerHTML = '<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">';
       }
     }
 

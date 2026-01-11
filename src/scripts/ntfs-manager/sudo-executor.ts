@@ -31,18 +31,44 @@ export class SudoExecutor {
         stderr += data.toString();
       });
 
-      // 等待一小段时间确保进程已启动，然后写入密码
-      setTimeout(() => {
-        if (childProcess.stdin && !passwordWritten) {
+      // 监听 stdin 错误，避免 EPIPE 错误
+      childProcess.stdin?.on('error', (error: Error) => {
+        // EPIPE 错误通常是因为进程已关闭，这是正常的
+        if (error.message.includes('EPIPE')) {
+          console.log('[SudoExecutor] stdin 管道已关闭（正常情况）');
+        } else {
+          console.error('[SudoExecutor] stdin 错误:', error);
+        }
+      });
+
+      // 等待进程准备好接收输入，然后写入密码
+      const writePassword = () => {
+        if (childProcess.stdin && !passwordWritten && !childProcess.stdin.destroyed) {
           try {
-            childProcess.stdin.write(password + '\n');
-            passwordWritten = true;
-            childProcess.stdin.end();
-          } catch (error) {
-            console.error('[SudoExecutor] 写入密码失败:', error);
+            if (childProcess.stdin.writable) {
+              childProcess.stdin.write(password + '\n', (error) => {
+                if (error) {
+                  console.error('[SudoExecutor] 写入密码失败:', error);
+                } else {
+                  passwordWritten = true;
+                  childProcess.stdin?.end();
+                }
+              });
+            } else {
+              // 如果不可写，稍后重试
+              setTimeout(writePassword, 50);
+            }
+          } catch (error: any) {
+            // EPIPE 错误可以忽略，说明进程已关闭
+            if (error.code !== 'EPIPE') {
+              console.error('[SudoExecutor] 写入密码异常:', error);
+            }
           }
         }
-      }, 100);
+      };
+
+      // 立即尝试写入，如果失败则稍后重试
+      setTimeout(writePassword, 50);
 
       const timeout = setTimeout(() => {
         try {
@@ -66,12 +92,33 @@ export class SudoExecutor {
         if (code === 0) {
           resolve({ stdout, stderr });
         } else {
-          // 检查是否是密码错误（更严格的检查）
+          // 检查是否是密码错误（更全面和严格的检查）
           const stderrLower = stderr.toLowerCase();
-          const isPasswordError = stderrLower.includes('password is incorrect') ||
-                                  stderrLower.includes('sorry, try again') ||
-                                  stderrLower.includes('incorrect password') ||
-                                  (code === 1 && stderrLower.includes('password'));
+          const stdoutLower = stdout.toLowerCase();
+          const allOutput = (stderr + ' ' + stdout).toLowerCase();
+
+          // macOS sudo 密码错误的常见提示（包括中英文）
+          const isPasswordError =
+            stderrLower.includes('password is incorrect') ||
+            stderrLower.includes('sorry, try again') ||
+            stderrLower.includes('incorrect password') ||
+            stderrLower.includes('password incorrect') ||
+            stderrLower.includes('wrong password') ||
+            stderrLower.includes('authentication failure') ||
+            stderrLower.includes('authentication failed') ||
+            allOutput.includes('password is incorrect') ||
+            allOutput.includes('sorry, try again') ||
+            allOutput.includes('incorrect password') ||
+            // 中文错误提示
+            stderrLower.includes('密码错误') ||
+            stderrLower.includes('密码不正确') ||
+            allOutput.includes('密码错误') ||
+            allOutput.includes('密码不正确') ||
+            // 日文错误提示
+            stderrLower.includes('パスワードが間違っています') ||
+            allOutput.includes('パスワードが間違っています') ||
+            // 如果退出码是1且输出中包含password相关关键词
+            (code === 1 && (stderrLower.includes('password') || stdoutLower.includes('password')));
 
           if (isPasswordError) {
             // 如果密码错误，删除保存的密码
@@ -91,7 +138,9 @@ export class SudoExecutor {
             console.error('[SudoExecutor] 命令执行失败:', {
               code,
               error: errorMsg,
-              args: args.join(' ')
+              args: args.join(' '),
+              stderr: stderr.substring(0, 200),
+              stdout: stdout.substring(0, 200)
             });
             reject(new Error(errorMsg));
           }

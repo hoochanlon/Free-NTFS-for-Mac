@@ -232,10 +232,10 @@
     "enterPassword": "ヒント：表示されたダイアログで管理者パスワードを入力してください",
     "passwordDialog": {
       "title": "管理者権限が必要です",
-      "prompt": "管理者パスワードを入力してください：",
+      "prompt": "Macアカウントのログインパスワードを入力してください：",
       "cancel": "キャンセル",
       "confirm": "OK",
-      "passwordEmpty": "パスワードを空にすることはできません",
+      "passwordEmpty": "パスワードを空にすることはできません、またはスペースを含めることはできません",
       "passwordParseError": "パスワード入力結果を解析できません：パスワードが空です",
       "userCancelled": "ユーザーがパスワード入力をキャンセルしました",
       "getPasswordFailed": "パスワードの取得に失敗しました",

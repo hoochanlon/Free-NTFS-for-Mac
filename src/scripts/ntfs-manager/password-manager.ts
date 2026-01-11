@@ -5,6 +5,8 @@ import { app } from 'electron';
 import { execAsync } from './utils';
 import { KeychainManager } from '../utils/keychain';
 import { SettingsManager } from '../utils/settings';
+import { SudoExecutor } from './sudo-executor';
+import { createPasswordDialog } from '../utils/password-dialog-window';
 
 // 翻译缓存
 let translations: Record<string, any> = {};
@@ -123,97 +125,96 @@ export class PasswordManager {
       const cancelButton = t('messages.passwordDialog.cancel');
       const confirmButton = t('messages.passwordDialog.confirm');
 
-      const escapedPrompt = defaultPrompt.replace(/"/g, '\\"').replace(/\n/g, ' ');
-      const escapedPasswordPrompt = passwordPrompt.replace(/"/g, '\\"').replace(/\n/g, ' ');
-      const scriptPath = `/tmp/ntfs_password_${Date.now()}.scpt`;
-      // 改进的 AppleScript：明确区分取消和空密码
-      const script = `try
-  tell application "System Events"
-    activate
-  end tell
-  tell application "System Events"
-    set theAnswer to display dialog "${escapedPrompt}" & return & return & "${escapedPasswordPrompt}" default answer "" with hidden answer buttons {"${cancelButton}", "${confirmButton}"} default button "${confirmButton}" with icon caution
-    set buttonPressed to button returned of theAnswer
-    set passwordText to text returned of theAnswer
+      // 使用自定义密码对话框（支持显示/隐藏密码）
+      const password = await createPasswordDialog({
+        title: defaultPrompt,
+        message: passwordPrompt,
+        label: passwordPrompt,
+        cancelText: cancelButton,
+        confirmText: confirmButton,
+        emptyPasswordText: t('messages.passwordDialog.passwordEmpty')
+      });
 
-    if buttonPressed is "${cancelButton}" then
-      return "CANCELED"
-    else if passwordText is "" then
-      return "EMPTY"
-    else
-      return passwordText
-    end if
-  end tell
-on error errorMessage
-  if errorMessage contains "canceled" or errorMessage contains "取消" or errorMessage contains "キャンセル" then
-    return "CANCELED"
-  else
-    return "ERROR:" & errorMessage
-  end if
-end try`;
-
-      await fs.writeFile(scriptPath, script);
-
-      try {
-        const result = await execAsync(`osascript "${scriptPath}"`) as { stdout: string; stderr?: string };
-        const output = (result.stdout || '').trim();
-        const errorOutput = (result.stderr || '').trim();
-
-        // 检查是否是用户取消
-        if (output === 'CANCELED' ||
-            errorOutput.toLowerCase().includes('user canceled') ||
-            errorOutput.toLowerCase().includes('用户取消了') ||
-            errorOutput.toLowerCase().includes('キャンセル') ||
-            output.toLowerCase().includes('canceled')) {
-          throw new Error(t('messages.passwordDialog.userCancelled'));
-        }
-
-        // 检查是否是空密码
-        if (output === 'EMPTY' || output === '') {
-          throw new Error(t('messages.passwordDialog.passwordEmpty'));
-        }
-
-        // 检查是否是错误
-        if (output.startsWith('ERROR:')) {
-          const errorMsg = output.substring(6);
-          if (errorMsg.toLowerCase().includes('cancel') ||
-              errorMsg.toLowerCase().includes('取消') ||
-              errorMsg.toLowerCase().includes('キャンセル')) {
-            throw new Error(t('messages.passwordDialog.userCancelled'));
-          }
-          throw new Error(`AppleScript error: ${errorMsg}`);
-        }
-
-        // 提取密码（去除可能的引号）
-        let password = output;
-        // 移除首尾引号（如果存在）
-        if ((password.startsWith('"') && password.endsWith('"')) ||
-            (password.startsWith("'") && password.endsWith("'"))) {
-          password = password.slice(1, -1);
-        }
-        password = password.trim();
-
-        // 验证密码不为空
-        if (!password || password.length === 0) {
-          throw new Error(t('messages.passwordDialog.passwordEmpty'));
-        }
-
-        console.log('[PasswordManager] 成功获取密码，长度:', password.length);
-
-        // 如果设置允许保存密码，保存新输入的密码
-        if (settings.savePassword && password) {
-          try {
-            await KeychainManager.savePassword(password);
-            console.log('[PasswordManager] 密码已保存到 Keychain');
-          } catch (error) {
-            console.warn('[PasswordManager] 保存密码失败:', error);
-          }
-        }
-
-        return password;
-      } finally {
-        fs.unlink(scriptPath).catch(() => {});
+      // 检查用户是否取消
+      if (password === null) {
+        throw new Error(t('messages.passwordDialog.userCancelled'));
       }
+
+      // 验证密码不为空或只包含空格
+      const trimmedPassword = password.trim();
+      if (!password || trimmedPassword.length === 0) {
+        throw new Error(t('messages.passwordDialog.passwordEmpty'));
+      }
+
+      // 验证密码中不能包含任何空格
+      if (password.includes(' ')) {
+        throw new Error(t('messages.passwordDialog.passwordEmpty'));
+      }
+
+      // 使用去除前后空格的密码
+      const finalPassword = trimmedPassword;
+
+      console.log('[PasswordManager] 成功获取密码，长度:', finalPassword.length);
+
+      // 验证密码是否正确（使用 sudo -v 验证）
+      // 注意：为了确保每次都验证新密码，我们使用 sudo -K 先清除缓存（不需要密码）
+      // 然后使用 sudo -v 验证密码（需要密码）
+      try {
+        // 先清除 sudo 缓存（使用 execAsync，不需要密码）
+        try {
+          await execAsync('sudo -K');
+        } catch {
+          // 清除缓存失败不影响，继续验证
+        }
+
+        // 然后验证密码（使用 sudo -v，需要密码）
+        const sudoExecutor = new SudoExecutor();
+        await sudoExecutor.executeSudoWithPassword(['-v'], finalPassword);
+        console.log('[PasswordManager] 密码验证成功');
+      } catch (error: any) {
+        const errorMessage = error.message || String(error);
+        const errorString = String(error).toLowerCase();
+        console.log('[PasswordManager] 密码验证失败:', errorMessage);
+
+        // 检查是否是密码错误（更全面的检查）
+        const isPasswordError =
+          errorMessage.includes('密码错误') ||
+          errorMessage.includes('incorrect password') ||
+          errorMessage.includes('Sorry, try again') ||
+          errorMessage.includes('password is incorrect') ||
+          errorMessage.includes('authentication failure') ||
+          errorMessage.includes('authentication failed') ||
+          errorMessage.includes('no password was provided') ||
+          errorMessage.includes('incorrect password attempt') ||
+          errorString.includes('password') && (errorString.includes('incorrect') || errorString.includes('wrong') || errorString.includes('error') || errorString.includes('failed'));
+
+        if (isPasswordError) {
+          // 如果之前保存了密码，删除它
+          if (settings.savePassword) {
+            try {
+              await KeychainManager.deletePassword();
+              console.log('[PasswordManager] 密码错误，已删除保存的密码');
+            } catch (deleteError) {
+              console.warn('[PasswordManager] 删除保存的密码失败:', deleteError);
+            }
+          }
+          throw new Error('密码错误，请重试');
+        }
+        // 其他错误也抛出，让调用者处理
+        throw new Error(`密码验证失败: ${errorMessage}`);
+      }
+
+      // 如果设置允许保存密码，保存新输入的密码（仅在验证成功后）
+      if (settings.savePassword && finalPassword) {
+        try {
+          await KeychainManager.savePassword(finalPassword);
+          console.log('[PasswordManager] 密码已保存到 Keychain');
+        } catch (error) {
+          console.warn('[PasswordManager] 保存密码失败:', error);
+        }
+      }
+
+      return finalPassword;
     } catch (error: any) {
       const cancelText = t('messages.passwordDialog.cancel');
       const errorOutput = error.stderr || '';

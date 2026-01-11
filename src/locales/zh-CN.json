@@ -232,10 +232,10 @@
     "enterPassword": "提示：请在弹出的对话框中输入管理员密码",
     "passwordDialog": {
       "title": "需要管理员权限",
-      "prompt": "请输入您的管理员密码：",
+      "prompt": "请输入你的Mac账户登录密码：",
       "cancel": "取消",
       "confirm": "确定",
-      "passwordEmpty": "密码不能为空",
+      "passwordEmpty": "密码不能为空或包含空格",
       "passwordParseError": "无法解析密码输入结果：密码为空",
       "userCancelled": "用户取消了密码输入",
       "getPasswordFailed": "获取密码失败",

@@ -1144,7 +1144,8 @@
           refreshDevicesBtn.disabled = true;
           const originalHTML = refreshDevicesBtn.innerHTML;
           const refreshingText = t('tray.refreshing') || '刷新中...';
-          refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon"> <span>${refreshingText}</span>`;
+          refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">`;
+          refreshDevicesBtn.title = refreshingText;
           try {
             // 强制刷新设备列表（跳过缓存）
             await refreshDevices(true);
@@ -1156,13 +1157,8 @@
             if (refreshDevicesBtn) {
               refreshDevicesBtn.disabled = false;
               const refreshText = t('devices.refreshDevices') || '刷新';
-              refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon"> <span data-i18n="devices.refreshDevices">${refreshText}</span>`;
+              refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">`;
               refreshDevicesBtn.title = refreshText;
-              // 触发国际化更新
-              const AppUtils = (window as any).AppUtils;
-              if (AppUtils?.I18n?.init) {
-                AppUtils.I18n.init();
-              }
             }
           }
         }
