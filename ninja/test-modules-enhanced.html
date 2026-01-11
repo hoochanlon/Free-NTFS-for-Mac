@@ -223,9 +223,10 @@
   </script>
 
   <!-- 加载模块（按顺序） -->
-  <script src="scripts/modules/devices/device-utils.js"></script>
-  <script src="scripts/modules/devices/device-renderer.js"></script>
-  <script src="scripts/modules/devices/device-operations.js"></script>
-  <script src="scripts/modules/devices/device-events.js"></script>
+  <!-- 注意：HTML 文件在 ninja/ 文件夹中，需要使用 ../ 访问项目根目录的 scripts -->
+  <script src="../scripts/modules/devices/device-utils.js"></script>
+  <script src="../scripts/modules/devices/device-renderer.js"></script>
+  <script src="../scripts/modules/devices/device-operations.js"></script>
+  <script src="../scripts/modules/devices/device-events.js"></script>
 </body>
 </html>

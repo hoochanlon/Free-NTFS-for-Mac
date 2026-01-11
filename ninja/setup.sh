@@ -23,9 +23,9 @@ echo -e "${YELLOW}📋 检查必要文件...${NC}"
 REQUIRED_FILES=(
   "package.json"
   "tsconfig.json"
-  "filter-tsc-output.js"
-  "sync-version.js"
-  "build.sh"
+  "ninja/filter-tsc-output.js"
+  "ninja/sync-version.js"
+  "ninja/build.sh"
 )
 
 for file in "${REQUIRED_FILES[@]}"; do
@@ -42,10 +42,10 @@ echo -e "${GREEN}✅ 所有必要文件都存在${NC}"
 # ============================================================
 echo -e "${YELLOW}🔐 设置脚本执行权限...${NC}"
 
-chmod +x build.sh 2>/dev/null || true
-chmod +x sync-version.js 2>/dev/null || true
-chmod +x filter-tsc-output.js 2>/dev/null || true
-chmod +x restart-watch.sh 2>/dev/null || true
+chmod +x ninja/build.sh 2>/dev/null || true
+chmod +x ninja/sync-version.js 2>/dev/null || true
+chmod +x ninja/filter-tsc-output.js 2>/dev/null || true
+chmod +x ninja/restart-watch.sh 2>/dev/null || true
 
 echo -e "${GREEN}✅ 权限设置完成${NC}"
 
@@ -78,12 +78,12 @@ echo -e "${GREEN}✅ 目录结构检查完成${NC}"
 # ============================================================
 echo -e "${YELLOW}🔄 同步版本号...${NC}"
 
-if [ -f "sync-version.js" ]; then
-  node sync-version.js || {
+if [ -f "ninja/sync-version.js" ]; then
+  node ninja/sync-version.js || {
     echo -e "${YELLOW}⚠️  版本号同步失败，继续执行...${NC}"
   }
 else
-  echo -e "${YELLOW}⚠️  sync-version.js 不存在，跳过版本同步${NC}"
+  echo -e "${YELLOW}⚠️  ninja/sync-version.js 不存在，跳过版本同步${NC}"
 fi
 
 # ============================================================

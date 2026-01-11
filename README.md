@@ -46,13 +46,13 @@
 
 
  ```shell
- /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
+ /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
  ```
 
 二、下载到本地，往后开启可直接输入`nigate`
 
 ```shell
-curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
+curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
 ```
 
 ## 快速开始，图形化软件版（Electron）
@@ -110,7 +110,7 @@ pnpm run setup
 或直接运行：
 
 ```bash
-./setup.sh
+./ninja/setup.sh
 ```
 
 这个脚本会自动：
@@ -130,7 +130,7 @@ pnpm run setup
 - **ZIP 文件**：压缩的应用包
 
 **其他打包选项**：
-- 使用 `./build.sh` 脚本进行更灵活的打包
+- 使用 `./ninja/build.sh` 脚本进行更灵活的打包
 - 首次运行可能需要右键点击应用选择"打开"（macOS 安全限制）
 
 ## 故障排除
@@ -201,7 +201,7 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 Copy and paste into a ***terminal with full administrative privileges*** and press Enter:
 
 ```shell
-/bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
+/bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
 ```
 
 **Method 2: Download Locally**
@@ -209,7 +209,7 @@ Copy and paste into a ***terminal with full administrative privileges*** and pre
 After downloading, you can directly type `nigate` to start:
 
 ```shell
-curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
+curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
 ```
 
 ### Quick Start - GUI Version (Electron)
@@ -266,7 +266,7 @@ pnpm run setup
 Or run directly:
 
 ```bash
-./setup.sh
+./ninja/setup.sh
 ```
 
 This script automatically:
@@ -286,7 +286,7 @@ After packaging, the following will be generated in the `dist` directory:
 - **ZIP File**: Compressed application package
 
 **Other Packaging Options**:
-- Use `./build.sh` script for more flexible packaging
+- Use `./ninja/build.sh` script for more flexible packaging
 - First run may require right-clicking the application and selecting "Open" (macOS security restrictions)
 
 ### Troubleshooting
@@ -356,7 +356,7 @@ After packaging, the following will be generated in the `dist` directory:
 ***完全な管理権限を持つターミナル***にコピー＆ペーストして Enter キーを押してください：
 
 ```shell
-/bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/nigate.sh)"
+/bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
 ```
 
 **方法2: ローカルにダウンロード**
@@ -364,7 +364,7 @@ After packaging, the following will be generated in the `dist` directory:
 ダウンロード後、`nigate` と直接入力して起動できます：
 
 ```shell
-curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
+curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
 ```
 
 ### クイックスタート - グラフィカルソフトウェア版（Electron）
@@ -421,7 +421,7 @@ pnpm run setup
 または直接実行：
 
 ```bash
-./setup.sh
+./ninja/setup.sh
 ```
 
 このスクリプトは自動的に：
@@ -441,7 +441,7 @@ pnpm run setup
 - **ZIP ファイル**: 圧縮されたアプリケーションパッケージ
 
 **その他のパッケージングオプション**:
-- `./build.sh` スクリプトを使用してより柔軟なパッケージングを行う
+- `./ninja/build.sh` スクリプトを使用してより柔軟なパッケージングを行う
 - 初回実行時は、アプリケーションを右クリックして「開く」を選択する必要がある場合があります（macOS セキュリティ制限）
 
 ### トラブルシューティング

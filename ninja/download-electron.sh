@@ -101,7 +101,7 @@ if [ $? -eq 0 ]; then
   echo "现在可以重新运行打包命令:"
   echo "  pnpm run build"
   echo "  或"
-  echo "  ./build.sh"
+  echo "  ./ninja/build.sh"
   echo ""
   echo "electron-builder 会自动使用已下载的文件，不需要重新下载。"
 else
