@@ -72,10 +72,13 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 ### 安装步骤
 
-1. **安装依赖**
+1. **克隆项目并初始化**
 
 ```bash
+git clone <repository-url>
+cd Free-NTFS-for-Mac
 pnpm install
+pnpm run setup  # 一键修复常见问题，初始化项目
 ```
 
 2. **运行应用**
@@ -95,6 +98,28 @@ pnpm run dev
 ```bash
 pnpm run build
 ```
+
+### 项目初始化脚本
+
+如果遇到 `pnpm run dev` 报错，运行初始化脚本一键修复：
+
+```bash
+pnpm run setup
+```
+
+或直接运行：
+
+```bash
+./setup.sh
+```
+
+这个脚本会自动：
+- ✅ 检查必要文件是否存在
+- ✅ 设置脚本执行权限
+- ✅ 创建必要的目录结构
+- ✅ 同步版本号
+- ✅ 编译 TypeScript 和 Stylus
+- ✅ 验证关键文件
 
 构建完成后，可在 `dist` 目录找到打包好的应用。
 
@@ -203,10 +228,13 @@ Download and use from [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tag
 
 #### Installation Steps
 
-1. **Install Dependencies**
+1. **Clone and Initialize**
 
 ```bash
+git clone <repository-url>
+cd Free-NTFS-for-Mac
 pnpm install
+pnpm run setup  # One-click fix for common issues, initialize project
 ```
 
 2. **Run Application**
@@ -226,6 +254,28 @@ pnpm run dev
 ```bash
 pnpm run build
 ```
+
+#### Project Setup Script
+
+If you encounter errors with `pnpm run dev`, run the setup script to fix them:
+
+```bash
+pnpm run setup
+```
+
+Or run directly:
+
+```bash
+./setup.sh
+```
+
+This script automatically:
+- ✅ Checks if required files exist
+- ✅ Sets script execution permissions
+- ✅ Creates necessary directory structure
+- ✅ Syncs version numbers
+- ✅ Compiles TypeScript and Stylus
+- ✅ Verifies critical files
 
 After building, you can find the packaged application in the `dist` directory.
 
@@ -333,10 +383,13 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/nigate.sh > ~/P
 
 #### インストール手順
 
-1. **依存関係のインストール**
+1. **プロジェクトのクローンと初期化**
 
 ```bash
+git clone <repository-url>
+cd Free-NTFS-for-Mac
 pnpm install
+pnpm run setup  # 一般的な問題をワンクリックで修正、プロジェクトを初期化
 ```
 
 2. **アプリケーションの実行**
@@ -356,6 +409,28 @@ pnpm run dev
 ```bash
 pnpm run build
 ```
+
+#### プロジェクトセットアップスクリプト
+
+`pnpm run dev` でエラーが発生した場合、セットアップスクリプトを実行して修正：
+
+```bash
+pnpm run setup
+```
+
+または直接実行：
+
+```bash
+./setup.sh
+```
+
+このスクリプトは自動的に：
+- ✅ 必要なファイルが存在するか確認
+- ✅ スクリプトの実行権限を設定
+- ✅ 必要なディレクトリ構造を作成
+- ✅ バージョン番号を同期
+- ✅ TypeScript と Stylus をコンパイル
+- ✅ 重要なファイルを検証
 
 ビルド完了後、`dist` ディレクトリにパッケージ化されたアプリケーションが見つかります。
 

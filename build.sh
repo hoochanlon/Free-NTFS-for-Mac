@@ -93,15 +93,23 @@ if [ "$CLEAN" = true ]; then
 fi
 
 # ============================================================
+# 同步版本号
+# ============================================================
+# 在编译之前，先同步版本号（从 package.json 更新到所有相关文件）
+echo -e "${GREEN}同步版本号...${NC}"
+pnpm run sync-version
+
+# ============================================================
 # 编译源代码
 # ============================================================
 # 在打包之前，需要先编译 TypeScript 和 Stylus
 echo -e "${GREEN}编译 TypeScript 和 Stylus...${NC}"
 # pnpm run build:all: 运行 package.json 中定义的 build:all 脚本
 # 这个脚本会：
+#   - 同步版本号（已在上一步完成）
 #   - 编译 TypeScript (.ts -> .js)
 #   - 编译 Stylus (.styl -> .css)
-pnpm run build:all
+pnpm run build:stylus && pnpm run build:ts
 
 # ============================================================
 # 设置 Electron 下载镜像（可选）

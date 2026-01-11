@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ################################################################################
-# Free NTFS for Mac - NTFS 设备自动挂载脚本 (Multi-language Support)
+# Free NTFS for Mac - NTFS 设备自动挂载脚本
 #
 # 功能说明：
 #   这个脚本会持续监控系统，当检测到 NTFS 格式的 U盘/移动硬盘插入时，
@@ -15,120 +15,12 @@
 # 使用方法：
 #   直接运行: bash nigate.sh
 #   或添加执行权限后: chmod +x nigate.sh && ./nigate.sh
-#   设置语言: LANG=ja bash nigate.sh (日文) 或 LANG=en bash nigate.sh (英文)
 #
 # 注意事项：
 #   - 需要管理员权限（会提示输入密码）
 #   - 首次运行会安装必要的依赖，可能需要一些时间
 #   - 如果设备在 Windows 中使用了快速启动，可能导致挂载失败
 ################################################################################
-
-# ============================================================
-# 多语言支持
-# ============================================================
-
-# 检测系统语言
-detect_language() {
-	# 优先使用环境变量 LANG
-	if [ -n "$LANG" ]; then
-		case "$LANG" in
-			*zh*|*CN*|*TW*)
-				echo "zh"
-				;;
-			*ja*|*JP*)
-				echo "ja"
-				;;
-			*)
-				echo "en"
-				;;
-		esac
-	# 如果没有设置，检测系统默认语言
-	elif [ -n "$LC_ALL" ]; then
-		case "$LC_ALL" in
-			*zh*|*CN*|*TW*)
-				echo "zh"
-				;;
-			*ja*|*JP*)
-				echo "ja"
-				;;
-			*)
-				echo "en"
-				;;
-		esac
-	else
-		# 检测系统语言设置
-		sys_lang=$(defaults read -g AppleLanguages 2>/dev/null | head -1 | sed 's/[",]//g' | cut -d'_' -f1)
-		case "$sys_lang" in
-			zh)
-				echo "zh"
-				;;
-			ja)
-				echo "ja"
-				;;
-			*)
-				echo "en"
-				;;
-		esac
-	fi
-}
-
-# 设置语言
-SCRIPT_LANG=$(detect_language)
-
-# 翻译函数
-t() {
-	local key=$1
-	case "$SCRIPT_LANG" in
-		zh)
-			case "$key" in
-				error_ntfs3g_not_found) echo "错误: 无法找到 ntfs-3g，请确保已正确安装。" ;;
-				partition_unmounted) echo "分区 /dev/$2 已成功卸载。" ;;
-				partition_unmount_failed) echo "分区 /dev/$2 卸载失败，请检查是否还有进程正在使用该分区。" ;;
-				mounting) echo "正在挂载 /dev/$2 到 /Volumes/$3..." ;;
-				warning_mount_timeout) echo "警告: 挂载操作超时（可能是Windows快速启动导致），正在终止..." ;;
-				new_device_readwrite) echo "新设备: $2，已可读写！" ;;
-				error_mount_timeout) echo "错误: 挂载超时。可能是Windows快速启动导致文件系统处于脏状态。" ;;
-				suggestion_fast_boot) echo "建议: 在Windows中完全关闭（而非休眠），或禁用快速启动功能。" ;;
-				error_remount_failed) echo "重新挂载分区 /dev/$2 到 /Volumes/$3 失败（退出码: $4）。" ;;
-				tip_fast_boot) echo "提示: 如果是Windows快速启动问题，请在Windows中完全关闭后再试。" ;;
-				waiting_device) echo "等待NTFS新设备接入" ;;
-				*) echo "$key" ;;
-			esac
-			;;
-		ja)
-			case "$key" in
-				error_ntfs3g_not_found) echo "エラー: ntfs-3g が見つかりません。正しくインストールされていることを確認してください。" ;;
-				partition_unmounted) echo "パーティション /dev/$2 のアンマウントに成功しました。" ;;
-				partition_unmount_failed) echo "パーティション /dev/$2 のアンマウントに失敗しました。パーティションを使用しているプロセスがないか確認してください。" ;;
-				mounting) echo "/dev/$2 を /Volumes/$3 にマウントしています..." ;;
-				warning_mount_timeout) echo "警告: マウント操作がタイムアウトしました（Windows の高速スタートアップが原因の可能性があります）。終了しています..." ;;
-				new_device_readwrite) echo "新しいデバイス: $2、読み書き可能になりました！" ;;
-				error_mount_timeout) echo "エラー: マウントがタイムアウトしました。Windows の高速スタートアップによりファイルシステムがダーティ状態になっている可能性があります。" ;;
-				suggestion_fast_boot) echo "推奨: Windows で完全にシャットダウンする（スリープではなく）、または高速スタートアップ機能を無効にしてください。" ;;
-				error_remount_failed) echo "パーティション /dev/$2 を /Volumes/$3 に再マウントできませんでした（終了コード: $4）。" ;;
-				tip_fast_boot) echo "ヒント: Windows の高速スタートアップの問題の場合は、Windows で完全にシャットダウンしてから再試行してください。" ;;
-				waiting_device) echo "NTFS デバイスの接続を待機中" ;;
-				*) echo "$key" ;;
-			esac
-			;;
-		en|*)
-			case "$key" in
-				error_ntfs3g_not_found) echo "Error: Cannot find ntfs-3g. Please ensure it is properly installed." ;;
-				partition_unmounted) echo "Partition /dev/$2 has been successfully unmounted." ;;
-				partition_unmount_failed) echo "Failed to unmount partition /dev/$2. Please check if any process is still using this partition." ;;
-				mounting) echo "Mounting /dev/$2 to /Volumes/$3..." ;;
-				warning_mount_timeout) echo "Warning: Mount operation timed out (possibly due to Windows Fast Startup). Terminating..." ;;
-				new_device_readwrite) echo "New device: $2, now read-write enabled!" ;;
-				error_mount_timeout) echo "Error: Mount timeout. The filesystem may be in a dirty state due to Windows Fast Startup." ;;
-				suggestion_fast_boot) echo "Suggestion: Fully shut down Windows (not sleep), or disable Fast Startup feature." ;;
-				error_remount_failed) echo "Failed to remount partition /dev/$2 to /Volumes/$3 (exit code: $4)." ;;
-				tip_fast_boot) echo "Tip: If this is a Windows Fast Startup issue, please fully shut down Windows and try again." ;;
-				waiting_device) echo "Waiting for NTFS device connection" ;;
-				*) echo "$key" ;;
-			esac
-			;;
-	esac
-}
 
 # 定义配置函数：检查依赖并挂载 NTFS 设备为读写模式
 config_u_drive(){
@@ -207,7 +99,7 @@ config_u_drive(){
 	# ============================================================
 	# 如果还是找不到，说明安装失败，退出函数并返回错误码 1
 	if [ -z "$NTFS3G_PATH" ] || [ ! -f "/System/Volumes/Data/$NTFS3G_PATH" ]; then
-		t error_ntfs3g_not_found
+		echo "错误: 无法找到 ntfs-3g，请确保已正确安装。"
 		return 1
 	fi
 
@@ -262,9 +154,9 @@ config_u_drive(){
 	    # ============================================================
 	    # $? 是上一个命令的退出码，0 表示成功
 	    if [ $? -eq 0 ]; then
-	        t partition_unmounted "$disk"
+	        echo "分区 /dev/$disk 已成功卸载。"
 	    else
-	        t partition_unmount_failed "$disk"
+	        echo "分区 /dev/$disk 卸载失败，请检查是否还有进程正在使用该分区。"
 	        continue  # 卸载失败，跳过这个设备
 	    fi
 
@@ -272,7 +164,7 @@ config_u_drive(){
 	    # 重新挂载为读写模式
 	    # ============================================================
 	    # 这是最关键的一步：使用 ntfs-3g 将设备挂载为读写模式
-	    t mounting "$disk" "$volume"
+	    echo "正在挂载 /dev/$disk 到 /Volumes/$volume..."
 
 	    # 为了防止挂载操作卡死（比如 Windows 快速启动导致的问题），
 	    # 我们使用超时机制：如果 10 秒内没完成，就终止操作
@@ -319,7 +211,7 @@ config_u_drive(){
 
 	        # 如果 10 秒后进程还在运行，说明超时了，强制终止
 	        if kill -0 $mount_pid 2>/dev/null; then
-	            t warning_mount_timeout
+	            echo "警告: 挂载操作超时（可能是Windows快速启动导致），正在终止..."
 	            sudo kill -9 $mount_pid 2>/dev/null  # kill -9 强制终止
 	            mount_result=124  # 124 是 timeout 的标准退出码
 	        fi
@@ -330,19 +222,19 @@ config_u_drive(){
 	    # ============================================================
 	    if [ $mount_result -eq 0 ]; then
 	        # 退出码 0 表示成功
-	        t new_device_readwrite "$volume"
+	        echo "新设备: ${volume}，已可读写！"
 	        # 创建标记文件，表示这个设备已经处理过了
 	        touch "/tmp/ntfs_mounted_${disk}"
 
 	    elif [ $mount_result -eq 124 ]; then
 	        # 退出码 124 表示超时
-	        t error_mount_timeout
-	        t suggestion_fast_boot
+	        echo "错误: 挂载超时。可能是Windows快速启动导致文件系统处于脏状态。"
+	        echo "建议: 在Windows中完全关闭（而非休眠），或禁用快速启动功能。"
 
 	    else
 	        # 其他退出码表示失败
-	        t error_remount_failed "$disk" "$volume" "$mount_result"
-	        t tip_fast_boot
+	        echo "重新挂载分区 /dev/$disk 到 /Volumes/$volume 失败（退出码: $mount_result）。"
+	        echo "提示: 如果是Windows快速启动问题，请在Windows中完全关闭后再试。"
 	    fi
 
 	    echo '---------'
@@ -356,7 +248,7 @@ config_u_drive(){
 
 echo " "
 echo " "
-t waiting_device
+echo "等待NTFS新设备接入"
 echo " "
 echo '---------'
 echo " "
