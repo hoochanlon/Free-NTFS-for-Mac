@@ -12,7 +12,7 @@
   const AppUtils = (window as any).AppUtils;
 
   // 支持的语言
-  type SupportedLanguage = 'zh-CN' | 'zh-TW' | 'ja' | 'en';
+  type SupportedLanguage = 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'de';
   type LanguageSetting = SupportedLanguage | 'system';
 
   // 当前语言
@@ -23,6 +23,8 @@
     const systemLang = navigator.language;
     if (systemLang.startsWith('ja')) {
       return 'ja';
+    } else if (systemLang.startsWith('de')) {
+      return 'de';
     } else if (systemLang.startsWith('en')) {
       return 'en';
     } else if (systemLang.startsWith('zh-TW') || systemLang.startsWith('zh-Hant')) {

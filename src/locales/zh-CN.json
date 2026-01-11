@@ -194,7 +194,8 @@
       "zh-CN": "简体中文",
       "zh-TW": "繁體中文",
       "ja": "日本語",
-      "en": "English"
+      "en": "English",
+      "de": "Deutsch"
     },
     "trayMode": "托盘模式",
     "trayModeDesc": "启用后，关闭窗口时不会退出应用，而是最小化到系统托盘。可以通过托盘图标快速管理 NTFS 设备。",
@@ -238,7 +239,7 @@
       "prompt": "请输入你的Mac账户登录密码：",
       "cancel": "取消",
       "confirm": "确定",
-      "passwordEmpty": "密码不能为空或包含空格",
+      "passwordEmpty": "密码不能为空",
       "passwordParseError": "无法解析密码输入结果：密码为空",
       "userCancelled": "用户取消了密码输入",
       "getPasswordFailed": "获取密码失败",

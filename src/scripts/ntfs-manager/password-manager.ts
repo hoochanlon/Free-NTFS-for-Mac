@@ -140,19 +140,13 @@ export class PasswordManager {
         throw new Error(t('messages.passwordDialog.userCancelled'));
       }
 
-      // 验证密码不为空或只包含空格
-      const trimmedPassword = password.trim();
-      if (!password || trimmedPassword.length === 0) {
+      // 验证密码不为空或只包含空格（仅用于验证，不修改密码）
+      if (!password || password.trim().length === 0) {
         throw new Error(t('messages.passwordDialog.passwordEmpty'));
       }
 
-      // 验证密码中不能包含任何空格
-      if (password.includes(' ')) {
-        throw new Error(t('messages.passwordDialog.passwordEmpty'));
-      }
-
-      // 使用去除前后空格的密码
-      const finalPassword = trimmedPassword;
+      // 保留密码的所有字符，包括前后空格和中间空格
+      const finalPassword = password;
 
       console.log('[PasswordManager] 成功获取密码，长度:', finalPassword.length);
 

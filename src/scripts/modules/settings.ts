@@ -114,7 +114,7 @@
         if (languageSelect) {
           languageSelect.addEventListener('change', async () => {
             try {
-              const newLanguage = languageSelect.value as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system';
+              const newLanguage = languageSelect.value as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'de' | 'system';
               await electronAPI.saveSettings({ language: newLanguage });
               // 切换语言
               if (AppUtils && AppUtils.I18n) {

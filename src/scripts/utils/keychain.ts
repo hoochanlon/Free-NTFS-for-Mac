@@ -39,7 +39,9 @@ export class KeychainManager {
     try {
       const command = `security find-generic-password -a "${KEYCHAIN_SERVICE}" -s "${KEYCHAIN_SERVICE}" -w`;
       const { stdout } = await exec(command);
-      return stdout.trim();
+      // 保留密码的所有字符，包括前后空格
+      // 只去除末尾的换行符（security 命令会自动添加）
+      return stdout.replace(/\n$/, '');
     } catch (error: any) {
       // 如果密码不存在，返回 null
       if (error.message?.includes('could not be found') || error.message?.includes('The specified item could not be found')) {

@@ -18,7 +18,7 @@ const DEFAULT_SETTINGS = {
   autoMount: false,
   startupTab: 'dependencies' as 'dependencies' | 'devices' | 'logs' | 'help',
   enableLogs: false,
-  language: 'system' as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system',
+  language: 'system' as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'de' | 'system',
   windowWidth: WINDOW_SIZE_CONFIG.defaultWidth,
   windowHeight: WINDOW_SIZE_CONFIG.defaultHeight,
   trayMode: false, // 托盘模式，默认关闭
@@ -30,7 +30,7 @@ export interface AppSettings {
   autoMount: boolean;
   startupTab: 'dependencies' | 'devices' | 'logs' | 'help';
   enableLogs: boolean;
-  language: 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system';
+  language: 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'de' | 'system';
   windowWidth: number;
   windowHeight: number;
   trayMode: boolean; // 托盘模式

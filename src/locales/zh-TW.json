@@ -194,7 +194,8 @@
       "zh-CN": "簡體中文",
       "zh-TW": "繁體中文",
       "ja": "日本語",
-      "en": "English"
+      "en": "English",
+      "de": "Deutsch"
     },
     "trayMode": "托盤模式",
     "trayModeDesc": "啟用後，關閉視窗時不會退出應用，而是最小化到系統托盤。可以通過托盤圖標快速管理 NTFS 設備。",
@@ -238,7 +239,7 @@
       "prompt": "請輸入你的Mac帳戶登入密碼：",
       "cancel": "取消",
       "confirm": "確定",
-      "passwordEmpty": "密碼不能為空或包含空格",
+      "passwordEmpty": "密碼不能為空",
       "passwordParseError": "無法解析密碼輸入結果：密碼為空",
       "userCancelled": "用戶取消了密碼輸入",
       "getPasswordFailed": "獲取密碼失敗",

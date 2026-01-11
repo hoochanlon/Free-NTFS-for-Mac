@@ -230,7 +230,8 @@
         'zh-CN': t('settings.languages.zh-CN'),
         'zh-TW': t('settings.languages.zh-TW'),
         'ja': t('settings.languages.ja'),
-        'en': t('settings.languages.en')
+        'en': t('settings.languages.en'),
+        'de': t('settings.languages.de')
       };
       Array.from(languageSelect.options).forEach(option => {
         if (langMap[option.value]) {

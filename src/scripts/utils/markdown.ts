@@ -31,7 +31,8 @@
         'zh-CN': 'help.zh-CN.md',
         'zh-TW': 'help.zh-TW.md',
         'ja': 'help.ja.md',
-        'en': 'help.en.md'
+        'en': 'help.en.md',
+        'de': 'help.de.md'
       };
       return langMap[currentLang] || 'help.zh-CN.md';
     }

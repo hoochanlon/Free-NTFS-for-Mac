@@ -70,7 +70,7 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
           label: options.label || '密码:',
           cancelText: options.cancelText || '取消',
           confirmText: options.confirmText || '确定',
-          emptyPasswordText: options.emptyPasswordText || '密码不能为空或包含空格'
+          emptyPasswordText: options.emptyPasswordText || '密码不能为空'
         });
       }
     });

@@ -194,7 +194,8 @@
       "zh-CN": "简体中文",
       "zh-TW": "繁體中文",
       "ja": "日本語",
-      "en": "English"
+      "en": "English",
+      "de": "Deutsch"
     },
     "trayMode": "Tray Mode",
     "trayModeDesc": "When enabled, closing the window will minimize to the system tray instead of quitting the app. You can quickly manage NTFS devices through the tray icon.",
@@ -238,7 +239,7 @@
       "prompt": "Please enter your Mac account login password:",
       "cancel": "Cancel",
       "confirm": "OK",
-      "passwordEmpty": "Password cannot be empty or contain spaces",
+      "passwordEmpty": "Password cannot be empty",
       "passwordParseError": "Unable to parse password input: password is empty",
       "userCancelled": "User cancelled password input",
       "getPasswordFailed": "Failed to get password",
