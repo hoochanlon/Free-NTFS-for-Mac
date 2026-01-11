@@ -83,17 +83,20 @@
         deletePasswordBtn.addEventListener('click', async () => {
           const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
           const confirmText = t('settings.deletePasswordConfirm') || '确定要删除保存的密码吗？';
-          const confirmed = await AppUtils.UI.showConfirm('确认', confirmText);
+          const confirmTitle = t('dialog.confirm') || '确认';
+          const confirmed = await AppUtils.UI.showConfirm(confirmTitle, confirmText);
           if (confirmed) {
             try {
               await electronAPI.deleteSavedPassword();
               deletePasswordBtn.style.display = 'none';
               const successText = t('settings.deletePasswordSuccess') || '已删除保存的密码';
-              await AppUtils.UI.showMessage('成功', successText, 'info');
+              const successTitle = t('logs.logTypes.success') || '成功';
+              await AppUtils.UI.showMessage(successTitle, successText, 'info');
             } catch (error) {
               console.error('删除密码失败:', error);
               const errorText = t('settings.deletePasswordError') || '删除密码失败，请重试';
-              await AppUtils.UI.showMessage('错误', errorText, 'error');
+              const errorTitle = t('logs.logTypes.error') || '错误';
+              await AppUtils.UI.showMessage(errorTitle, errorText, 'error');
             }
           }
         });

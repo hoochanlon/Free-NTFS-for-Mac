@@ -135,7 +135,7 @@
   },
   "dialog": {
     "cancel": "取消",
-    "confirm": "确定",
+    "confirm": "确认",
     "ok": "确定"
   },
   "logs": {
@@ -157,7 +157,8 @@
       "success": "成功",
       "error": "错误",
       "warning": "警告"
-    }
+    },
+    "logsEnabled": "操作日志已启用"
   },
   "help": {
     "title": "指南手册",

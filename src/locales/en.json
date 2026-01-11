@@ -157,7 +157,8 @@
       "success": "Success",
       "error": "Error",
       "warning": "Warning"
-    }
+    },
+    "logsEnabled": "Operation logs enabled"
   },
   "help": {
     "title": "Guide",

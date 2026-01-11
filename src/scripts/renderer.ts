@@ -267,7 +267,9 @@
         try {
           await window.electronAPI.saveSettings({ enableLogs: enableLogsCheckbox.checked });
           if (enableLogsCheckbox.checked) {
-            await AppUtils.Logs.addLog('操作日志已启用', 'success');
+            const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
+            const logsEnabledText = t('logs.logsEnabled') || '操作日志已启用';
+            await AppUtils.Logs.addLog(logsEnabledText, 'success');
           }
         } catch (error) {
           console.error('保存操作日志设置失败:', error);

@@ -30,7 +30,10 @@
   // 清空日志
   async function clearLogs() {
     if ((window as any).AppUtils && (window as any).AppUtils.UI) {
-      const confirmed = await (window as any).AppUtils.UI.showConfirm('确认', '确定要清空所有日志吗？');
+      const t = (window as any).AppUtils && (window as any).AppUtils.I18n ? (window as any).AppUtils.I18n.t : ((key: string) => key);
+      const confirmTitle = t('dialog.confirm') || '确认';
+      const confirmText = t('logs.clearConfirm') || '确定要清空所有日志吗？';
+      const confirmed = await (window as any).AppUtils.UI.showConfirm(confirmTitle, confirmText);
       if (confirmed) {
         localStorage.setItem('appLogs', '[]');
         loadLogs();

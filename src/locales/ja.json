@@ -157,7 +157,8 @@
       "success": "成功",
       "error": "エラー",
       "warning": "警告"
-    }
+    },
+    "logsEnabled": "操作ログが有効になりました"
   },
   "help": {
     "title": "ガイド",
