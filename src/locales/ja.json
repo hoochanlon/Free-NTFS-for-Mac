@@ -204,6 +204,8 @@
   "tray": {
     "showWindow": "ウィンドウを表示",
     "ntfsDevices": "NTFS デバイス",
+    "autoMount": "自動読み書き",
+    "showMainWindow": "メインインターフェース",
     "refreshDevices": "デバイスリストを更新",
     "refreshing": "更新中...",
     "mountAll": "全読み書き",

@@ -204,6 +204,8 @@
   "tray": {
     "showWindow": "显示窗口",
     "ntfsDevices": "NTFS 设备",
+    "autoMount": "自动读写",
+    "showMainWindow": "主界面",
     "refreshDevices": "刷新设备列表",
     "refreshing": "刷新中...",
     "mountAll": "全读写",

@@ -87,9 +87,18 @@
 
   .devices-header-actions
     display flex
-    gap 3px
-    align-items center
-    flex-wrap wrap
+    flex-direction column
+    gap 6px
+    align-items flex-end
+    width 100%
+
+    .devices-action-buttons-row
+      display flex
+      gap 3px
+      align-items center
+      flex-wrap wrap
+      justify-content flex-end
+      width 100%
 
     .auto-mount-checkbox
       display flex
@@ -129,6 +138,26 @@
       white-space nowrap
       min-height 24px
       line-height 1.3
+
+      .btn-icon
+        width 11px
+        height 11px
+        display block
+        margin 0
+        padding 0
+
+    #autoMountBtn,
+    #showMainWindowBtn,
+    #refreshDevicesBtn
+      padding 5px 10px
+      min-width auto
+
+    #autoMountBtn.active
+      background var(--accent)
+      color var(--bg-primary)
+
+      .btn-icon
+        filter brightness(0) invert(1)
 
   .devices-list
     gap 12px
@@ -388,8 +417,16 @@
 
     .header-actions
       display flex
+      flex-direction column
       gap 8px
-      align-items center
+      align-items flex-end
+
+      .header-actions-row
+        display flex
+        gap 8px
+        align-items center
+        flex-wrap wrap
+        justify-content flex-end
 
       .auto-mount-checkbox
         display flex
@@ -415,6 +452,25 @@
         span
           font-weight 500
           letter-spacing -0.01em
+
+      .btn
+        display inline-flex
+        align-items center
+        justify-content center
+        white-space nowrap
+
+        .btn-icon
+          width 12px
+          height 12px
+          display block
+          margin 0
+          padding 0
+          flex-shrink 0
+
+      #refreshDevicesBtn
+        padding 6px 12px
+        min-width auto
+        width auto
 
 // 设备列表容器
 .devices-list

@@ -86,6 +86,24 @@ export class SmartPollingManager {
         this.pollingCallback().catch(error => {
           console.error('立即检测失败:', error);
         });
+
+        // 连续插入多块U盘时，多次检测确保不遗漏
+        setTimeout(() => {
+          if (this.pollingCallback) {
+            this.pollingCallback().catch(error => {
+              console.error('二次检测失败:', error);
+            });
+          }
+        }, 500);
+
+        // 第三次检测，确保捕获所有设备
+        setTimeout(() => {
+          if (this.pollingCallback) {
+            this.pollingCallback().catch(error => {
+              console.error('三次检测失败:', error);
+            });
+          }
+        }, 1000);
       }
       this.reschedule();
     }

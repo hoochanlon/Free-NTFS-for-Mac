@@ -59,18 +59,23 @@ export class HybridDetector {
     // 检查是否有实际变化
     const hasChanged = this.hasDeviceListChanged(this.currentDevices, devices);
 
-    if (hasChanged || fromEvent) {
+    // 如果设备数量增加，即使状态没变也认为是变化（可能是新设备插入）
+    const deviceCountIncreased = devices.length > this.currentDevices.length;
+
+    // 事件驱动模式下，每次都更新（确保不遗漏）
+    // 轮询模式下，只在有变化时更新
+    if (fromEvent || hasChanged || deviceCountIncreased) {
       this.currentDevices = devices;
 
       // 更新轮询管理器状态
       if (!this.useEvents) {
         this.pollingManager.updateDeviceState(
           devices.length > 0,
-          hasChanged
+          hasChanged || deviceCountIncreased
         );
       }
 
-      // 调用回调
+      // 调用回调（事件驱动模式下每次都调用，确保UI更新）
       if (this.onChangeCallback) {
         this.onChangeCallback(devices);
       }
@@ -81,23 +86,47 @@ export class HybridDetector {
    * 检查设备列表是否有变化
    */
   private hasDeviceListChanged(oldDevices: NTFSDevice[], newDevices: NTFSDevice[]): boolean {
+    // 如果数量不同，肯定有变化
     if (oldDevices.length !== newDevices.length) {
       return true;
     }
 
     // 比较设备状态
-    const oldMap = new Map(oldDevices.map(d => [d.disk, { isMounted: d.isMounted, isReadOnly: d.isReadOnly }]));
-    const newMap = new Map(newDevices.map(d => [d.disk, { isMounted: d.isMounted, isReadOnly: d.isReadOnly }]));
+    const oldMap = new Map(oldDevices.map(d => [d.disk, {
+      volumeName: d.volumeName,
+      isMounted: d.isMounted,
+      isReadOnly: d.isReadOnly
+    }]));
+    const newMap = new Map(newDevices.map(d => [d.disk, {
+      volumeName: d.volumeName,
+      isMounted: d.isMounted,
+      isReadOnly: d.isReadOnly
+    }]));
 
-    // 检查是否有新增或删除
+    // 检查是否有新增或删除（通过 disk 标识）
     if (oldMap.size !== newMap.size) {
       return true;
+    }
+
+    // 检查是否有新设备（disk 不在旧列表中）
+    for (const [disk] of newMap) {
+      if (!oldMap.has(disk)) {
+        return true; // 有新设备
+      }
+    }
+
+    // 检查是否有设备被移除（disk 不在新列表中）
+    for (const [disk] of oldMap) {
+      if (!newMap.has(disk)) {
+        return true; // 有设备被移除
+      }
     }
 
     // 检查是否有状态变化
     for (const [disk, oldState] of oldMap) {
       const newState = newMap.get(disk);
       if (!newState ||
+          newState.volumeName !== oldState.volumeName ||
           newState.isMounted !== oldState.isMounted ||
           newState.isReadOnly !== oldState.isReadOnly) {
         return true;

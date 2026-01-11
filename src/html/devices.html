@@ -21,15 +21,18 @@
       <div class="section">
         <div class="devices-section-header">
           <div class="devices-header-actions">
-            <label class="auto-mount-checkbox">
-              <input type="checkbox" id="autoMountCheckbox">
-              <span>自动读写</span>
-            </label>
-            <div class="devices-action-buttons">
-              <button class="btn btn-secondary" id="showMainWindowBtn">主界面</button>
+            <div class="devices-action-buttons-row">
+              <button class="btn btn-secondary" id="autoMountBtn" data-i18n-title="tray.autoMount">
+                <img src="../imgs/svg/flash-auto.svg" alt="" class="btn-icon">
+              </button>
+              <button class="btn btn-secondary" id="showMainWindowBtn" data-i18n-title="tray.showMainWindow">
+                <img src="../imgs/svg/home.svg" alt="" class="btn-icon">
+              </button>
               <button class="btn btn-secondary" id="refreshDevicesBtn" data-i18n-title="tray.refreshDevices">
                 <img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">
               </button>
+            </div>
+            <div class="devices-action-buttons-row">
               <button class="btn btn-primary" id="mountAllBtn">全读写</button>
               <button class="btn btn-warning" id="restoreAllReadOnlyBtn">全只读</button>
               <button class="btn btn-danger" id="ejectAllBtn">全推出</button>

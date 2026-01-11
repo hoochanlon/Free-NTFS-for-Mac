@@ -204,6 +204,8 @@
   "tray": {
     "showWindow": "Show Window",
     "ntfsDevices": "NTFS Devices",
+    "autoMount": "Auto Read/Write",
+    "showMainWindow": "Main Interface",
     "refreshDevices": "Refresh Device List",
     "refreshing": "Refreshing...",
     "mountAll": "All Read-Write",

@@ -195,11 +195,11 @@ export class DeviceDetector {
         // 获取 mount 信息
         (async () => {
           if (stdout) return stdout;
-          try {
+        try {
             const result = await Promise.race([
               this.batchExecutor.execute(
-                'mount | grep -iE "(ntfs|fuse)"',
-                'mount_ntfs_fuse',
+            'mount | grep -iE "(ntfs|fuse)"',
+            'mount_ntfs_fuse',
                 forceRefresh ? 100 : 200 // 强制刷新时缓存0.1秒，否则0.2秒（接近即时）
               ),
               new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
@@ -207,10 +207,10 @@ export class DeviceDetector {
             const output = result.stdout || '';
             if (output) {
               this.cache.setMountInfo(output);
-            }
+          }
             return output;
-          } catch (error: any) {
-            if (error.code === 1) {
+        } catch (error: any) {
+          if (error.code === 1) {
               return error.stdout || '';
             }
             return '';
@@ -244,7 +244,7 @@ export class DeviceDetector {
         stdout = mountResult.value || '';
       } else {
         console.warn('[设备检测] mount 命令执行失败:', mountResult.reason);
-      }
+          }
 
       // 处理 diskutil list 结果
       if (diskutilResult.status === 'fulfilled') {
@@ -498,8 +498,8 @@ export class DeviceDetector {
             // 使用批量执行器（带缓存，优化超时时间）
             const result = await Promise.race([
               this.batchExecutor.execute(
-                `diskutil info ${unmountedDevice.devicePath} 2>/dev/null`,
-                `diskutil_${unmountedDevice.devicePath}`,
+              `diskutil info ${unmountedDevice.devicePath} 2>/dev/null`,
+              `diskutil_${unmountedDevice.devicePath}`,
                 3000 // 缓存3秒（减少到3秒，提高响应速度）
               ),
               new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))

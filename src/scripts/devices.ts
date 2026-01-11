@@ -13,7 +13,7 @@
   // DOM 元素
   const devicesList = document.getElementById('devicesList')!;
   const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
-  const autoMountCheckbox = document.getElementById('autoMountCheckbox') as HTMLInputElement | null;
+  const autoMountBtn = document.getElementById('autoMountBtn') as HTMLButtonElement | null;
   const showMainWindowBtn = document.getElementById('showMainWindowBtn') as HTMLButtonElement | null;
   const refreshDevicesBtn = document.getElementById('refreshDevicesBtn') as HTMLButtonElement | null;
   const mountAllBtn = document.getElementById('mountAllBtn') as HTMLButtonElement | null;
@@ -1027,17 +1027,7 @@
         return;
       }
 
-      if (showMainWindowBtn) {
-        const translatedText = t('devices.showMainWindow');
-        // 如果返回的是键名本身，说明翻译未找到
-        if (translatedText === 'devices.showMainWindow') {
-          console.warn('翻译键 devices.showMainWindow 未找到');
-          // 不设置默认值，等待翻译加载完成
-          setTimeout(updateButtonTexts, 100);
-        } else {
-          showMainWindowBtn.textContent = translatedText;
-        }
-      }
+      // showMainWindowBtn 现在是图标按钮，不需要更新文本
       if (mountAllBtn) {
         mountAllBtn.textContent = t('devices.mountAll');
       }
@@ -1047,12 +1037,7 @@
       if (ejectAllBtn) {
         ejectAllBtn.textContent = t('devices.ejectAll');
       }
-      if (autoMountCheckbox) {
-        const label = autoMountCheckbox.parentElement?.querySelector('span');
-        if (label) {
-          label.textContent = t('devices.autoMount');
-        }
-      }
+      // autoMountBtn 现在是图标按钮，不需要更新文本
     };
 
     // 等待 i18n 初始化完成后再更新文本
@@ -1089,18 +1074,30 @@
     waitForI18n();
 
     // 功能按钮
-    if (autoMountCheckbox) {
+    if (autoMountBtn) {
+      let autoMountEnabled = false;
+
       // 从设置读取自动挂载配置
       const loadAutoMountSetting = async () => {
         try {
           if (electronAPI.getSettings) {
             const settings = await electronAPI.getSettings();
             if (settings && typeof settings.autoMount === 'boolean') {
-              autoMountCheckbox.checked = settings.autoMount;
+              autoMountEnabled = settings.autoMount;
+              updateAutoMountButtonState();
             }
           }
         } catch (e) {
           // 静默处理
+        }
+      };
+
+      // 更新按钮状态
+      const updateAutoMountButtonState = () => {
+        if (autoMountEnabled) {
+          autoMountBtn.classList.add('active');
+        } else {
+          autoMountBtn.classList.remove('active');
         }
       };
 
@@ -1111,15 +1108,18 @@
       if (electronAPI.onSettingsChange) {
         electronAPI.onSettingsChange((settings: any) => {
           if (settings && typeof settings.autoMount === 'boolean') {
-            autoMountCheckbox.checked = settings.autoMount;
+            autoMountEnabled = settings.autoMount;
+            updateAutoMountButtonState();
           }
         });
       }
 
-      autoMountCheckbox.addEventListener('change', async (e) => {
+      autoMountBtn.addEventListener('click', async () => {
         try {
+          autoMountEnabled = !autoMountEnabled;
+          updateAutoMountButtonState();
           if (electronAPI.saveSettings) {
-            await electronAPI.saveSettings({ autoMount: (e.target as HTMLInputElement).checked });
+            await electronAPI.saveSettings({ autoMount: autoMountEnabled });
           }
         } catch (e) {
           // 静默处理
