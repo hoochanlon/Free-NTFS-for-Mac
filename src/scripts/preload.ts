@@ -56,17 +56,32 @@ const electronAPI: ElectronAPI = {
   // 混合检测相关
   startHybridDetection: (callback: (devices: any[]) => void) => {
     // 注意：每个窗口都需要注册自己的监听器
-    // 不要移除所有监听器，因为可能有多个窗口需要监听
+    // 保存当前窗口的监听器引用，避免重复注册
+    const listenerKey = 'hybrid-detection-listener';
+    const existingListener = (window as any)[listenerKey];
+
+    // 如果已存在监听器，先移除它
+    if (existingListener) {
+      ipcRenderer.removeListener('hybrid-detection-device-change', existingListener);
+      console.log('[preload] 移除旧的设备变化事件监听器');
+    }
 
     // 通过 IPC 启动混合检测，回调通过事件传递
     const listener = (event: any, devices: any[]) => {
       try {
-        console.log('[preload] 收到设备变化事件，设备数量:', devices.length);
-        callback(devices);
+        console.log('[preload] 收到设备变化事件，设备数量:', devices.length, '设备列表:', devices.map((d: any) => d.volumeName || d.disk));
+        if (Array.isArray(devices)) {
+          callback(devices);
+        } else {
+          console.error('[preload] 设备列表不是数组:', devices);
+        }
       } catch (error) {
-        console.error('设备变化回调执行失败:', error);
+        console.error('[preload] 设备变化回调执行失败:', error);
       }
     };
+
+    // 保存监听器引用
+    (window as any)[listenerKey] = listener;
 
     // 注册事件监听器（每个窗口都有自己的监听器）
     ipcRenderer.on('hybrid-detection-device-change', listener);

@@ -17,9 +17,16 @@
   // UI 工具函数
   AppUtils.UI = {
     // 显示/隐藏加载遮罩
-    showLoading(loadingOverlay: HTMLElement, show: boolean = true): void {
+    showLoading(loadingOverlay: HTMLElement, show: boolean = true, text?: string): void {
       if (show) {
         loadingOverlay.classList.add('visible');
+        // 如果提供了文本，更新加载文本（用于刷新设备时显示"刷新中..."）
+        if (text) {
+          const loadingText = loadingOverlay.querySelector('p');
+          if (loadingText) {
+            loadingText.textContent = text;
+          }
+        }
       } else {
         loadingOverlay.classList.remove('visible');
       }

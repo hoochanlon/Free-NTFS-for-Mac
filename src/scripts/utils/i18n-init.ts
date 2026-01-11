@@ -328,6 +328,8 @@
         if ((window as any).AppModules.Devices.Renderer) {
           (window as any).AppModules.Devices.Renderer.lastRenderedDevices = [];
         }
+        // 清除设备列表的状态缓存，强制重新渲染（修复：清除 __lastStateKey）
+        (devicesList as any).__lastStateKey = '';
         // 重新渲染设备列表
         if ((window as any).AppModules.Devices.Renderer && (window as any).AppModules.Devices.Renderer.renderDevices) {
           (window as any).AppModules.Devices.Renderer.renderDevices(

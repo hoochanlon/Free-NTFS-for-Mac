@@ -11,6 +11,13 @@
   <script src="../../scripts/utils/i18n-init.js"></script>
   <!-- 设备信息渲染工具（共享模块，统一管理设备信息渲染逻辑） -->
   <script src="../../scripts/utils/device-info-renderer.js"></script>
+  <!-- 设备管理子模块（按顺序加载） -->
+  <script src="../../scripts/modules/devices/device-utils.js"></script>
+  <script src="../../scripts/modules/devices/device-renderer.js"></script>
+  <script src="../../scripts/modules/devices/device-operations.js"></script>
+  <script src="../../scripts/modules/devices/device-events.js"></script>
+  <script src="../../scripts/modules/devices/device-refresh.js"></script>
+  <script src="../../scripts/modules/devices/device-auto-refresh.js"></script>
 </head>
 <body>
   <div class="devices-page">
@@ -56,6 +63,7 @@
     <p>处理中...</p>
   </div>
 
+  <!-- 使用重构后的 devices.js -->
   <script src="../../scripts/devices.js"></script>
 </body>
 </html>

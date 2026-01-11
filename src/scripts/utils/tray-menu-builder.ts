@@ -178,26 +178,6 @@ export async function createTrayMenu(
               }
             }
           },
-          { type: 'separator' },
-          {
-            label: t('devices.unmount') || '卸载',
-            click: async () => {
-              try {
-                // 直接在主进程中执行操作
-                await ntfsManager.unmountDevice(device);
-                // 等待一小段时间让系统更新状态
-                await new Promise(resolve => setTimeout(resolve, 500));
-                // 更新托盘菜单
-                await updateMenuCallback(true);
-                // 刷新所有窗口的设备列表（包括托盘窗口）
-                await refreshAllWindowsDevices();
-              } catch (error) {
-                console.error('卸载设备失败:', error);
-                // 即使失败也更新菜单，显示当前状态
-                await updateMenuCallback(true);
-              }
-            }
-          },
           {
             label: t('devices.eject') || '推出',
             click: async () => {
@@ -261,26 +241,6 @@ export async function createTrayMenu(
                 await updateMenuCallback(true);
                 // 刷新所有窗口的设备列表（包括托盘窗口）
                 await refreshAllWindowsDevices();
-              }
-            }
-          },
-          { type: 'separator' },
-          {
-            label: t('devices.unmount') || '卸载',
-            click: async () => {
-              try {
-                // 直接在主进程中执行操作
-                await ntfsManager.unmountDevice(device);
-                // 等待一小段时间让系统更新状态
-                await new Promise(resolve => setTimeout(resolve, 500));
-                // 更新托盘菜单
-                await updateMenuCallback(true);
-                // 刷新所有窗口的设备列表（包括托盘窗口）
-                await refreshAllWindowsDevices();
-              } catch (error) {
-                console.error('卸载设备失败:', error);
-                // 即使失败也更新菜单，显示当前状态
-                await updateMenuCallback(true);
               }
             }
           },
@@ -352,41 +312,6 @@ export async function createTrayMenu(
             await refreshAllWindowsDevices();
           } catch (error) {
             console.error('全读写操作失败:', error);
-            // 即使失败也更新菜单
-            await updateMenuCallback(true);
-            // 刷新所有窗口的设备列表（包括托盘窗口）
-            await refreshAllWindowsDevices();
-          }
-        }
-      },
-      {
-        label: t('tray.unmountAll') || '全卸载',
-        click: async () => {
-          try {
-            // 强制刷新，确保获取最新状态
-            const devices = await ntfsManager.getNTFSDevices(true);
-            const mountedDevices = devices.filter(d => !d.isReadOnly && !d.isUnmounted);
-            if (mountedDevices.length === 0) {
-              return;
-            }
-            for (const device of mountedDevices) {
-              try {
-                await ntfsManager.unmountDevice(device);
-                await new Promise(resolve => setTimeout(resolve, 300));
-              } catch (error) {
-                console.error(`卸载 ${device.volumeName} 失败:`, error);
-              }
-            }
-            // 等待所有操作完成后再更新菜单
-            await new Promise(resolve => setTimeout(resolve, 500));
-            await updateMenuCallback(true);
-            // 再次更新确保状态同步
-            await new Promise(resolve => setTimeout(resolve, 200));
-            await updateMenuCallback(true);
-            // 刷新所有窗口的设备列表（包括托盘窗口）
-            await refreshAllWindowsDevices();
-          } catch (error) {
-            console.error('全卸载操作失败:', error);
             // 即使失败也更新菜单
             await updateMenuCallback(true);
             // 刷新所有窗口的设备列表（包括托盘窗口）

@@ -45,21 +45,9 @@
     // 上次渲染的设备列表（用于比较）
     lastRenderedDevices: [] as any[],
 
-    // 渲染设备列表
+    // 渲染设备列表（整合了 devices.ts 中的复杂渲染逻辑）
     renderDevices(devicesList: HTMLElement, readWriteDevicesList: HTMLElement): void {
       const devices = AppModules.Devices.devices || [];
-
-      // 生成设备标识字符串用于比较
-      const currentDeviceKey = devices.map((d: any) => `${d.disk}:${d.isReadOnly}:${d.isUnmounted || false}`).join('|');
-      const lastDeviceKey = AppModules.Devices.Renderer.lastRenderedDevices.map((d: any) => `${d.disk}:${d.isReadOnly}:${d.isUnmounted || false}`).join('|');
-
-      // 如果设备列表没有变化，跳过重新渲染
-      if (currentDeviceKey === lastDeviceKey && devices.length > 0) {
-        return;
-      }
-
-      // 更新上次渲染的设备列表
-      AppModules.Devices.Renderer.lastRenderedDevices = devices.map((d: any) => ({ ...d }));
 
       if (devices.length === 0) {
         devicesList.innerHTML = `
@@ -72,36 +60,63 @@
         return;
       }
 
-      devicesList.innerHTML = '';
+      // 保存当前选中的设备（如果有）
+      const selectedDisk = (document.querySelector('.device-item.selected') as HTMLElement)?.dataset?.disk;
 
-      // 按状态分组：先显示只读设备，再显示读写设备
-      const readOnlyDevices = devices.filter((device: any) => device.isReadOnly);
-      const readWriteDevices = devices.filter((device: any) => !device.isReadOnly);
+      // 检查是否是托盘窗口（用于判断是否需要重新渲染）
+      const isTrayWindow = document.body && document.body.classList.contains('tray-window');
+      const lastIsTrayWindow = (devicesList as any).__lastIsTrayWindow;
 
-      // 渲染只读设备
-      if (readOnlyDevices.length > 0) {
-        readOnlyDevices.forEach((device: any) => {
-          const item = AppModules.Devices.Renderer.createDeviceItem(device);
-          devicesList.appendChild(item);
-        });
+      // 生成设备状态的唯一标识，用于判断是否需要更新
+      // 包含容量信息，确保容量变化时能触发重新渲染
+      // 同时包含当前语言，确保语言变更时能触发重新渲染
+      const currentLanguage = ((window as any).AppUtils && (window as any).AppUtils.I18n)
+        ? ((window as any).AppUtils.I18n.getLanguage ? (window as any).AppUtils.I18n.getLanguage() : 'en')
+        : 'en';
+      const deviceStateKey = devices.map((d: any) => {
+        const capacityInfo = d.capacity ? `${d.capacity.total}:${d.capacity.available || 0}:${d.capacity.used || 0}` : 'no-capacity';
+        return `${d.disk}:${d.isReadOnly}:${d.isUnmounted || false}:${capacityInfo}`;
+      }).join('|') + `|lang:${currentLanguage}`;
+      const lastStateKey = (devicesList as any).__lastStateKey || '';
+
+      // 如果设备状态没有变化，且窗口类型没有变化，且已有DOM元素，则跳过重新渲染
+      if (deviceStateKey === lastStateKey &&
+          isTrayWindow === lastIsTrayWindow &&
+          devicesList.querySelectorAll('.device-item').length === devices.length) {
+        return;
       }
 
-      // 渲染读写设备
-      if (readWriteDevices.length > 0) {
-        readWriteDevices.forEach((device: any) => {
+      // 保存当前窗口类型和状态
+      (devicesList as any).__lastIsTrayWindow = isTrayWindow;
+      (devicesList as any).__lastStateKey = deviceStateKey;
+
+      devicesList.innerHTML = '';
+
+      // 渲染所有设备
+      devices.forEach((device: any) => {
           const item = AppModules.Devices.Renderer.createDeviceItem(device);
           devicesList.appendChild(item);
         });
+
+      // 恢复选中状态
+      if (selectedDisk) {
+        const selectedItem = devicesList.querySelector(`[data-disk="${selectedDisk}"]`) as HTMLElement;
+        if (selectedItem) {
+          selectedItem.classList.add('selected');
+        }
       }
 
       // 绑定按钮事件
       AppModules.Devices.Events.bindDeviceEvents(devicesList, readWriteDevicesList);
     },
 
-    // 创建设备项
+    // 创建设备项（整合了 devices.ts 中的复杂容量计算逻辑）
     createDeviceItem(device: any): HTMLElement {
       const item = document.createElement('div');
       item.className = 'device-item';
+      item.setAttribute('data-disk', device.disk);
+
+      // 添加读写设备样式类
       if (!device.isReadOnly && !device.isUnmounted) {
         item.classList.add('read-write-device');
       }
@@ -109,32 +124,31 @@
         item.classList.add('unmounted-device');
       }
 
-      const statusClass = device.isUnmounted ? 'unmounted' : (device.isReadOnly ? 'read-only' : 'read-write');
-      const statusText = device.isUnmounted ? t('devices.unmounted') : (device.isReadOnly ? t('devices.readOnly') : t('devices.readWrite'));
+      const isUnmounted = device.isUnmounted || false;
+      const statusClass = isUnmounted ? 'unmounted' : (device.isReadOnly ? 'read-only' : 'read-write');
+      const statusText = isUnmounted ? t('devices.unmounted') : (device.isReadOnly ? t('devices.readOnly') : t('devices.readWrite'));
 
-      // 计算容量百分比和使用空间（Windows 风格）
+      // 检查是否是托盘窗口
+      const isTrayWindow = document.body && document.body.classList.contains('tray-window');
+
+      // 计算容量百分比和使用空间（Windows 风格）- 整合自 devices.ts
       let capacityPercent = 0;
       let availableText = '';
       let totalText = '';
+
       if (device.capacity && device.capacity.total > 0) {
         const total = device.capacity.total;
         let used = device.capacity.used || 0;
         let available = device.capacity.available || 0;
 
         // 计算逻辑：始终优先使用 available 来计算 used（更可靠）
-        // 因为 available 通常比 used 更准确，且不容易出错
-        // 注意：即使 available 接近 total（比如 99.9%），也应该使用它来计算
         if (available > 0) {
-          // 如果 available 存在，直接使用它来计算 used
-          // 这是最可靠的方法，因为 available 通常更准确
           used = total - available;
-          // 确保 used 不为负数
           if (used < 0) {
             used = 0;
             available = total;
           }
         } else if (device.capacity.used && device.capacity.used > 0) {
-          // 如果只有 used 值（available 不存在或无效），使用它
           used = device.capacity.used;
           available = total - used;
           if (available < 0) {
@@ -142,7 +156,6 @@
             used = total;
           }
         } else {
-          // 如果都无法获取，至少显示总容量
           used = 0;
           available = total;
         }
@@ -151,28 +164,53 @@
         const sum = used + available;
         const diff = Math.abs(sum - total);
         if (diff > total * 0.01) {
-          // 如果差异超过 1%，重新计算
-          if (available > 0) {
+          if (available > 0 && available < total) {
             used = total - available;
-          } else if (used > 0) {
+          } else if (used > 0 && used < total) {
             available = total - used;
           }
         }
 
+        // 确保数据不为负数且不超过 total
+        used = Math.max(0, Math.min(total, used));
+        available = Math.max(0, Math.min(total, available));
+
         // 计算使用率百分比（用于进度条和颜色）
-        // 确保百分比在 0-100 之间
+        if (total > 0) {
+          capacityPercent = Math.max(0, Math.min(100, Math.round((used / total) * 100)));
+          if (isNaN(capacityPercent) || capacityPercent < 0 || capacityPercent > 100) {
         capacityPercent = Math.max(0, Math.min(100, Math.round((used / total) * 100)));
+          }
+        }
+
         availableText = formatCapacity(available);
         totalText = formatCapacity(total);
-        // 设置 data 属性用于样式选择器
         item.setAttribute('data-capacity-percent', capacityPercent.toString());
       }
 
-      // 检查是否是托盘窗口
-      const isTrayWindow = document.body && document.body.classList.contains('tray-window');
-
       // 托盘窗口使用卡片样式，主窗口使用原来的样式
+      // 在渲染前再次验证 capacityPercent（防止变量作用域问题）
+      let finalCapacityPercent = capacityPercent;
       if (isTrayWindow) {
+        if (device.capacity && device.capacity.total > 0) {
+          const total = device.capacity.total;
+          const available = device.capacity.available || 0;
+          const used = device.capacity.used || 0;
+          let calculatedUsed = used;
+
+          // 重新计算以确保正确
+          if (available > 0) {
+            calculatedUsed = total - available;
+          } else if (used > 0) {
+            calculatedUsed = used;
+          }
+
+          if (total > 0 && calculatedUsed >= 0) {
+            const recalculatedPercent = Math.round((calculatedUsed / total) * 100);
+            finalCapacityPercent = Math.max(0, Math.min(100, recalculatedPercent));
+          }
+        }
+
         // 托盘窗口：显示磁盘名称、容量条和操作按钮
         item.innerHTML = `
           <div class="device-card-tray">
@@ -181,16 +219,16 @@
             </div>
             <div class="device-card-content">
               <div class="device-name-large">${device.volumeName}</div>
-              ${device.capacity ? `
+              ${device.capacity && device.capacity.total > 0 && availableText && totalText ? `
               <div class="device-capacity-info-windows">
                 <span class="capacity-text-windows">${availableText} ${t('devices.available')}, ${t('devices.total')} ${totalText}</span>
               </div>
               <div class="capacity-bar-windows">
-                <div class="capacity-bar-fill-windows" style="width: ${capacityPercent}%; min-width: ${capacityPercent > 0 ? '2px' : '0'};" title="${t('devices.usageRate')}: ${capacityPercent}%"></div>
+                <div class="capacity-bar-fill-windows" data-percent="${finalCapacityPercent}" data-width="${finalCapacityPercent}" title="${t('devices.usageRate')}: ${finalCapacityPercent}%"></div>
               </div>
               ` : ''}
               <div class="device-actions-tray">
-                ${device.isUnmounted ? `
+                ${isUnmounted ? `
                   <button class="btn btn-success mount-btn" data-disk="${device.disk}">
                     ${t('devices.remount')}
                   </button>
@@ -216,6 +254,19 @@
             </div>
           </div>
         `;
+
+        // 渲染后立即设置进度条宽度（避免 CSP 阻止内联样式）
+        if (device.capacity && device.capacity.total > 0) {
+          setTimeout(() => {
+            const fillElement = item.querySelector('.capacity-bar-fill-windows') as HTMLElement;
+            if (fillElement) {
+              const percent = fillElement.getAttribute('data-width');
+              if (percent) {
+                fillElement.style.width = `${percent}%`;
+              }
+            }
+          }, 0);
+        }
       } else {
         item.innerHTML = `
           <div class="device-header">
@@ -233,12 +284,11 @@
                 return Utils.renderDeviceInfoHTML(device, t, formatCapacity);
               }
               // 如果共享函数不存在，使用本地实现（向后兼容）
-              const isUnmounted = device.isUnmounted || false;
               return `
             ${device.capacity ? `
             <div class="device-info-item">
               <span class="device-info-label">${t('devices.capacityLabel')}</span>
-                  <span>${formatCapacity(device.capacity.used)}/${formatCapacity(device.capacity.total)}</span>
+                  <span>${formatCapacity(device.capacity.used || 0)}/${formatCapacity(device.capacity.total)}</span>
             </div>
             ` : ''}
                 <div class="device-info-item">
@@ -249,13 +299,11 @@
             })()}
           </div>
         `;
-      }
 
       // 只在主窗口添加操作按钮，托盘窗口不显示
-      if (!isTrayWindow) {
         const actionsHTML = `
           <div class="device-actions">
-            ${device.isUnmounted ? `
+            ${isUnmounted ? `
               <button class="btn btn-success mount-btn" data-disk="${device.disk}">
                 ${t('devices.remount')}
               </button>
