@@ -26,11 +26,15 @@ export class DeviceDetector {
 
   // 获取磁盘容量信息
   // 优先从挂载点获取（如果已挂载），否则从设备本身获取（即使未挂载）
+  // 优化：添加超时控制，避免阻塞
   private async getDiskCapacity(volume: string, devicePath: string): Promise<{ total: number; used: number; available: number } | undefined> {
     try {
       // 方法1：尝试从挂载点获取（如果设备已挂载）
       try {
-        const dfResult = await execAsync(`df -k "${volume}" 2>/dev/null`) as { stdout: string };
+        const dfResult = await Promise.race([
+          execAsync(`df -k "${volume}" 2>/dev/null`) as Promise<{ stdout: string }>,
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 1500))
+        ]);
         const dfLines = dfResult.stdout.trim().split('\n').filter(line => line.length > 0);
 
         if (dfLines.length >= 2) {
@@ -89,7 +93,10 @@ export class DeviceDetector {
 
       // 方法2：从设备本身获取容量（即使未挂载也可以）
       try {
-        const diskutilResult = await execAsync(`diskutil info "${devicePath}" 2>/dev/null`) as { stdout: string };
+        const diskutilResult = await Promise.race([
+          execAsync(`diskutil info "${devicePath}" 2>/dev/null`) as Promise<{ stdout: string }>,
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 1500))
+        ]);
         const info = diskutilResult.stdout;
 
         // 解析 diskutil 输出
@@ -162,7 +169,7 @@ export class DeviceDetector {
     }
   }
 
-  // 获取 NTFS 设备列表（优化版：使用缓存和批量执行）
+  // 获取 NTFS 设备列表（优化版：使用缓存和批量执行，并行优化）
   async getNTFSDevices(forceRefresh: boolean = false): Promise<NTFSDevice[]> {
     try {
       // 如果强制刷新，先失效缓存
@@ -178,35 +185,70 @@ export class DeviceDetector {
         }
       }
 
+      // 并行执行 mount 和 diskutil list，提高检测速度和完整性
       // 检查挂载信息缓存（仅在非强制刷新时使用）
       let stdout = forceRefresh ? '' : (this.cache.getMountInfo() || '');
+      let diskutilListOutput = forceRefresh ? '' : (this.cache.getDiskutilList() || '');
 
-      if (!stdout) {
-        try {
-          // 使用批量执行器（带缓存，但强制刷新时使用更短的TTL）
-          const result = await this.batchExecutor.execute(
-            'mount | grep -iE "(ntfs|fuse)"',
-            'mount_ntfs_fuse',
-            forceRefresh ? 300 : 1000 // 强制刷新时缓存0.3秒，否则1秒
-          );
-          stdout = result.stdout || '';
-
-          // 更新缓存
-          if (stdout) {
-            this.cache.setMountInfo(stdout);
-          }
-        } catch (error: any) {
-          if (error.code === 1) {
-            stdout = error.stdout || '';
-            if (!stdout) {
-              // 缓存空结果，避免频繁查询
-              this.cache.setDeviceList([]);
-              return [];
+      // 并行获取 mount 和 diskutil list 信息
+      const [mountResult, diskutilResult] = await Promise.allSettled([
+        // 获取 mount 信息
+        (async () => {
+          if (stdout) return stdout;
+          try {
+            const result = await Promise.race([
+              this.batchExecutor.execute(
+                'mount | grep -iE "(ntfs|fuse)"',
+                'mount_ntfs_fuse',
+                forceRefresh ? 100 : 200 // 强制刷新时缓存0.1秒，否则0.2秒（接近即时）
+              ),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+            ]);
+            const output = result.stdout || '';
+            if (output) {
+              this.cache.setMountInfo(output);
             }
-          } else {
-            return [];
+            return output;
+          } catch (error: any) {
+            if (error.code === 1) {
+              return error.stdout || '';
+            }
+            return '';
           }
-        }
+        })(),
+        // 获取 diskutil list 信息（补充检测，确保不遗漏设备）
+        (async () => {
+          if (diskutilListOutput) return diskutilListOutput;
+          try {
+            const result = await Promise.race([
+              this.batchExecutor.execute(
+                'diskutil list | grep -i "ntfs"',
+                'diskutil_list_ntfs',
+                forceRefresh ? 200 : 500 // 强制刷新时缓存0.2秒，否则0.5秒（更快）
+              ),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+            ]);
+            const output = result.stdout || '';
+            if (output) {
+              this.cache.setDiskutilList(output);
+            }
+            return output;
+          } catch {
+            return '';
+          }
+        })()
+      ]);
+
+      // 处理 mount 结果
+      if (mountResult.status === 'fulfilled') {
+        stdout = mountResult.value || '';
+      } else {
+        console.warn('[设备检测] mount 命令执行失败:', mountResult.reason);
+      }
+
+      // 处理 diskutil list 结果
+      if (diskutilResult.status === 'fulfilled') {
+        diskutilListOutput = diskutilResult.value || '';
       }
 
       const lines = stdout.trim().split('\n').filter(line => line.length > 0 && (line.toLowerCase().includes('ntfs') || line.toLowerCase().includes('fuse')));
@@ -214,7 +256,115 @@ export class DeviceDetector {
       console.log('[设备检测] mount 输出匹配到的行数:', lines.length);
       console.log('[设备检测] mount 输出匹配到的行:', lines);
 
+      // 从 diskutil list 中提取所有NTFS设备（补充检测，确保不遗漏）
+      const allNTFSDevices = new Set<string>(); // 用于跟踪已检测到的设备路径
       const devices: NTFSDevice[] = [];
+
+      // 解析 diskutil list 输出，找出所有NTFS设备
+      if (diskutilListOutput) {
+        try {
+          // diskutil list 输出格式示例：
+          // /dev/disk6 (external, physical):
+          //    #:                       TYPE NAME                    SIZE       IDENTIFIER
+          //    0:      FDisk_partition_scheme                        *119.5 GB   disk6
+          //    1:                  Apple_HFS Samsung                 119.5 GB   disk6s1
+          // 或者：
+          // /dev/disk7 (external, physical):
+          //    #:                       TYPE NAME                    SIZE       IDENTIFIER
+          //    0:      FDisk_partition_scheme                        *500.1 GB   disk7
+          //    1:                       NTFS TOSHIBA                500.1 GB   disk7s1
+
+          const diskutilLines = diskutilListOutput.split('\n');
+          let currentDisk = '';
+          for (const line of diskutilLines) {
+            // 匹配磁盘标识符行：/dev/diskX
+            const diskMatch = line.match(/^\/dev\/(disk\d+)/);
+            if (diskMatch) {
+              currentDisk = diskMatch[1];
+              continue;
+            }
+
+            // 匹配包含NTFS的行
+            if (line.toLowerCase().includes('ntfs') && currentDisk) {
+              // 提取分区标识符（如 disk6s1）
+              const partitionMatch = line.match(/(disk\d+s\d+)/i);
+              if (partitionMatch) {
+                const partitionId = partitionMatch[1];
+                const devicePath = `/dev/${partitionId}`;
+
+                // 如果这个设备已经在allNTFSDevices中（已从mount输出处理），跳过
+                if (allNTFSDevices.has(devicePath)) {
+                  continue;
+                }
+
+                // 如果这个设备不在mount输出中，尝试获取其信息
+                const alreadyInMount = lines.some(l => l.includes(devicePath));
+                if (!alreadyInMount) {
+                  // 标记为已处理，避免重复
+                  allNTFSDevices.add(devicePath);
+                  // 这是一个未挂载的NTFS设备，尝试获取详细信息
+                  try {
+                    const diskutilInfoResult = await Promise.race([
+                      this.batchExecutor.execute(
+                        `diskutil info ${devicePath} 2>/dev/null`,
+                        `diskutil_info_${devicePath}`,
+                        2000
+                      ),
+                      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 1500))
+                    ]);
+
+                    const diskutilInfo = diskutilInfoResult.stdout || '';
+                    if (diskutilInfo.includes('File System Personality:') && diskutilInfo.toLowerCase().includes('ntfs')) {
+                      // 提取卷名
+                      const volumeNameMatch = diskutilInfo.match(/Volume Name:\s*(.+)/i);
+                      const volumeName = volumeNameMatch ? volumeNameMatch[1].trim() : partitionId;
+
+                      // 检查是否已挂载
+                      const mountPointMatch = diskutilInfo.match(/Mount Point:\s*(.+)/i);
+                      const volume = mountPointMatch ? mountPointMatch[1].trim() : '';
+
+                      // 获取容量信息
+                      let capacity: { total: number; used: number; available: number } | undefined;
+                      try {
+                        capacity = await Promise.race([
+                          this.getDiskCapacity(volume, devicePath),
+                          new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 1500))
+                        ]);
+                      } catch {
+                        capacity = undefined;
+                      }
+
+                      // 添加到设备列表
+                      devices.push({
+                        disk: partitionId,
+                        devicePath,
+                        volume: volume || '',
+                        volumeName,
+                        isReadOnly: true, // 未通过ntfs-3g挂载的设备默认只读
+                        options: '',
+                        isMounted: false,
+                        isUnmounted: !volume, // 如果没有挂载点，标记为已卸载
+                        capacity
+                      });
+
+                      console.log('[设备检测] 从 diskutil list 发现未挂载的NTFS设备:', {
+                        disk: partitionId,
+                        volumeName,
+                        devicePath
+                      });
+                    }
+                  } catch (error) {
+                    // 获取设备信息失败，跳过
+                    console.log('[设备检测] 获取设备信息失败:', devicePath, error);
+                  }
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.warn('[设备检测] 解析 diskutil list 失败:', error);
+        }
+      }
       for (const line of lines) {
         const parts = line.split(' on ');
         if (parts.length !== 2) {
@@ -285,9 +435,15 @@ export class DeviceDetector {
 
         // 获取磁盘容量信息（无论是否挂载都尝试获取）
         // 优先从挂载点获取，如果失败则从设备本身获取
+        // 优化：容量信息获取失败时不影响设备列表显示，可以异步获取
         let capacity: { total: number; used: number; available: number } | undefined;
+        // 先快速返回设备信息，容量信息可以后续异步获取（如果需要）
+        // 这里仍然同步获取，但设置了更短的超时
         try {
-          capacity = await this.getDiskCapacity(volume, devicePath);
+          capacity = await Promise.race([
+            this.getDiskCapacity(volume, devicePath),
+            new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 2000)) // 2秒超时
+          ]);
         } catch (error) {
           // 获取容量失败时静默处理，不影响设备列表显示
           capacity = undefined;
@@ -302,6 +458,9 @@ export class DeviceDetector {
           isMounted: deviceIsMounted,
           hasCapacity: !!capacity
         });
+
+        // 标记设备已处理
+        allNTFSDevices.add(devicePath);
 
         devices.push({
           disk,
@@ -336,12 +495,15 @@ export class DeviceDetector {
           let diskutilOutput = this.cache.getDiskutilInfo(unmountedDevice.devicePath);
 
           if (!diskutilOutput) {
-            // 使用批量执行器（带缓存）
-            const result = await this.batchExecutor.execute(
-              `diskutil info ${unmountedDevice.devicePath} 2>/dev/null`,
-              `diskutil_${unmountedDevice.devicePath}`,
-              5000 // 缓存5秒
-            );
+            // 使用批量执行器（带缓存，优化超时时间）
+            const result = await Promise.race([
+              this.batchExecutor.execute(
+                `diskutil info ${unmountedDevice.devicePath} 2>/dev/null`,
+                `diskutil_${unmountedDevice.devicePath}`,
+                3000 // 缓存3秒（减少到3秒，提高响应速度）
+              ),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+            ]);
             diskutilOutput = result.stdout || '';
 
             if (diskutilOutput) {
@@ -355,9 +517,13 @@ export class DeviceDetector {
             const volumeName = volumeNameMatch ? volumeNameMatch[1].trim() : unmountedDevice.volumeName;
 
             // 尝试获取容量信息（即使设备未挂载）
+            // 优化：设置超时，避免阻塞
             let capacity: { total: number; used: number; available: number } | undefined;
             try {
-              capacity = await this.getDiskCapacity('', unmountedDevice.devicePath);
+              capacity = await Promise.race([
+                this.getDiskCapacity('', unmountedDevice.devicePath),
+                new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 2000)) // 2秒超时
+              ]);
             } catch {
               capacity = undefined;
             }

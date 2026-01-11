@@ -126,36 +126,72 @@ export class PasswordManager {
       const escapedPrompt = defaultPrompt.replace(/"/g, '\\"').replace(/\n/g, ' ');
       const escapedPasswordPrompt = passwordPrompt.replace(/"/g, '\\"').replace(/\n/g, ' ');
       const scriptPath = `/tmp/ntfs_password_${Date.now()}.scpt`;
-      const script = `tell application "System Events"
-  activate
-end tell
-tell application "System Events"
-  set theAnswer to display dialog "${escapedPrompt}" & return & return & "${escapedPasswordPrompt}" default answer "" with hidden answer buttons {"${cancelButton}", "${confirmButton}"} default button "${confirmButton}" with icon caution
-  return text returned of theAnswer
-end tell`;
+      // 改进的 AppleScript：明确区分取消和空密码
+      const script = `try
+  tell application "System Events"
+    activate
+  end tell
+  tell application "System Events"
+    set theAnswer to display dialog "${escapedPrompt}" & return & return & "${escapedPasswordPrompt}" default answer "" with hidden answer buttons {"${cancelButton}", "${confirmButton}"} default button "${confirmButton}" with icon caution
+    set buttonPressed to button returned of theAnswer
+    set passwordText to text returned of theAnswer
+
+    if buttonPressed is "${cancelButton}" then
+      return "CANCELED"
+    else if passwordText is "" then
+      return "EMPTY"
+    else
+      return passwordText
+    end if
+  end tell
+on error errorMessage
+  if errorMessage contains "canceled" or errorMessage contains "取消" or errorMessage contains "キャンセル" then
+    return "CANCELED"
+  else
+    return "ERROR:" & errorMessage
+  end if
+end try`;
 
       await fs.writeFile(scriptPath, script);
 
       try {
-        const result = await execAsync(`osascript "${scriptPath}"`) as { stdout: string };
-        const match = result.stdout.match(/text returned:(.+)/i);
-        let password: string;
+        const result = await execAsync(`osascript "${scriptPath}"`) as { stdout: string; stderr?: string };
+        const output = (result.stdout || '').trim();
+        const errorOutput = (result.stderr || '').trim();
 
-        if (match && match[1]) {
-          password = match[1].trim();
-        } else {
-          const trimmed = result.stdout.trim();
-          // 检查是否是错误或取消
-          if (trimmed.toLowerCase().includes('error') || trimmed.toLowerCase().includes('cancel')) {
+        // 检查是否是用户取消
+        if (output === 'CANCELED' ||
+            errorOutput.toLowerCase().includes('user canceled') ||
+            errorOutput.toLowerCase().includes('用户取消了') ||
+            errorOutput.toLowerCase().includes('キャンセル') ||
+            output.toLowerCase().includes('canceled')) {
+          throw new Error(t('messages.passwordDialog.userCancelled'));
+        }
+
+        // 检查是否是空密码
+        if (output === 'EMPTY' || output === '') {
+          throw new Error(t('messages.passwordDialog.passwordEmpty'));
+        }
+
+        // 检查是否是错误
+        if (output.startsWith('ERROR:')) {
+          const errorMsg = output.substring(6);
+          if (errorMsg.toLowerCase().includes('cancel') ||
+              errorMsg.toLowerCase().includes('取消') ||
+              errorMsg.toLowerCase().includes('キャンセル')) {
             throw new Error(t('messages.passwordDialog.userCancelled'));
           }
-          // 尝试直接使用输出（可能是密码本身）
-          if (trimmed && trimmed.length > 0) {
-            password = trimmed;
-          } else {
-            throw new Error(t('messages.passwordDialog.passwordParseError'));
-          }
+          throw new Error(`AppleScript error: ${errorMsg}`);
         }
+
+        // 提取密码（去除可能的引号）
+        let password = output;
+        // 移除首尾引号（如果存在）
+        if ((password.startsWith('"') && password.endsWith('"')) ||
+            (password.startsWith("'") && password.endsWith("'"))) {
+          password = password.slice(1, -1);
+        }
+        password = password.trim();
 
         // 验证密码不为空
         if (!password || password.length === 0) {
@@ -180,17 +216,34 @@ end tell`;
       }
     } catch (error: any) {
       const cancelText = t('messages.passwordDialog.cancel');
+      const errorOutput = error.stderr || '';
+      const errorMessage = error.message || '';
+      const fullError = (errorOutput + ' ' + errorMessage).toLowerCase();
+
+      // 检查是否是用户取消（更全面的检查）
       if (error.code === 1 ||
-          error.stderr?.includes('User canceled') ||
-          error.stderr?.includes('用户取消了') ||
-          error.stderr?.includes('キャンセル') ||
-          error.message?.includes('取消') ||
-          error.message?.includes('キャンセル') ||
-          error.message?.includes('cancel')) {
+          errorOutput.includes('User canceled') ||
+          errorOutput.includes('用户取消了') ||
+          errorOutput.includes('キャンセル') ||
+          errorOutput.includes('button returned') ||
+          fullError.includes('cancel') ||
+          fullError.includes('取消') ||
+          fullError.includes('キャンセル') ||
+          errorMessage.includes('userCancelled') ||
+          errorMessage.includes('用户取消')) {
         throw new Error(t('messages.passwordDialog.userCancelled'));
       }
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`${t('messages.passwordDialog.getPasswordFailed')}: ${errorMessage}`);
+
+      // 检查是否是空密码错误（已经在内部处理，这里只是传递）
+      if (errorMessage.includes('passwordEmpty') ||
+          errorMessage.includes('密码为空') ||
+          errorMessage.includes('password is empty')) {
+        throw error; // 直接抛出，保持原始错误消息
+      }
+
+      // 其他错误
+      const finalErrorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`${t('messages.passwordDialog.getPasswordFailed')}: ${finalErrorMessage}`);
     }
   }
 }

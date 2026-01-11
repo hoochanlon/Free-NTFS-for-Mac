@@ -3,7 +3,7 @@ import type { ElectronAPI } from '../types/electron';
 
 const electronAPI: ElectronAPI = {
   checkDependencies: () => ipcRenderer.invoke('check-dependencies'),
-  getNTFSDevices: () => ipcRenderer.invoke('get-ntfs-devices'),
+  getNTFSDevices: (forceRefresh?: boolean) => ipcRenderer.invoke('get-ntfs-devices', forceRefresh),
   mountDevice: (device) => ipcRenderer.invoke('mount-device', device),
   unmountDevice: (device) => ipcRenderer.invoke('unmount-device', device),
   restoreToReadOnly: (device) => ipcRenderer.invoke('restore-to-readonly', device),

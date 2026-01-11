@@ -34,6 +34,7 @@
   const devicesList = document.getElementById('devicesList')!;
   // readWriteDevicesList 已整合到 devicesList 中，保留变量以兼容现有代码
   const readWriteDevicesList = devicesList;
+  const refreshDevicesBtn = document.getElementById('refreshDevicesBtn') as HTMLButtonElement;
   const mountAllBtn = document.getElementById('mountAllBtn') as HTMLButtonElement;
   const unmountAllBtn = document.getElementById('unmountAllBtn') as HTMLButtonElement;
   const restoreAllReadOnlyBtn = document.getElementById('restoreAllReadOnlyBtn') as HTMLButtonElement;
@@ -179,6 +180,37 @@
         statusText
       );
     });
+
+    if (refreshDevicesBtn) {
+      refreshDevicesBtn.addEventListener('click', async () => {
+        // 禁用按钮，防止重复点击
+        if (refreshDevicesBtn) {
+          refreshDevicesBtn.disabled = true;
+          const refreshingText = AppUtils?.I18n?.t('tray.refreshing') || '刷新中...';
+          refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon"> <span>${refreshingText}</span>`;
+        }
+        try {
+          // 强制刷新设备列表（跳过缓存）
+          const devices = await (window as any).electronAPI.getNTFSDevices(true);
+          await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText, devices);
+        } catch (error) {
+          console.error('刷新设备列表失败:', error);
+          await AppUtils.Logs.addLog('刷新设备列表失败: ' + (error instanceof Error ? error.message : String(error)), 'error');
+        } finally {
+          // 恢复按钮状态
+          if (refreshDevicesBtn) {
+            refreshDevicesBtn.disabled = false;
+            const refreshText = AppUtils?.I18n?.t('devices.refreshDevices') || '刷新';
+            refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon"> <span data-i18n="devices.refreshDevices">${refreshText}</span>`;
+            refreshDevicesBtn.title = refreshText;
+            // 触发国际化更新
+            if (AppUtils?.I18n?.init) {
+              AppUtils.I18n.init();
+            }
+          }
+        }
+      });
+    }
 
     if (mountAllBtn) {
       mountAllBtn.addEventListener('click', () => {

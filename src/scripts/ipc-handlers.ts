@@ -25,8 +25,8 @@ export function setupNTFSHandlers(): void {
     return await ntfsManager.checkDependencies();
   });
 
-  ipcMain.handle('get-ntfs-devices', async () => {
-    return await ntfsManager.getNTFSDevices();
+  ipcMain.handle('get-ntfs-devices', async (event, forceRefresh: boolean = false) => {
+    return await ntfsManager.getNTFSDevices(forceRefresh);
   });
 
   ipcMain.handle('mount-device', async (event, device) => {

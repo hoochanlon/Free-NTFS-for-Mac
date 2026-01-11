@@ -16,14 +16,15 @@ export interface CacheEntry<T> {
 export class DeviceCacheManager {
   private deviceListCache: CacheEntry<NTFSDevice[]> | null = null;
   private mountInfoCache: CacheEntry<string> | null = null;
+  private diskutilListCache: CacheEntry<string> | null = null; // diskutil list 缓存
   private diskutilCache: Map<string, CacheEntry<string>> = new Map();
 
-  // 不同数据的缓存TTL（优化：减少TTL以加快响应速度）
+  // 不同数据的缓存TTL（优化：大幅减少TTL以加快响应速度，接近即时检测）
   private readonly ttl = {
-    deviceList: 500,       // 设备列表：0.5秒（大幅减少，加快响应）
-    mountInfo: 300,        // 挂载信息：0.3秒（大幅减少，加快响应）
-    diskutil: 1000,        // diskutil信息：1秒（减少）
-    capacity: 3000         // 容量信息：3秒（减少）
+    deviceList: 200,       // 设备列表：0.2秒（接近即时）
+    mountInfo: 100,        // 挂载信息：0.1秒（接近即时）
+    diskutil: 500,         // diskutil信息：0.5秒（减少）
+    capacity: 2000         // 容量信息：2秒（减少）
   };
 
   /**
@@ -120,11 +121,33 @@ export class DeviceCacheManager {
   }
 
   /**
+   * 获取缓存的 diskutil list 信息
+   */
+  getDiskutilList(): string | null {
+    if (this.diskutilListCache && this.isValid(this.diskutilListCache)) {
+      return this.diskutilListCache.data;
+    }
+    return null;
+  }
+
+  /**
+   * 设置 diskutil list 信息缓存
+   */
+  setDiskutilList(info: string): void {
+    this.diskutilListCache = {
+      data: info,
+      timestamp: Date.now(),
+      ttl: this.ttl.diskutil
+    };
+  }
+
+  /**
    * 使所有缓存失效（设备插拔时调用）
    */
   invalidateAll(): void {
     this.deviceListCache = null;
     this.mountInfoCache = null;
+    this.diskutilListCache = null;
     this.diskutilCache.clear();
   }
 

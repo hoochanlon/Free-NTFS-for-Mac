@@ -25,16 +25,16 @@ export class SmartPollingManager {
   private currentInterval: number | null = null;
   private pollingCallback: (() => Promise<void>) | null = null;
   private readonly intervals = {
-    // 无设备时的间隔（30秒）
-    noDevices: 30000,
-    // 有设备但稳定的间隔（10秒）
-    stable: 10000,
-    // 设备变化后的高频间隔（2秒）
-    active: 2000,
-    // 窗口不可见时的间隔（60秒）
-    hidden: 60000,
-    // 初始检测间隔（1秒）
-    initial: 1000
+    // 无设备时的间隔（5秒，减少等待时间）
+    noDevices: 5000,
+    // 有设备但稳定的间隔（3秒，提高响应速度）
+    stable: 3000,
+    // 设备变化后的高频间隔（1秒，更快响应）
+    active: 1000,
+    // 窗口不可见时的间隔（10秒，即使隐藏也保持较快检测）
+    hidden: 10000,
+    // 初始检测间隔（0.5秒，立即开始检测）
+    initial: 500
   };
 
   private readonly maxConsecutiveChanges = 3; // 连续变化次数阈值
@@ -79,8 +79,14 @@ export class SmartPollingManager {
     this.state.hasDevices = hasDevices;
     this.state.lastPollTime = now;
 
-    // 如果状态变化，立即重新调度
+    // 如果状态变化，立即触发检测并重新调度
     if (hasChanged) {
+      // 立即执行一次检测（类似刷新按钮的行为）
+      if (this.pollingCallback) {
+        this.pollingCallback().catch(error => {
+          console.error('立即检测失败:', error);
+        });
+      }
       this.reschedule();
     }
   }
@@ -123,7 +129,7 @@ export class SmartPollingManager {
     const timeSinceLastChange = Date.now() - this.state.lastChangeTime;
     if (this.state.consecutiveChanges > 0 &&
         this.state.consecutiveChanges <= this.maxConsecutiveChanges &&
-        timeSinceLastChange < 10000) {
+        timeSinceLastChange < 15000) { // 延长到15秒，保持更长时间的高频检测
       return this.intervals.active;
     }
 

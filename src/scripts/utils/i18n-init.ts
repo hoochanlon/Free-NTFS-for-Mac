@@ -85,6 +85,27 @@
       ejectAllBtn.textContent = t('devices.ejectAll');
     }
 
+    const refreshDevicesBtn = document.getElementById('refreshDevicesBtn');
+    if (refreshDevicesBtn) {
+      // 更新标题（使用 tray.refreshDevices 作为完整描述，devices.refreshDevices 作为简短文本）
+      const titleText = t('tray.refreshDevices') || t('devices.refreshDevices');
+      refreshDevicesBtn.title = titleText;
+      // 更新文本（保留图标和结构）
+      const icon = refreshDevicesBtn.querySelector('.btn-icon');
+      const textSpan = refreshDevicesBtn.querySelector('span[data-i18n], span:not(.btn-icon)');
+      const refreshText = t('devices.refreshDevices');
+      if (textSpan) {
+        textSpan.textContent = refreshText;
+      } else {
+        // 如果没有找到文本span，直接更新整个按钮内容（保留图标）
+        if (icon) {
+          refreshDevicesBtn.innerHTML = icon.outerHTML + ' <span>' + refreshText + '</span>';
+        } else {
+          refreshDevicesBtn.innerHTML = '<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon"> <span>' + refreshText + '</span>';
+        }
+      }
+    }
+
     // 操作日志标签页
     const logsTitle = document.querySelector('#logsTab h2');
     if (logsTitle) {
@@ -232,6 +253,66 @@
     if (loadingText) {
       loadingText.textContent = t('status.checking');
     }
+
+    // 处理所有带有 data-i18n 属性的元素（通用处理）
+    const i18nElements = document.querySelectorAll('[data-i18n]');
+    i18nElements.forEach((element) => {
+      const key = element.getAttribute('data-i18n');
+      if (key) {
+        const translatedText = t(key);
+        if (translatedText && translatedText !== key) {
+          // 如果是 span 或其他文本元素，直接更新文本
+          if (element.tagName === 'SPAN' || element.tagName === 'P' || element.tagName === 'DIV') {
+            element.textContent = translatedText;
+          } else if (element.tagName === 'BUTTON') {
+            // 对于按钮，保留图标，只更新文本span
+            const icon = element.querySelector('.btn-icon, img.btn-icon');
+            const textSpan = element.querySelector('span[data-i18n], span:not(.btn-icon)');
+            if (textSpan) {
+              textSpan.textContent = translatedText;
+            } else if (icon) {
+              // 如果有图标但没有文本span，创建一个
+              const span = document.createElement('span');
+              span.textContent = translatedText;
+              element.appendChild(span);
+            } else {
+              // 没有图标，直接更新文本内容
+              element.textContent = translatedText;
+            }
+          } else {
+            // 对于其他元素，更新文本内容但保留子元素（如图标）
+            const icon = element.querySelector('.btn-icon, img');
+            if (icon) {
+              // 保留图标，只更新文本
+              const textSpan = element.querySelector('span:not(.btn-icon)');
+              if (textSpan) {
+                textSpan.textContent = translatedText;
+              } else {
+                // 如果没有文本span，创建一个
+                const span = document.createElement('span');
+                span.textContent = translatedText;
+                element.appendChild(span);
+              }
+            } else {
+              // 没有图标，直接更新文本内容
+              element.textContent = translatedText;
+            }
+          }
+        }
+      }
+    });
+
+    // 处理所有带有 data-i18n-title 属性的元素（用于 title 属性）
+    const i18nTitleElements = document.querySelectorAll('[data-i18n-title]');
+    i18nTitleElements.forEach((element) => {
+      const key = element.getAttribute('data-i18n-title');
+      if (key) {
+        const translatedText = t(key);
+        if (translatedText && translatedText !== key) {
+          element.setAttribute('title', translatedText);
+        }
+      }
+    });
   }
 
   // 监听语言变更事件

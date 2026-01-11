@@ -1,7 +1,129 @@
 // 依赖检查模块
 import type { Dependencies } from '../../types/electron';
-import { commandExists, execAsync } from './utils';
+import { commandExists, execAsync, fileExists } from './utils';
 import { PathFinder } from './path-finder';
+
+// 检查 MacFUSE（使用多种方法，提高可靠性）
+async function checkMacFUSE(brewExists: boolean): Promise<boolean> {
+  // 方法1：检查系统扩展是否加载（最可靠的方法）
+  try {
+    const { stdout } = await Promise.race([
+      execAsync('systemextensionsctl list 2>/dev/null'),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+    ]) as { stdout: string };
+
+    // 检查输出中是否包含 macfuse 相关的扩展
+    if (stdout && (stdout.toLowerCase().includes('macfuse') || stdout.toLowerCase().includes('fuse'))) {
+      // 进一步检查是否已启用（状态为 enabled 或 activated）
+      const lines = stdout.split('\n');
+      for (const line of lines) {
+        const lowerLine = line.toLowerCase();
+        if (lowerLine.includes('macfuse') || lowerLine.includes('fuse')) {
+          // 如果包含 enabled、activated 或 running，认为已安装
+          if (lowerLine.includes('enabled') || lowerLine.includes('activated') ||
+              lowerLine.includes('running') || lowerLine.includes('*')) {
+            console.log('[依赖检查] MacFUSE 通过系统扩展检查');
+            return true;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    // 系统扩展检查失败，继续尝试其他方法
+    console.log('[依赖检查] 系统扩展检查失败，尝试其他方法:', error);
+  }
+
+  // 方法2：检查关键文件是否存在（快速且可靠）
+  const macfuseFiles = [
+    '/Library/Filesystems/macfuse.fs/Contents/Resources/mount_macfuse',
+    '/Library/Filesystems/macfuse.fs/Contents/Resources/load_macfuse',
+    '/usr/local/lib/libfuse.dylib',
+    '/opt/homebrew/lib/libfuse.dylib'
+  ];
+
+  for (const file of macfuseFiles) {
+    try {
+      if (await fileExists(file)) {
+        console.log('[依赖检查] MacFUSE 通过文件检查:', file);
+        return true;
+      }
+    } catch {
+      // 继续检查下一个文件
+    }
+  }
+
+  // 方法3：使用 brew info 作为备用（如果 Homebrew 可用）
+  if (brewExists) {
+    try {
+      // 确保 PATH 包含 Homebrew 路径（合并现有 PATH 和默认路径）
+      const defaultPaths = [
+        '/usr/local/bin',
+        '/opt/homebrew/bin',
+        '/usr/bin',
+        '/bin',
+        '/usr/sbin',
+        '/sbin'
+      ];
+      const existingPath = process.env.PATH || '';
+      const pathArray = existingPath ? existingPath.split(':') : [];
+      // 合并并去重
+      const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
+
+      const env = {
+        ...process.env,
+        PATH: mergedPaths.join(':')
+      };
+
+      // 使用 brew info 检查（带超时保护）
+      try {
+        const infoResult = await Promise.race([
+          execAsync('brew info macfuse 2>/dev/null', { env }),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+        ]);
+        // 检查输出中是否包含 "Installed" 字符串
+        const output = (infoResult as { stdout: string }).stdout || '';
+        if (output.includes('Installed') || output.includes('installed')) {
+          console.log('[依赖检查] MacFUSE 通过 brew info 检查');
+          return true;
+        }
+      } catch (error) {
+        // brew info 失败，可能因为网络问题或 brew 未正确配置
+        console.log('[依赖检查] brew info 检查失败:', error);
+      }
+    } catch {
+      // 忽略错误
+    }
+  }
+
+  // 如果所有方法都失败，返回 false
+  // 但可以尝试一次重试（延迟后再次检查系统扩展，因为有时需要时间加载）
+  console.log('[依赖检查] MacFUSE 所有检查方法均失败，尝试延迟重试...');
+  try {
+    await new Promise(resolve => setTimeout(resolve, 500)); // 延迟 500ms
+    // 重试系统扩展检查
+    const { stdout } = await Promise.race([
+      execAsync('systemextensionsctl list 2>/dev/null'),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+    ]) as { stdout: string };
+
+    if (stdout && (stdout.toLowerCase().includes('macfuse') || stdout.toLowerCase().includes('fuse'))) {
+      const lines = stdout.split('\n');
+      for (const line of lines) {
+        const lowerLine = line.toLowerCase();
+        if ((lowerLine.includes('macfuse') || lowerLine.includes('fuse')) &&
+            (lowerLine.includes('enabled') || lowerLine.includes('activated') ||
+             lowerLine.includes('running') || lowerLine.includes('*'))) {
+          console.log('[依赖检查] MacFUSE 通过延迟重试检查');
+          return true;
+        }
+      }
+    }
+  } catch {
+    // 重试也失败，返回 false
+  }
+
+  return false;
+}
 
 // 检查macOS版本是否满足要求（macOS 14 Sonoma或更高版本）
 async function checkMacOSVersion(): Promise<{ satisfied: boolean; version: string }> {
@@ -77,46 +199,11 @@ export async function checkDependencies(): Promise<Dependencies> {
     result.swift = swiftExists;
     result.brew = brewExists;
 
-    // 检查 MacFUSE（使用 brew info 方法，最准确且不需要网络）
-    if (result.brew) {
-      try {
-        // 确保 PATH 包含 Homebrew 路径（合并现有 PATH 和默认路径）
-        const defaultPaths = [
-          '/usr/local/bin',
-          '/opt/homebrew/bin',
-          '/usr/bin',
-          '/bin',
-          '/usr/sbin',
-          '/sbin'
-        ];
-        const existingPath = process.env.PATH || '';
-        const pathArray = existingPath ? existingPath.split(':') : [];
-        // 合并并去重
-        const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
-
-        const env = {
-          ...process.env,
-          PATH: mergedPaths.join(':')
-        };
-
-        // 使用 brew info 检查（带超时保护）
-        try {
-          const infoResult = await Promise.race([
-            execAsync('brew info macfuse 2>/dev/null', { env }),
-            new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000))
-          ]);
-          // 检查输出中是否包含 "Installed" 字符串
-          const output = (infoResult as { stdout: string }).stdout || '';
-          result.macfuse = output.includes('Installed') || output.includes('installed');
-        } catch {
-          result.macfuse = false;
-        }
-      } catch {
-        result.macfuse = false;
-      }
-    } else {
-      result.macfuse = false;
-    }
+    // 检查 MacFUSE（使用多种方法，提高可靠性）
+    // 方法1：检查系统扩展是否加载（最可靠）
+    // 方法2：检查关键文件是否存在
+    // 方法3：使用 brew info 作为备用
+    result.macfuse = await checkMacFUSE(result.brew);
 
     // 检查 ntfs-3g（带超时）
     try {

@@ -39,11 +39,12 @@ export class HybridDetector {
       // 降级到智能轮询
       this.useEvents = false;
       this.pollingManager.start(async () => {
-        // 轮询时也使用强制刷新，确保获取最新状态
+        // 轮询时也使用强制刷新，确保获取最新状态（与刷新按钮行为一致）
         const devices = await this.deviceDetector.getNTFSDevices(true);
         this.handleDeviceChange(devices, false);
       });
       console.log('⚠️ [混合检测] 降级到智能轮询模式（fswatch未安装，建议运行: brew install fswatch）');
+      console.log('ℹ️ [混合检测] 已优化轮询间隔，接近即时检测（初始0.5秒，稳定3秒，活跃1秒）');
     }
 
     // 立即执行一次检测（强制刷新，确保获取最新状态）
