@@ -211,15 +211,19 @@ export function setupNTFSHandlers(): void {
   //   }
   // });
 
-  ipcMain.handle('request-sudo-password', async () => {
+  ipcMain.handle('request-sudo-password', async (event) => {
     return new Promise<void>((resolve) => {
-      if (mainWindow) {
-        dialog.showMessageBox(mainWindow, {
+      // 优先使用调用方所属窗口，其次回退到 mainWindow
+      const win = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+
+      if (win && !win.isDestroyed()) {
+        dialog.showMessageBox(win, {
           type: 'info',
           title: '需要管理员权限',
           message: '挂载 NTFS 设备需要管理员权限。\n\n请在终端中输入您的密码。',
-          buttons: ['确定']
-        }).then(() => resolve());
+          buttons: ['确定'],
+          defaultId: 0
+        }).then(() => resolve()).catch(() => resolve());
       } else {
         resolve();
       }
