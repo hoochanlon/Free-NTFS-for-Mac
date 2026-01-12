@@ -52,6 +52,23 @@
     AppModules.Devices.Operations = {};
   }
 
+  // 统一的设备列表刷新函数（确保操作后状态立即更新）
+  async function refreshDeviceList(devicesList: HTMLElement): Promise<void> {
+    const Refresh = AppModules?.Devices?.Refresh;
+    if (Refresh && Refresh.refreshDevices) {
+      // 获取当前状态对象（从 devices.js 传入或使用默认）
+      const state = (window as any).__devicesState || {
+        devices: AppModules.Devices.devices || [],
+        lastDeviceCount: 0,
+        lastDeviceState: ''
+      };
+      await Refresh.refreshDevices(devicesList, true, state);
+    } else if ((window as any).refreshDevices) {
+      // 降级：使用全局 refreshDevices 函数
+      await (window as any).refreshDevices(true);
+    }
+  }
+
   // 设备操作功能
   AppModules.Devices.Operations = {
     // 挂载设备
@@ -80,7 +97,9 @@
           }
           // 等待一小段时间，确保挂载操作完全完成，标记文件已创建
           await new Promise(resolve => setTimeout(resolve, 500));
-          await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+
+          // 强制刷新设备列表（确保状态立即更新）
+          await refreshDeviceList(devicesList);
         } else {
           await addLog(`${t('messages.mountError')}: ${result.error || t('messages.mountError')}`, 'error');
           if (result.error?.includes('密码错误') || result.error?.includes('password')) {
@@ -124,7 +143,9 @@
           }
           // 等待一小段时间，让系统重新挂载
           await new Promise(resolve => setTimeout(resolve, 1500));
-          await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+
+          // 强制刷新设备列表（确保状态立即更新）
+          await refreshDeviceList(devicesList);
         } else {
           await addLog(`${t('messages.restoreError')}: ${result.error || t('messages.restoreError')}`, 'error');
           if (result.error?.includes('密码错误') || result.error?.includes('password')) {
@@ -205,8 +226,8 @@
         // 等待一小段时间，让系统重新挂载
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        // 刷新设备列表
-        await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+        // 刷新设备列表（确保状态立即更新）
+        await refreshDeviceList(devicesList);
 
         // 显示总结
         if (successCount > 0) {
@@ -326,8 +347,8 @@
           }
         }
 
-        // 刷新设备列表
-        await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+        // 刷新设备列表（确保状态立即更新）
+        await refreshDeviceList(devicesList);
 
         // 显示总结
         if (successCount > 0) {
@@ -401,8 +422,8 @@
           }
         }
 
-        // 刷新设备列表
-        await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+        // 刷新设备列表（确保状态立即更新）
+        await refreshDeviceList(devicesList);
 
         // 显示总结
         if (successCount > 0) {
@@ -515,8 +536,8 @@
         // 等待一小段时间，让系统完全断开设备
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // 刷新设备列表
-        await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+        // 刷新设备列表（确保状态立即更新）
+        await refreshDeviceList(devicesList);
 
         // 显示总结
         if (successCount > 0) {

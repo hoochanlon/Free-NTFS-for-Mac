@@ -38,6 +38,9 @@
     lastDeviceState: ''
   };
 
+  // 暴露 state 到 window，供 device-operations 模块使用
+  (window as any).__devicesState = state;
+
   // 使用模块化的功能
   const Utils = (window as any).AppModules?.Devices?.Utils;
   const Renderer = (window as any).AppModules?.Devices?.Renderer;

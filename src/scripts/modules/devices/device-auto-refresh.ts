@@ -133,6 +133,7 @@
         // 根据状态调整轮询间隔
         if (hasChanged) {
           consecutiveChanges++;
+          // 状态变化时，快速刷新（1秒），确保托盘窗口能立即看到变化
           currentInterval = 1000;
         } else {
           if (consecutiveChanges > 0) {
@@ -142,13 +143,16 @@
           if (devices.length === 0) {
             currentInterval = 30000;
           } else if (consecutiveChanges === 0) {
-            currentInterval = 5000;
+            // 托盘窗口场景下，使用更短的轮询间隔（2秒），确保状态变化能快速反映
+            const isTrayWindow = document.body && document.body.classList.contains('tray-window');
+            currentInterval = isTrayWindow ? 2000 : 5000;
           }
         }
 
         if (consecutiveChanges > 3) {
           consecutiveChanges = 0;
-          currentInterval = 5000;
+          const isTrayWindow = document.body && document.body.classList.contains('tray-window');
+          currentInterval = isTrayWindow ? 2000 : 5000;
         }
 
         const isVisible = !document.hidden;

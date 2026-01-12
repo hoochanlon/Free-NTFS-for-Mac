@@ -128,8 +128,21 @@
         }
 
         // 增量更新：只更新变化的部分
-        const hasChanged = JSON.stringify(oldDevices.map(d => ({ disk: d.disk, isMounted: d.isMounted }))) !==
-                          JSON.stringify(devices.map(d => ({ disk: d.disk, isMounted: d.isMounted })));
+        // 需要同时对比挂载状态、读写状态和卸载标记，确保托盘/主窗口都能正确刷新 UI
+        const oldState = oldDevices.map(d => ({
+          disk: d.disk,
+          isMounted: d.isMounted,
+          isReadOnly: d.isReadOnly,
+          isUnmounted: d.isUnmounted || false
+        }));
+        const newState = devices.map(d => ({
+          disk: d.disk,
+          isMounted: d.isMounted,
+          isReadOnly: d.isReadOnly,
+          isUnmounted: d.isUnmounted || false
+        }));
+
+        const hasChanged = JSON.stringify(oldState) !== JSON.stringify(newState);
 
         if (hasChanged || force) {
           renderDevices(devicesList, devices);
