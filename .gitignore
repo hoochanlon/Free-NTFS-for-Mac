@@ -40,3 +40,4 @@ logs/
 *.js.map
 styles.css
 !node_modules/**/*.js
+!ninja/**/*.js
