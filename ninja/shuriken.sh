@@ -6,7 +6,6 @@
 # 功能说明：
 #   提供便捷的选项来配置 macOS 系统权限设置，包括：
 #   - 禁用 Gatekeeper（允许任何来源的应用）
-#   - 打开隐私与安全性设置
 #   - 解锁拖拽安装的应用程序
 #   - 检查 SIP 和 Gatekeeper 状态
 #   - SIP 禁用说明（需在恢复模式下操作）
@@ -25,6 +24,10 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+WHITE='\033[1;37m'
+BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 # 打印带颜色的消息
@@ -71,21 +74,39 @@ disable_gatekeeper() {
 
     if check_admin; then
         print_info "正在执行: sudo spctl --master-disable"
-        spctl --master-disable
-        if [ $? -eq 0 ]; then
+        output=$(spctl --master-disable 2>&1)
+        exit_code=$?
+
+        # spctl --master-disable 成功时会输出提示信息，即使退出码可能非零
+        if echo "$output" | grep -qi "assessment system\|Globally disabling" || [ $exit_code -eq 0 ]; then
             print_success "Gatekeeper 已禁用"
+            if echo "$output" | grep -qi "System Settings"; then
+                print_info "提示：需要在「系统设置」>「隐私与安全性」中确认此更改"
+            fi
             print_info "现在可以在「系统设置」>「隐私与安全性」中看到「任何来源」选项"
         else
             print_error "禁用失败，请检查权限"
+            if [ -n "$output" ]; then
+                echo "$output"
+            fi
         fi
     else
         print_info "需要管理员权限，请输入密码："
-        sudo spctl --master-disable
-        if [ $? -eq 0 ]; then
+        output=$(sudo spctl --master-disable 2>&1)
+        exit_code=$?
+
+        # spctl --master-disable 成功时会输出提示信息，即使退出码可能非零
+        if echo "$output" | grep -qi "assessment system\|Globally disabling" || [ $exit_code -eq 0 ]; then
             print_success "Gatekeeper 已禁用"
+            if echo "$output" | grep -qi "System Settings"; then
+                print_info "提示：需要在「系统设置」>「隐私与安全性」中确认此更改"
+            fi
             print_info "现在可以在「系统设置」>「隐私与安全性」中看到「任何来源」选项"
         else
             print_error "禁用失败，可能是密码错误或权限不足"
+            if [ -n "$output" ]; then
+                echo "$output"
+            fi
         fi
     fi
 
@@ -93,20 +114,7 @@ disable_gatekeeper() {
     read -p "按回车键继续..."
 }
 
-# 选项 2: 打开隐私与安全性设置
-open_security_settings() {
-    print_info "正在打开「系统设置」>「隐私与安全性」..."
-    open "x-apple.systempreferences:com.apple.preference.security"
-    print_success "已打开隐私与安全性设置"
-    echo ""
-    print_info "提示：在「安全性」部分，您可以："
-    print_info "  - 允许从「任何来源」下载的应用"
-    print_info "  - 允许特定开发者的应用"
-    echo ""
-    read -p "按回车键继续..."
-}
-
-# 选项 3: SIP 禁用说明
+# 选项 2: SIP 禁用说明
 show_sip_info() {
     print_info "系统完整性保护 (SIP) 说明"
     echo ""
@@ -150,7 +158,7 @@ show_sip_info() {
     read -p "按回车键继续..."
 }
 
-# 选项 4: 解锁应用程序（xattr -cr）
+# 选项 3: 解锁应用程序（xattr -cr）
 unlock_app() {
     print_info "应用程序解锁工具"
     echo ""
@@ -193,7 +201,7 @@ unlock_app() {
     read -p "按回车键继续..."
 }
 
-# 选项 5: 检查当前状态
+# 选项 4: 检查当前状态
 check_status() {
     print_info "正在检查系统安全设置状态..."
     echo ""
@@ -222,12 +230,12 @@ check_status() {
             print_success "SIP 已禁用"
         else
             print_info "SIP 已启用（默认状态）"
-            print_info "如需禁用，请选择选项 3 查看详细说明"
+            print_info "如需禁用，请选择选项 2 查看详细说明"
         fi
     else
         print_warning "无法在正常模式下检查 SIP 状态"
         print_info "SIP 状态检查需要在恢复模式下运行 csrutil 命令"
-        print_info "请选择选项 3 查看 SIP 禁用说明"
+        print_info "请选择选项 2 查看 SIP 禁用说明"
     fi
 
     echo ""
@@ -237,31 +245,28 @@ check_status() {
 # 主菜单
 show_menu() {
     clear
-    echo "=========================================="
-    echo "  🥷 Shuriken - macOS 权限设置工具"
-    echo "=========================================="
+    echo -e "${CYAN}==========================================${NC}"
+    echo -e "  ${BOLD}${WHITE}🥷 Shuriken - macOS 权限设置工具${NC}"
+    echo -e "${CYAN}==========================================${NC}"
     echo ""
-    echo "请选择操作："
+    echo -e "${BOLD}请选择操作：${NC}"
     echo ""
-    echo "  1) 禁用 Gatekeeper（允许任何来源）"
-    echo "     sudo spctl --master-disable"
+    echo -e "  ${GREEN}1)${NC} ${BOLD}禁用 Gatekeeper（允许任何来源）${NC}"
+    echo -e "     ${YELLOW}sudo spctl --master-disable${NC}"
     echo ""
-    echo "  2) 打开「隐私与安全性」设置"
-    echo "     在图形界面中配置应用权限"
+    echo -e "  ${MAGENTA}2)${NC} ${BOLD}SIP 禁用说明${NC}"
+    echo -e "     ${YELLOW}查看系统完整性保护的禁用方法（需恢复模式）${NC}"
     echo ""
-    echo "  3) SIP 禁用说明"
-    echo "     查看系统完整性保护的禁用方法（需恢复模式）"
+    echo -e "  ${CYAN}3)${NC} ${BOLD}解锁应用程序 (xattr -cr)${NC}"
+    echo -e "     ${YELLOW}移除应用的隔离属性${NC}"
     echo ""
-    echo "  4) 解锁应用程序 (xattr -cr)"
-    echo "     移除应用的隔离属性"
+    echo -e "  ${YELLOW}4)${NC} ${BOLD}检查当前状态${NC}"
+    echo -e "     ${YELLOW}查看 Gatekeeper 和 SIP 的当前状态${NC}"
     echo ""
-    echo "  5) 检查当前状态"
-    echo "     查看 Gatekeeper 和 SIP 的当前状态"
+    echo -e "  ${RED}0)${NC} ${BOLD}退出${NC}"
     echo ""
-    echo "  0) 退出"
-    echo ""
-    echo "=========================================="
-    echo -n "请输入选项 [0-5]: "
+    echo -e "${CYAN}==========================================${NC}"
+    echo -ne "${BOLD}请输入选项 ${GREEN}[0-4]${NC}${BOLD}: ${NC}"
 }
 
 # 主循环
@@ -277,15 +282,12 @@ main() {
                 disable_gatekeeper
                 ;;
             2)
-                open_security_settings
-                ;;
-            3)
                 show_sip_info
                 ;;
-            4)
+            3)
                 unlock_app
                 ;;
-            5)
+            4)
                 check_status
                 ;;
             0)
