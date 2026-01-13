@@ -38,7 +38,12 @@
 - **管理员权限**：挂载操作需要管理员权限，系统会提示输入密码
 - **Windows 快速启动**：如果设备在 Windows 中使用了快速启动功能，可能导致挂载失败。建议在 Windows 中完全关闭（而非休眠），或禁用快速启动功能
 - **设备名称**：U盘名称不支持空格与非法字符
-- **系统完整性保护**：首次使用可能需要禁用系统完整性保护（SIP），在终端运行：`sudo spctl --master-disable`
+- **Gatekeeper（允许任何来源）**：首次使用可能需要禁用 Gatekeeper 以允许运行未签名的应用。在终端运行：`sudo spctl --master-disable`。禁用后可在「系统设置」>「隐私与安全性」中看到「任何来源」选项
+- **系统完整性保护（SIP）**：如需禁用 SIP，需要在恢复模式下操作：
+  1. 重启 Mac，按住电源键直到屏幕上出现苹果的标志和进度条，进入 Recovery 模式
+  2. 在屏幕上方的工具栏找到并打开终端，输入命令：`csrutil disable`
+  3. 关掉终端，重启 Mac
+  4. 重启以后可以在终端中运行 `csrutil status` 查看状态确认
 
 ## 快速开始，两种方式，任选其一 （Shell）
 
@@ -192,7 +197,12 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 - **Administrator Privileges**: Mounting operations require administrator privileges, and the system will prompt for a password
 - **Windows Fast Startup**: If the device uses Fast Startup in Windows, mounting may fail. It is recommended to fully shut down (not hibernate) in Windows, or disable Fast Startup
 - **Device Name**: USB drive names do not support spaces or illegal characters
-- **System Integrity Protection**: First-time use may require disabling System Integrity Protection (SIP). Run in terminal: `sudo spctl --master-disable`
+- **Gatekeeper (Allow Anywhere)**: First-time use may require disabling Gatekeeper to allow unsigned applications. Run in terminal: `sudo spctl --master-disable`. After disabling, you can see the "Anywhere" option in "System Settings" > "Privacy & Security"
+- **System Integrity Protection (SIP)**: To disable SIP, you need to operate in Recovery Mode:
+  1. Restart Mac, hold the power button until the Apple logo and progress bar appear, enter Recovery Mode
+  2. Find and open Terminal from the toolbar at the top of the screen, enter command: `csrutil disable`
+  3. Close Terminal and restart Mac
+  4. After restart, you can run `csrutil status` in terminal to check the status
 
 ### Quick Start - Two Methods (Shell)
 
@@ -347,7 +357,12 @@ After packaging, the following will be generated in the `dist` directory:
 - **管理者権限**: マウント操作には管理者権限が必要で、システムがパスワードの入力を求めます
 - **Windows 高速スタートアップ**: デバイスが Windows で高速スタートアップ機能を使用している場合、マウントが失敗する可能性があります。Windows で完全にシャットダウン（スリープではなく）するか、高速スタートアップ機能を無効にすることをお勧めします
 - **デバイス名**: USB ドライブ名はスペースと不正な文字をサポートしていません
-- **システム整合性保護**: 初回使用時は、システム整合性保護（SIP）を無効にする必要がある場合があります。ターミナルで実行: `sudo spctl --master-disable`
+- **Gatekeeper（すべてのソースを許可）**: 初回使用時は、未署名アプリケーションを実行できるように Gatekeeper を無効にする必要がある場合があります。ターミナルで実行: `sudo spctl --master-disable`。無効にした後、「システム設定」>「プライバシーとセキュリティ」で「すべてのソース」オプションが表示されます
+- **システム整合性保護（SIP）**: SIP を無効にするには、リカバリモードで操作する必要があります：
+  1. Mac を再起動し、電源ボタンを押し続けて、画面に Apple ロゴとプログレスバーが表示されるまで待ち、リカバリモードに入る
+  2. 画面上部のツールバーからターミナルを見つけて開き、コマンドを入力: `csrutil disable`
+  3. ターミナルを閉じて、Mac を再起動する
+  4. 再起動後、ターミナルで `csrutil status` を実行して状態を確認できます
 
 ### クイックスタート - 2つの方法（Shell）
 
