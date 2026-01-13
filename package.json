@@ -43,7 +43,7 @@
     "pnpm": "^10.27.0"
   },
   "build": {
-    "appId": "com.freentfs.mac",
+    "appId": "io.hoochanlon.github",
     "productName": "Nigate",
     "icon": "src/imgs/ico/flash.icns",
     "npmRebuild": false,

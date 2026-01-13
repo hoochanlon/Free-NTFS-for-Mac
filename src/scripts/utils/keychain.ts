@@ -3,8 +3,8 @@ import { promisify } from 'util';
 
 const exec = promisify(child_process.exec);
 
-// Keychain 服务名称
-const KEYCHAIN_SERVICE = 'com.freentfs.mac';
+// Keychain 服务名称（与 appId 对齐）
+const KEYCHAIN_SERVICE = 'io.hoochanlon.github';
 
 /**
  * 使用 macOS Keychain 安全存储密码
