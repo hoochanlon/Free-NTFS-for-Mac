@@ -165,6 +165,9 @@ pnpm run setup
 2. 删除 `node_modules` 并重新运行 `pnpm install`
 3. 查看控制台错误信息
 
+## 致谢
+
+感谢所有为这个项目做出贡献的开发者、测试者和用户！查看 [致谢名单](ACKNOWLEDGMENTS.md) 了解详情。
 
 [^1]: 注：使用本工具挂载或修改 NTFS 设备存在数据丢失风险。强烈建议操作前备份重要数据。本工具按"现状"提供，不提供任何担保。因使用本工具造成的数据损失，开发者不承担责任。
 
@@ -333,6 +336,10 @@ After packaging, the following will be generated in the `dist` directory:
 2. Delete `node_modules` and rerun `pnpm install`
 3. Check console error messages
 
+### Acknowledgments
+
+Thank you to all developers, testers, and users who have contributed to this project! See [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md) for details.
+
 [^2]: **Note**: Using this tool to mount or modify NTFS devices carries a risk of data loss. It is strongly recommended to backup important data before operation. This tool is provided "as is" without any warranty. The developer is not responsible for data loss caused by using this tool.
 
 ---
@@ -499,5 +506,9 @@ pnpm run setup
 1. Node.js のバージョンが要件を満たしているか確認
 2. `node_modules` を削除し、`pnpm install` を再実行
 3. コンソールのエラーメッセージを確認
+
+## 謝辞
+
+このプロジェクトに貢献してくださったすべての開発者、テスター、ユーザーの皆様に感謝いたします！詳細は [謝辞リスト](ACKNOWLEDGMENTS.md) をご覧ください。
 
 [^3]: **注**: このツールを使用して NTFS デバイスをマウントまたは変更することは、データ損失のリスクがあります。操作前に重要なデータをバックアップすることを強く推奨します。このツールは「現状のまま」提供され、いかなる保証もありません。このツールの使用によって引き起こされたデータ損失について、開発者は責任を負いません。
