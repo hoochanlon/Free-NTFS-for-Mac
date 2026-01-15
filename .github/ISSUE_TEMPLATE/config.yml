@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 💬 Discussions / 讨论区
+  - name: 💬 Discussions
     url: https://github.com/hoochanlon/Free-NTFS-for-Mac/discussions
-    about: Ask general questions or participate in discussions / 提出一般性问题或参与讨论
-  - name: 📖 Documentation / 文档
+    about: Ask general questions or participate in discussions
+  - name: 📖 Documentation
     url: https://github.com/hoochanlon/Free-NTFS-for-Mac#readme
-    about: View project documentation and usage instructions / 查看项目文档和使用说明
+    about: View project documentation and usage instructions

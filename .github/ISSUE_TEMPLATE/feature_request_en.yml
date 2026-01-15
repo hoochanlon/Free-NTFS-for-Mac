@@ -1,20 +1,12 @@
-name: 💡 Feature Request (English)
-description: Suggest a new feature or improvement / 建议一个新功能或改进 (English Template / 英文模板)
+name: 💡 Feature Request
+description: Suggest a new feature or improvement
 title: "[Feature] "
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
-        **🌐 Language / 语言: English**
-
         Thank you for suggesting a feature! Your ideas are important to us.
-
-        ---
-
-        **🌐 语言 / Language: 中文 (Chinese)**
-
-        感谢您提出功能建议！您的想法对我们很重要。
 
   - type: textarea
     id: problem

@@ -1,0 +1,89 @@
+name: ✨ Improvement Suggestion
+description: Suggest an improvement to existing functionality
+title: "[Improvement] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting an improvement! Your feedback helps us make the project better.
+
+  - type: dropdown
+    id: improvement_type
+    attributes:
+      label: Type of Improvement
+      description: What area does this improvement relate to?
+      options:
+        - User Interface (UI) - Visual design, layout, or appearance
+        - User Experience (UX) - Workflow, usability, or interaction
+        - Performance - Speed, efficiency, or resource usage
+        - Documentation - README, guides, or help text
+        - Code Quality - Refactoring, structure, or maintainability
+        - Error Handling - Error messages, validation, or recovery
+        - Accessibility - Support for users with disabilities
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current Behavior
+      description: Describe how the current functionality works
+      placeholder: e.g., Currently, when mounting a device, the user must wait 5 seconds before seeing the device appear in the list
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested_improvement
+    attributes:
+      label: Suggested Improvement
+      description: How would you like to improve this? Please describe your suggestion in detail
+      placeholder: e.g., Reduce the refresh interval to 2 seconds, or add a manual refresh button
+    validations:
+      required: true
+
+  - type: textarea
+    id: benefits
+    attributes:
+      label: Benefits
+      description: What benefits would this improvement bring? (e.g., better user experience, faster performance, clearer understanding)
+      placeholder: e.g., Users would see their devices faster, reducing confusion and improving the overall experience
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important do you think this improvement is?
+      options:
+        - High - Significantly impacts usability or performance
+        - Medium - Noticeable improvement to user experience
+        - Low - Minor polish or nice-to-have
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples or References
+      description: Do you have examples from other applications, mockups, or references that illustrate this improvement?
+      placeholder: e.g., Screenshots, links to similar implementations, or design mockups
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution Willingness
+      options:
+        - label: I am willing to help implement this improvement
+          required: false
+        - label: I can provide design or testing assistance
+          required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information
+      description: Any other information that might be useful
+      placeholder: e.g., Related issues, technical considerations, or constraints

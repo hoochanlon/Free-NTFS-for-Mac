@@ -1,20 +1,12 @@
-name: 🐛 Bug Report (English)
-description: Report a bug or issue / 报告一个 bug 或问题 (English Template / 英文模板)
+name: 🐛 Bug Report
+description: Report a bug or issue
 title: "[Bug] "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        **🌐 Language / 语言: English**
-
         Thank you for reporting an issue! Please fill in the following information as detailed as possible to help us resolve the problem faster.
-
-        ---
-
-        **🌐 语言 / Language: 中文 (Chinese)**
-
-        感谢您报告问题！请尽可能详细地填写以下信息，这将帮助我们更快地解决问题。
 
   - type: textarea
     id: description
