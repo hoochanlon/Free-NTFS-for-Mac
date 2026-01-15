@@ -21,6 +21,9 @@ export class EventDrivenDetector {
   private lastDetectionTime: number = 0; // 上次检测时间
   private readonly minDetectionInterval = 200; // 最小检测间隔200ms
   private healthCheckInterval: NodeJS.Timeout | null = null; // 健康检查定时器
+  private periodicVerificationInterval: NodeJS.Timeout | null = null; // 定期验证定时器
+  private lastVerifiedDevices: NTFSDevice[] = []; // 上次验证的设备列表
+  private readonly verificationInterval = 5000; // 每5秒验证一次设备状态
 
   constructor(deviceDetector: DeviceDetector) {
     this.deviceDetector = deviceDetector;
@@ -198,8 +201,9 @@ export class EventDrivenDetector {
               console.log('[事件驱动] fswatch 进程成功启动，重置重启计数');
               this.restartAttempts = 0;
             }
-            // 启动健康检查
+            // 启动健康检查和定期验证
             this.startHealthCheck();
+            this.startPeriodicVerification();
             resolve();
           } else {
             reject(new Error('fswatch 进程启动失败'));
@@ -344,6 +348,9 @@ export class EventDrivenDetector {
       console.log('[事件驱动] 第一次检测（强制刷新）...');
       const devices1 = await this.deviceDetector.getNTFSDevices(true);
       console.log(`[事件驱动] 第一次检测完成，设备数: ${devices1.length}`);
+
+      // 更新上次验证的设备列表
+      this.lastVerifiedDevices = devices1;
 
       // 立即更新UI，确保设备变化（包括移除）能尽快显示
       // 对于设备移除，第一次检测就应该能检测到，立即更新UI
@@ -529,6 +536,81 @@ export class EventDrivenDetector {
   }
 
   /**
+   * 启动定期验证（即使没有事件也定期检查设备状态，确保设备移除时能及时响应）
+   */
+  private startPeriodicVerification(): void {
+    // 每5秒验证一次设备状态，确保即使事件丢失也能检测到设备移除
+    this.periodicVerificationInterval = setInterval(async () => {
+      if (!this.isRunning) {
+        if (this.periodicVerificationInterval) {
+          clearInterval(this.periodicVerificationInterval);
+          this.periodicVerificationInterval = null;
+        }
+        return;
+      }
+
+      // 如果正在检测中，跳过本次验证（避免冲突）
+      if (this.isDetecting) {
+        return;
+      }
+
+      try {
+        // 静默检测设备状态（不触发回调，只用于验证）
+        const currentDevices = await this.deviceDetector.getNTFSDevices(true);
+
+        // 比较设备列表是否有变化
+        const hasChanged = this.hasDeviceListChanged(this.lastVerifiedDevices, currentDevices);
+
+        if (hasChanged) {
+          console.log(`[事件驱动] 定期验证：检测到设备变化（${this.lastVerifiedDevices.length} -> ${currentDevices.length}），触发更新`);
+          // 有变化，触发更新
+          if (this.onChangeCallback) {
+            this.onChangeCallback(currentDevices);
+          }
+        }
+
+        // 更新上次验证的设备列表
+        this.lastVerifiedDevices = currentDevices;
+      } catch (error) {
+        console.error('[事件驱动] 定期验证失败:', error);
+      }
+    }, this.verificationInterval);
+  }
+
+  /**
+   * 检查设备列表是否有变化（用于定期验证）
+   */
+  private hasDeviceListChanged(oldDevices: NTFSDevice[], newDevices: NTFSDevice[]): boolean {
+    // 如果数量不同，肯定有变化
+    if (oldDevices.length !== newDevices.length) {
+      return true;
+    }
+
+    // 比较设备标识（disk）
+    const oldDisks = new Set(oldDevices.map(d => d.disk));
+    const newDisks = new Set(newDevices.map(d => d.disk));
+
+    // 检查是否有新增或删除
+    if (oldDisks.size !== newDisks.size) {
+      return true;
+    }
+
+    for (const disk of oldDisks) {
+      if (!newDisks.has(disk)) {
+        return true; // 有设备被移除
+      }
+    }
+
+    for (const disk of newDisks) {
+      if (!oldDisks.has(disk)) {
+        return true; // 有新设备
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * 停止事件驱动检测
    */
   stop(): void {
@@ -557,10 +639,16 @@ export class EventDrivenDetector {
       this.healthCheckInterval = null;
     }
 
+    if (this.periodicVerificationInterval) {
+      clearInterval(this.periodicVerificationInterval);
+      this.periodicVerificationInterval = null;
+    }
+
     this.onChangeCallback = undefined;
     this.restartAttempts = 0;
     this.isDetecting = false;
     this.pendingEvents = 0;
+    this.lastVerifiedDevices = [];
 
     console.log('[事件驱动] 检测已停止');
   }

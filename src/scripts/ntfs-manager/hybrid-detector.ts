@@ -13,6 +13,8 @@ export class HybridDetector {
   private useEvents: boolean = false;
   private onChangeCallback?: (devices: NTFSDevice[]) => void;
   private currentDevices: NTFSDevice[] = [];
+  private backupPollingInterval: NodeJS.Timeout | null = null; // 备用轮询定时器（事件驱动模式下的安全网）
+  private readonly backupPollingIntervalMs = 10000; // 每10秒备用检测一次
 
   constructor(deviceDetector: DeviceDetector) {
     this.deviceDetector = deviceDetector;
@@ -35,6 +37,8 @@ export class HybridDetector {
     if (eventSuccess) {
       this.useEvents = true;
       console.log('✅ [混合检测] 使用事件驱动模式（零延迟、极低CPU）');
+      // 启动备用轮询机制（作为安全网，确保即使事件丢失也能检测到设备移除）
+      this.startBackupPolling();
     } else {
       // 降级到智能轮询
       this.useEvents = false;
@@ -149,6 +153,39 @@ export class HybridDetector {
   }
 
   /**
+   * 启动备用轮询（事件驱动模式下的安全网）
+   */
+  private startBackupPolling(): void {
+    // 每10秒进行一次备用检测，确保即使事件丢失也能检测到设备移除
+    this.backupPollingInterval = setInterval(async () => {
+      if (!this.useEvents || !this.onChangeCallback) {
+        // 如果已切换到轮询模式或回调已清除，停止备用轮询
+        if (this.backupPollingInterval) {
+          clearInterval(this.backupPollingInterval);
+          this.backupPollingInterval = null;
+        }
+        return;
+      }
+
+      try {
+        // 静默检测设备状态
+        const currentDevices = await this.deviceDetector.getNTFSDevices(true);
+
+        // 检查是否有变化（特别是设备移除）
+        const hasChanged = this.hasDeviceListChanged(this.currentDevices, currentDevices);
+        const deviceCountDecreased = currentDevices.length < this.currentDevices.length;
+
+        if (hasChanged || deviceCountDecreased) {
+          console.log(`[混合检测] 备用检测：发现设备变化（${this.currentDevices.length} -> ${currentDevices.length}），触发更新`);
+          this.handleDeviceChange(currentDevices, false); // 使用 fromEvent=false，因为这是备用检测
+        }
+      } catch (error) {
+        console.error('[混合检测] 备用检测失败:', error);
+      }
+    }, this.backupPollingIntervalMs);
+  }
+
+  /**
    * 停止检测
    */
   stop(): void {
@@ -157,6 +194,12 @@ export class HybridDetector {
     } else {
       this.pollingManager.stop();
     }
+
+    if (this.backupPollingInterval) {
+      clearInterval(this.backupPollingInterval);
+      this.backupPollingInterval = null;
+    }
+
     this.onChangeCallback = undefined;
   }
 
