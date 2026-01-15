@@ -1,0 +1,29 @@
+name: Delete old workflow runs
+on:
+  # 允许手动触发工作流
+  workflow_dispatch:
+
+jobs:
+  del_runs:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write  # 需要写权限来删除工作流记录
+      contents: read  # 读取仓库内容权限
+    steps:
+      - name: Set China Timezone (UTC+8)
+        run: |
+          # 设置时区为中国时区
+          export TZ="Asia/Shanghai"
+          # 获取当前日期和时间，计算保留天数
+          current_date=$(date +"%Y-%m-%d")
+          echo "Current Date (China Time): $current_date"
+          # 将日期传递给后续步骤
+          echo "current_date=$current_date" >> $GITHUB_ENV
+
+      - name: Delete workflow runs for remote repo
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}  # 使用GitHub Token进行身份验证
+          repository: 'hoochanlon/Free-NTFS-for-Mac'  # 替换为你的GitHub用户名和仓库
+          retain_days: 0  # 保留最近 1 天的工作流记录（基于中国时区）
+          keep_minimum_runs: 3  # 至少保留 X 条工作流记录
