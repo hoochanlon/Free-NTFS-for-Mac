@@ -1,0 +1,122 @@
+name: 🐛 Bug 报告 (中文 / Chinese)
+description: 报告一个 bug 或问题 / Report a bug or issue (中文模板 / Chinese Template)
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **🌐 语言 / Language: 中文 (Chinese)**
+
+        感谢您报告问题！请尽可能详细地填写以下信息，这将帮助我们更快地解决问题。
+
+        ---
+
+        **🌐 Language / 语言: English**
+
+        Thank you for reporting an issue! Please fill in the following information as detailed as possible to help us resolve the problem faster.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 请清晰简洁地描述遇到的问题
+      placeholder: 例如：在尝试挂载 NTFS 设备时，应用崩溃了
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请详细描述如何复现这个问题
+      placeholder: |
+        1. 打开应用
+        2. 插入 NTFS 设备
+        3. 点击"挂载为读写"按钮
+        4. 看到错误信息
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+      description: 您期望发生什么？
+      placeholder: 设备应该成功挂载为读写模式
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+      description: 实际发生了什么？
+      placeholder: 应用显示错误信息"挂载失败"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 操作系统版本
+      description: 您使用的 macOS 版本
+      options:
+        - macOS 14 (Sonoma)
+        - macOS 13 (Ventura)
+        - macOS 12 (Monterey)
+        - macOS 11 (Big Sur)
+        - 其他版本
+    validations:
+      required: true
+
+  - type: dropdown
+    id: app_version
+    attributes:
+      label: 应用版本
+      description: 您使用的应用版本（如果是 Electron 版本）
+      options:
+        - 最新版本
+        - 从 tags 下载的版本
+        - Shell 版本 (nigate)
+        - 开发版本
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 依赖状态
+      description: 请检查并列出依赖安装状态（Swift, Homebrew, MacFUSE, ntfs-3g）
+      placeholder: |
+        - Swift: ✅ 已安装
+        - Homebrew: ✅ 已安装
+        - MacFUSE: ❌ 未安装
+        - ntfs-3g: ✅ 已安装
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 错误日志
+      description: 如果有错误日志或控制台输出，请粘贴在这里
+      placeholder: 粘贴错误日志或截图
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 其他信息
+      description: 任何其他可能有用的信息（截图、设备信息等）
+      placeholder: 例如：设备在 Windows 中使用了快速启动功能
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 检查清单
+      options:
+        - label: 我已经搜索过现有的 issues，确认这是一个新问题
+          required: true
+        - label: 我已经阅读了 README 中的故障排除部分
+          required: false
+        - label: 我已经尝试过重新安装依赖
+          required: false

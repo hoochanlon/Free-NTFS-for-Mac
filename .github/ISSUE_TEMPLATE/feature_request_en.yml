@@ -1,0 +1,71 @@
+name: 💡 Feature Request (English)
+description: Suggest a new feature or improvement / 建议一个新功能或改进 (English Template / 英文模板)
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **🌐 Language / 语言: English**
+
+        Thank you for suggesting a feature! Your ideas are important to us.
+
+        ---
+
+        **🌐 语言 / Language: 中文 (Chinese)**
+
+        感谢您提出功能建议！您的想法对我们很重要。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Description
+      description: What problem does this feature solve? Please describe the pain point or need you encountered
+      placeholder: e.g., I would like to be able to manage multiple NTFS devices in batch
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this feature to be implemented? Please describe your idea
+      placeholder: e.g., Add a device list in the interface to support managing multiple devices simultaneously
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered other solutions? Please describe them
+      placeholder: e.g., Could also add a command-line parameter to implement batch operations
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important do you think this feature is?
+      options:
+        - High - Severely impacts user experience
+        - Medium - Significantly improves user experience
+        - Low - Nice-to-have feature
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution Willingness
+      options:
+        - label: I am willing to help implement this feature
+          required: false
+        - label: I can provide design or testing assistance
+          required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information
+      description: Any other information that might be useful (screenshots, reference links, etc.)
+      placeholder: e.g., Referenced designs from other similar applications

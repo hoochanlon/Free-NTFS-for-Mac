@@ -1,0 +1,71 @@
+name: 💡 功能请求 (中文 / Chinese)
+description: 建议一个新功能或改进 / Suggest a new feature or improvement (中文模板 / Chinese Template)
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **🌐 语言 / Language: 中文 (Chinese)**
+
+        感谢您提出功能建议！您的想法对我们很重要。
+
+        ---
+
+        **🌐 Language / 语言: English**
+
+        Thank you for suggesting a feature! Your ideas are important to us.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题描述
+      description: 这个功能要解决什么问题？请描述您遇到的痛点或需求
+      placeholder: 例如：我希望能够批量管理多个 NTFS 设备
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 建议的解决方案
+      description: 您希望如何实现这个功能？请描述您的想法
+      placeholder: 例如：在界面中添加一个设备列表，支持同时管理多个设备
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 替代方案
+      description: 您是否考虑过其他解决方案？请描述一下
+      placeholder: 例如：也可以添加一个命令行参数来实现批量操作
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 优先级
+      description: 您认为这个功能的重要程度
+      options:
+        - 高 - 严重影响使用体验
+        - 中 - 能显著改善使用体验
+        - 低 - 锦上添花的功能
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 贡献意愿
+      options:
+        - label: 我愿意参与实现这个功能
+          required: false
+        - label: 我可以提供设计或测试帮助
+          required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 其他信息
+      description: 任何其他可能有用的信息（截图、参考链接等）
+      placeholder: 例如：参考了其他类似应用的设计
