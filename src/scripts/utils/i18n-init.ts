@@ -89,7 +89,6 @@
     if (refreshDevicesBtn) {
       // 更新标题（只更新 title，不更新内容，因为只有图标）
       const titleText = t('tray.refreshDevices') || t('devices.refreshDevices');
-      refreshDevicesBtn.title = titleText;
       // 确保只有图标（如果没有图标，添加图标）
       const icon = refreshDevicesBtn.querySelector('.btn-icon');
       if (!icon) {
@@ -105,7 +104,6 @@
       const isTrayWindow = document.body && document.body.classList.contains('tray-window');
       if (isTrayWindow) {
         const titleText = t('tray.quit');
-        quitBtn.title = titleText;
 
         // 托盘窗口使用简单的黑色退出图标（与其它图标风格一致）
         const icon = quitBtn.querySelector('.btn-icon');

@@ -17,6 +17,9 @@
       <div class="titlebar-content">
         <h1 class="app-title">Nigate（Free NTFS for Mac）</h1>
         <div class="titlebar-right">
+          <button class="btn-about" id="caffeinateBtn">
+            <img src="../imgs/svg/caffe.svg" alt="" class="btn-about-icon" data-i18n-alt="tray.preventSleep">
+          </button>
           <button class="btn-about" id="aboutBtn">
             <img src="../imgs/svg/info.svg" alt="关于" class="btn-about-icon">
           </button>
@@ -105,11 +108,15 @@
                   <input type="checkbox" id="trayModeCheckbox">
                   <span data-i18n="settings.trayMode">托盘模式</span>
                 </label>
-                <button class="btn btn-secondary" id="refreshDevicesBtn" data-i18n-title="tray.refreshDevices">
+                <button class="btn btn-secondary" id="refreshDevicesBtn">
                   <img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">
                 </button>
               </div>
               <div class="header-actions-row">
+                <button class="btn btn-secondary" id="caffeinateMainBtn">
+                  <img src="../imgs/svg/caffe.svg" alt="" class="btn-icon" data-i18n-alt="tray.preventSleep">
+                  <span id="caffeinateMainBtnText" data-i18n="tray.preventSleep">防止休眠</span>
+                </button>
                 <button class="btn btn-primary" id="mountAllBtn">全读写</button>
                 <button class="btn btn-warning" id="restoreAllReadOnlyBtn">全只读</button>
                 <button class="btn btn-info" id="unmountAllBtn">全卸载</button>

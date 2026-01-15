@@ -47,6 +47,9 @@
   const helpTab = document.getElementById('helpTab') as HTMLElement;
   const aboutBtn = document.getElementById('aboutBtn') as HTMLButtonElement;
   const quitBtn = document.getElementById('quitBtn') as HTMLButtonElement;
+  const caffeinateBtn = document.getElementById('caffeinateBtn') as HTMLButtonElement | null;
+  const caffeinateMainBtn = document.getElementById('caffeinateMainBtn') as HTMLButtonElement | null;
+  const caffeinateMainBtnText = document.getElementById('caffeinateMainBtnText') as HTMLElement | null;
   const autoMountCheckbox = document.getElementById('autoMountCheckbox') as HTMLInputElement;
   const trayModeCheckbox = document.getElementById('trayModeCheckbox') as HTMLInputElement;
 
@@ -174,6 +177,99 @@
       });
     }
 
+    // 防止休眠按钮（标题栏 + 主界面按钮）
+    const getT = () => {
+      return AppUtils && AppUtils.I18n && AppUtils.I18n.t
+        ? AppUtils.I18n.t
+        : ((key: string) => key);
+    };
+
+    const updateMainCaffeinateButtonState = async () => {
+      if (!caffeinateMainBtn) return;
+      try {
+        const t = getT();
+        const isActive = await window.electronAPI.caffeinateStatus();
+        if (isActive) {
+          caffeinateMainBtn.classList.add('active');
+          if (caffeinateMainBtnText) {
+            caffeinateMainBtnText.textContent = t('tray.preventSleepEnabled');
+          }
+        } else {
+          caffeinateMainBtn.classList.remove('active');
+          if (caffeinateMainBtnText) {
+            caffeinateMainBtnText.textContent = t('tray.preventSleep');
+          }
+        }
+      } catch (error) {
+        console.error('获取防止休眠状态失败:', error);
+      }
+    };
+
+    const updateCaffeinateButtonState = async () => {
+      if (!caffeinateBtn) return;
+      try {
+        const t = getT();
+        const isActive = await window.electronAPI.caffeinateStatus();
+        if (isActive) {
+          caffeinateBtn.classList.add('active');
+        } else {
+          caffeinateBtn.classList.remove('active');
+        }
+      } catch (error) {
+        console.error('获取防止休眠状态失败:', error);
+      }
+    };
+
+    const syncCaffeinateButtons = async () => {
+      await Promise.all([
+        updateCaffeinateButtonState(),
+        updateMainCaffeinateButtonState()
+      ]);
+    };
+
+    const handleCaffeinateToggle = async () => {
+      try {
+        const result = await window.electronAPI.caffeinateToggle();
+        if (result.success) {
+          await syncCaffeinateButtons();
+          const t = getT();
+          const message = result.isActive
+            ? t('tray.preventSleepEnabled')
+            : t('tray.preventSleepDisabled');
+          await AppUtils.Logs.addLog(message, result.isActive ? 'success' : 'info');
+        } else {
+          console.error('切换防止休眠状态失败:', result.error);
+          const t = getT();
+          await AppUtils.Logs.addLog(`${t('tray.preventSleep')}操作失败: ${result.error || t('devices.unknownError') || '未知错误'}`, 'error');
+        }
+      } catch (error) {
+        console.error('防止休眠操作失败:', error);
+        const t = getT();
+        await AppUtils.Logs.addLog(`${t('tray.preventSleep')}操作失败: ${error instanceof Error ? error.message : String(error)}`, 'error');
+      }
+    };
+
+    if (caffeinateBtn) {
+      await updateCaffeinateButtonState();
+      caffeinateBtn.addEventListener('click', handleCaffeinateToggle);
+    }
+
+    if (caffeinateMainBtn) {
+      await updateMainCaffeinateButtonState();
+      caffeinateMainBtn.addEventListener('click', handleCaffeinateToggle);
+    }
+
+    if (window.electronAPI.onCaffeinateStatusChange) {
+      window.electronAPI.onCaffeinateStatusChange(async () => {
+        await syncCaffeinateButtons();
+      });
+    }
+
+    window.addEventListener('languageChanged', async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await syncCaffeinateButtons();
+    });
+
     // 初始化托盘模式复选框
     if (trayModeCheckbox) {
       window.electronAPI.getSettings().then((settings: any) => {
@@ -215,7 +311,6 @@
           refreshDevicesBtn.disabled = true;
           const refreshingText = AppUtils?.I18n?.t('tray.refreshing') || '刷新中...';
           refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">`;
-          refreshDevicesBtn.title = refreshingText;
         }
         try {
           // 强制刷新设备列表（跳过缓存）
@@ -230,7 +325,6 @@
             refreshDevicesBtn.disabled = false;
             const refreshText = AppUtils?.I18n?.t('devices.refreshDevices') || '刷新';
             refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">`;
-            refreshDevicesBtn.title = refreshText;
           }
         }
       });

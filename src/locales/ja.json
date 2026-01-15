@@ -221,7 +221,8 @@
     "about": "について",
     "quit": "終了",
     "quitConfirmTitle": "終了の確認",
-    "quitConfirmMessage": "アプリケーションを終了してもよろしいですか？"
+    "quitConfirmMessage": "アプリケーションを終了してもよろしいですか？",
+    "tooltip": "Nigate - NTFS デバイス管理\nクリックしてデバイスリストを表示"
   },
   "messages": {
     "mounting": "{name} をマウント中...",

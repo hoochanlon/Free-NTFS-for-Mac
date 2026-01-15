@@ -221,7 +221,8 @@
     "about": "About",
     "quit": "Quit",
     "quitConfirmTitle": "Confirm Quit",
-    "quitConfirmMessage": "Are you sure you want to quit the application?"
+    "quitConfirmMessage": "Are you sure you want to quit the application?",
+    "tooltip": "Nigate - NTFS Device Management\nClick to display device list"
   },
   "messages": {
     "mounting": "Mounting {name}...",

@@ -145,6 +145,7 @@
         display block
         margin 0
         padding 0
+        transition opacity 0.15s ease, filter 0.15s ease
 
 
 
@@ -160,6 +161,19 @@
 
       .btn-icon
         filter brightness(0) invert(1)
+
+    // 托盘窗口中的防止休眠按钮激活时使用咖啡色
+    #caffeinateBtn.active
+      background var(--coffee)
+      color #ffffff
+      border-color var(--coffee)
+
+      .btn-icon
+        filter brightness(0) invert(1)
+
+      &:hover
+        background var(--coffee-hover)
+        border-color var(--coffee-hover)
 
   .devices-list
     gap 12px
@@ -723,3 +737,22 @@ body.light-theme
     .empty-icon
       background var(--light-bg-tertiary)
       border-color var(--light-border)
+
+// 夜间模式下托盘窗口按钮图标优化（改为白色，提高可见性）
+// 注意：tray-window 类是在 body 上，所以这里使用 body.tray-window:not(.light-theme)
+body.tray-window:not(.light-theme)
+  .devices-header-actions
+    .devices-action-buttons-row
+      .btn.btn-secondary
+        .btn-icon
+          // 将图标颜色改为白色，在深色背景下更清晰可见
+          filter brightness(0) invert(1)
+          opacity 0.9
+
+        &:hover .btn-icon
+          filter brightness(0) invert(1)
+          opacity 1
+
+        &.active .btn-icon
+          filter brightness(0) invert(1)
+          opacity 1

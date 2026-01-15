@@ -24,6 +24,7 @@
   // DOM 元素
   const devicesList = document.getElementById('devicesList')!;
   const autoMountBtn = document.getElementById('autoMountBtn') as HTMLButtonElement | null;
+  const caffeinateBtn = document.getElementById('caffeinateBtn') as HTMLButtonElement | null;
   const showMainWindowBtn = document.getElementById('showMainWindowBtn') as HTMLButtonElement | null;
   const refreshDevicesBtn = document.getElementById('refreshDevicesBtn') as HTMLButtonElement | null;
   const quitBtn = document.getElementById('quitBtn') as HTMLButtonElement | null;
@@ -366,7 +367,6 @@
           refreshDevicesBtn.disabled = true;
           const refreshingText = t('tray.refreshing') || '刷新中...';
           refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">`;
-          refreshDevicesBtn.title = refreshingText;
           try {
             await refreshDevices(true);
           } catch (error) {
@@ -377,8 +377,72 @@
               refreshDevicesBtn.disabled = false;
               const refreshText = t('devices.refreshDevices') || '刷新';
               refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">`;
-              refreshDevicesBtn.title = refreshText;
             }
+          }
+        }
+      });
+    }
+
+    // 防止休眠按钮（托盘窗口）
+    if (caffeinateBtn) {
+      const updateCaffeinateButtonState = async () => {
+        try {
+          const isActive = await electronAPI.caffeinateStatus();
+          if (isActive) {
+            caffeinateBtn.classList.add('active');
+          } else {
+            caffeinateBtn.classList.remove('active');
+          }
+        } catch (error) {
+          console.error('获取防止休眠状态失败:', error);
+        }
+      };
+
+      // 初始化按钮状态
+      updateCaffeinateButtonState().catch(err => {
+        console.error('初始化防止休眠按钮状态失败:', err);
+      });
+
+      // 监听状态变化
+      if (electronAPI.onCaffeinateStatusChange) {
+        electronAPI.onCaffeinateStatusChange(async () => {
+          await updateCaffeinateButtonState();
+        });
+      }
+
+      // 语言切换时更新提示文案
+      window.addEventListener('languageChanged', async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        await updateCaffeinateButtonState();
+      });
+
+      // 点击切换
+      caffeinateBtn.addEventListener('click', async () => {
+        try {
+          const result = await electronAPI.caffeinateToggle();
+          if (result.success) {
+            await updateCaffeinateButtonState();
+            const message = result.isActive
+              ? t('tray.preventSleepEnabled')
+              : t('tray.preventSleepDisabled');
+            const AppUtils = (window as any).AppUtils;
+            if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
+              await AppUtils.Logs.addLog(message, result.isActive ? 'success' : 'info');
+            }
+          } else {
+            console.error('切换防止休眠状态失败:', result.error);
+            const AppUtils = (window as any).AppUtils;
+            if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
+              const errorMsg = `${t('tray.preventSleep')}操作失败: ${result.error || t('devices.unknownError') || '未知错误'}`;
+              await AppUtils.Logs.addLog(errorMsg, 'error');
+            }
+          }
+        } catch (error) {
+          console.error('防止休眠操作失败:', error);
+          const AppUtils = (window as any).AppUtils;
+          if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
+            const errorMsg = `${t('tray.preventSleep')}操作失败: ${error instanceof Error ? error.message : String(error)}`;
+            await AppUtils.Logs.addLog(errorMsg, 'error');
           }
         }
       });

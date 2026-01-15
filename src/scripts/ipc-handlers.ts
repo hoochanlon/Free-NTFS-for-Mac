@@ -17,7 +17,7 @@ import { SettingsManager, AppSettings } from './utils/settings';
 import { WINDOW_SIZE_CONFIG } from '../config/window-config';
 import { KeychainManager } from './utils/keychain';
 import { rebuildApplicationMenu } from './app-config';
-import { initTray, destroyTray, updateTrayMenu } from './utils/tray-manager';
+import { initTray, destroyTray, updateTrayMenu, updateTrayTooltip } from './utils/tray-manager';
 import { caffeinateManager } from './utils/caffeinate-manager';
 
 let quitWindow: BrowserWindow | null = null;
@@ -542,6 +542,8 @@ export function setupSettingsHandlers(): void {
     // 如果语言设置发生变化，重新构建菜单和托盘菜单
     if (settings.language && settings.language !== oldSettings.language) {
       await rebuildApplicationMenu();
+      // 更新托盘提示文字
+      await updateTrayTooltip();
       await updateTrayMenu();
     }
     // 如果托盘模式设置发生变化，初始化或销毁托盘

@@ -221,7 +221,8 @@
     "about": "關於",
     "quit": "退出",
     "quitConfirmTitle": "確認退出",
-    "quitConfirmMessage": "確定要退出應用嗎？"
+    "quitConfirmMessage": "確定要退出應用嗎？",
+    "tooltip": "Nigate - NTFS 設備管理\n點擊顯示設備列表"
   },
   "messages": {
     "mounting": "正在掛載 {name}...",

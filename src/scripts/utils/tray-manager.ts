@@ -3,12 +3,56 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { createTrayIcon } from './tray-icons';
 import { toggleTrayDevicesWindow, mainWindow } from '../window-manager';
+import { SettingsManager } from './settings';
 
 // 托盘图标引用
 let tray: Tray | null = null;
 
 // 注意：托盘菜单已完全替换为 BrowserWindow
 // 点击托盘图标时会显示 BrowserWindow 窗口，实现真正的实时更新
+
+/**
+ * 获取托盘提示文字的翻译
+ */
+async function getTrayTooltipText(): Promise<string> {
+  try {
+    const settings = await SettingsManager.getSettings();
+    let language = settings.language;
+
+    // 如果设置为跟随系统，检测系统语言
+    if (language === 'system') {
+      const systemLang = app.getLocale();
+      if (systemLang.startsWith('ja')) {
+        language = 'ja';
+      } else if (systemLang.startsWith('de')) {
+        language = 'de';
+      } else if (systemLang.startsWith('en')) {
+        language = 'en';
+      } else if (systemLang.startsWith('zh-TW') || systemLang.startsWith('zh-Hant')) {
+        language = 'zh-TW';
+      } else if (systemLang.startsWith('zh')) {
+        language = 'zh-CN';
+      } else {
+        language = 'zh-CN'; // 默认使用简体中文
+      }
+    }
+
+    // 读取对应的语言文件
+    const localePath = path.join(app.getAppPath(), 'src', 'locales', `${language}.json`);
+    if (fs.existsSync(localePath)) {
+      const localeContent = fs.readFileSync(localePath, 'utf-8');
+      const locale = JSON.parse(localeContent);
+      if (locale.tray && locale.tray.tooltip) {
+        return locale.tray.tooltip;
+      }
+    }
+  } catch (error) {
+    console.error('获取托盘提示文字失败:', error);
+  }
+
+  // 如果获取失败，返回默认的中文
+  return 'Nigate - NTFS 设备管理\n点击显示设备列表';
+}
 
 /**
  * 初始化托盘
@@ -62,8 +106,9 @@ export async function initTray(): Promise<void> {
       }
     }
 
-    // 设置托盘提示
-    tray.setToolTip('Nigate - NTFS 设备管理\n点击显示设备列表');
+    // 设置托盘提示（使用国际化）
+    const tooltipText = await getTrayTooltipText();
+    tray.setToolTip(tooltipText);
 
     // 点击托盘图标时的处理逻辑：如果主窗口显示则聚焦主窗口，否则显示托盘设备窗口
     tray.on('click', async () => {
@@ -103,10 +148,24 @@ export async function initTray(): Promise<void> {
 
 /**
  * 更新托盘（已替换为 BrowserWindow，此函数保留用于兼容性）
- * BrowserWindow 会自动实时更新，无需手动调用
+ * BrowserWindow 会自动实时更新，无需手动刷新
  */
 export async function updateTrayMenu(forceRefresh: boolean = false): Promise<void> {
   // BrowserWindow 会自动更新，无需手动刷新
+}
+
+/**
+ * 更新托盘提示文字（当语言切换时调用）
+ */
+export async function updateTrayTooltip(): Promise<void> {
+  if (tray) {
+    try {
+      const tooltipText = await getTrayTooltipText();
+      tray.setToolTip(tooltipText);
+    } catch (error) {
+      console.error('更新托盘提示文字失败:', error);
+    }
+  }
 }
 
 /**
