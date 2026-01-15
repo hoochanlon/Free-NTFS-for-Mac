@@ -13,11 +13,13 @@ export class EventDrivenDetector {
   private isRunning: boolean = false;
   private restartAttempts: number = 0;
   private readonly maxRestartAttempts = 3;
-  private readonly debounceMs = 100; // 防抖100ms，避免过于频繁
+  private readonly debounceMs = 50; // 防抖50ms，加快响应速度
   private isDetecting: boolean = false; // 标记是否正在检测中
   private pendingEvents: number = 0; // 待处理的事件数量
   private detectionTimeout: NodeJS.Timeout | null = null; // 检测超时定时器
-  private readonly maxDetectionTime = 10000; // 最大检测时间10秒
+  private readonly maxDetectionTime = 5000; // 最大检测时间5秒（减少超时时间，加快响应）
+  private lastDetectionTime: number = 0; // 上次检测时间
+  private readonly minDetectionInterval = 200; // 最小检测间隔200ms
   private healthCheckInterval: NodeJS.Timeout | null = null; // 健康检查定时器
 
   constructor(deviceDetector: DeviceDetector) {
@@ -267,12 +269,20 @@ export class EventDrivenDetector {
   private async handleVolumeChange(): Promise<void> {
     // 增加待处理事件计数
     this.pendingEvents++;
-    console.log(`[事件驱动] 收到卷变化事件，待处理事件数: ${this.pendingEvents}, 正在检测: ${this.isDetecting}`);
+    const now = Date.now();
+    const timeSinceLastDetection = now - this.lastDetectionTime;
 
-    // 如果正在检测，只记录事件，等待检测完成后再处理
-    // 但如果检测时间过长（可能是卡住了），强制重置并处理新事件
+    console.log(`[事件驱动] 收到卷变化事件，待处理事件数: ${this.pendingEvents}, 正在检测: ${this.isDetecting}, 距离上次检测: ${timeSinceLastDetection}ms`);
+
+    // 如果正在检测，检查是否应该中断当前检测以处理新事件
     if (this.isDetecting) {
-      console.log('[事件驱动] 正在检测中，事件已记录，等待检测完成后处理');
+      // 如果距离上次检测已经超过最小间隔，且待处理事件较多，可以考虑提前处理
+      if (timeSinceLastDetection > this.minDetectionInterval && this.pendingEvents > 1) {
+        console.log(`[事件驱动] 检测中但待处理事件较多(${this.pendingEvents}个)，将在检测完成后立即处理`);
+      } else {
+        console.log('[事件驱动] 正在检测中，事件已记录，等待检测完成后处理');
+      }
+
       // 检查是否检测超时
       if (this.detectionTimeout) {
         // 已经有超时定时器，说明检测正在进行中，只记录事件
@@ -289,6 +299,9 @@ export class EventDrivenDetector {
       clearTimeout(this.debounceTimer);
     }
 
+    // 如果距离上次检测时间太短，使用防抖；否则立即处理
+    const debounceDelay = timeSinceLastDetection < this.minDetectionInterval ? this.debounceMs : 0;
+
     // 使用防抖，但确保每次事件都会被处理
     this.debounceTimer = setTimeout(async () => {
       const eventsToProcess = this.pendingEvents;
@@ -298,7 +311,7 @@ export class EventDrivenDetector {
       console.log(`[事件驱动] 开始处理 ${eventsToProcess} 个事件`);
       // 执行检测
       await this.performDetection(eventsToProcess);
-    }, this.debounceMs);
+    }, debounceDelay);
   }
 
   /**
@@ -331,12 +344,14 @@ export class EventDrivenDetector {
       console.log('[事件驱动] 第一次检测（强制刷新）...');
       const devices1 = await this.deviceDetector.getNTFSDevices(true);
       console.log(`[事件驱动] 第一次检测完成，设备数: ${devices1.length}`);
+      // 立即更新UI，确保新设备尽快显示
       if (this.onChangeCallback) {
         this.onChangeCallback(devices1);
       }
 
-      // 延迟检测，确保系统完成挂载/卸载操作（特别是读写状态变化）
-      await new Promise(resolve => setTimeout(resolve, 400));
+      // 对于连续插入的设备，减少延迟时间，加快响应
+      const delayTime = eventCount > 1 ? 200 : 300; // 多个事件时减少延迟
+      await new Promise(resolve => setTimeout(resolve, delayTime));
 
       // 二次检测（强制刷新，捕获可能的延迟状态更新）
       console.log('[事件驱动] 第二次检测（验证状态）...');
@@ -392,18 +407,19 @@ export class EventDrivenDetector {
         console.log('[事件驱动] 设备状态无变化，跳过UI更新');
       }
 
-      // 如果检测期间有多个事件（连续插入多块U盘），增加检测次数
+      // 如果检测期间有多个事件（连续插入多块U盘），增加检测次数，但减少延迟
       if (eventCount > 1) {
         console.log(`[事件驱动] 检测到多个事件(${eventCount})，增加检测次数`);
-        await new Promise(resolve => setTimeout(resolve, 400));
+        // 减少延迟，加快响应
+        await new Promise(resolve => setTimeout(resolve, 250));
         const devices3 = await this.deviceDetector.getNTFSDevices(true);
         console.log(`[事件驱动] 第三次检测完成，设备数: ${devices3.length}`);
         if (this.onChangeCallback) {
           this.onChangeCallback(devices3);
         }
 
-        // 再检测一次，确保捕获所有设备
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // 再检测一次，确保捕获所有设备（进一步减少延迟）
+        await new Promise(resolve => setTimeout(resolve, 300));
         const devices4 = await this.deviceDetector.getNTFSDevices(true);
         console.log(`[事件驱动] 第四次检测完成，设备数: ${devices4.length}`);
         if (this.onChangeCallback) {
@@ -432,13 +448,16 @@ export class EventDrivenDetector {
       }
 
       this.isDetecting = false;
+      this.lastDetectionTime = Date.now();
       console.log('[事件驱动] 检测完成，待处理事件数:', this.pendingEvents);
 
-      // 如果检测完成后还有待处理的事件，继续处理
+      // 如果检测完成后还有待处理的事件，继续处理（减少延迟，加快响应）
       if (this.pendingEvents > 0) {
-        console.log(`[事件驱动] 检测完成后还有 ${this.pendingEvents} 个待处理事件，继续处理`);
+        console.log(`[事件驱动] 检测完成后还有 ${this.pendingEvents} 个待处理事件，立即继续处理`);
         const remainingEvents = this.pendingEvents;
         this.pendingEvents = 0;
+        // 减少延迟，加快响应连续插入的设备
+        const delay = Date.now() - this.lastDetectionTime < this.minDetectionInterval ? 100 : 0;
         setTimeout(() => {
           this.performDetection(remainingEvents).catch(error => {
             console.error('[事件驱动] 后续检测失败:', error);
@@ -449,7 +468,7 @@ export class EventDrivenDetector {
               this.detectionTimeout = null;
             }
           });
-        }, 200);
+        }, delay);
       }
     }
   }

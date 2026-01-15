@@ -100,6 +100,7 @@
   // 刷新设备列表（优化版：防抖和增量更新）
   let refreshDebounceTimer: number | null = null;
   const REFRESH_DEBOUNCE_MS = 200;
+  const EVENT_DRIVEN_DEBOUNCE_MS = 50; // 事件驱动模式下使用更短的防抖时间
 
   async function refreshDevices(
     devicesList: HTMLElement,
@@ -108,8 +109,13 @@
       devices: any[];
       lastDeviceCount: number;
       lastDeviceState: string;
-    }
+    },
+    providedDevices?: any[] // 如果提供了设备列表，说明是事件驱动模式
   ): Promise<any[]> {
+    // 如果提供了设备列表（事件驱动模式），使用更短的防抖时间，并且跳过防抖直接执行
+    const debounceMs = providedDevices ? EVENT_DRIVEN_DEBOUNCE_MS : REFRESH_DEBOUNCE_MS;
+    const shouldSkipDebounce = providedDevices !== undefined; // 事件驱动模式下跳过防抖
+
     // 防抖：短时间内多次调用只执行最后一次
     if (!force && refreshDebounceTimer !== null) {
       clearTimeout(refreshDebounceTimer);
@@ -120,8 +126,8 @@
         showLoading(true);
         const oldDevices = [...state.devices];
         const previousDevicePaths = oldDevices.map(d => d.devicePath);
-        // 强制刷新时使用 getNTFSDevices(true)，确保获取最新状态（特别是读写状态）
-        const devices = await electronAPI.getNTFSDevices(force);
+        // 如果提供了设备列表（事件驱动模式），直接使用；否则从API获取
+        const devices = providedDevices || await electronAPI.getNTFSDevices(force);
 
         // 更新 AppModules.Devices.devices（如果存在）
         if (AppModules.Devices) {
@@ -243,15 +249,21 @@
       }
     };
 
-    if (!force) {
+    // 如果提供了设备列表（事件驱动模式），跳过防抖直接执行，加快响应
+    if (shouldSkipDebounce || force) {
+      // 清除可能存在的防抖定时器
+      if (refreshDebounceTimer !== null) {
+        clearTimeout(refreshDebounceTimer);
+        refreshDebounceTimer = null;
+      }
+      return doRefresh();
+    } else {
       return new Promise((resolve) => {
         refreshDebounceTimer = window.setTimeout(async () => {
           const result = await doRefresh();
           resolve(result);
-        }, REFRESH_DEBOUNCE_MS);
+        }, debounceMs);
       });
-    } else {
-      return doRefresh();
     }
   }
 
