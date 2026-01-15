@@ -13,8 +13,9 @@ export class HybridDetector {
   private useEvents: boolean = false;
   private onChangeCallback?: (devices: NTFSDevice[]) => void;
   private currentDevices: NTFSDevice[] = [];
-  private backupPollingInterval: NodeJS.Timeout | null = null; // 备用轮询定时器（事件驱动模式下的安全网）
-  private readonly backupPollingIntervalMs = 10000; // 每10秒备用检测一次
+  private backupPollingInterval: NodeJS.Timeout | null = null; // 备用轮询定时器（事件驱动模式下的安全网，使用 setTimeout 而非 setInterval）
+  private readonly backupPollingIntervalWithDevices = 12000; // 有设备时每12秒备用检测一次
+  private readonly backupPollingIntervalNoDevices = 20000; // 无设备时每20秒备用检测一次（降低频率）
 
   constructor(deviceDetector: DeviceDetector) {
     this.deviceDetector = deviceDetector;
@@ -154,14 +155,14 @@ export class HybridDetector {
 
   /**
    * 启动备用轮询（事件驱动模式下的安全网）
+   * 优化：根据设备状态动态调整检测频率，降低CPU使用
    */
   private startBackupPolling(): void {
-    // 每10秒进行一次备用检测，确保即使事件丢失也能检测到设备移除
-    this.backupPollingInterval = setInterval(async () => {
+    const performBackupCheck = async () => {
       if (!this.useEvents || !this.onChangeCallback) {
         // 如果已切换到轮询模式或回调已清除，停止备用轮询
         if (this.backupPollingInterval) {
-          clearInterval(this.backupPollingInterval);
+          clearTimeout(this.backupPollingInterval);
           this.backupPollingInterval = null;
         }
         return;
@@ -179,10 +180,30 @@ export class HybridDetector {
           console.log(`[混合检测] 备用检测：发现设备变化（${this.currentDevices.length} -> ${currentDevices.length}），触发更新`);
           this.handleDeviceChange(currentDevices, false); // 使用 fromEvent=false，因为这是备用检测
         }
+
+        // 根据设备状态动态调整下次检测间隔
+        const hasDevices = currentDevices.length > 0;
+        const nextInterval = hasDevices
+          ? this.backupPollingIntervalWithDevices  // 有设备时12秒
+          : this.backupPollingIntervalNoDevices;   // 无设备时20秒（降低频率）
+
+        // 清除旧的定时器并重新调度
+        if (this.backupPollingInterval) {
+          clearTimeout(this.backupPollingInterval);
+        }
+        this.backupPollingInterval = setTimeout(performBackupCheck, nextInterval);
       } catch (error) {
         console.error('[混合检测] 备用检测失败:', error);
+        // 出错时也重新调度，但使用较长的间隔
+        if (this.backupPollingInterval) {
+          clearTimeout(this.backupPollingInterval);
+        }
+        this.backupPollingInterval = setTimeout(performBackupCheck, this.backupPollingIntervalNoDevices);
       }
-    }, this.backupPollingIntervalMs);
+    };
+
+    // 立即执行一次检测
+    performBackupCheck();
   }
 
   /**
@@ -196,7 +217,7 @@ export class HybridDetector {
     }
 
     if (this.backupPollingInterval) {
-      clearInterval(this.backupPollingInterval);
+      clearTimeout(this.backupPollingInterval);
       this.backupPollingInterval = null;
     }
 

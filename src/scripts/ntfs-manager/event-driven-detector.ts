@@ -21,9 +21,11 @@ export class EventDrivenDetector {
   private lastDetectionTime: number = 0; // 上次检测时间
   private readonly minDetectionInterval = 200; // 最小检测间隔200ms
   private healthCheckInterval: NodeJS.Timeout | null = null; // 健康检查定时器
-  private periodicVerificationInterval: NodeJS.Timeout | null = null; // 定期验证定时器
+  private periodicVerificationInterval: NodeJS.Timeout | null = null; // 定期验证定时器（使用 setTimeout 而非 setInterval）
   private lastVerifiedDevices: NTFSDevice[] = []; // 上次验证的设备列表
-  private readonly verificationInterval = 5000; // 每5秒验证一次设备状态
+  private lastVerificationTime: number = 0; // 上次验证时间
+  private readonly verificationIntervalWithDevices = 8000; // 有设备时每8秒验证一次（降低频率）
+  private readonly verificationIntervalNoDevices = 15000; // 无设备时每15秒验证一次（进一步降低频率）
 
   constructor(deviceDetector: DeviceDetector) {
     this.deviceDetector = deviceDetector;
@@ -537,13 +539,13 @@ export class EventDrivenDetector {
 
   /**
    * 启动定期验证（即使没有事件也定期检查设备状态，确保设备移除时能及时响应）
+   * 优化：根据设备状态动态调整检测频率，降低CPU使用
    */
   private startPeriodicVerification(): void {
-    // 每5秒验证一次设备状态，确保即使事件丢失也能检测到设备移除
-    this.periodicVerificationInterval = setInterval(async () => {
+    const performVerification = async () => {
       if (!this.isRunning) {
         if (this.periodicVerificationInterval) {
-          clearInterval(this.periodicVerificationInterval);
+          clearTimeout(this.periodicVerificationInterval);
           this.periodicVerificationInterval = null;
         }
         return;
@@ -569,12 +571,33 @@ export class EventDrivenDetector {
           }
         }
 
-        // 更新上次验证的设备列表
+        // 更新上次验证的设备列表和时间
         this.lastVerifiedDevices = currentDevices;
+        this.lastVerificationTime = Date.now();
+
+        // 根据设备状态动态调整下次验证间隔
+        const hasDevices = currentDevices.length > 0;
+        const nextInterval = hasDevices
+          ? this.verificationIntervalWithDevices  // 有设备时8秒（降低频率）
+          : this.verificationIntervalNoDevices;   // 无设备时15秒（进一步降低频率）
+
+        // 清除旧的定时器并重新调度
+        if (this.periodicVerificationInterval) {
+          clearInterval(this.periodicVerificationInterval);
+        }
+        this.periodicVerificationInterval = setTimeout(performVerification, nextInterval);
       } catch (error) {
         console.error('[事件驱动] 定期验证失败:', error);
+        // 出错时也重新调度，但使用较长的间隔
+        if (this.periodicVerificationInterval) {
+          clearInterval(this.periodicVerificationInterval);
+        }
+        this.periodicVerificationInterval = setTimeout(performVerification, this.verificationIntervalNoDevices);
       }
-    }, this.verificationInterval);
+    };
+
+    // 立即执行一次验证
+    performVerification();
   }
 
   /**
