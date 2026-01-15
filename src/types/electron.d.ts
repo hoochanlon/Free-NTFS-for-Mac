@@ -65,6 +65,8 @@ export interface ElectronAPI {
   showMainWindow: () => Promise<void>;
   adjustTrayWindowHeightByDeviceCount: (deviceCount: number) => Promise<void>;
   quitApp: () => Promise<void>;
+  openQuitWindow: () => Promise<void>;
+  closeQuitWindow: () => Promise<void>;
 }
 
 export interface Dependencies {

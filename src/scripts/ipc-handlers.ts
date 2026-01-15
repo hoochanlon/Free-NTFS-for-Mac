@@ -19,6 +19,8 @@ import { KeychainManager } from './utils/keychain';
 import { rebuildApplicationMenu } from './app-config';
 import { initTray, destroyTray, updateTrayMenu } from './utils/tray-manager';
 
+let quitWindow: BrowserWindow | null = null;
+
 // NTFS 相关 IPC handlers
 export function setupNTFSHandlers(): void {
   ipcMain.handle('check-dependencies', async () => {
@@ -321,6 +323,64 @@ export function setupWindowHandlers(): void {
 
   ipcMain.handle('open-about-window', async () => {
     await openAboutWindow();
+  });
+
+  // 打开退出确认窗口
+  ipcMain.handle('open-quit-window', async () => {
+    try {
+      if (quitWindow && !quitWindow.isDestroyed()) {
+        quitWindow.focus();
+        return;
+      }
+
+      const appPath = app.getAppPath();
+      const quitPath = path.join(appPath, 'src', 'html', 'quit-confirm.html');
+
+      quitWindow = new BrowserWindow({
+        width: 420,
+        height: 220,
+        resizable: false,
+        minimizable: false,
+        maximizable: false,
+        fullscreenable: false,
+        show: false,
+        parent: mainWindow || undefined,
+        modal: true,
+        frame: false,
+        titleBarStyle: 'hiddenInset',
+        webPreferences: {
+          preload: path.join(__dirname, 'preload.js'),
+          nodeIntegration: false,
+          contextIsolation: true
+        }
+      });
+
+      quitWindow.on('closed', () => {
+        quitWindow = null;
+      });
+
+      await quitWindow.loadFile(quitPath);
+
+      quitWindow.once('ready-to-show', () => {
+        if (quitWindow && !quitWindow.isDestroyed()) {
+          quitWindow.show();
+          quitWindow.focus();
+        }
+      });
+    } catch (error) {
+      console.error('打开退出窗口失败:', error);
+      if (quitWindow && !quitWindow.isDestroyed()) {
+        quitWindow.close();
+      }
+      quitWindow = null;
+    }
+  });
+
+  ipcMain.handle('close-quit-window', async () => {
+    if (quitWindow && !quitWindow.isDestroyed()) {
+      quitWindow.close();
+      quitWindow = null;
+    }
   });
 
   ipcMain.handle('switch-to-tab', async (event, tabName: string) => {

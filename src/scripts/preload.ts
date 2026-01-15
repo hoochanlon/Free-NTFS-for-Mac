@@ -96,7 +96,9 @@ const electronAPI: ElectronAPI = {
   updateWindowVisibility: (isVisible: boolean) => ipcRenderer.invoke('update-window-visibility', isVisible),
   getDetectionMode: () => ipcRenderer.invoke('get-detection-mode'),
   checkEventDrivenAvailable: () => ipcRenderer.invoke('check-event-driven-available'),
-  quitApp: () => ipcRenderer.invoke('quit-app')
+  quitApp: () => ipcRenderer.invoke('quit-app'),
+  openQuitWindow: () => ipcRenderer.invoke('open-quit-window'),
+  closeQuitWindow: () => ipcRenderer.invoke('close-quit-window')
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

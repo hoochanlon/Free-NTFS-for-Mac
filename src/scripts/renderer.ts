@@ -124,20 +124,25 @@
       AppModules.About.initAboutButton(aboutBtn);
     }
 
-    // 初始化退出按钮
+    // 初始化退出按钮（使用统一 confirm-dialog 样式）
     if (quitBtn) {
       quitBtn.addEventListener('click', async () => {
         try {
-          // 获取翻译函数
           const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
+          const title = t('tray.quitConfirmTitle') || '确认退出';
+          const message = t('tray.quitConfirmMessage') || '确定要退出应用吗？';
 
-          // 显示确认对话框
-          const confirmTitle = t('tray.quitConfirmTitle') || '确认退出';
-          const confirmMessage = t('tray.quitConfirmMessage') || '确定要退出应用吗？';
-          const confirmed = await window.electronAPI.showConfirmDialog(confirmTitle, confirmMessage);
-
-          if (confirmed) {
-            await window.electronAPI.quitApp();
+          if (AppUtils && AppUtils.UI && typeof AppUtils.UI.showConfirm === 'function') {
+            const confirmed = await AppUtils.UI.showConfirm(title, message);
+            if (confirmed) {
+              await window.electronAPI.quitApp();
+            }
+          } else {
+            // 降级：直接退出（极端情况下）
+            const confirmed = window.confirm(message);
+            if (confirmed) {
+              await window.electronAPI.quitApp();
+            }
           }
         } catch (error) {
           console.error('退出应用失败:', error);
