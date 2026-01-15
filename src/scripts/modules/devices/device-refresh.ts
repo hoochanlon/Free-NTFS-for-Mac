@@ -136,6 +136,17 @@
 
         // 增量更新：只更新变化的部分
         // 需要同时对比挂载状态、读写状态和卸载标记，确保托盘/主窗口都能正确刷新 UI
+        // 首先检查设备数量变化（设备移除或新增）
+        const deviceCountChanged = oldDevices.length !== devices.length;
+
+        // 检查设备列表是否有变化（通过 disk 标识）
+        const oldDeviceDisks = new Set(oldDevices.map(d => d.disk));
+        const newDeviceDisks = new Set(devices.map(d => d.disk));
+        const deviceListChanged = deviceCountChanged ||
+          [...oldDeviceDisks].some(disk => !newDeviceDisks.has(disk)) ||
+          [...newDeviceDisks].some(disk => !oldDeviceDisks.has(disk));
+
+        // 检查设备状态变化
         const oldState = oldDevices.map(d => ({
           disk: d.disk,
           isMounted: d.isMounted,
@@ -149,8 +160,34 @@
           isUnmounted: d.isUnmounted || false
         }));
 
-        const hasChanged = JSON.stringify(oldState) !== JSON.stringify(newState);
+        // 使用 Map 来比较状态，更准确
+        const oldStateMap = new Map(oldState.map(s => [s.disk, s]));
+        const newStateMap = new Map(newState.map(s => [s.disk, s]));
+        let stateChanged = false;
 
+        // 检查状态变化
+        for (const [disk, newS] of newStateMap) {
+          const oldS = oldStateMap.get(disk);
+          if (!oldS ||
+              oldS.isMounted !== newS.isMounted ||
+              oldS.isReadOnly !== newS.isReadOnly ||
+              oldS.isUnmounted !== newS.isUnmounted) {
+            stateChanged = true;
+            break;
+          }
+        }
+
+        // 如果有设备被移除，也要检查
+        for (const [disk] of oldStateMap) {
+          if (!newStateMap.has(disk)) {
+            stateChanged = true;
+            break;
+          }
+        }
+
+        const hasChanged = deviceListChanged || stateChanged;
+
+        // 如果有变化或强制刷新，更新UI
         if (hasChanged || force) {
           renderDevices(devicesList, devices);
         }
@@ -212,17 +249,17 @@
         const currentState = `${currentDeviceCount}-${readOnlyCount}`;
 
         // 只在设备状态变化时添加日志
-        const stateChanged = currentDeviceCount !== state.lastDeviceCount || currentState !== state.lastDeviceState;
+        const deviceStateChanged = currentDeviceCount !== state.lastDeviceCount || currentState !== state.lastDeviceState;
 
         if (devices.length === 0) {
-          if (stateChanged) {
+          if (deviceStateChanged) {
             await addLog(t('messages.noDevicesDetected'), 'info');
           }
         } else {
           const readWriteCount = devices.length - readOnlyCount;
 
           if (readOnlyCount > 0) {
-            if (stateChanged) {
+            if (deviceStateChanged) {
               if (readWriteCount > 0) {
                 await addLog(t('messages.devicesDetected', { count: devices.length, readOnly: readOnlyCount, readWrite: readWriteCount }), 'info');
               } else {
@@ -230,7 +267,7 @@
               }
             }
           } else {
-            if (stateChanged) {
+            if (deviceStateChanged) {
               await addLog(t('messages.devicesDetectedAllReadWrite', { count: devices.length }), 'success');
             }
           }

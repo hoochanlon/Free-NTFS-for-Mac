@@ -75,6 +75,14 @@
         // 如果提供了新的设备列表（来自事件回调），直接使用；否则重新获取
         if (providedDevices && Array.isArray(providedDevices)) {
           console.log('[主界面] 使用事件提供的设备列表，设备数量:', providedDevices.length);
+          const previousCount = (AppModules.Devices.devices || []).length;
+          const currentCount = providedDevices.length;
+
+          // 如果设备数量减少，说明有设备被移除，立即更新UI
+          if (currentCount < previousCount) {
+            console.log(`[主界面] 检测到设备移除: ${previousCount} -> ${currentCount}，立即更新UI`);
+          }
+
           AppModules.Devices.devices = providedDevices;
         } else {
           // 主界面这里改为强制刷新，避免缓存导致的读写/只读状态延迟
@@ -82,6 +90,7 @@
           AppModules.Devices.devices = await electronAPI.getNTFSDevices(true);
         }
 
+        // 无论是否有变化，都渲染设备列表（确保设备移除时UI能及时更新）
         Renderer.renderDevices(devicesList, readWriteDevicesList);
 
         const currentDeviceCount = AppModules.Devices.devices.length;

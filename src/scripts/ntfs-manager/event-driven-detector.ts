@@ -344,13 +344,16 @@ export class EventDrivenDetector {
       console.log('[事件驱动] 第一次检测（强制刷新）...');
       const devices1 = await this.deviceDetector.getNTFSDevices(true);
       console.log(`[事件驱动] 第一次检测完成，设备数: ${devices1.length}`);
-      // 立即更新UI，确保新设备尽快显示
+
+      // 立即更新UI，确保设备变化（包括移除）能尽快显示
+      // 对于设备移除，第一次检测就应该能检测到，立即更新UI
       if (this.onChangeCallback) {
         this.onChangeCallback(devices1);
       }
 
       // 对于连续插入的设备，减少延迟时间，加快响应
-      const delayTime = eventCount > 1 ? 200 : 300; // 多个事件时减少延迟
+      // 对于设备移除，也需要快速验证，确保状态同步
+      const delayTime = eventCount > 1 ? 200 : 250; // 减少延迟，加快响应
       await new Promise(resolve => setTimeout(resolve, delayTime));
 
       // 二次检测（强制刷新，捕获可能的延迟状态更新）
@@ -358,17 +361,22 @@ export class EventDrivenDetector {
       const devices2 = await this.deviceDetector.getNTFSDevices(true);
       console.log(`[事件驱动] 第二次检测完成，设备数: ${devices2.length}`);
 
-      // 检查是否有状态变化（特别是读写状态）
+      // 检查是否有状态变化（特别是读写状态和设备移除）
       // 使用 Map 来比较，避免索引不匹配的问题
       const devices1Map = new Map(devices1.map(d => [d.disk, d]));
       const devices2Map = new Map(devices2.map(d => [d.disk, d]));
 
       let hasStateChange = false;
+      let hasDeviceRemoved = false; // 标记是否有设备被移除
 
       // 检查设备数量变化
       if (devices2.length !== devices1.length) {
         hasStateChange = true;
         console.log(`[事件驱动] 设备数量变化: ${devices1.length} -> ${devices2.length}`);
+        // 如果设备数量减少，说明有设备被移除
+        if (devices2.length < devices1.length) {
+          hasDeviceRemoved = true;
+        }
       }
 
       // 检查每个设备的状态变化
@@ -393,18 +401,28 @@ export class EventDrivenDetector {
       for (const [disk, device1] of devices1Map) {
         if (!devices2Map.has(disk)) {
           hasStateChange = true;
+          hasDeviceRemoved = true;
           console.log(`[事件驱动] 设备被移除: ${device1.volumeName}`);
         }
       }
 
       // 如果有状态变化，或者设备列表从空变为非空（设备重新出现），都更新UI
-      if (hasStateChange || (devices1.length === 0 && devices2.length > 0)) {
+      // 特别注意：设备移除时，即使第一次检测已经更新，也要再次更新确保同步
+      if (hasStateChange || (devices1.length === 0 && devices2.length > 0) || hasDeviceRemoved) {
         console.log('[事件驱动] 检测到状态变化，更新UI');
         if (this.onChangeCallback) {
           this.onChangeCallback(devices2);
         }
       } else {
-        console.log('[事件驱动] 设备状态无变化，跳过UI更新');
+        // 即使没有状态变化，如果设备数量不同，也要更新（确保设备移除时UI同步）
+        if (devices1.length !== devices2.length) {
+          console.log('[事件驱动] 设备数量不同，更新UI以确保同步');
+          if (this.onChangeCallback) {
+            this.onChangeCallback(devices2);
+          }
+        } else {
+          console.log('[事件驱动] 设备状态无变化，跳过UI更新');
+        }
       }
 
       // 如果检测期间有多个事件（连续插入多块U盘），增加检测次数，但减少延迟

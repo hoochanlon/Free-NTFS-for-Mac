@@ -62,20 +62,23 @@ export class HybridDetector {
     // 如果设备数量增加，即使状态没变也认为是变化（可能是新设备插入）
     const deviceCountIncreased = devices.length > this.currentDevices.length;
 
-    // 事件驱动模式下，每次都更新（确保不遗漏）
+    // 如果设备数量减少，说明有设备被移除，必须更新
+    const deviceCountDecreased = devices.length < this.currentDevices.length;
+
+    // 事件驱动模式下，每次都更新（确保不遗漏，特别是设备移除时）
     // 轮询模式下，只在有变化时更新
-    if (fromEvent || hasChanged || deviceCountIncreased) {
+    if (fromEvent || hasChanged || deviceCountIncreased || deviceCountDecreased) {
       this.currentDevices = devices;
 
       // 更新轮询管理器状态
       if (!this.useEvents) {
         this.pollingManager.updateDeviceState(
           devices.length > 0,
-          hasChanged || deviceCountIncreased
+          hasChanged || deviceCountIncreased || deviceCountDecreased
         );
       }
 
-      // 调用回调（事件驱动模式下每次都调用，确保UI更新）
+      // 调用回调（事件驱动模式下每次都调用，确保UI更新，特别是设备移除时）
       if (this.onChangeCallback) {
         this.onChangeCallback(devices);
       }
