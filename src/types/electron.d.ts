@@ -13,7 +13,8 @@ export interface AppSettings {
 
 export interface ElectronAPI {
   checkDependencies: () => Promise<Dependencies>;
-  getNTFSDevices: () => Promise<NTFSDevice[]>;
+  // 可选参数 forceRefresh: 是否强制刷新设备列表（跳过缓存）
+  getNTFSDevices: (forceRefresh?: boolean) => Promise<NTFSDevice[]>;
   mountDevice: (device: NTFSDevice) => Promise<OperationResult>;
   unmountDevice: (device: NTFSDevice) => Promise<OperationResult>;
   restoreToReadOnly: (device: NTFSDevice) => Promise<OperationResult>;

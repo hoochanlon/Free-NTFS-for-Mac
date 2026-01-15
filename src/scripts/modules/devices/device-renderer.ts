@@ -80,9 +80,20 @@
       const lastStateKey = (devicesList as any).__lastStateKey || '';
 
       // 如果设备状态没有变化，且窗口类型没有变化，且已有DOM元素，则跳过重新渲染
-      if (deviceStateKey === lastStateKey &&
+      // 但是，如果设备列表从空变为非空，或者从非空变为空，必须重新渲染
+      const currentDeviceCount = devices.length;
+      const lastDeviceCount = devicesList.querySelectorAll('.device-item').length;
+      const isEmptyState = currentDeviceCount === 0;
+      const wasEmptyState = lastDeviceCount === 0;
+
+      // 如果设备列表从空变为非空，或从非空变为空，必须重新渲染
+      if (isEmptyState !== wasEmptyState) {
+        console.log(`[设备渲染] 设备列表状态变化: ${wasEmptyState ? '空' : '非空'} -> ${isEmptyState ? '空' : '非空'}, 强制重新渲染`);
+      } else if (deviceStateKey === lastStateKey &&
           isTrayWindow === lastIsTrayWindow &&
-          devicesList.querySelectorAll('.device-item').length === devices.length) {
+          currentDeviceCount === lastDeviceCount &&
+          currentDeviceCount > 0) {
+        // 只有在设备列表非空且状态完全相同时才跳过渲染
         return;
       }
 

@@ -88,9 +88,9 @@
         (window as any).AppModules.Devices.devices = devices;
       }
     } else {
-      // 降级实现
+      // 降级实现（强制刷新时使用 true）
       try {
-        devices = await electronAPI.getNTFSDevices();
+        devices = await electronAPI.getNTFSDevices(force);
         state.devices = devices;
         // 确保 AppModules.Devices.devices 同步更新
         if ((window as any).AppModules?.Devices) {
@@ -136,7 +136,7 @@
       const statusDot = document.querySelector('.status-dot') as HTMLElement | null;
       const statusText = document.querySelector('.status-text') as HTMLElement | null;
       await Operations.mountDevice(device, devicesList, devicesList, statusDot || devicesList, statusText || devicesList);
-      await refreshDevices();
+      await refreshDevices(true); // 操作完成后强制刷新，确保状态立即同步
     }
   }
 
@@ -145,7 +145,7 @@
       const statusDot = document.querySelector('.status-dot') as HTMLElement | null;
       const statusText = document.querySelector('.status-text') as HTMLElement | null;
       await Operations.restoreToReadOnly(device, devicesList, devicesList, statusDot || devicesList, statusText || devicesList);
-      await refreshDevices();
+      await refreshDevices(true); // 操作完成后强制刷新
     }
   }
 
@@ -154,7 +154,7 @@
       const statusDot = document.querySelector('.status-dot') as HTMLElement | null;
       const statusText = document.querySelector('.status-text') as HTMLElement | null;
       await Operations.unmountDevice(device, devicesList, devicesList, statusDot || devicesList, statusText || devicesList);
-      await refreshDevices();
+      await refreshDevices(true); // 操作完成后强制刷新
     }
   }
 
@@ -163,7 +163,7 @@
       const statusDot = document.querySelector('.status-dot') as HTMLElement | null;
       const statusText = document.querySelector('.status-text') as HTMLElement | null;
       await Operations.ejectDevice(device, devicesList, devicesList, statusDot || devicesList, statusText || devicesList);
-      await refreshDevices();
+      await refreshDevices(true); // 操作完成后强制刷新
     }
   }
 
@@ -172,7 +172,7 @@
       const statusDot = document.querySelector('.status-dot') as HTMLElement | null;
       const statusText = document.querySelector('.status-text') as HTMLElement | null;
       await Operations.mountAllDevices(devicesList, devicesList, statusDot || devicesList, statusText || devicesList);
-      await refreshDevices();
+      await refreshDevices(true); // 操作完成后强制刷新
     }
   }
 
@@ -181,7 +181,7 @@
       const statusDot = document.querySelector('.status-dot') as HTMLElement | null;
       const statusText = document.querySelector('.status-text') as HTMLElement | null;
       await Operations.restoreAllToReadOnly(devicesList, devicesList, statusDot || devicesList, statusText || devicesList);
-      await refreshDevices();
+      await refreshDevices(true); // 操作完成后强制刷新
     }
   }
 
@@ -190,7 +190,7 @@
       const statusDot = document.querySelector('.status-dot') as HTMLElement | null;
       const statusText = document.querySelector('.status-text') as HTMLElement | null;
       await Operations.ejectAllDevices(devicesList, devicesList, statusDot || devicesList, statusText || devicesList);
-      await refreshDevices();
+      await refreshDevices(true); // 操作完成后强制刷新
     }
   }
 
@@ -387,9 +387,9 @@
     if (quitBtn) {
       quitBtn.addEventListener('click', async () => {
         try {
-          // 显示确认对话框
           const confirmTitle = t('tray.quitConfirmTitle') || '确认退出';
           const confirmMessage = t('tray.quitConfirmMessage') || '确定要退出应用吗？';
+
           const confirmed = await electronAPI.showConfirmDialog(confirmTitle, confirmMessage);
 
           if (confirmed && electronAPI.quitApp) {

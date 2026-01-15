@@ -327,23 +327,69 @@ export class EventDrivenDetector {
     }, this.maxDetectionTime);
 
     try {
-      // 立即检测一次
-      console.log('[事件驱动] 第一次检测...');
+      // 立即检测一次（强制刷新，确保获取最新状态）
+      console.log('[事件驱动] 第一次检测（强制刷新）...');
       const devices1 = await this.deviceDetector.getNTFSDevices(true);
       console.log(`[事件驱动] 第一次检测完成，设备数: ${devices1.length}`);
       if (this.onChangeCallback) {
         this.onChangeCallback(devices1);
       }
 
-      // 延迟检测，确保系统完成挂载操作
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // 延迟检测，确保系统完成挂载/卸载操作（特别是读写状态变化）
+      await new Promise(resolve => setTimeout(resolve, 400));
 
-      // 二次检测
-      console.log('[事件驱动] 第二次检测...');
+      // 二次检测（强制刷新，捕获可能的延迟状态更新）
+      console.log('[事件驱动] 第二次检测（验证状态）...');
       const devices2 = await this.deviceDetector.getNTFSDevices(true);
       console.log(`[事件驱动] 第二次检测完成，设备数: ${devices2.length}`);
-      if (this.onChangeCallback) {
-        this.onChangeCallback(devices2);
+
+      // 检查是否有状态变化（特别是读写状态）
+      // 使用 Map 来比较，避免索引不匹配的问题
+      const devices1Map = new Map(devices1.map(d => [d.disk, d]));
+      const devices2Map = new Map(devices2.map(d => [d.disk, d]));
+
+      let hasStateChange = false;
+
+      // 检查设备数量变化
+      if (devices2.length !== devices1.length) {
+        hasStateChange = true;
+        console.log(`[事件驱动] 设备数量变化: ${devices1.length} -> ${devices2.length}`);
+      }
+
+      // 检查每个设备的状态变化
+      for (const [disk, device2] of devices2Map) {
+        const device1 = devices1Map.get(disk);
+        if (!device1) {
+          // 新设备
+          hasStateChange = true;
+          console.log(`[事件驱动] 检测到新设备: ${device2.volumeName}`);
+        } else if (
+          device1.isReadOnly !== device2.isReadOnly ||
+          device1.isMounted !== device2.isMounted ||
+          device1.volumeName !== device2.volumeName
+        ) {
+          // 状态变化（特别是读写状态）
+          hasStateChange = true;
+          console.log(`[事件驱动] 设备状态变化: ${device2.volumeName}, 只读: ${device1.isReadOnly} -> ${device2.isReadOnly}, 挂载: ${device1.isMounted} -> ${device2.isMounted}`);
+        }
+      }
+
+      // 检查是否有设备被移除
+      for (const [disk, device1] of devices1Map) {
+        if (!devices2Map.has(disk)) {
+          hasStateChange = true;
+          console.log(`[事件驱动] 设备被移除: ${device1.volumeName}`);
+        }
+      }
+
+      // 如果有状态变化，或者设备列表从空变为非空（设备重新出现），都更新UI
+      if (hasStateChange || (devices1.length === 0 && devices2.length > 0)) {
+        console.log('[事件驱动] 检测到状态变化，更新UI');
+        if (this.onChangeCallback) {
+          this.onChangeCallback(devices2);
+        }
+      } else {
+        console.log('[事件驱动] 设备状态无变化，跳过UI更新');
       }
 
       // 如果检测期间有多个事件（连续插入多块U盘），增加检测次数

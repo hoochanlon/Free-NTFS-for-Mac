@@ -77,8 +77,9 @@
           console.log('[主界面] 使用事件提供的设备列表，设备数量:', providedDevices.length);
           AppModules.Devices.devices = providedDevices;
         } else {
-          console.log('[主界面] 重新获取设备列表');
-          AppModules.Devices.devices = await electronAPI.getNTFSDevices();
+          // 主界面这里改为强制刷新，避免缓存导致的读写/只读状态延迟
+          console.log('[主界面] 重新获取设备列表（强制刷新）');
+          AppModules.Devices.devices = await electronAPI.getNTFSDevices(true);
         }
 
         Renderer.renderDevices(devicesList, readWriteDevicesList);

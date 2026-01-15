@@ -120,7 +120,8 @@
         showLoading(true);
         const oldDevices = [...state.devices];
         const previousDevicePaths = oldDevices.map(d => d.devicePath);
-        const devices = await electronAPI.getNTFSDevices();
+        // 强制刷新时使用 getNTFSDevices(true)，确保获取最新状态（特别是读写状态）
+        const devices = await electronAPI.getNTFSDevices(force);
 
         // 更新 AppModules.Devices.devices（如果存在）
         if (AppModules.Devices) {
@@ -175,8 +176,8 @@
                   await addLog(`设备 ${device.volumeName} 自动配置失败: ${errorMessage}`, 'error');
                 }
               }
-              // 重新刷新设备列表以更新状态
-              const updatedDevices = await electronAPI.getNTFSDevices();
+              // 重新刷新设备列表以更新状态（强制刷新，确保获取最新状态）
+              const updatedDevices = await electronAPI.getNTFSDevices(true);
               if (AppModules.Devices) {
                 AppModules.Devices.devices = updatedDevices;
               }

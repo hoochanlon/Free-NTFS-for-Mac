@@ -348,13 +348,36 @@
     try {
       if (window.electronAPI && typeof window.electronAPI.startHybridDetection === 'function') {
         await window.electronAPI.startHybridDetection(async (devices: any[]) => {
-          // 设备变化回调（立即使用事件提供的设备列表）
+          // 设备变化回调（立即使用事件提供的设备列表，这些设备列表已经是强制刷新的最新状态）
           console.log('[主界面] 设备变化事件触发，设备数量:', devices.length, '设备列表:', devices.map((d: any) => d.volumeName));
 
           // 立即更新设备列表（不等待，确保UI快速响应）
+          // 注意：事件提供的设备列表已经是强制刷新的最新状态，直接使用即可
           try {
             await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText, devices);
             console.log('[主界面] UI已更新，当前显示设备数量:', devices.length);
+
+            // 对于读写状态变化，额外进行一次验证检测（确保状态完全同步）
+            // 延迟一小段时间后再次强制刷新，捕获可能的延迟状态更新
+            setTimeout(async () => {
+              try {
+                // 再次强制刷新，确保读写状态完全同步（特别是读写转换操作后）
+                const latestDevices = await window.electronAPI.getNTFSDevices(true);
+                const hasStateChange = latestDevices.some((newDevice: any, index: number) => {
+                  const oldDevice = devices[index];
+                  return !oldDevice ||
+                         oldDevice.isReadOnly !== newDevice.isReadOnly ||
+                         oldDevice.isMounted !== newDevice.isMounted;
+                });
+
+                if (hasStateChange) {
+                  console.log('[主界面] 检测到状态变化，更新UI');
+                  await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText, latestDevices);
+                }
+              } catch (error) {
+                console.warn('[主界面] 状态验证检测失败:', error);
+              }
+            }, 500);
           } catch (error) {
             console.error('[主界面] 更新设备列表失败:', error);
           }
@@ -368,10 +391,18 @@
             window.electronAPI.updateWindowVisibility(!document.hidden);
           }
 
-          // 窗口变为可见时，立即强制刷新设备列表
+          // 窗口变为可见时，立即强制刷新设备列表（使用强制刷新，确保获取最新状态）
           if (!document.hidden) {
-            setTimeout(() => {
-              AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+            setTimeout(async () => {
+              try {
+                // 强制刷新，确保窗口重新可见时显示最新状态
+                const latestDevices = await window.electronAPI.getNTFSDevices(true);
+                await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText, latestDevices);
+              } catch (error) {
+                console.error('[主界面] 窗口可见性变化时刷新失败:', error);
+                // 降级：不使用强制刷新
+                await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+              }
             }, 100);
           }
         });
@@ -388,32 +419,44 @@
     let currentInterval = 500; // 初始0.5秒（加快初始检测）
     let consecutiveChanges = 0;
     let lastDeviceCount = 0;
+    let lastDeviceState = ''; // 记录设备状态哈希，用于检测读写状态变化
 
     const poll = async () => {
       try {
         const oldDeviceCount = lastDeviceCount;
-        await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+        const oldDeviceState = lastDeviceState;
 
-        const currentDeviceCount = devicesList?.children.length || 0;
-        const hasChanged = currentDeviceCount !== oldDeviceCount;
+        // 轮询模式下也使用强制刷新，确保获取最新状态
+        const latestDevices = await window.electronAPI.getNTFSDevices(true);
+        await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText, latestDevices);
+
+        const currentDeviceCount = devicesList?.children.length || latestDevices.length;
+        // 计算设备状态哈希（包括读写状态）
+        const currentDeviceState = JSON.stringify(latestDevices.map((d: any) => ({
+          disk: d.disk,
+          isReadOnly: d.isReadOnly,
+          isMounted: d.isMounted
+        })));
+
+        const hasChanged = currentDeviceCount !== oldDeviceCount || currentDeviceState !== oldDeviceState;
 
         if (hasChanged) {
           consecutiveChanges++;
           currentInterval = 1000; // 变化后使用1秒高频（加快响应）
-          console.log('[主界面] 设备数量变化:', oldDeviceCount, '->', currentDeviceCount);
+          console.log('[主界面] 设备变化:', oldDeviceCount, '->', currentDeviceCount, '状态变化:', currentDeviceState !== oldDeviceState);
         } else {
           consecutiveChanges = Math.max(0, consecutiveChanges - 1);
 
           if (currentDeviceCount === 0) {
             currentInterval = 30000;
           } else if (consecutiveChanges === 0) {
-            currentInterval = 5000; // 稳定状态：5秒（减少到5秒）
+            currentInterval = 5000; // 稳定状态：5秒
           }
         }
 
         if (consecutiveChanges > 3) {
           consecutiveChanges = 0;
-          currentInterval = 5000; // 减少到5秒
+          currentInterval = 5000;
         }
 
         if (document.hidden) {
@@ -421,10 +464,11 @@
         }
 
         lastDeviceCount = currentDeviceCount;
+        lastDeviceState = currentDeviceState;
         autoRefreshInterval = setTimeout(poll, currentInterval);
       } catch (error) {
         console.error('[主界面] 智能轮询检测失败:', error);
-        autoRefreshInterval = setTimeout(poll, 5000); // 减少到5秒
+        autoRefreshInterval = setTimeout(poll, 5000);
       }
     };
 

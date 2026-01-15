@@ -53,19 +53,58 @@
   }
 
   // 统一的设备列表刷新函数（确保操作后状态立即更新）
-  async function refreshDeviceList(devicesList: HTMLElement): Promise<void> {
+  // 增加重试机制，确保读写状态变化能被及时捕获
+  async function refreshDeviceList(devicesList: HTMLElement, retryCount: number = 0): Promise<void> {
     const Refresh = AppModules?.Devices?.Refresh;
-    if (Refresh && Refresh.refreshDevices) {
-      // 获取当前状态对象（从 devices.js 传入或使用默认）
-      const state = (window as any).__devicesState || {
-        devices: AppModules.Devices.devices || [],
-        lastDeviceCount: 0,
-        lastDeviceState: ''
-      };
-      await Refresh.refreshDevices(devicesList, true, state);
-    } else if ((window as any).refreshDevices) {
-      // 降级：使用全局 refreshDevices 函数
-      await (window as any).refreshDevices(true);
+    const maxRetries = 2; // 最多重试2次
+
+    try {
+      if (Refresh && Refresh.refreshDevices) {
+        // 获取当前状态对象（从 devices.js 传入或使用默认）
+        const state = (window as any).__devicesState || {
+          devices: AppModules.Devices.devices || [],
+          lastDeviceCount: 0,
+          lastDeviceState: ''
+        };
+        await Refresh.refreshDevices(devicesList, true, state);
+
+        // 如果是读写转换操作后的刷新，延迟后再次验证状态
+        if (retryCount === 0) {
+          setTimeout(async () => {
+            try {
+              // 再次强制刷新，确保状态完全同步
+              const latestDevices = await electronAPI.getNTFSDevices(true);
+              const currentDevices = AppModules.Devices.devices || [];
+
+              // 检查是否有状态变化（特别是读写状态）
+              const hasStateChange = latestDevices.some((newDevice: any) => {
+                const oldDevice = currentDevices.find((d: any) => d.disk === newDevice.disk);
+                return !oldDevice ||
+                       oldDevice.isReadOnly !== newDevice.isReadOnly ||
+                       oldDevice.isMounted !== newDevice.isMounted;
+              });
+
+              if (hasStateChange) {
+                console.log('[设备操作] 检测到状态变化，再次刷新');
+                await Refresh.refreshDevices(devicesList, true, state);
+              }
+            } catch (error) {
+              console.warn('[设备操作] 状态验证刷新失败:', error);
+            }
+          }, 800); // 延迟800ms，给系统足够时间完成状态更新
+        }
+      } else if ((window as any).refreshDevices) {
+        // 降级：使用全局 refreshDevices 函数
+        await (window as any).refreshDevices(true);
+      }
+    } catch (error) {
+      console.error('[设备操作] 刷新设备列表失败:', error);
+      // 如果失败且还有重试次数，延迟后重试
+      if (retryCount < maxRetries) {
+        setTimeout(async () => {
+          await refreshDeviceList(devicesList, retryCount + 1);
+        }, 500);
+      }
     }
   }
 
@@ -98,8 +137,8 @@
           // 等待一小段时间，确保挂载操作完全完成，标记文件已创建
           await new Promise(resolve => setTimeout(resolve, 500));
 
-          // 强制刷新设备列表（确保状态立即更新）
-          await refreshDeviceList(devicesList);
+          // 强制刷新设备列表（确保状态立即更新，包含重试机制）
+          await refreshDeviceList(devicesList, 0);
         } else {
           await addLog(`${t('messages.mountError')}: ${result.error || t('messages.mountError')}`, 'error');
           if (result.error?.includes('密码错误') || result.error?.includes('password')) {
@@ -141,11 +180,30 @@
           if (result.result) {
             await addLog(result.result, 'success');
           }
-          // 等待一小段时间，让系统重新挂载
+          // 等待一小段时间，让系统重新挂载（restoreToReadOnly 需要更长时间）
           await new Promise(resolve => setTimeout(resolve, 1500));
 
-          // 强制刷新设备列表（确保状态立即更新）
-          await refreshDeviceList(devicesList);
+          // 强制刷新设备列表（确保状态立即更新，包含重试机制）
+          // restoreToReadOnly 操作后需要更仔细的状态检测
+          await refreshDeviceList(devicesList, 0);
+
+          // 额外延迟验证，确保只读状态完全同步
+          setTimeout(async () => {
+            try {
+              const latestDevices = await electronAPI.getNTFSDevices(true);
+              const Refresh = AppModules?.Devices?.Refresh;
+              if (Refresh && Refresh.refreshDevices) {
+                const state = (window as any).__devicesState || {
+                  devices: AppModules.Devices.devices || [],
+                  lastDeviceCount: 0,
+                  lastDeviceState: ''
+                };
+                await Refresh.refreshDevices(devicesList, true, state);
+              }
+            } catch (error) {
+              console.warn('[设备操作] restoreToReadOnly 状态验证失败:', error);
+            }
+          }, 1000);
         } else {
           await addLog(`${t('messages.restoreError')}: ${result.error || t('messages.restoreError')}`, 'error');
           if (result.error?.includes('密码错误') || result.error?.includes('password')) {

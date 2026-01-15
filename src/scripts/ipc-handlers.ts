@@ -21,6 +21,29 @@ import { initTray, destroyTray, updateTrayMenu } from './utils/tray-manager';
 
 let quitWindow: BrowserWindow | null = null;
 
+// 辅助函数：向所有窗口广播最新设备列表（绕过 fswatch 可能的延迟）
+async function broadcastDevicesToAllWindows(): Promise<void> {
+  try {
+    // 使用强制刷新，确保获取最新状态（特别是读写/只读切换后）
+    const devices = await ntfsManager.getNTFSDevices(true);
+    const allWindows = BrowserWindow.getAllWindows();
+    console.log(`[设备广播] 向 ${allWindows.length} 个窗口广播最新设备列表，设备数量:`, devices.length);
+
+    allWindows.forEach((win, index) => {
+      if (!win.isDestroyed()) {
+        try {
+          win.webContents.send('hybrid-detection-device-change', devices);
+          console.log(`[设备广播] 已发送设备列表到窗口 ${index + 1}`);
+        } catch (error) {
+          console.warn(`[设备广播] 向窗口 ${index + 1} 发送设备列表失败:`, error);
+        }
+      }
+    });
+  } catch (error) {
+    console.error('[设备广播] 获取或广播设备列表失败:', error);
+  }
+}
+
 // NTFS 相关 IPC handlers
 export function setupNTFSHandlers(): void {
   ipcMain.handle('check-dependencies', async () => {
@@ -38,6 +61,12 @@ export function setupNTFSHandlers(): void {
       setTimeout(() => {
         updateTrayMenu(true); // 强制刷新，确保菜单显示最新状态
       }, 500); // 等待系统状态更新
+      // 同步：广播最新设备列表到所有窗口，避免仅依赖 fswatch 事件
+      setTimeout(() => {
+        broadcastDevicesToAllWindows().catch(err => {
+          console.warn('[mount-device] 广播设备列表失败:', err);
+        });
+      }, 700);
       return { success: true, result };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -56,6 +85,11 @@ export function setupNTFSHandlers(): void {
       setTimeout(() => {
         updateTrayMenu(true);
       }, 500);
+      setTimeout(() => {
+        broadcastDevicesToAllWindows().catch(err => {
+          console.warn('[unmount-device] 广播设备列表失败:', err);
+        });
+      }, 700);
       return { success: true, result };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -74,6 +108,12 @@ export function setupNTFSHandlers(): void {
       setTimeout(() => {
         updateTrayMenu(true);
       }, 1500); // 等待系统重新挂载完成
+      // 读写 -> 只读 切换通常更慢，延迟更久再广播设备列表
+      setTimeout(() => {
+        broadcastDevicesToAllWindows().catch(err => {
+          console.warn('[restore-to-readonly] 广播设备列表失败:', err);
+        });
+      }, 2000);
       return { success: true, result };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -91,6 +131,11 @@ export function setupNTFSHandlers(): void {
       setTimeout(() => {
         updateTrayMenu(true);
       }, 500);
+      setTimeout(() => {
+        broadcastDevicesToAllWindows().catch(err => {
+          console.warn('[eject-device] 广播设备列表失败:', err);
+        });
+      }, 700);
       return { success: true, result };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

@@ -138,6 +138,49 @@ async function ensureWindowVisible(): Promise<boolean> {
   return false;
 }
 
+/**
+ * 通过主窗口弹出统一样式的退出确认对话框
+ * 返回用户是否确认退出
+ */
+async function confirmQuitViaMainWindow(): Promise<boolean> {
+  try {
+    // 确保主窗口存在且可见
+    await ensureWindowVisible();
+
+    if (!mainWindow || mainWindow.isDestroyed()) {
+      // 如果仍然没有主窗口，保守起见直接退出
+      return true;
+    }
+
+    const confirmed = await mainWindow.webContents.executeJavaScript(`
+      (async () => {
+        try {
+          const AppUtils = window.AppUtils;
+          const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : (key => key);
+          const title = t('tray.quitConfirmTitle') || '确认退出';
+          const message = t('tray.quitConfirmMessage') || '确定要退出应用吗？';
+
+          if (AppUtils && AppUtils.UI && typeof AppUtils.UI.showConfirm === 'function') {
+            return await AppUtils.UI.showConfirm(title, message);
+          }
+
+          // 降级为原生 confirm
+          return window.confirm(message);
+        } catch (error) {
+          console.error('菜单退出确认对话框显示失败:', error);
+          return window.confirm('确定要退出应用吗？');
+        }
+      })();
+    `);
+
+    return !!confirmed;
+  } catch (error) {
+    console.error('菜单退出确认失败，使用默认行为:', error);
+    // 出错时采用保守策略：返回 true 允许退出，避免应用卡死
+    return true;
+  }
+}
+
 // 配置应用菜单
 export async function setupApplicationMenu(): Promise<void> {
   // 获取当前语言设置
@@ -203,8 +246,11 @@ export async function setupApplicationMenu(): Promise<void> {
         {
           label: t('menu.quit') || '退出',
           accelerator: 'Command+Q',
-          click: () => {
-            app.quit();
+          click: async () => {
+            const confirmed = await confirmQuitViaMainWindow();
+            if (confirmed) {
+              app.quit();
+            }
           }
         }
       ]
