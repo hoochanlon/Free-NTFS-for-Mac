@@ -216,7 +216,9 @@
     "settings": "設定",
     "logs": "操作ログ",
     "about": "について",
-    "quit": "終了"
+    "quit": "終了",
+    "quitConfirmTitle": "終了の確認",
+    "quitConfirmMessage": "アプリケーションを終了してもよろしいですか？"
   },
   "messages": {
     "mounting": "{name} をマウント中...",

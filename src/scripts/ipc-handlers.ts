@@ -401,6 +401,11 @@ export function setupSystemHandlers(): void {
       }
     });
   });
+
+  // 退出应用
+  ipcMain.handle('quit-app', async () => {
+    app.quit();
+  });
 }
 
 // 设置相关 IPC handlers

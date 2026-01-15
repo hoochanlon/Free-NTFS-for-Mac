@@ -216,7 +216,9 @@
     "settings": "Einstellungen",
     "logs": "Betriebsprotokolle",
     "about": "Über",
-    "quit": "Beenden"
+    "quit": "Beenden",
+    "quitConfirmTitle": "Beenden bestätigen",
+    "quitConfirmMessage": "Möchten Sie die Anwendung wirklich beenden?"
   },
   "messages": {
     "mounting": "Wird eingehängt {name}...",

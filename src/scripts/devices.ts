@@ -26,6 +26,7 @@
   const autoMountBtn = document.getElementById('autoMountBtn') as HTMLButtonElement | null;
   const showMainWindowBtn = document.getElementById('showMainWindowBtn') as HTMLButtonElement | null;
   const refreshDevicesBtn = document.getElementById('refreshDevicesBtn') as HTMLButtonElement | null;
+  const quitBtn = document.getElementById('quitBtn') as HTMLButtonElement | null;
   const mountAllBtn = document.getElementById('mountAllBtn') as HTMLButtonElement | null;
   const restoreAllReadOnlyBtn = document.getElementById('restoreAllReadOnlyBtn') as HTMLButtonElement | null;
   const ejectAllBtn = document.getElementById('ejectAllBtn') as HTMLButtonElement | null;
@@ -379,6 +380,23 @@
               refreshDevicesBtn.title = refreshText;
             }
           }
+        }
+      });
+    }
+
+    if (quitBtn) {
+      quitBtn.addEventListener('click', async () => {
+        try {
+          // 显示确认对话框
+          const confirmTitle = t('tray.quitConfirmTitle') || '确认退出';
+          const confirmMessage = t('tray.quitConfirmMessage') || '确定要退出应用吗？';
+          const confirmed = await electronAPI.showConfirmDialog(confirmTitle, confirmMessage);
+
+          if (confirmed && electronAPI.quitApp) {
+            await electronAPI.quitApp();
+          }
+        } catch (error) {
+          console.error('退出应用失败:', error);
         }
       });
     }

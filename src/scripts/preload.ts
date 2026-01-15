@@ -95,7 +95,8 @@ const electronAPI: ElectronAPI = {
   stopHybridDetection: () => ipcRenderer.invoke('stop-hybrid-detection'),
   updateWindowVisibility: (isVisible: boolean) => ipcRenderer.invoke('update-window-visibility', isVisible),
   getDetectionMode: () => ipcRenderer.invoke('get-detection-mode'),
-  checkEventDrivenAvailable: () => ipcRenderer.invoke('check-event-driven-available')
+  checkEventDrivenAvailable: () => ipcRenderer.invoke('check-event-driven-available'),
+  quitApp: () => ipcRenderer.invoke('quit-app')
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

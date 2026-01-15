@@ -97,6 +97,24 @@
       }
     }
 
+    const quitBtn = document.getElementById('quitBtn');
+    if (quitBtn) {
+      // 区分主界面和托盘窗口：
+      // - 主界面：使用 HTML 中自带的 exit-red.svg + btn-about-icon，不修改 title 和内容
+      // - 托盘窗口：使用统一的 btn-icon 样式和退出提示文案
+      const isTrayWindow = document.body && document.body.classList.contains('tray-window');
+      if (isTrayWindow) {
+        const titleText = t('tray.quit');
+        quitBtn.title = titleText;
+
+        // 托盘窗口使用简单的黑色退出图标（与其它图标风格一致）
+        const icon = quitBtn.querySelector('.btn-icon');
+        if (!icon) {
+          quitBtn.innerHTML = '<img src="../imgs/svg/exit.svg" alt="" class="btn-icon">';
+        }
+      }
+    }
+
     // 操作日志标签页
     const logsTitle = document.querySelector('#logsTab h2');
     if (logsTitle) {

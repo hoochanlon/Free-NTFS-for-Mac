@@ -216,7 +216,9 @@
     "settings": "Settings",
     "logs": "Operation Logs",
     "about": "About",
-    "quit": "Quit"
+    "quit": "Quit",
+    "quitConfirmTitle": "Confirm Quit",
+    "quitConfirmMessage": "Are you sure you want to quit the application?"
   },
   "messages": {
     "mounting": "Mounting {name}...",

@@ -216,7 +216,9 @@
     "settings": "设置",
     "logs": "操作日志",
     "about": "关于",
-    "quit": "退出"
+    "quit": "退出",
+    "quitConfirmTitle": "确认退出",
+    "quitConfirmMessage": "确定要退出应用吗？"
   },
   "messages": {
     "mounting": "正在挂载 {name}...",

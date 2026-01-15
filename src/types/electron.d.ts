@@ -64,6 +64,7 @@ export interface ElectronAPI {
   writeLogsFile: (content: string) => Promise<{ success: boolean; error?: string }>;
   showMainWindow: () => Promise<void>;
   adjustTrayWindowHeightByDeviceCount: (deviceCount: number) => Promise<void>;
+  quitApp: () => Promise<void>;
 }
 
 export interface Dependencies {

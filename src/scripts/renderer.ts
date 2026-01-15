@@ -46,6 +46,7 @@
   const docBody = document.body;
   const helpTab = document.getElementById('helpTab') as HTMLElement;
   const aboutBtn = document.getElementById('aboutBtn') as HTMLButtonElement;
+  const quitBtn = document.getElementById('quitBtn') as HTMLButtonElement;
   const autoMountCheckbox = document.getElementById('autoMountCheckbox') as HTMLInputElement;
   const trayModeCheckbox = document.getElementById('trayModeCheckbox') as HTMLInputElement;
 
@@ -121,6 +122,27 @@
     // 初始化关于按钮
     if (aboutBtn) {
       AppModules.About.initAboutButton(aboutBtn);
+    }
+
+    // 初始化退出按钮
+    if (quitBtn) {
+      quitBtn.addEventListener('click', async () => {
+        try {
+          // 获取翻译函数
+          const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
+
+          // 显示确认对话框
+          const confirmTitle = t('tray.quitConfirmTitle') || '确认退出';
+          const confirmMessage = t('tray.quitConfirmMessage') || '确定要退出应用吗？';
+          const confirmed = await window.electronAPI.showConfirmDialog(confirmTitle, confirmMessage);
+
+          if (confirmed) {
+            await window.electronAPI.quitApp();
+          }
+        } catch (error) {
+          console.error('退出应用失败:', error);
+        }
+      });
     }
 
     // 监听菜单中的关于对话框事件
