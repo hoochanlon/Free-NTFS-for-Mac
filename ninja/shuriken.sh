@@ -9,7 +9,6 @@
 #   - 解锁拖拽安装的应用程序
 #   - 检查 SIP 和 Gatekeeper 状态
 #   - SIP 禁用说明（需在恢复模式下操作）
-#
 # 重要说明：
 #   - Gatekeeper: 通过 spctl --master-disable 禁用（可在正常模式下操作）
 #   - SIP (System Integrity Protection): 需在恢复模式下使用 csrutil disable

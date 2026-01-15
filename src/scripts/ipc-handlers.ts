@@ -437,8 +437,16 @@ export function setupSettingsHandlers(): void {
     if (settings.trayMode !== undefined && settings.trayMode !== oldSettings.trayMode) {
       if (settings.trayMode) {
         await initTray();
+        // 在 macOS 上，托盘模式下隐藏 Dock 图标
+        if (process.platform === 'darwin' && app.dock) {
+          app.dock.hide();
+        }
       } else {
         destroyTray();
+        // 在 macOS 上，退出托盘模式时显示 Dock 图标
+        if (process.platform === 'darwin' && app.dock) {
+          app.dock.show();
+        }
       }
     }
     // 如果系统自启设置发生变化，更新登录项设置

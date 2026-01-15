@@ -20,6 +20,10 @@ app.whenReady().then(async () => {
   if (settings.trayMode) {
     try {
       await initTray();
+      // 在 macOS 上，托盘模式下隐藏 Dock 图标
+      if (process.platform === 'darwin' && app.dock) {
+        app.dock.hide();
+      }
     } catch (error) {
       console.error('托盘初始化失败:', error);
     }
