@@ -68,6 +68,12 @@ export interface ElectronAPI {
   quitApp: () => Promise<void>;
   openQuitWindow: () => Promise<void>;
   closeQuitWindow: () => Promise<void>;
+  // Caffeinate 相关
+  caffeinateStart: () => Promise<{ success: boolean; error?: string }>;
+  caffeinateStop: () => Promise<{ success: boolean; error?: string }>;
+  caffeinateToggle: () => Promise<{ success: boolean; isActive: boolean; error?: string }>;
+  caffeinateStatus: () => Promise<boolean>;
+  onCaffeinateStatusChange: (callback: (isActive: boolean) => void) => void;
 }
 
 export interface Dependencies {

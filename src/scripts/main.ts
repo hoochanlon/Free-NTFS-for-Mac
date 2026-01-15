@@ -5,6 +5,7 @@ import { setupIpcHandlers } from './ipc-handlers';
 import { setupAppConfig } from './app-config';
 import { initTray, destroyTray, updateTrayMenu } from './utils/tray-manager';
 import { SettingsManager } from './utils/settings';
+import { caffeinateManager } from './utils/caffeinate-manager';
 
 // 初始化热重载（开发模式）
 setupHotReload();
@@ -77,7 +78,8 @@ app.on('window-all-closed', async () => {
   }
 });
 
-// 应用退出前清理托盘
+// 应用退出前清理托盘和防止休眠进程
 app.on('before-quit', () => {
   destroyTray();
+  caffeinateManager.stop();
 });

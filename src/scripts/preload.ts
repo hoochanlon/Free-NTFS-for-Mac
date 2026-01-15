@@ -98,7 +98,15 @@ const electronAPI: ElectronAPI = {
   checkEventDrivenAvailable: () => ipcRenderer.invoke('check-event-driven-available'),
   quitApp: () => ipcRenderer.invoke('quit-app'),
   openQuitWindow: () => ipcRenderer.invoke('open-quit-window'),
-  closeQuitWindow: () => ipcRenderer.invoke('close-quit-window')
+  closeQuitWindow: () => ipcRenderer.invoke('close-quit-window'),
+  // Caffeinate 相关
+  caffeinateStart: () => ipcRenderer.invoke('caffeinate-start'),
+  caffeinateStop: () => ipcRenderer.invoke('caffeinate-stop'),
+  caffeinateToggle: () => ipcRenderer.invoke('caffeinate-toggle'),
+  caffeinateStatus: () => ipcRenderer.invoke('caffeinate-status'),
+  onCaffeinateStatusChange: (callback: (isActive: boolean) => void) => {
+    ipcRenderer.on('caffeinate-status-changed', (event, isActive: boolean) => callback(isActive));
+  }
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

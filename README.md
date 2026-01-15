@@ -17,6 +17,7 @@
 - 🔄 **一键挂载** - 轻松将只读 NTFS 设备挂载为读写模式
 - 📊 **状态显示** - 清晰显示设备状态和操作日志
 - 🛡️ **安全可靠** - 使用 Electron 安全最佳实践
+- ☕ **防止休眠** - 一键开启/关闭系统休眠防止功能，确保长时间操作时系统保持唤醒状态
 
 ## 使用说明
 
@@ -32,6 +33,12 @@
    - 应用会自动检测设备（每 5 秒刷新一次）
    - 对于只读设备，点击"挂载为读写"按钮
    - 输入管理员密码完成挂载
+
+3. **防止休眠功能**
+   - 在标题栏、主界面操作区域或托盘窗口中点击"防止休眠"按钮
+   - 启用后，系统将保持唤醒状态，防止进入休眠模式
+   - 适用于长时间文件传输或批量操作场景
+   - 操作完成后可随时关闭，节省系统资源
 
 ### 注意事项
 
@@ -176,6 +183,7 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 - 🔄 **One-Click Mount** - Easily mount read-only NTFS devices in read-write mode
 - 📊 **Status Display** - Clearly displays device status and operation logs
 - 🛡️ **Secure & Reliable** - Uses Electron security best practices
+- ☕ **Prevent Sleep** - One-click toggle to prevent system sleep, ensuring the system stays awake during long operations
 
 ### Usage Instructions
 
@@ -191,6 +199,12 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
    - The application will automatically detect the device (refreshes every 5 seconds)
    - For read-only devices, click the "Mount as Read-Write" button
    - Enter administrator password to complete mounting
+
+3. **Prevent Sleep Feature**
+   - Click the "Prevent Sleep" button in the title bar, main interface action area, or tray window
+   - When enabled, the system will stay awake and prevent entering sleep mode
+   - Suitable for long file transfers or batch operations
+   - Can be turned off at any time after completion to save system resources
 
 ### Important Notes
 
@@ -336,6 +350,7 @@ After packaging, the following will be generated in the `dist` directory:
 - 🔄 **ワンクリックマウント** - 読み取り専用 NTFS デバイスを読み書きモードで簡単にマウント
 - 📊 **ステータス表示** - デバイスの状態と操作ログを明確に表示
 - 🛡️ **安全で信頼性が高い** - Electron のセキュリティベストプラクティスを使用
+- ☕ **スリープ防止** - ワンクリックでシステムスリープを防止し、長時間の操作中もシステムを起動状態に保つ
 
 ### 使用説明
 
@@ -351,6 +366,12 @@ After packaging, the following will be generated in the `dist` directory:
    - アプリケーションは自動的にデバイスを検出します（5秒ごとに更新）
    - 読み取り専用デバイスの場合、「読み書きとしてマウント」ボタンをクリック
    - 管理者パスワードを入力してマウントを完了
+
+3. **スリープ防止機能**
+   - タイトルバー、メインインターフェースの操作領域、またはトレイウィンドウで「スリープ防止」ボタンをクリック
+   - 有効にすると、システムは起動状態を維持し、スリープモードに入ることを防ぎます
+   - 長時間のファイル転送やバッチ操作に適しています
+   - 操作完了後はいつでもオフにして、システムリソースを節約できます
 
 ### 注意事項
 

@@ -49,6 +49,18 @@
       opacity 0.5
       cursor not-allowed
 
+    &.active
+      background var(--accent)
+      color #ffffff
+      border-color var(--accent)
+
+      .btn-icon
+        filter brightness(0) invert(1)
+
+      &:hover
+        background var(--accent-hover)
+        border-color var(--accent-hover)
+
   &.btn-success
     background var(--success)
     color #ffffff

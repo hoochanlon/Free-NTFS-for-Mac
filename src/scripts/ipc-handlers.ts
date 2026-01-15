@@ -18,6 +18,7 @@ import { WINDOW_SIZE_CONFIG } from '../config/window-config';
 import { KeychainManager } from './utils/keychain';
 import { rebuildApplicationMenu } from './app-config';
 import { initTray, destroyTray, updateTrayMenu } from './utils/tray-manager';
+import { caffeinateManager } from './utils/caffeinate-manager';
 
 let quitWindow: BrowserWindow | null = null;
 
@@ -581,6 +582,68 @@ export function setupSettingsHandlers(): void {
   });
 }
 
+// Caffeinate 相关 IPC handlers
+export function setupCaffeinateHandlers(): void {
+  // 启动防止休眠
+  ipcMain.handle('caffeinate-start', async () => {
+    try {
+      const result = await caffeinateManager.start();
+      // 广播状态变化到所有窗口
+      const allWindows = BrowserWindow.getAllWindows();
+      allWindows.forEach(window => {
+        if (!window.isDestroyed()) {
+          window.webContents.send('caffeinate-status-changed', result.success);
+        }
+      });
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { success: false, error: errorMessage };
+    }
+  });
+
+  // 停止防止休眠
+  ipcMain.handle('caffeinate-stop', async () => {
+    try {
+      caffeinateManager.stop();
+      // 广播状态变化到所有窗口
+      const allWindows = BrowserWindow.getAllWindows();
+      allWindows.forEach(window => {
+        if (!window.isDestroyed()) {
+          window.webContents.send('caffeinate-status-changed', false);
+        }
+      });
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { success: false, error: errorMessage };
+    }
+  });
+
+  // 切换防止休眠状态
+  ipcMain.handle('caffeinate-toggle', async () => {
+    try {
+      const result = await caffeinateManager.toggle();
+      // 广播状态变化到所有窗口
+      const allWindows = BrowserWindow.getAllWindows();
+      allWindows.forEach(window => {
+        if (!window.isDestroyed()) {
+          window.webContents.send('caffeinate-status-changed', result.isActive);
+        }
+      });
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { success: false, isActive: false, error: errorMessage };
+    }
+  });
+
+  // 获取防止休眠状态
+  ipcMain.handle('caffeinate-status', async () => {
+    return caffeinateManager.getStatus();
+  });
+}
+
 // 初始化所有 IPC handlers
 export function setupIpcHandlers(): void {
   setupNTFSHandlers();
@@ -588,4 +651,5 @@ export function setupIpcHandlers(): void {
   setupFileHandlers();
   setupSystemHandlers();
   setupSettingsHandlers();
+  setupCaffeinateHandlers();
 }

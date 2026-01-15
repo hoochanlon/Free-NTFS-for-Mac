@@ -173,6 +173,44 @@ body
   height 18px
   transform none
 
+// 防止休眠按钮（标题栏）
+#caffeinateBtn
+  &.active
+    .btn-about-icon
+      opacity 1
+      filter brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%)
+
+  &:hover:not(.active)
+    .btn-about-icon
+      opacity 1
+
+// 防止休眠按钮（主界面操作按钮区域）
+#caffeinateMainBtn
+  display inline-flex
+  align-items center
+  gap 6px
+  padding 6px 12px
+
+  .btn-icon
+    width 14px
+    height 14px
+    display block
+    margin 0
+    padding 0
+    opacity 0.9
+
+  &.active
+    background var(--accent)
+    color #ffffff
+
+    .btn-icon
+      filter brightness(0) invert(1)
+      opacity 1
+
+  &:hover:not(.active)
+    .btn-icon
+      opacity 1
+
 // 关于弹窗
 .about-modal
   position fixed
