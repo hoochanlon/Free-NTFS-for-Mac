@@ -1,5 +1,5 @@
-name: 🐛 Bug Report
-description: Report a bug or issue
+name: 🐛 Bug Report / Bug 报告
+description: Report a bug or issue / 报告一个 bug 或问题
 title: "[Bug] "
 labels: ["bug"]
 body:
@@ -8,56 +8,57 @@ body:
       value: |
         Thank you for reporting an issue! Please fill in the following information as detailed as possible to help us resolve the problem faster.
 
+        感谢您报告问题！请尽可能详细地填写以下信息，这将帮助我们更快地解决问题。
+
   - type: textarea
     id: description
     attributes:
-      label: Description
-      description: Please clearly and concisely describe the issue you encountered
-      placeholder: e.g., The application crashed when trying to mount an NTFS device
+      label: Description / 问题描述
+      description: Please clearly and concisely describe the issue you encountered / 请清晰简洁地描述遇到的问题
+      placeholder: e.g., The application crashed when trying to mount an NTFS device / 例如：在尝试挂载 NTFS 设备时，应用崩溃了
     validations:
       required: true
 
   - type: textarea
     id: steps
     attributes:
-      label: Steps to Reproduce
-      description: Please describe in detail how to reproduce this issue
+      label: Steps to Reproduce / 复现步骤
+      description: Please describe in detail how to reproduce this issue / 请详细描述如何复现这个问题
       placeholder: |
-        1. Open the application
-        2. Insert an NTFS device
-        3. Click the "Mount as Read-Write" button
-        4. See error message
+        1. Open the application / 打开应用
+        2. Insert an NTFS device / 插入 NTFS 设备
+        3. Click the "Mount as Read-Write" button / 点击"挂载为读写"按钮
+        4. See error message / 看到错误信息
     validations:
       required: true
 
   - type: textarea
     id: expected
     attributes:
-      label: Expected Behavior
-      description: What did you expect to happen?
-      placeholder: The device should be successfully mounted in read-write mode
+      label: Expected Behavior / 预期行为
+      description: What did you expect to happen? / 您期望发生什么？
+      placeholder: The device should be successfully mounted in read-write mode / 设备应该成功挂载为读写模式
     validations:
       required: true
 
   - type: textarea
     id: actual
     attributes:
-      label: Actual Behavior
-      description: What actually happened?
-      placeholder: The application displayed an error message "Mount failed"
+      label: Actual Behavior / 实际行为
+      description: What actually happened? / 实际发生了什么？
+      placeholder: The application displayed an error message "Mount failed" / 应用显示错误信息"挂载失败"
     validations:
       required: true
 
   - type: dropdown
     id: os
     attributes:
-      label: macOS Version
-      description: The macOS version you are using (minimum macOS 14)
+      label: macOS Version / macOS 版本
+      description: The macOS version you are using (minimum macOS 14) / 您使用的 macOS 版本（最低 macOS 14）
       options:
         - macOS 14 (Sonoma)
         - macOS 15 (Sequoia)
         - macOS 26
-        - macOS 26+
         - Newer version
     validations:
       required: true
@@ -65,50 +66,50 @@ body:
   - type: dropdown
     id: app_version
     attributes:
-      label: Application Version
-      description: The application version you are using (if using Electron version)
+      label: Application Version / 应用版本
+      description: The application version you are using (if using Electron version) / 您使用的应用版本（如果是 Electron 版本）
       options:
-        - Latest version
-        - Version from tags
-        - Shell version (nigate)
-        - Development version
+        - Latest version / 最新版本
+        - Version from tags / 从 tags 下载的版本
+        - Shell version (nigate) / Shell 版本 (nigate)
+        - Development version / 开发版本
     validations:
       required: true
 
   - type: textarea
     id: dependencies
     attributes:
-      label: Dependencies Status
-      description: Please check and list the installation status of dependencies (Swift, Homebrew, MacFUSE, ntfs-3g)
+      label: Dependencies Status / 依赖状态
+      description: Please check and list the installation status of dependencies (Swift, Homebrew, MacFUSE, ntfs-3g) / 请检查并列出依赖安装状态（Swift, Homebrew, MacFUSE, ntfs-3g）
       placeholder: |
-        - Swift: ✅ Installed
-        - Homebrew: ✅ Installed
-        - MacFUSE: ❌ Not installed
-        - ntfs-3g: ✅ Installed
+        - Swift: ✅ Installed / 已安装
+        - Homebrew: ✅ Installed / 已安装
+        - MacFUSE: ❌ Not installed / 未安装
+        - ntfs-3g: ✅ Installed / 已安装
 
   - type: textarea
     id: logs
     attributes:
-      label: Error Logs
-      description: If you have error logs or console output, please paste them here
-      placeholder: Paste error logs or screenshots
+      label: Error Logs / 错误日志
+      description: If you have error logs or console output, please paste them here / 如果有错误日志或控制台输出，请粘贴在这里
+      placeholder: Paste error logs or screenshots / 粘贴错误日志或截图
       render: shell
 
   - type: textarea
     id: additional
     attributes:
-      label: Additional Information
-      description: Any other information that might be useful (screenshots, device information, etc.)
-      placeholder: e.g., The device uses Fast Startup feature in Windows
+      label: Additional Information / 其他信息
+      description: Any other information that might be useful (screenshots, device information, etc.) / 任何其他可能有用的信息（截图、设备信息等）
+      placeholder: e.g., The device uses Fast Startup feature in Windows / 例如：设备在 Windows 中使用了快速启动功能
 
   - type: checkboxes
     id: checks
     attributes:
-      label: Checklist
+      label: Checklist / 检查清单
       options:
-        - label: I have searched existing issues and confirmed this is a new issue
+        - label: I have searched existing issues and confirmed this is a new issue / 我已经搜索过现有的 issues，确认这是一个新问题
           required: true
-        - label: I have read the troubleshooting section in README
+        - label: I have read the troubleshooting section in README / 我已经阅读了 README 中的故障排除部分
           required: false
-        - label: I have tried reinstalling dependencies
+        - label: I have tried reinstalling dependencies / 我已经尝试过重新安装依赖
           required: false

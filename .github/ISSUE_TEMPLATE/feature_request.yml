@@ -1,5 +1,5 @@
-name: 💡 Feature Request
-description: Suggest a new feature or improvement
+name: 💡 Feature Request / 功能请求
+description: Suggest a new feature or improvement / 建议一个新功能或改进
 title: "[Feature] "
 labels: ["enhancement"]
 body:
@@ -8,56 +8,58 @@ body:
       value: |
         Thank you for suggesting a feature! Your ideas are important to us.
 
+        感谢您提出功能建议！您的想法对我们很重要。
+
   - type: textarea
     id: problem
     attributes:
-      label: Problem Description
-      description: What problem does this feature solve? Please describe the pain point or need you encountered
-      placeholder: e.g., I would like to be able to manage multiple NTFS devices in batch
+      label: Problem Description / 问题描述
+      description: What problem does this feature solve? Please describe the pain point or need you encountered / 这个功能要解决什么问题？请描述您遇到的痛点或需求
+      placeholder: e.g., I would like to be able to manage multiple NTFS devices in batch / 例如：我希望能够批量管理多个 NTFS 设备
     validations:
       required: true
 
   - type: textarea
     id: solution
     attributes:
-      label: Proposed Solution
-      description: How would you like this feature to be implemented? Please describe your idea
-      placeholder: e.g., Add a device list in the interface to support managing multiple devices simultaneously
+      label: Proposed Solution / 建议的解决方案
+      description: How would you like this feature to be implemented? Please describe your idea / 您希望如何实现这个功能？请描述您的想法
+      placeholder: e.g., Add a device list in the interface to support managing multiple devices simultaneously / 例如：在界面中添加一个设备列表，支持同时管理多个设备
     validations:
       required: true
 
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatives Considered
-      description: Have you considered other solutions? Please describe them
-      placeholder: e.g., Could also add a command-line parameter to implement batch operations
+      label: Alternatives Considered / 替代方案
+      description: Have you considered other solutions? Please describe them / 您是否考虑过其他解决方案？请描述一下
+      placeholder: e.g., Could also add a command-line parameter to implement batch operations / 例如：也可以添加一个命令行参数来实现批量操作
 
   - type: dropdown
     id: priority
     attributes:
-      label: Priority
-      description: How important do you think this feature is?
+      label: Priority / 优先级
+      description: How important do you think this feature is? / 您认为这个功能的重要程度
       options:
-        - High - Severely impacts user experience
-        - Medium - Significantly improves user experience
-        - Low - Nice-to-have feature
+        - High - Severely impacts user experience / 高 - 严重影响使用体验
+        - Medium - Significantly improves user experience / 中 - 能显著改善使用体验
+        - Low - Nice-to-have feature / 低 - 锦上添花的功能
     validations:
       required: true
 
   - type: checkboxes
     id: contribution
     attributes:
-      label: Contribution Willingness
+      label: Contribution Willingness / 贡献意愿
       options:
-        - label: I am willing to help implement this feature
+        - label: I am willing to help implement this feature / 我愿意参与实现这个功能
           required: false
-        - label: I can provide design or testing assistance
+        - label: I can provide design or testing assistance / 我可以提供设计或测试帮助
           required: false
 
   - type: textarea
     id: additional
     attributes:
-      label: Additional Information
-      description: Any other information that might be useful (screenshots, reference links, etc.)
-      placeholder: e.g., Referenced designs from other similar applications
+      label: Additional Information / 其他信息
+      description: Any other information that might be useful (screenshots, reference links, etc.) / 任何其他可能有用的信息（截图、参考链接等）
+      placeholder: e.g., Referenced designs from other similar applications / 例如：参考了其他类似应用的设计

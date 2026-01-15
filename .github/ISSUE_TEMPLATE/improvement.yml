@@ -1,5 +1,5 @@
-name: ✨ Improvement Suggestion
-description: Suggest an improvement to existing functionality
+name: ✨ Improvement Suggestion / 改善建议
+description: Suggest an improvement to existing functionality / 建议对现有功能的改进
 title: "[Improvement] "
 labels: ["enhancement"]
 body:
@@ -8,82 +8,84 @@ body:
       value: |
         Thank you for suggesting an improvement! Your feedback helps us make the project better.
 
+        感谢您提出改善建议！您的反馈帮助我们让项目变得更好。
+
   - type: dropdown
     id: improvement_type
     attributes:
-      label: Type of Improvement
-      description: What area does this improvement relate to?
+      label: Type of Improvement / 改善类型
+      description: What area does this improvement relate to? / 这个改善涉及哪个方面？
       options:
-        - User Interface (UI) - Visual design, layout, or appearance
-        - User Experience (UX) - Workflow, usability, or interaction
-        - Performance - Speed, efficiency, or resource usage
-        - Documentation - README, guides, or help text
-        - Code Quality - Refactoring, structure, or maintainability
-        - Error Handling - Error messages, validation, or recovery
-        - Accessibility - Support for users with disabilities
-        - Other
+        - User Interface (UI) - Visual design, layout, or appearance / 用户界面 (UI) - 视觉设计、布局或外观
+        - User Experience (UX) - Workflow, usability, or interaction / 用户体验 (UX) - 工作流程、可用性或交互
+        - Performance - Speed, efficiency, or resource usage / 性能 - 速度、效率或资源使用
+        - Documentation - README, guides, or help text / 文档 - README、指南或帮助文本
+        - Code Quality - Refactoring, structure, or maintainability / 代码质量 - 重构、结构或可维护性
+        - Error Handling - Error messages, validation, or recovery / 错误处理 - 错误消息、验证或恢复
+        - Accessibility - Support for users with disabilities / 无障碍 - 为残障用户提供支持
+        - Other / 其他
     validations:
       required: true
 
   - type: textarea
     id: current_behavior
     attributes:
-      label: Current Behavior
-      description: Describe how the current functionality works
-      placeholder: e.g., Currently, when mounting a device, the user must wait 5 seconds before seeing the device appear in the list
+      label: Current Behavior / 当前行为
+      description: Describe how the current functionality works / 描述当前功能如何工作
+      placeholder: e.g., Currently, when mounting a device, the user must wait 5 seconds before seeing the device appear in the list / 例如：目前，挂载设备时，用户必须等待 5 秒才能看到设备出现在列表中
     validations:
       required: true
 
   - type: textarea
     id: suggested_improvement
     attributes:
-      label: Suggested Improvement
-      description: How would you like to improve this? Please describe your suggestion in detail
-      placeholder: e.g., Reduce the refresh interval to 2 seconds, or add a manual refresh button
+      label: Suggested Improvement / 建议的改进
+      description: How would you like to improve this? Please describe your suggestion in detail / 您希望如何改进？请详细描述您的建议
+      placeholder: e.g., Reduce the refresh interval to 2 seconds, or add a manual refresh button / 例如：将刷新间隔减少到 2 秒，或添加手动刷新按钮
     validations:
       required: true
 
   - type: textarea
     id: benefits
     attributes:
-      label: Benefits
-      description: What benefits would this improvement bring? (e.g., better user experience, faster performance, clearer understanding)
-      placeholder: e.g., Users would see their devices faster, reducing confusion and improving the overall experience
+      label: Benefits / 收益
+      description: What benefits would this improvement bring? (e.g., better user experience, faster performance, clearer understanding) / 这个改进会带来什么好处？（例如：更好的用户体验、更快的性能、更清晰的理解）
+      placeholder: e.g., Users would see their devices faster, reducing confusion and improving the overall experience / 例如：用户可以更快地看到设备，减少困惑并改善整体体验
     validations:
       required: true
 
   - type: dropdown
     id: priority
     attributes:
-      label: Priority
-      description: How important do you think this improvement is?
+      label: Priority / 优先级
+      description: How important do you think this improvement is? / 您认为这个改进的重要程度
       options:
-        - High - Significantly impacts usability or performance
-        - Medium - Noticeable improvement to user experience
-        - Low - Minor polish or nice-to-have
+        - High - Significantly impacts usability or performance / 高 - 显著影响可用性或性能
+        - Medium - Noticeable improvement to user experience / 中 - 明显改善用户体验
+        - Low - Minor polish or nice-to-have / 低 - 小的优化或锦上添花
     validations:
       required: true
 
   - type: textarea
     id: examples
     attributes:
-      label: Examples or References
-      description: Do you have examples from other applications, mockups, or references that illustrate this improvement?
-      placeholder: e.g., Screenshots, links to similar implementations, or design mockups
+      label: Examples or References / 示例或参考
+      description: Do you have examples from other applications, mockups, or references that illustrate this improvement? / 您是否有来自其他应用的示例、 mockup 或参考来说明这个改进？
+      placeholder: e.g., Screenshots, links to similar implementations, or design mockups / 例如：截图、类似实现的链接或设计 mockup
 
   - type: checkboxes
     id: contribution
     attributes:
-      label: Contribution Willingness
+      label: Contribution Willingness / 贡献意愿
       options:
-        - label: I am willing to help implement this improvement
+        - label: I am willing to help implement this improvement / 我愿意帮助实现这个改进
           required: false
-        - label: I can provide design or testing assistance
+        - label: I can provide design or testing assistance / 我可以提供设计或测试帮助
           required: false
 
   - type: textarea
     id: additional
     attributes:
-      label: Additional Information
-      description: Any other information that might be useful
-      placeholder: e.g., Related issues, technical considerations, or constraints
+      label: Additional Information / 其他信息
+      description: Any other information that might be useful / 任何其他可能有用的信息
+      placeholder: e.g., Related issues, technical considerations, or constraints / 例如：相关问题、技术考虑或约束
