@@ -5,7 +5,47 @@ import { PathFinder } from './path-finder';
 
 // 检查 MacFUSE（使用多种方法，提高可靠性）
 async function checkMacFUSE(brewExists: boolean): Promise<boolean> {
-  // 方法1：检查系统扩展是否加载（最可靠的方法）
+  // 方法1：优先使用 brew list --cask（最准确的方法，如果 Homebrew 可用）
+  if (brewExists) {
+    try {
+      // 确保 PATH 包含 Homebrew 路径（合并现有 PATH 和默认路径）
+      const defaultPaths = [
+        '/usr/local/bin',
+        '/opt/homebrew/bin',
+        '/usr/bin',
+        '/bin',
+        '/usr/sbin',
+        '/sbin'
+      ];
+      const existingPath = process.env.PATH || '';
+      const pathArray = existingPath ? existingPath.split(':') : [];
+      // 合并并去重
+      const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
+
+      const env = {
+        ...process.env,
+        PATH: mergedPaths.join(':')
+      };
+
+      // 使用 brew list --cask 检查（最准确的方法）
+      try {
+        await Promise.race([
+          execAsync('brew list --cask macfuse 2>/dev/null', { env }),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+        ]);
+        // 如果命令成功执行（退出码为 0），说明已安装
+        console.log('[依赖检查] MacFUSE 通过 brew list --cask 检查');
+        return true;
+      } catch (error) {
+        // brew list --cask 返回非零退出码或抛出异常，说明未安装
+        console.log('[依赖检查] brew list --cask 检查：MacFUSE 未通过 Homebrew 安装');
+      }
+    } catch {
+      // 忽略错误，继续尝试其他方法
+    }
+  }
+
+  // 方法2：检查系统扩展是否加载（如果通过其他方式安装）
   try {
     const { stdout } = await Promise.race([
       execAsync('systemextensionsctl list 2>/dev/null'),
@@ -33,7 +73,7 @@ async function checkMacFUSE(brewExists: boolean): Promise<boolean> {
     console.log('[依赖检查] 系统扩展检查失败，尝试其他方法:', error);
   }
 
-  // 方法2：检查关键文件是否存在（快速且可靠）
+  // 方法3：检查关键文件是否存在（快速且可靠）
   const macfuseFiles = [
     '/Library/Filesystems/macfuse.fs/Contents/Resources/mount_macfuse',
     '/Library/Filesystems/macfuse.fs/Contents/Resources/load_macfuse',
@@ -52,7 +92,7 @@ async function checkMacFUSE(brewExists: boolean): Promise<boolean> {
     }
   }
 
-  // 方法3：使用 brew info 作为备用（如果 Homebrew 可用）
+  // 方法4：使用 brew info 作为备用（如果 Homebrew 可用但 brew list 失败）
   if (brewExists) {
     try {
       // 确保 PATH 包含 Homebrew 路径（合并现有 PATH 和默认路径）
@@ -80,9 +120,16 @@ async function checkMacFUSE(brewExists: boolean): Promise<boolean> {
           execAsync('brew info macfuse 2>/dev/null', { env }),
           new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
         ]);
-        // 检查输出中是否包含 "Installed" 字符串
+        // 检查输出中是否包含 "Not installed"，如果包含则未安装
         const output = (infoResult as { stdout: string }).stdout || '';
-        if (output.includes('Installed') || output.includes('installed')) {
+        const lowerOutput = output.toLowerCase();
+        // 明确检查是否包含 "Not installed"，避免误判
+        if (lowerOutput.includes('not installed')) {
+          console.log('[依赖检查] brew info 检查：MacFUSE 未安装');
+          return false;
+        }
+        // 如果输出中包含 "Installed" 且不包含 "Not installed"，认为已安装
+        if (lowerOutput.includes('installed') && !lowerOutput.includes('not installed')) {
           console.log('[依赖检查] MacFUSE 通过 brew info 检查');
           return true;
         }
