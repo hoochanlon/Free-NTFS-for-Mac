@@ -1,6 +1,6 @@
 {
   "name": "free-ntfs-for-mac",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "description": "免费的 macOS NTFS 读写工具 - Electron 界面版",
   "main": "scripts/main.js",
   "scripts": {

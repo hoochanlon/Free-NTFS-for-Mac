@@ -71,7 +71,7 @@ function t(key: string): string | undefined {
 export function setupAboutPanel(): void {
   app.setAboutPanelOptions({
     applicationName: 'Nigate',
-    applicationVersion: 'v1.3.5',
+    applicationVersion: 'v1.3.6',
     copyright: '© 2024 Hoochanlon',
     credits: '基于 ntfs-3g 驱动制作'
   });
