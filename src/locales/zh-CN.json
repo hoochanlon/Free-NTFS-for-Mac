@@ -63,7 +63,7 @@
     "checkTimeout": "检查超时，请重试",
     "installCommandLabel": "安装命令：",
     "swift": {
-      "name": "Swift (Xcode Command Line Tools)",
+      "name": "Xcode Command Line Tools",
       "description": "Apple 官方开发工具，提供 Swift 编译器和基础开发库",
       "installGuide": "在终端运行上述命令，会弹出安装窗口，按照提示完成安装。安装过程可能需要几分钟到几十分钟，请耐心等待。"
     },

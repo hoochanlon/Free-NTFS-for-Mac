@@ -6,7 +6,7 @@ Die Verwendung dieses Tools zum Einhängen und Ändern von NTFS-Geräten birgt d
 
 Dieses Tool erfordert die folgenden Systemabhängigkeiten:
 
-1. **Swift (Xcode Command Line Tools)** - Apple-Entwicklungstools
+1. **Xcode Command Line Tools** - Apple-Entwicklungstools
 2. **Homebrew** - Paketmanager für macOS
 3. **MacFUSE** - Dateisystem-Benutzerraum-Framework
 4. **ntfs-3g** - NTFS-Dateisystemtreiber

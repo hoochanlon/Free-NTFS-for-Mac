@@ -6,7 +6,7 @@ Using this tool to mount and modify NTFS devices carries the risk of data loss. 
 
 This tool requires the following system dependencies:
 
-1. **Swift (Xcode Command Line Tools)** - Apple's development tools
+1. **Xcode Command Line Tools** - Apple's development tools
 2. **Homebrew** - Package manager for macOS
 3. **MacFUSE** - File system user space framework
 4. **ntfs-3g** - NTFS file system driver

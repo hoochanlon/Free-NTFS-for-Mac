@@ -237,7 +237,7 @@ export async function checkDependencies(): Promise<Dependencies> {
   }
 
   try {
-    // 并行检查 swift 和 brew，提高速度
+    // 并行检查 Xcode Command Line Tools (通过 swift 命令) 和 brew，提高速度
     const [swiftExists, brewExists] = await Promise.all([
       commandExists('swift'),
       commandExists('brew')

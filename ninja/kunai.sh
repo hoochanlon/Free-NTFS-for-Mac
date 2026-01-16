@@ -7,7 +7,7 @@
 #   一次性安装所有必要的系统依赖，包括：
 #   - macOS 版本检查（要求 macOS 14+）
 #   - macOS 安全检查设置
-#   - Xcode Command Line Tools (Swift)
+#   - Xcode Command Line Tools
 #   - Homebrew (可选择原生或国内镜像源)
 #   - MacFUSE
 #   - ntfs-3g-mac
@@ -253,9 +253,9 @@ echo ""
 # ============================================================
 # 步骤 2: 检查并安装 Xcode Command Line Tools
 # ============================================================
-echo -e "${GREEN}$(t step 2 "安装 Xcode Command Line Tools (Swift)")${NC}"
+echo -e "${GREEN}$(t step 2 "安装 Xcode Command Line Tools")${NC}"
 if [ -x $(command -v swift) ]; then
-	echo "$(t installed "Swift / Xcode Command Line Tools")"
+	echo "$(t installed "Xcode Command Line Tools")"
 else
 	echo "$(t not_found "Xcode Command Line Tools")"
 	echo "$(t installing "Xcode Command Line Tools")"
@@ -436,7 +436,7 @@ fi
 echo ""
 echo "$(t checking "依赖状态:")"
 echo "  macOS 版本: $MACOS_VERSION $([ "$MACOS_VERSION" != "未知" ] && [ "$(echo "$MACOS_VERSION" | cut -d'.' -f1)" -ge 14 ] 2>/dev/null && echo '✅ 符合要求' || echo '⚠️  需要 macOS 14+')"
-echo "  Swift: $([ -x $(command -v swift) ] && echo '✅ 已安装' || echo '❌ 未安装')"
+echo "  Xcode Command Line Tools: $([ -x $(command -v swift) ] && echo '✅ 已安装' || echo '❌ 未安装')"
 echo "  Homebrew: $([ -x $(command -v brew) ] && echo '✅ 已安装' || echo '❌ 未安装')"
 echo "  MacFUSE: $(brew list --cask macfuse &>/dev/null && echo '✅ 已安装' || echo '❌ 未安装')"
 echo "  ntfs-3g: $([ -n "$NTFS3G_PATH" ] && echo '✅ 已安装' || echo '❌ 未安装')"

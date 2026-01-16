@@ -6,7 +6,7 @@
 
 使用本工具需要以下系统依赖：
 
-1. **Swift (Xcode Command Line Tools)** - Apple 的开发工具
+1. **Xcode Command Line Tools** - Apple 的开发工具
 2. **Homebrew** - macOS 的包管理器
 3. **MacFUSE** - 文件系统用户空间框架
 4. **ntfs-3g** - NTFS 文件系统驱动

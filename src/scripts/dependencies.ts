@@ -89,7 +89,7 @@
     depsList.innerHTML = '';
 
     const deps = [
-      { name: 'Swift (Xcode Command Line Tools)', status: dependencies.swift },
+      { name: 'Xcode Command Line Tools', status: dependencies.swift },
       { name: 'Homebrew', status: dependencies.brew },
       { name: 'ntfs-3g', status: dependencies.ntfs3g },
       { name: 'MacFUSE', status: dependencies.macfuse },

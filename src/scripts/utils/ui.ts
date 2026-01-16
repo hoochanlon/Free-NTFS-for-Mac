@@ -317,7 +317,7 @@
         const ul = document.createElement('ul');
         const items = [
           { label: t('about.author') || '作者：', value: 'Hoochanlon' },
-          { label: t('about.version') || '软件版本：', value: 'Nigate v1.3.6' },
+          { label: t('about.version') || '软件版本：', value: 'Nigate v1.3.7' },
           { label: t('about.technology') || '基于技术：', value: 'Electron + Shell + TypeScript + Stylus' }
         ];
         items.forEach(item => {

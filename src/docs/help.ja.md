@@ -6,7 +6,7 @@
 
 本ツールを使用するには、以下のシステム依存関係が必要です：
 
-1. **Swift (Xcode Command Line Tools)** - Appleの開発ツール
+1. **Xcode Command Line Tools** - Appleの開発ツール
 2. **Homebrew** - macOSのパッケージマネージャー
 3. **MacFUSE** - ファイルシステムユーザー空間フレームワーク
 4. **ntfs-3g** - NTFSファイルシステムドライバー

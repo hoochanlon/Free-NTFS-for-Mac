@@ -80,9 +80,9 @@ body:
     id: dependencies
     attributes:
       label: Dependencies Status / 依赖状态
-      description: Please check and list the installation status of dependencies (Swift, Homebrew, MacFUSE, ntfs-3g) / 请检查并列出依赖安装状态（Swift, Homebrew, MacFUSE, ntfs-3g）
+      description: Please check and list the installation status of dependencies (Xcode Command Line Tools, Homebrew, MacFUSE, ntfs-3g) / 请检查并列出依赖安装状态（Xcode Command Line Tools、Homebrew、MacFUSE、ntfs-3g）
       placeholder: |
-        - Swift: ✅ Installed / 已安装
+        - Xcode Command Line Tools: ✅ Installed / 已安装
         - Homebrew: ✅ Installed / 已安装
         - MacFUSE: ❌ Not installed / 未安装
         - ntfs-3g: ✅ Installed / 已安装

@@ -85,7 +85,7 @@ LANG=ja_JP ./ninja/install-dependencies.sh  # 日文
 **安装内容：**
 1. 检查 macOS 版本（要求 macOS 14+）
 2. 禁用 macOS 安全检查（Gatekeeper）
-3. 安装 Xcode Command Line Tools (Swift)
+3. 安装 Xcode Command Line Tools
 4. 安装 Homebrew（可选择官方源或国内镜像源）
 5. 安装 MacFUSE
 6. 安装 ntfs-3g-mac

@@ -47,7 +47,7 @@
   // 依赖信息和安装指引（保留用于向后兼容，但实际使用动态获取）
   const DEPENDENCY_INFO = {
     swift: {
-      name: 'Swift (Xcode Command Line Tools)',
+      name: 'Xcode Command Line Tools',
       description: 'Apple 官方开发工具，提供 Swift 编译器和基础开发库',
       installCommand: 'xcode-select --install',
       installGuide: '在终端运行上述命令，会弹出安装窗口，按照提示完成安装。安装过程可能需要几分钟到几十分钟，请耐心等待。'

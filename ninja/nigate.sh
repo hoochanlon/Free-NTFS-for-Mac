@@ -8,7 +8,7 @@
 #   自动将其从只读模式切换为读写模式，让你可以在 Mac 上正常写入文件。
 #
 # 工作原理：
-#   1. 检查并安装必要的系统依赖（Swift、Homebrew、MacFUSE、ntfs-3g）
+#   1. 检查并安装必要的系统依赖（Xcode Command Line Tools、Homebrew、MacFUSE、ntfs-3g）
 #   2. 每 5 秒检查一次是否有新的 NTFS 设备接入
 #   3. 如果发现只读的 NTFS 设备，自动卸载并重新挂载为读写模式
 #
@@ -140,11 +140,11 @@ config_u_drive(){
 	sudo spctl --master-disable
 
 	# ============================================================
-	# 第二步：检查并安装 Swift（Apple 的编程语言）
+	# 第二步：检查并安装 Xcode Command Line Tools
 	# ============================================================
-	# command -v swift: 检查系统中是否有 swift 命令
+	# command -v swift: 检查系统中是否有 swift 命令（swift 是 Xcode Command Line Tools 的一部分）
 	# ! -x: 如果命令不存在或不可执行
-	# 如果 Swift 不存在，就安装 Xcode Command Line Tools（包含 Swift）
+	# 如果 Xcode Command Line Tools 不存在，就安装它
 	if [ ! -x $(command -v swift) ]; then
 		xcode-select --install
 	fi

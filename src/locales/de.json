@@ -63,7 +63,7 @@
     "checkTimeout": "Prüfung abgelaufen, bitte erneut versuchen",
     "installCommandLabel": "Installationsbefehl:",
     "swift": {
-      "name": "Swift (Xcode Command Line Tools)",
+      "name": "Xcode Command Line Tools",
       "description": "Offizielle Apple-Entwicklungstools, die Swift-Compiler und grundlegende Entwicklungsbibliotheken bereitstellen",
       "installGuide": "Führen Sie den obigen Befehl im Terminal aus, ein Installationsfenster wird angezeigt, folgen Sie den Anweisungen, um die Installation abzuschließen. Der Installationsvorgang kann einige Minuten bis mehrere zehn Minuten dauern, bitte haben Sie Geduld."
     },

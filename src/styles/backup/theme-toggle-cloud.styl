@@ -1,4 +1,4 @@
-// 主题切换开关样式（参考 2.css）
+// 主题切换开关样式
 @import 'variables'
 
 .theme-toggle
@@ -9,9 +9,18 @@
   --sun-diameter: 1.3em
   --sun-offset: calc((var(--toggle-height) - var(--sun-diameter)) / 2)
 
+  // 云朵配置
+  --cloud-scale: 0.7
+  --cloud-size: calc(0.8em * var(--cloud-scale))  // 云朵主体直径
+
+  // 云朵位置偏移（正值向左移动）
+  // 云朵 cloud-offset-y 向下偏移
+  --cloud-offset-x: 0em
+  --cloud-offset-y: 1.7em
+
   --bg-toggle-light: #3d7eae
   --bg-toggle-dark: #1d1f2c
-  --color-sun: #ecca2f
+  --color-sun: #ffdd00
   --color-moon: #c4c9d1
   --color-crater: #959db1
   --color-star: #fff
@@ -58,7 +67,6 @@ body.light-theme .theme-toggle__container
   border-radius: 50%
   position: absolute
   top: var(--sun-offset)
-  // 默认（深色模式）：太阳在右边
   transform: translateX(
     calc(var(--toggle-width) - var(--sun-diameter) - var(--sun-offset))
   )
@@ -73,7 +81,6 @@ body.light-theme .theme-toggle__container
   overflow: hidden
   z-index: 3
 
-// 浅色模式：太阳移到左边
 body.light-theme .theme-toggle__container .theme-toggle__sun
   transform: translateX(var(--sun-offset))
 
@@ -83,14 +90,12 @@ body.light-theme .theme-toggle__container .theme-toggle__sun
   height: 100%
   background-color: var(--color-moon)
   border-radius: inherit
-  // 默认（深色模式）：月亮遮罩在左边（显示月亮）
   transform: translateX(0)
   transition: transform 0.3s ease
   box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset,
     0em -0.062em 0.062em 0em #969696 inset
   z-index: 1
 
-// 浅色模式：月亮遮罩移到右边（隐藏月亮，显示太阳）
 body.light-theme .theme-toggle__container .theme-toggle__moon-mask
   transform: translateX(100%)
 
@@ -123,55 +128,43 @@ body.light-theme .theme-toggle__container .theme-toggle__moon-mask
   position: absolute
   left: 0.2em
   top: 0.3em
-  // 默认（深色模式）：星星可见
   transform: translateY(0)
   transition: transform 0.3s ease
   width: 1.8em
   color: var(--color-star)
   z-index: 2
 
-// 浅色模式：星星隐藏
 body.light-theme .theme-toggle__container .theme-toggle__stars
   transform: translateY(-1.3em)
-  opacity: 0  // 添加透明度变化，让隐藏更自然
+  opacity: 0
 
 .theme-toggle__clouds
-  position: absolute
-  left: 0.2em
-  // 云朵放置在太阳下方，降低top值
-  top: 0.8em  // 从 0.3em 改为 0.8em，降低位置
-  // 默认（深色模式）：云朵完全隐藏（移动到容器外）
-  transform: translateY(3em)  // 从 2em 改为 3em，确保完全移出容器
-  opacity: 0  // 添加透明度为0
-  width: 0.8em
-  height: 0.8em
-  background-color: var(--color-cloud-front)
-  border-radius: 50%
-  box-shadow:
-    0.6em 0.2em var(--color-cloud-front),
-    0.9em 0.25em var(--color-cloud-front),
-    1.4em 0 var(--color-cloud-front),
-    1.9em 0.2em var(--color-cloud-front),
-    2.3em -0.04em var(--color-cloud-front),
-    2.9em -0.2em var(--color-cloud-front),
-    3em -1.1em 0 0.28em var(--color-cloud-front),
-    -0.2em -0.2em var(--color-cloud-back),
-    0.32em -0.08em var(--color-cloud-back),
-    0.8em -0.04em var(--color-cloud-back),
-    1.3em -0.2em var(--color-cloud-back),
-    1.7em 0em var(--color-cloud-back),
-    2.2em -0.28em var(--color-cloud-back),
-    2.6em -0.4em var(--color-cloud-back),
-    2.7em -1.4em 0 0.28em var(--color-cloud-back)
-  transition: transform 0.3s ease, opacity 0.3s ease  // 添加透明度过渡
-  z-index: 2
+  position absolute
+  // 修复：直接计算位置
+  left calc(var(--toggle-width) - calc(0.8em * var(--cloud-scale)) - calc(3em * var(--cloud-scale)) + calc(var(--cloud-offset-x) * var(--cloud-scale)))
+  top calc(var(--toggle-height) - calc(0.8em * var(--cloud-scale)) - calc(1.4em * var(--cloud-scale)) + calc(var(--cloud-offset-y) * var(--cloud-scale)))
 
-// 浅色模式：云朵可见（向上移动显示）
+  // 默认（深色模式）：云朵隐藏在容器右侧外部
+  transform translateX(calc(3em * var(--cloud-scale)))
+  opacity 0
+
+  // 云朵主体
+  width var(--cloud-size)
+  height var(--cloud-size)
+  background-color var(--color-cloud-front)
+  border-radius 50%
+
+  // 云朵阴影 - 向右延伸
+  box-shadow calc(0.6em * var(--cloud-scale)) calc(0.2em * var(--cloud-scale)) 0 0 var(--color-cloud-front), calc(0.9em * var(--cloud-scale)) calc(0.25em * var(--cloud-scale)) 0 0 var(--color-cloud-front), calc(1.4em * var(--cloud-scale)) 0 0 0 var(--color-cloud-front), calc(1.9em * var(--cloud-scale)) calc(0.2em * var(--cloud-scale)) 0 0 var(--color-cloud-front), calc(2.3em * var(--cloud-scale)) calc(-0.04em * var(--cloud-scale)) 0 0 var(--color-cloud-front), calc(2.9em * var(--cloud-scale)) calc(-0.2em * var(--cloud-scale)) 0 0 var(--color-cloud-front), calc(3em * var(--cloud-scale)) calc(-1.1em * var(--cloud-scale)) 0 calc(0.28em * var(--cloud-scale)) var(--color-cloud-front), calc(-0.2em * var(--cloud-scale)) calc(-0.2em * var(--cloud-scale)) 0 0 var(--color-cloud-back), calc(0.32em * var(--cloud-scale)) calc(-0.08em * var(--cloud-scale)) 0 0 var(--color-cloud-back), calc(0.8em * var(--cloud-scale)) calc(-0.04em * var(--cloud-scale)) 0 0 var(--color-cloud-back), calc(1.3em * var(--cloud-scale)) calc(-0.2em * var(--cloud-scale)) 0 0 var(--color-cloud-back), calc(1.7em * var(--cloud-scale)) 0 0 0 var(--color-cloud-back), calc(2.2em * var(--cloud-scale)) calc(-0.28em * var(--cloud-scale)) 0 0 var(--color-cloud-back), calc(2.6em * var(--cloud-scale)) calc(-0.4em * var(--cloud-scale)) 0 0 var(--color-cloud-back), calc(2.7em * var(--cloud-scale)) calc(-1.4em * var(--cloud-scale)) 0 calc(0.28em * var(--cloud-scale)) var(--color-cloud-back)
+
+  transition transform 0.3s ease, opacity 0.3s ease
+  z-index 2
+
+// 浅色模式：云朵从右侧滑入显示
 body.light-theme .theme-toggle__container .theme-toggle__clouds
-  transform: translateY(0)  // 回到正常位置
-  opacity: 1  // 显示云朵
+  transform translateX(0)
+  opacity 1
 
-// 默认（深色模式）hover：太阳稍微左移
 .theme-toggle__container:hover .theme-toggle__sun
   transform: translateX(
     calc(
@@ -179,6 +172,5 @@ body.light-theme .theme-toggle__container .theme-toggle__clouds
     )
   )
 
-// 浅色模式 hover：太阳稍微右移
 body.light-theme .theme-toggle__container:hover .theme-toggle__sun
   transform: translateX(calc(var(--sun-offset) + 0.15em))

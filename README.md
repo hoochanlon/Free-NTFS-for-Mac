@@ -25,7 +25,7 @@
 
 1. **检查系统依赖**
    - 打开应用后，点击"检查依赖"按钮
-   - 系统会自动检查所需的依赖（Swift、Homebrew、MacFUSE、ntfs-3g）
+   - 系统会自动检查所需的依赖（Xcode Command Line Tools、Homebrew、MacFUSE、ntfs-3g）
    - 如果有缺失的依赖，点击"安装缺失依赖"按钮进行安装
 
 2. **挂载 NTFS 设备**
@@ -213,7 +213,7 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 
 1. **Check System Dependencies**
    - After opening the application, click the "Check Dependencies" button
-   - The system will automatically check required dependencies (Swift, Homebrew, MacFUSE, ntfs-3g)
+   - The system will automatically check required dependencies (Xcode Command Line Tools, Homebrew, MacFUSE, ntfs-3g)
    - If any dependencies are missing, click "Install Missing Dependencies" to install them
 
 2. **Mount NTFS Devices**
@@ -404,7 +404,7 @@ Thank you to all developers, testers, and users who have contributed to this pro
 
 1. **システム依存関係のチェック**
    - アプリケーションを開いた後、「依存関係をチェック」ボタンをクリック
-   - システムは必要な依存関係（Swift、Homebrew、MacFUSE、ntfs-3g）を自動的にチェックします
+   - システムは必要な依存関係（Xcode Command Line Tools、Homebrew、MacFUSE、ntfs-3g）を自動的にチェックします
    - 不足している依存関係がある場合、「不足している依存関係をインストール」ボタンをクリックしてインストールします
 
 2. **NTFS デバイスのマウント**
