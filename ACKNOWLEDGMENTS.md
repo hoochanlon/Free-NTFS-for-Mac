@@ -39,6 +39,7 @@
 - [@amiaoapp](https://x.com/amiaoapp) - 在 Twitter/X 上推荐本项目
 - [iBeesoft](https://www.ibeesoft.com/howtos/free-ntfs-for-mac.html) - 在教程文章中推荐本项目
 - [MacBed](https://www.macbed.com/nigate/) - 在网站上介绍和推荐本项目
+- [阮一峰的网络日志](https://www.ruanyifeng.com/blog/2026/01/weekly-issue-381.html) - 投稿采纳
 
 ### 其他技术支持
 - [DreamBroke](https://github.com/DreamBroke) - 提供技术支持
@@ -52,6 +53,7 @@
 - [MacFUSE](https://osxfuse.github.io/) - 文件系统集成
 - [ntfs-3g](https://www.tuxera.com/community/open-source-ntfs-3g/) - NTFS 文件系统驱动
 - [Homebrew](https://brew.sh/) - macOS 包管理器
+- [fswatch](https://github.com/emcrisostomo/fswatch) - 文件系统事件监控工具，用于实现零延迟的设备检测
 
 ## 资源与素材
 
@@ -68,8 +70,8 @@
 - [Visual Studio Code](https://code.visualstudio.com/) - 强大的代码编辑器
 - [Cursor](https://cursor.sh/) - AI 驱动的代码编辑器
 - [Kate](https://kate-editor.org/) - 功能丰富的文本编辑器
+- [DeepSeek](https://www.deepseek.com/) - AI 编程助手
+- [Grok](https://x.ai/) - AI 助手
 
-## 灵感来源
 
-<!-- 列出启发这个工作的项目或人员 -->
 

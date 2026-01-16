@@ -79,6 +79,25 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 
 ![ ](src/imgs/example/2026-01-16_10-41-58.png)
 
+## 依赖管理
+
+### 一键安装依赖
+
+复制粘贴到 ***完全管理权限的终端*** 回车，一键安装所有依赖：
+
+```shell
+/bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
+```
+
+### 一键卸载依赖
+
+复制粘贴到 ***完全管理权限的终端*** 回车，一键卸载所有依赖：
+
+```shell
+/bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
+```
+
+> 更多信息请参考：[忍者工具集测试 #39](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/39)
 
 ## 运维 & 开发
 
@@ -251,6 +270,26 @@ Download and use from [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tag
 
 ![ ](src/imgs/example/2026-01-16_10-41-58.png)
 
+### Dependency Management
+
+#### One-Click Install Dependencies
+
+Copy and paste into a ***terminal with full administrative privileges*** and press Enter to install all dependencies:
+
+```shell
+/bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
+```
+
+#### One-Click Uninstall Dependencies
+
+Copy and paste into a ***terminal with full administrative privileges*** and press Enter to uninstall all dependencies:
+
+```shell
+/bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
+```
+
+> For more information, see: [Ninja Tools Testing #39](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/39)
+
 ### Operations & Development
 
 #### Installation Steps
@@ -421,6 +460,26 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 **トレイ**
 
 ![ ](src/imgs/example/2026-01-16_10-41-58.png)
+
+### 依存関係管理
+
+#### ワンクリック依存関係インストール
+
+***完全な管理権限を持つターミナル***にコピー＆ペーストして Enter キーを押すと、すべての依存関係をインストールできます：
+
+```shell
+/bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
+```
+
+#### ワンクリック依存関係アンインストール
+
+***完全な管理権限を持つターミナル***にコピー＆ペーストして Enter キーを押すと、すべての依存関係をアンインストールできます：
+
+```shell
+/bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
+```
+
+> 詳細情報については、[忍者ツールセットテスト #39](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/39) を参照してください。
 
 ### 運用 & 開発
 
