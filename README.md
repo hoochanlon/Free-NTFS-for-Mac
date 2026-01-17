@@ -17,7 +17,8 @@
 - 🔄 **一键挂载** - 轻松将只读 NTFS 设备挂载为读写模式
 - 📊 **状态显示** - 清晰显示设备状态和操作日志
 - 🛡️ **安全可靠** - 使用 Electron 安全最佳实践
-- ☕ **免睡眠** - 一键开启/关闭系统休眠防止功能，确保长时间操作时系统保持唤醒状态
+- ☕ **禁止休眠** - 一键开启/关闭系统休眠防止功能，确保长时间操作时系统保持唤醒状态
+- 🍃 **状态保护** - 长按3s可切换保护状态，保护后自动读写、托盘模式和防止休眠功能将被禁用，防止误操作
 
 ## 使用说明
 
@@ -34,11 +35,17 @@
    - 对于只读设备，点击"挂载为读写"按钮
    - 输入管理员密码完成挂载
 
-3. **免睡眠功能**
-   - 在标题栏、主界面操作区域或托盘窗口中点击"免睡眠"按钮
+3. **禁止休眠功能**
+   - 在标题栏、主界面操作区域或托盘窗口中点击"禁止休眠"按钮
    - 启用后，系统将保持唤醒状态，防止进入休眠模式
    - 适用于长时间文件传输或批量操作场景
    - 操作完成后可随时关闭，节省系统资源
+
+4. **状态保护功能**
+   - 在标题栏或托盘窗口中长按"状态保护"图标3s可切换保护状态
+   - 保护后，自动读写、托盘模式和防止休眠功能将被禁用，防止误操作
+   - 图标保护后显示为绿色并带有脉冲动画
+   - 再次长按3s可解除保护状态
 
 ### 注意事项
 
@@ -206,6 +213,7 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 - 📊 **Status Display** - Clearly displays device status and operation logs
 - 🛡️ **Secure & Reliable** - Uses Electron security best practices
 - ☕ **Prevent Sleep** - One-click toggle to prevent system sleep, ensuring the system stays awake during long operations
+- 🍃 **Status Protection** - Long press for 3s to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations
 
 ### Usage Instructions
 
@@ -227,6 +235,12 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
    - When enabled, the system will stay awake and prevent entering sleep mode
    - Suitable for long file transfers or batch operations
    - Can be turned off at any time after completion to save system resources
+
+4. **Status Protection Feature**
+   - Long press the "Status Protection" icon for 3s in the title bar or tray window to toggle protection status
+   - When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations
+   - The icon appears green with a pulse animation when protected
+   - Long press again for 3s to remove protection
 
 ### Important Notes
 
@@ -397,6 +411,7 @@ Thank you to all developers, testers, and users who have contributed to this pro
 - 📊 **ステータス表示** - デバイスの状態と操作ログを明確に表示
 - 🛡️ **安全で信頼性が高い** - Electron のセキュリティベストプラクティスを使用
 - ☕ **スリープ防止** - ワンクリックでシステムスリープを防止し、長時間の操作中もシステムを起動状態に保つ
+- 🍃 **状態保護** - 3s長押しで保護状態を切り替えます。保護後、自動読み書き、トレイモード、スリープ防止機能が無効になり、誤操作を防ぎます
 
 ### 使用説明
 
@@ -418,6 +433,12 @@ Thank you to all developers, testers, and users who have contributed to this pro
    - 有効にすると、システムは起動状態を維持し、スリープモードに入ることを防ぎます
    - 長時間のファイル転送やバッチ操作に適しています
    - 操作完了後はいつでもオフにして、システムリソースを節約できます
+
+4. **状態保護機能**
+   - タイトルバーまたはトレイウィンドウで「状態保護」アイコンを3s長押しして保護状態を切り替えます
+   - 保護後、自動読み書き、トレイモード、スリープ防止機能が無効になり、誤操作を防ぎます
+   - アイコンが保護されると緑色でパルスアニメーションが表示されます
+   - 再度3s長押しすると保護を解除できます
 
 ### 注意事項
 
