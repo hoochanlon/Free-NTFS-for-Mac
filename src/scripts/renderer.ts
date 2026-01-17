@@ -132,15 +132,51 @@
     let longPressTimer: NodeJS.Timeout | null = null;
     const LONG_PRESS_DURATION = 3000; // 3秒
 
+    // 从设置中读取锁定状态
+    const loadLockState = async () => {
+      try {
+        const settings = await window.electronAPI.getSettings();
+        // 检查设置中是否有 protectLocked 字段
+        if (settings && typeof (settings as any).protectLocked === 'boolean') {
+          isLocked = (settings as any).protectLocked;
+        } else {
+          // 如果没有该字段，从 localStorage 读取（向后兼容）
+          const stored = localStorage.getItem('protectLocked');
+          if (stored !== null) {
+            isLocked = stored === 'true';
+          }
+        }
+        updateLockState();
+      } catch (error) {
+        console.error('读取锁定状态失败:', error);
+      }
+    };
+
+    // 保存锁定状态到设置
+    const saveLockState = async (locked: boolean) => {
+      try {
+        await window.electronAPI.saveSettings({ protectLocked: locked } as any);
+      } catch (error) {
+        console.error('保存锁定状态失败:', error);
+        // 降级到 localStorage
+        try {
+          localStorage.setItem('protectLocked', String(locked));
+        } catch (e) {
+          console.error('保存到 localStorage 也失败:', e);
+        }
+      }
+    };
+
     // 更新锁定状态的视觉反馈
     const updateLockState = () => {
       if (protectBtn) {
+        const t = getT();
         if (isLocked) {
           protectBtn.classList.add('locked');
-          protectBtn.title = '状态已锁定（长按3秒解锁）';
+          protectBtn.title = t('app.protectTooltipLocked') || '状态已锁定（长按3秒解锁）';
         } else {
           protectBtn.classList.remove('locked');
-          protectBtn.title = '状态锁定（长按3秒锁定）';
+          protectBtn.title = t('app.protectTooltip') || '状态锁定（长按3秒锁定）';
         }
       }
 
@@ -160,9 +196,10 @@
     if (protectBtn) {
       // 鼠标按下事件
       protectBtn.addEventListener('mousedown', () => {
-        longPressTimer = setTimeout(() => {
+        longPressTimer = setTimeout(async () => {
           isLocked = !isLocked;
           updateLockState();
+          await saveLockState(isLocked);
           const t = getT();
           const message = isLocked
             ? (t('app.protectLocked') || '状态已锁定')
@@ -191,9 +228,10 @@
       // 触摸事件支持（移动端）
       protectBtn.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        longPressTimer = setTimeout(() => {
+        longPressTimer = setTimeout(async () => {
           isLocked = !isLocked;
           updateLockState();
+          await saveLockState(isLocked);
           const t = getT();
           const message = isLocked
             ? (t('app.protectLocked') || '状态已锁定')
@@ -218,8 +256,18 @@
         }
       });
 
-      // 初始化锁定状态
-      updateLockState();
+      // 初始化锁定状态（从设置中读取）
+      await loadLockState();
+    }
+
+    // 监听来自托盘窗口或其他窗口的状态锁定变化
+    if (window.electronAPI && window.electronAPI.onSettingsChange) {
+      window.electronAPI.onSettingsChange((updatedSettings: any) => {
+        if (updatedSettings.protectLocked !== undefined) {
+          isLocked = updatedSettings.protectLocked;
+          updateLockState();
+        }
+      });
     }
 
     // 初始化退出按钮（使用统一 confirm-dialog 样式）

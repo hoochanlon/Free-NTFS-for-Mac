@@ -69,6 +69,7 @@ brew install ntfs-3g-mac
 - <img src="../imgs/svg/devices/flash-auto.svg" alt="自动读写" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **自动读写图标** - 启用后，新插入的 NTFS 设备会自动挂载为读写模式。图标激活时显示为蓝色。
 - <img src="../imgs/svg/devices/tray.svg" alt="托盘模式" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **托盘模式图标** - 启用后，关闭窗口时应用会最小化到系统托盘而不是退出。图标激活时显示为紫色。
 - <img src="../imgs/svg/system/caffe.svg" alt="防止休眠" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **防止休眠图标** - 启用后，系统将禁止进入休眠状态，确保设备持续可用。图标激活时显示为咖啡色。
+- <img src="../imgs/svg/system/protect.svg" alt="状态保护" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **状态保护图标** - 长按3秒可切换保护状态。保护后，自动读写、托盘模式和防止休眠功能将被禁用，防止误操作。图标保护后显示为绿色并带有脉冲动画。
 - <img src="../imgs/svg/ui/info.svg" alt="关于" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **关于图标** - 打开关于窗口，查看应用信息和项目链接。
 - <img src="../imgs/svg/actions/exit-red.svg" alt="退出" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **退出图标** - 退出应用程序。
 

@@ -1,7 +1,13 @@
 {
   "app": {
     "title": "Nigate",
-    "about": "About"
+    "about": "About",
+    "protect": "Status Protection",
+    "protectLocked": "Status Protected",
+    "protectUnlocked": "Status Protection Removed",
+    "protectLockedMessage": "Status is protected, cannot modify",
+    "protectTooltip": "Status Protection (Long press 3 seconds to protect)",
+    "protectTooltipLocked": "Status Protected (Long press 3 seconds to remove protection)"
   },
   "menu": {
     "about": "About",
@@ -181,6 +187,10 @@
         "preventSleep": {
           "name": "Prevent Sleep Icon",
           "description": "When enabled, the system will prevent entering sleep mode to ensure devices remain accessible. The icon appears coffee-colored when active."
+        },
+        "protect": {
+          "name": "Status Protection Icon",
+          "description": "Long press for 3 seconds to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations. The icon appears green with a pulse animation when protected."
         },
         "about": {
           "name": "About Icon",

@@ -1,7 +1,13 @@
 {
   "app": {
     "title": "Nigate",
-    "about": "關於"
+    "about": "關於",
+    "protect": "狀態保護",
+    "protectLocked": "狀態已保護",
+    "protectUnlocked": "狀態已解除保護",
+    "protectLockedMessage": "狀態已保護，無法修改",
+    "protectTooltip": "狀態保護（長按3秒保護）",
+    "protectTooltipLocked": "狀態已保護（長按3秒解除保護）"
   },
   "menu": {
     "about": "關於",
@@ -181,6 +187,10 @@
         "preventSleep": {
           "name": "防止休眠圖示",
           "description": "啟用後，系統將禁止進入休眠狀態，確保裝置持續可用。圖示啟用時顯示為咖啡色。"
+        },
+        "protect": {
+          "name": "狀態保護圖示",
+          "description": "長按3秒可切換保護狀態。保護後，自動讀寫、託盤模式和防止休眠功能將被禁用，防止誤操作。圖示保護後顯示為綠色並帶有脈衝動畫。"
         },
         "about": {
           "name": "關於圖示",

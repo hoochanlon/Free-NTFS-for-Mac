@@ -175,6 +175,28 @@
         background var(--coffee-hover)
         border-color var(--coffee-hover)
 
+    // 托盘窗口中的状态锁定按钮
+    #protectBtn
+      position relative
+
+      &.locked
+        background var(--success)
+        color #ffffff
+        border-color var(--success)
+
+        .btn-icon
+          filter brightness(0) invert(1)
+          animation pulse 2s ease-in-out infinite
+
+        &:hover
+          background var(--success)
+          border-color var(--success)
+          opacity 0.9
+
+      &:hover:not(.locked)
+        .btn-icon
+          opacity 0.8
+
   .devices-list
     display flex
     flex-direction column

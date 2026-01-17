@@ -338,6 +338,15 @@
       }
       autoMountBtn.addEventListener('click', async () => {
         try {
+          // 检查是否锁定（通过检查保护按钮的状态）
+          const protectBtn = document.getElementById('protectBtn') as HTMLButtonElement | null;
+          if (protectBtn && protectBtn.classList.contains('locked')) {
+            const AppUtils = (window as any).AppUtils;
+            if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
+              await AppUtils.Logs.addLog(t('app.protectLockedMessage') || '状态已锁定，无法修改', 'warning');
+            }
+            return;
+          }
           autoMountEnabled = !autoMountEnabled;
           updateAutoMountButtonState();
           if (electronAPI.saveSettings) {
@@ -383,6 +392,162 @@
       });
     }
 
+    // 状态锁定按钮（托盘窗口）
+    const protectBtn = document.getElementById('protectBtn') as HTMLButtonElement | null;
+    if (protectBtn) {
+      let isLocked = false;
+      let longPressTimer: NodeJS.Timeout | null = null;
+      const LONG_PRESS_DURATION = 3000; // 3秒
+
+      // 从设置中读取锁定状态（如果设置中有 protectLocked 字段）
+      const loadLockState = async () => {
+        try {
+          const settings = await electronAPI.getSettings();
+          // 检查设置中是否有 protectLocked 字段
+          if (settings && typeof (settings as any).protectLocked === 'boolean') {
+            isLocked = (settings as any).protectLocked;
+          } else {
+            // 如果没有该字段，从 localStorage 读取（向后兼容）
+            const stored = localStorage.getItem('protectLocked');
+            if (stored !== null) {
+              isLocked = stored === 'true';
+            }
+          }
+          updateLockState();
+        } catch (error) {
+          console.error('读取锁定状态失败:', error);
+        }
+      };
+
+      // 保存锁定状态到设置（如果支持）或 localStorage
+      const saveLockState = async (locked: boolean) => {
+        try {
+          // 尝试保存到设置
+          if (electronAPI.saveSettings) {
+            try {
+              await electronAPI.saveSettings({ protectLocked: locked } as any);
+            } catch (e) {
+              // 如果设置接口不支持 protectLocked，使用 localStorage
+              localStorage.setItem('protectLocked', String(locked));
+            }
+          } else {
+            // 如果没有 saveSettings API，使用 localStorage
+            localStorage.setItem('protectLocked', String(locked));
+          }
+        } catch (error) {
+          console.error('保存锁定状态失败:', error);
+          // 降级到 localStorage
+          try {
+            localStorage.setItem('protectLocked', String(locked));
+          } catch (e) {
+            console.error('保存到 localStorage 也失败:', e);
+          }
+        }
+      };
+
+      // 更新锁定状态的视觉反馈
+      const updateLockState = () => {
+        if (protectBtn) {
+          if (isLocked) {
+            protectBtn.classList.add('locked');
+            protectBtn.title = t('app.protectTooltipLocked') || '状态已锁定（长按3秒解锁）';
+          } else {
+            protectBtn.classList.remove('locked');
+            protectBtn.title = t('app.protectTooltip') || '状态锁定（长按3秒锁定）';
+          }
+        }
+
+        // 更新其他按钮禁用状态
+        if (autoMountBtn) {
+          autoMountBtn.disabled = isLocked;
+        }
+        if (caffeinateBtn) {
+          caffeinateBtn.disabled = isLocked;
+        }
+      };
+
+      // 鼠标按下事件
+      protectBtn.addEventListener('mousedown', () => {
+        longPressTimer = setTimeout(async () => {
+          isLocked = !isLocked;
+          updateLockState();
+          await saveLockState(isLocked);
+          const message = isLocked
+            ? (t('app.protectLocked') || '状态已锁定')
+            : (t('app.protectUnlocked') || '状态已解锁');
+          const AppUtils = (window as any).AppUtils;
+          if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
+            AppUtils.Logs.addLog(message, 'info').catch(console.error);
+          }
+          longPressTimer = null;
+        }, LONG_PRESS_DURATION);
+      });
+
+      // 鼠标释放事件
+      protectBtn.addEventListener('mouseup', () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      });
+
+      // 鼠标离开事件（防止拖拽时触发）
+      protectBtn.addEventListener('mouseleave', () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      });
+
+      // 触摸事件支持（移动端）
+      protectBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        longPressTimer = setTimeout(async () => {
+          isLocked = !isLocked;
+          updateLockState();
+          await saveLockState(isLocked);
+          const message = isLocked
+            ? (t('app.protectLocked') || '状态已锁定')
+            : (t('app.protectUnlocked') || '状态已解锁');
+          const AppUtils = (window as any).AppUtils;
+          if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
+            AppUtils.Logs.addLog(message, 'info').catch(console.error);
+          }
+          longPressTimer = null;
+        }, LONG_PRESS_DURATION);
+      });
+
+      protectBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      });
+
+      protectBtn.addEventListener('touchcancel', () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      });
+
+      // 初始化锁定状态（从设置中读取）
+      loadLockState().catch(err => {
+        console.error('初始化状态锁定按钮失败:', err);
+      });
+
+      // 监听来自主窗口的状态锁定变化
+      if (electronAPI.onSettingsChange) {
+        electronAPI.onSettingsChange((updatedSettings: any) => {
+          if (updatedSettings.protectLocked !== undefined) {
+            isLocked = updatedSettings.protectLocked;
+            updateLockState();
+          }
+        });
+      }
+    }
+
     // 防止休眠按钮（托盘窗口）
     if (caffeinateBtn) {
       const updateCaffeinateButtonState = async () => {
@@ -419,6 +584,15 @@
       // 点击切换
       caffeinateBtn.addEventListener('click', async () => {
         try {
+          // 检查是否锁定（通过检查保护按钮的状态）
+          const protectBtn = document.getElementById('protectBtn') as HTMLButtonElement | null;
+          if (protectBtn && protectBtn.classList.contains('locked')) {
+            const AppUtils = (window as any).AppUtils;
+            if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
+              await AppUtils.Logs.addLog(t('app.protectLockedMessage') || '状态已锁定，无法修改', 'warning');
+            }
+            return;
+          }
           const result = await electronAPI.caffeinateToggle();
           if (result.success) {
             await updateCaffeinateButtonState();

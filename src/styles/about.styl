@@ -209,27 +209,10 @@ body
     .btn-about-icon
       opacity 1
 
-// 保护按钮（状态锁定）
-#protectBtn
-  position relative
+// 保护按钮样式已移至 icons.styl 统一管理
+// 以下样式保留用于向后兼容，但会被 icons.styl 中的样式覆盖
 
-  &.locked
-    .btn-about-icon
-      opacity 1
-      // 锁定状态：使用filter将图标转换为红色
-      filter brightness(0) saturate(100%) invert(20%) sepia(100%) saturate(2000%) hue-rotate(0deg) brightness(0.9) contrast(1.2)
-      animation pulse 2s ease-in-out infinite
-
-  &:hover:not(.locked)
-    .btn-about-icon
-      opacity 0.8
-
-  // 禁用状态样式（当其他按钮被锁定时）
-  &:disabled
-    opacity 0.5
-    cursor not-allowed
-
-// 锁定状态脉冲动画
+// 锁定状态脉冲动画（保留，因为可能被其他地方引用）
 @keyframes pulse
   0%, 100%
     opacity 1

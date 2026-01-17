@@ -1,7 +1,13 @@
 {
   "app": {
     "title": "Nigate",
-    "about": "Über"
+    "about": "Über",
+    "protect": "Status-Schutz",
+    "protectLocked": "Status geschützt",
+    "protectUnlocked": "Status-Schutz entfernt",
+    "protectLockedMessage": "Status ist geschützt, Änderungen nicht möglich",
+    "protectTooltip": "Status-Schutz (3 Sekunden lang drücken zum Schutz)",
+    "protectTooltipLocked": "Status geschützt (3 Sekunden lang drücken zum Schutz entfernen)"
   },
   "menu": {
     "about": "Über",
@@ -181,6 +187,10 @@
         "preventSleep": {
           "name": "Ruhezustand verhindern-Symbol",
           "description": "Wenn aktiviert, verhindert das System, dass es in den Ruhezustand wechselt, um sicherzustellen, dass Geräte kontinuierlich verfügbar bleiben. Das Symbol erscheint kaffeefarben, wenn es aktiv ist."
+        },
+        "protect": {
+          "name": "Status-Schutz Symbol",
+          "description": "3 Sekunden lang drücken, um den Schutzstatus umzuschalten. Wenn geschützt, werden automatisches Lesen/Schreiben, Tray-Modus und Ruhezustand verhindern deaktiviert, um versehentliche Vorgänge zu verhindern. Das Symbol erscheint grün mit einer Pulsanimation, wenn es geschützt ist."
         },
         "about": {
           "name": "Info-Symbol",

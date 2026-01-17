@@ -69,6 +69,7 @@ brew install ntfs-3g-mac
 - <img src="../imgs/svg/devices/flash-auto.svg" alt="自動讀寫" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **自動讀寫圖示** - 啟用後，新插入的 NTFS 裝置會自動掛載為讀寫模式。圖示啟用時顯示為藍色。
 - <img src="../imgs/svg/devices/tray.svg" alt="托盤模式" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **托盤模式圖示** - 啟用後，關閉視窗時應用程式會最小化到系統托盤而不是退出。圖示啟用時顯示為紫色。
 - <img src="../imgs/svg/system/caffe.svg" alt="防止休眠" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **防止休眠圖示** - 啟用後，系統將禁止進入休眠狀態，確保裝置持續可用。圖示啟用時顯示為咖啡色。
+- <img src="../imgs/svg/system/protect.svg" alt="狀態保護" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **狀態保護圖示** - 長按3秒可切換保護狀態。保護後，自動讀寫、託盤模式和防止休眠功能將被禁用，防止誤操作。圖示保護後顯示為綠色並帶有脈衝動畫。
 - <img src="../imgs/svg/ui/info.svg" alt="關於" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **關於圖示** - 開啟關於視窗，查看應用程式資訊和專案連結。
 - <img src="../imgs/svg/actions/exit-red.svg" alt="退出" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **退出圖示** - 退出應用程式。
 
