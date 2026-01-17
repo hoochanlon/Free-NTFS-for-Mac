@@ -76,14 +76,170 @@
   AppModules.Dependencies = {
     // 依赖数据
     dependencies: null as any,
+    // 缓存键名
+    CACHE_KEY: 'dependencies_cache',
+    CACHE_TIMESTAMP_KEY: 'dependencies_cache_timestamp',
+    // 缓存有效期：24小时（86400000毫秒）
+    // 依赖安装后通常不会频繁变化，大部分用户安装成功后基本不会再管
+    // 24小时的缓存可以有效减少不必要的检查，提升用户体验
+    CACHE_VALIDITY_PERIOD: 24 * 60 * 60 * 1000,
+
+    // 从 localStorage 加载缓存
+    loadCache(): any | null {
+      try {
+        const cacheData = localStorage.getItem(AppModules.Dependencies.CACHE_KEY);
+        const cacheTimestamp = localStorage.getItem(AppModules.Dependencies.CACHE_TIMESTAMP_KEY);
+
+        if (!cacheData || !cacheTimestamp) {
+          return null;
+        }
+
+        const timestamp = parseInt(cacheTimestamp, 10);
+        const now = Date.now();
+        const age = now - timestamp;
+
+        // 如果缓存过期，返回 null
+        if (age > AppModules.Dependencies.CACHE_VALIDITY_PERIOD) {
+          localStorage.removeItem(AppModules.Dependencies.CACHE_KEY);
+          localStorage.removeItem(AppModules.Dependencies.CACHE_TIMESTAMP_KEY);
+          return null;
+        }
+
+        return JSON.parse(cacheData);
+      } catch (error) {
+        console.error('加载依赖缓存失败:', error);
+        return null;
+      }
+    },
+
+    // 保存缓存到 localStorage
+    saveCache(dependencies: any): void {
+      try {
+        localStorage.setItem(AppModules.Dependencies.CACHE_KEY, JSON.stringify(dependencies));
+        localStorage.setItem(AppModules.Dependencies.CACHE_TIMESTAMP_KEY, String(Date.now()));
+      } catch (error) {
+        console.error('保存依赖缓存失败:', error);
+      }
+    },
+
+    // 使用缓存数据渲染
+    renderFromCache(
+      depsList: HTMLElement,
+      statusDot: HTMLElement,
+      statusText: HTMLElement
+    ): void {
+      const cached = AppModules.Dependencies.loadCache();
+      if (!cached) {
+        return;
+      }
+
+      AppModules.Dependencies.dependencies = cached;
+      AppModules.Dependencies.renderDependencies(depsList);
+
+      const allInstalled = AppModules.Dependencies.dependencies.swift &&
+                          AppModules.Dependencies.dependencies.brew &&
+                          AppModules.Dependencies.dependencies.macfuse &&
+                          AppModules.Dependencies.dependencies.ntfs3g &&
+                          AppModules.Dependencies.dependencies.macosVersion;
+
+      if (allInstalled) {
+        AppUtils.UI.updateStatus('active', t('status.systemReady'), statusDot, statusText);
+      } else {
+        AppUtils.UI.updateStatus('error', t('status.missingDeps'), statusDot, statusText);
+      }
+    },
+
+    // 后台验证缓存（快速检查关键依赖，如果状态变化则清除缓存并更新 UI）
+    async validateCacheInBackground(
+      cached: any,
+      depsList: HTMLElement,
+      statusDot: HTMLElement,
+      statusText: HTMLElement
+    ): Promise<void> {
+      try {
+        // 快速检查所有依赖（使用较短的超时时间）
+        const quickCheckPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('timeout')), 5000); // 5秒超时
+        });
+
+        const freshDeps = await Promise.race([
+          electronAPI.checkDependencies(),
+          quickCheckPromise
+        ]).catch(() => null);
+
+        if (!freshDeps) {
+          // 如果快速检查失败，忽略（可能是网络问题等）
+          return;
+        }
+
+        // 比较关键依赖的状态
+        const keyDeps = ['swift', 'brew', 'macfuse', 'ntfs3g', 'macosVersion'];
+        const hasChanged = keyDeps.some(key => {
+          return cached[key] !== freshDeps[key];
+        });
+
+        // 如果状态发生变化，清除缓存并立即更新 UI
+        if (hasChanged) {
+          console.log('[依赖检查] 检测到依赖状态变化，更新显示');
+          localStorage.removeItem(AppModules.Dependencies.CACHE_KEY);
+          localStorage.removeItem(AppModules.Dependencies.CACHE_TIMESTAMP_KEY);
+
+          // 更新显示（使用新的检查结果）
+          AppModules.Dependencies.dependencies = freshDeps;
+          AppModules.Dependencies.saveCache(freshDeps);
+
+          // 立即更新 UI
+          AppModules.Dependencies.renderDependencies(depsList);
+
+          const allInstalled = freshDeps.swift &&
+                              freshDeps.brew &&
+                              freshDeps.macfuse &&
+                              freshDeps.ntfs3g &&
+                              freshDeps.macosVersion;
+
+          if (allInstalled) {
+            AppUtils.UI.updateStatus('active', t('status.systemReady'), statusDot, statusText);
+            await AppUtils.Logs.addLog(t('dependencies.allInstalled'), 'success');
+          } else {
+            AppUtils.UI.updateStatus('error', t('status.missingDeps'), statusDot, statusText);
+            await AppUtils.Logs.addLog(t('dependencies.missingDepsDetected'), 'warning');
+          }
+        }
+      } catch (error) {
+        // 后台验证失败不影响主流程，静默处理
+        console.log('[依赖检查] 后台验证失败:', error);
+      }
+    },
 
     // 检查依赖
     async checkDependencies(
       depsList: HTMLElement,
       loadingOverlay: HTMLElement,
       statusDot: HTMLElement,
-      statusText: HTMLElement
+      statusText: HTMLElement,
+      forceRefresh: boolean = false
     ): Promise<void> {
+      // 如果不是强制刷新，先尝试使用缓存
+      if (!forceRefresh) {
+        const cached = AppModules.Dependencies.loadCache();
+        if (cached) {
+          console.log('[依赖检查] 使用缓存结果');
+          AppModules.Dependencies.renderFromCache(depsList, statusDot, statusText);
+
+          // 后台验证缓存（不阻塞 UI）
+          // 如果检测到变化，会立即更新 UI
+          AppModules.Dependencies.validateCacheInBackground(
+            cached,
+            depsList,
+            statusDot,
+            statusText
+          ).catch(() => {
+            // 静默处理错误
+          });
+          return;
+        }
+      }
+
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
         AppUtils.UI.updateStatus('active', t('status.checking'), statusDot, statusText);
@@ -97,6 +253,9 @@
           electronAPI.checkDependencies(),
           timeoutPromise
         ]);
+
+        // 保存到缓存
+        AppModules.Dependencies.saveCache(AppModules.Dependencies.dependencies);
 
         AppModules.Dependencies.renderDependencies(depsList);
 

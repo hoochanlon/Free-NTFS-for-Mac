@@ -3,23 +3,25 @@
 
 // CSS 变量（用于动态主题切换）
 :root
-  // 深色模式
-  --bg-primary dark-bg-primary
-  --bg-secondary dark-bg-secondary
-  --bg-tertiary dark-bg-tertiary
-  --text-primary dark-text-primary
-  --text-secondary dark-text-secondary
-  --accent accent
-  --accent-hover accent-hover
-  --success success
-  --warning warning
-  --error error
-  --coffee coffee
-  --coffee-hover coffee-hover
-  --border dark-border
-  --shadow dark-shadow
+  // 浅色模式（默认）
+  --bg-primary light-bg-primary
+  --bg-secondary light-bg-secondary
+  --bg-tertiary light-bg-tertiary
+  --text-primary light-text-primary
+  --text-secondary light-text-secondary
+  --border light-border
+  --shadow light-shadow
 
-  // 浅色模式变量（通过类切换）
+  // 深色模式变量（通过类切换）
+  --dark-bg-primary dark-bg-primary
+  --dark-bg-secondary dark-bg-secondary
+  --dark-bg-tertiary dark-bg-tertiary
+  --dark-text-primary dark-text-primary
+  --dark-text-secondary dark-text-secondary
+  --dark-border dark-border
+  --dark-shadow dark-shadow
+
+  // 浅色模式变量（保留用于兼容）
   --light-bg-primary light-bg-primary
   --light-bg-secondary light-bg-secondary
   --light-bg-tertiary light-bg-tertiary
@@ -28,15 +30,24 @@
   --light-border light-border
   --light-shadow light-shadow
 
-// 浅色模式类
-body.light-theme
-  --bg-primary var(--light-bg-primary)
-  --bg-secondary var(--light-bg-secondary)
-  --bg-tertiary var(--light-bg-tertiary)
-  --text-primary var(--light-text-primary)
-  --text-secondary var(--light-text-secondary)
-  --border var(--light-border)
-  --shadow var(--light-shadow)
+  // 通用颜色
+  --accent accent
+  --accent-hover accent-hover
+  --success success
+  --warning warning
+  --error error
+  --coffee coffee
+  --coffee-hover coffee-hover
+
+// 深色模式：移除 light-theme 类时使用深色
+body:not(.light-theme)
+  --bg-primary var(--dark-bg-primary)
+  --bg-secondary var(--dark-bg-secondary)
+  --bg-tertiary var(--dark-bg-tertiary)
+  --text-primary var(--dark-text-primary)
+  --text-secondary var(--dark-text-secondary)
+  --border var(--dark-border)
+  --shadow var(--dark-shadow)
 
 body
   font-family -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif
@@ -47,4 +58,7 @@ body
   -moz-osx-font-smoothing grayscale
   font-feature-settings 'kern' 1
   text-rendering optimizeLegibility
-  transition background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s cubic-bezier(0.4, 0, 0.2, 1)
+  // 只对颜色应用过渡，不对背景色应用过渡，避免残影
+  transition color 0.25s cubic-bezier(0.4, 0, 0.2, 1)
+  // 背景色立即切换，不应用过渡
+  transition background-color 0s

@@ -49,14 +49,17 @@
     initializeTheme(docBody: HTMLElement, themeToggleButton?: HTMLElement | null): void {
       try {
         const savedTheme = localStorage.getItem('app-theme');
-        if (savedTheme === 'light') {
-          AppUtils.Theme.updateTheme(true, docBody, themeToggleButton);
-        } else {
+        // 默认使用浅色模式，只有明确设置为 'dark' 时才使用深色
+        if (savedTheme === 'dark') {
           AppUtils.Theme.updateTheme(false, docBody, themeToggleButton);
+        } else {
+          // 默认浅色模式（包括 savedTheme === 'light' 或 null/undefined）
+          AppUtils.Theme.updateTheme(true, docBody, themeToggleButton);
         }
       } catch (e) {
         console.warn('无法从 localStorage 读取主题设置:', e);
-        AppUtils.Theme.updateTheme(false, docBody, themeToggleButton);
+        // 默认浅色模式
+        AppUtils.Theme.updateTheme(true, docBody, themeToggleButton);
       }
     }
   };

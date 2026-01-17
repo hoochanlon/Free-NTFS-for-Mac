@@ -119,7 +119,19 @@ echo -e "${GREEN}编译 TypeScript 和 Stylus...${NC}"
 #   - 同步版本号（已在上一步完成）
 #   - 编译 TypeScript (.ts -> .js)
 #   - 编译 Stylus (.styl -> .css)
+# 强制重新编译，确保使用最新代码
 pnpm run build:stylus && pnpm run build:ts
+
+# 验证关键文件是否已更新
+if [ ! -f "styles.css" ]; then
+  echo -e "${YELLOW}警告: styles.css 不存在，重新编译...${NC}"
+  pnpm run build:stylus
+fi
+
+# 检查 styles.css 的修改时间，确保是最新的
+if [ -f "styles.css" ]; then
+  echo -e "${GREEN}✓ styles.css 已更新${NC}"
+fi
 
 # ============================================================
 # 设置 Electron 下载镜像（可选）

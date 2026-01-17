@@ -5,6 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self';">
   <title>Nigate</title>
+  <script>
+    // 在 CSS 加载前立即设置主题和内联样式，避免残影
+    (function() {
+      try {
+        const savedTheme = localStorage.getItem('app-theme');
+        // 默认使用浅色模式，只有明确设置为 'dark' 时才使用深色
+        const isLight = savedTheme !== 'dark';
+
+        // 立即设置内联样式，确保在 CSS 加载前就有正确的背景色
+        const style = document.createElement('style');
+        style.textContent = isLight
+          ? 'body { background-color: #ffffff !important; color: #000000 !important; }'
+          : 'body { background-color: #1d1d1f !important; color: #ffffff !important; }';
+        document.head.appendChild(style);
+
+        // 设置主题类
+        function applyTheme() {
+          if (document.body) {
+            if (isLight) {
+              document.body.classList.add('light-theme');
+            } else {
+              document.body.classList.remove('light-theme');
+            }
+            // 移除内联样式，让 CSS 接管
+            setTimeout(() => {
+              if (style.parentNode) {
+                style.parentNode.removeChild(style);
+              }
+            }, 100);
+          }
+        }
+
+        if (document.body) {
+          applyTheme();
+        } else {
+          document.addEventListener('DOMContentLoaded', applyTheme, { once: true });
+          if (document.readyState !== 'loading') {
+            applyTheme();
+          }
+        }
+      } catch(e) {
+        console.warn('设置主题失败:', e);
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="../../styles.css?v=12">
   <script src="../../scripts/theme-init.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>

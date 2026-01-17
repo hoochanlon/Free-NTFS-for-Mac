@@ -36,11 +36,17 @@ export async function createMainWindow(): Promise<BrowserWindow> {
     },
     titleBarStyle: 'hidden',
     frame: false,
-    backgroundColor: '#1e1e1e',
+    backgroundColor: '#ffffff', // 默认浅色背景，减少深色残影
     show: false
   });
 
   const htmlPath = path.join(appPath, 'src', 'html', 'index.html');
+
+  // 在 DOM 准备好时立即更新背景色，避免残影
+  // 使用 dom-ready 事件，在 DOM 准备好但页面还未完全渲染时更新
+  mainWindow.webContents.once('dom-ready', () => {
+    updateWindowBackgroundColor(mainWindow!);
+  });
 
   mainWindow.loadFile(htmlPath).catch((error: Error) => {
     console.error('Failed to load HTML:', error);
@@ -55,6 +61,8 @@ export async function createMainWindow(): Promise<BrowserWindow> {
 
   mainWindow.once('ready-to-show', () => {
     if (mainWindow) {
+      // 确保背景色已更新（双重保险）
+      updateWindowBackgroundColor(mainWindow);
       // 首次创建窗口时总是显示
       // 只有在托盘模式下，用户关闭窗口后，再次通过 activate 事件创建时才隐藏
       mainWindow.show();
@@ -144,9 +152,10 @@ export function closeLogsWindow(): void {
   }
 }
 
-// 获取主题背景色
+// 获取主题背景色（同步方式，用于窗口创建时）
 function getThemeBackgroundColor(): string {
   // 默认返回深色背景，实际主题会在页面加载后通过JavaScript同步
+  // 为了减少残影，我们会在窗口创建后立即更新背景色
   return '#1e1e1e';
 }
 

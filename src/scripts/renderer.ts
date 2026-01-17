@@ -522,11 +522,13 @@
 
     // 事件监听
     checkDepsBtn.addEventListener('click', () => {
+      // 手动点击时强制刷新，忽略缓存
       AppModules.Dependencies.checkDependencies(
         depsList,
         loadingOverlay,
         statusDot,
-        statusText
+        statusText,
+        true // forceRefresh = true
       );
     });
 
