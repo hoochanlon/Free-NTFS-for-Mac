@@ -13,13 +13,14 @@
 
 ### Bug 报告者
 - [kevintao0417](https://github.com/kevintao0417) - 早期发现并报告盘符命名不规范（存在空格和非法字符）导致无法正常使用 nigate 的问题
+- [ltlly](https://github.com/ltlly) - 报告 macOS 14 及其以上版本增加多个磁盘挂载的问题，以及系统预览版显示信息格式变化导致脚本解析字符串错误的问题
 - Ahmed Zidan - 邮件反馈空格密码无法识别问题、反馈增加德语支持
 
 ### 测试贡献者
 - [拾光壁纸](https://gallery.timeline.ink/) - 提供U盘识别测试帮助
 
 ### 功能建议者
-- [ltlly](https://github.com/ltlly) - 报告 macOS 14 及其以上版本增加多个磁盘挂载的问题，以及系统预览版显示信息格式变化导致脚本解析字符串错误的问题
+
 - [lidiaoo](https://github.com/lidiaoo) - 报告 macOS 14 及其以上版本增加多个磁盘挂载的问题，以及系统预览版显示信息格式变化导致脚本解析字符串错误的问题
 - [1962247851](https://github.com/1962247851) - 参与讨论 shell 代码如何适配不同系统版本的处理逻辑
 
@@ -56,6 +57,8 @@
 - [Iconify](https://icon-sets.iconify.design/) - 提供丰富的图标集合
 - [Heroicons](https://heroicons.com/) - 精美的手工制作 SVG 图标
 - [Bilibili 用户 - 林想的Web工坊](https://space.bilibili.com/847346) - 提供夜间模式设计素材
+- [Font Compress](https://www.fontspider.vip/) - 在线字体压缩工具，用于压缩字体文件体积
+- [Flagpedia.asia](https://flagpedia.asia/download/icons) - 提供世界各国国旗图标免费下载
 
 ## 开发工具
 
