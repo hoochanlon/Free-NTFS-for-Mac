@@ -765,6 +765,12 @@ body.light-theme
       background var(--light-bg-tertiary)
       border-color var(--light-border)
 
+// 夜间模式下主界面刷新按钮图标优化（改为白色，提高可见性）
+body:not(.light-theme)
+  .devices-container
+    #refreshDevicesBtn .btn-icon
+      dark-mode-icon-white()
+
 // 夜间模式下托盘窗口按钮图标优化（改为白色，提高可见性）
 // 注意：tray-window 类是在 body 上，所以这里使用 body.tray-window:not(.light-theme)
 body.tray-window:not(.light-theme)
@@ -773,13 +779,13 @@ body.tray-window:not(.light-theme)
       .btn.btn-secondary
         .btn-icon
           // 将图标颜色改为白色，在深色背景下更清晰可见
-          filter brightness(0) invert(1)
+          dark-mode-icon-white()
           opacity 0.9
 
         &:hover .btn-icon
-          filter brightness(0) invert(1)
+          dark-mode-icon-white()
           opacity 1
 
         &.active .btn-icon
-          filter brightness(0) invert(1)
+          dark-mode-icon-white()
           opacity 1

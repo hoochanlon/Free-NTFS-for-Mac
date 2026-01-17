@@ -34,3 +34,7 @@ text-primary = dark-text-primary
 text-secondary = dark-text-secondary
 border = dark-border
 shadow = dark-shadow
+
+// 夜间模式图标变白的mixin（用于在夜间模式下将黑色图标转换为白色）
+dark-mode-icon-white()
+  filter brightness(0) invert(1)

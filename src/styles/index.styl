@@ -466,6 +466,11 @@ body.light-theme
     blockquote
       background var(--light-bg-tertiary)
 
+// 夜间模式下日志标签页图标优化（改为白色，提高可见性）
+body:not(.light-theme)
+  .tab[data-tab="logs"] .tab-icon
+    dark-mode-icon-white()
+
 // 设置界面样式
 .settings-content
   padding 0
