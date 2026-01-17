@@ -163,7 +163,48 @@
   "help": {
     "title": "指南手册",
     "loadError": "加载失败: {error}",
-    "unknownError": "未知错误"
+    "unknownError": "未知错误",
+    "icons": {
+      "title": "界面图标说明",
+      "intro": "应用主界面提供了多个功能图标，帮助您快速访问常用功能：",
+      "titleBar": {
+        "title": "标题栏图标",
+        "autoMount": {
+          "name": "自动读写图标",
+          "description": "启用后，新插入的 NTFS 设备会自动挂载为读写模式。图标激活时显示为蓝色。"
+        },
+        "trayMode": {
+          "name": "托盘模式图标",
+          "description": "启用后，关闭窗口时应用会最小化到系统托盘而不是退出。图标激活时显示为紫色。"
+        },
+        "preventSleep": {
+          "name": "防止休眠图标",
+          "description": "启用后，系统将禁止进入休眠状态，确保设备持续可用。图标激活时显示为咖啡色。"
+        },
+        "about": {
+          "name": "关于图标",
+          "description": "打开关于窗口，查看应用信息和项目链接。"
+        },
+        "quit": {
+          "name": "退出图标",
+          "description": "退出应用程序。"
+        }
+      },
+      "tabs": {
+        "title": "标签页图标",
+        "logs": {
+          "name": "日志图标",
+          "description": "切换到\"操作日志\"标签页，查看所有操作的记录。"
+        }
+      },
+      "devices": {
+        "title": "设备管理图标",
+        "refresh": {
+          "name": "刷新图标",
+          "description": "刷新设备列表，重新检测已连接的 NTFS 设备。"
+        }
+      }
+    }
   },
   "settings": {
     "title": "应用设置",

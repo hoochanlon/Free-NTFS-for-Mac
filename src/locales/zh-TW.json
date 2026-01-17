@@ -163,7 +163,48 @@
   "help": {
     "title": "指南手冊",
     "loadError": "載入失敗: {error}",
-    "unknownError": "未知錯誤"
+    "unknownError": "未知錯誤",
+    "icons": {
+      "title": "介面圖示說明",
+      "intro": "應用程式主介面提供了多個功能圖示，幫助您快速存取常用功能：",
+      "titleBar": {
+        "title": "標題列圖示",
+        "autoMount": {
+          "name": "自動讀寫圖示",
+          "description": "啟用後，新插入的 NTFS 裝置會自動掛載為讀寫模式。圖示啟用時顯示為藍色。"
+        },
+        "trayMode": {
+          "name": "托盤模式圖示",
+          "description": "啟用後，關閉視窗時應用程式會最小化到系統托盤而不是退出。圖示啟用時顯示為紫色。"
+        },
+        "preventSleep": {
+          "name": "防止休眠圖示",
+          "description": "啟用後，系統將禁止進入休眠狀態，確保裝置持續可用。圖示啟用時顯示為咖啡色。"
+        },
+        "about": {
+          "name": "關於圖示",
+          "description": "開啟關於視窗，查看應用程式資訊和專案連結。"
+        },
+        "quit": {
+          "name": "退出圖示",
+          "description": "退出應用程式。"
+        }
+      },
+      "tabs": {
+        "title": "標籤頁圖示",
+        "logs": {
+          "name": "日誌圖示",
+          "description": "切換到「操作日誌」標籤頁，查看所有操作的記錄。"
+        }
+      },
+      "devices": {
+        "title": "裝置管理圖示",
+        "refresh": {
+          "name": "重新整理圖示",
+          "description": "重新整理裝置列表，重新偵測已連接的 NTFS 裝置。"
+        }
+      }
+    }
   },
   "settings": {
     "title": "應用設定",

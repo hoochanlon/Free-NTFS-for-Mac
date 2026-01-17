@@ -163,7 +163,48 @@
   "help": {
     "title": "Anleitung",
     "loadError": "Laden fehlgeschlagen: {error}",
-    "unknownError": "Unbekannter Fehler"
+    "unknownError": "Unbekannter Fehler",
+    "icons": {
+      "title": "Benutzeroberflächen-Symbole",
+      "intro": "Die Hauptoberfläche der Anwendung bietet mehrere Funktionssymbole, die Ihnen helfen, schnell auf häufig verwendete Funktionen zuzugreifen:",
+      "titleBar": {
+        "title": "Titelleisten-Symbole",
+        "autoMount": {
+          "name": "Automatisches Lese-Schreib-Symbol",
+          "description": "Wenn aktiviert, werden neu eingefügte NTFS-Geräte automatisch im Lese-Schreib-Modus eingehängt. Das Symbol erscheint blau, wenn es aktiv ist."
+        },
+        "trayMode": {
+          "name": "Systemleisten-Modus-Symbol",
+          "description": "Wenn aktiviert, wird die Anwendung beim Schließen des Fensters in die Systemleiste minimiert, anstatt beendet zu werden. Das Symbol erscheint lila, wenn es aktiv ist."
+        },
+        "preventSleep": {
+          "name": "Ruhezustand verhindern-Symbol",
+          "description": "Wenn aktiviert, verhindert das System, dass es in den Ruhezustand wechselt, um sicherzustellen, dass Geräte kontinuierlich verfügbar bleiben. Das Symbol erscheint kaffeefarben, wenn es aktiv ist."
+        },
+        "about": {
+          "name": "Info-Symbol",
+          "description": "Öffnet das Info-Fenster, um Anwendungsinformationen und Projektlinks anzuzeigen."
+        },
+        "quit": {
+          "name": "Beenden-Symbol",
+          "description": "Beendet die Anwendung."
+        }
+      },
+      "tabs": {
+        "title": "Registerkarten-Symbole",
+        "logs": {
+          "name": "Protokoll-Symbol",
+          "description": "Wechselt zur Registerkarte \"Betriebsprotokolle\", um Aufzeichnungen aller Vorgänge anzuzeigen."
+        }
+      },
+      "devices": {
+        "title": "Geräteverwaltungs-Symbole",
+        "refresh": {
+          "name": "Aktualisieren-Symbol",
+          "description": "Aktualisiert die Geräteliste und erkennt angeschlossene NTFS-Geräte neu."
+        }
+      }
+    }
   },
   "settings": {
     "title": "Anwendungseinstellungen",

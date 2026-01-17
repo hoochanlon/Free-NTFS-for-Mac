@@ -60,6 +60,26 @@ brew install ntfs-3g-mac
 
 **Note**: The installation order is important. Please install in the order: 1 → 2 → 3 → 4.
 
+## Interface Icons Guide
+
+The application's main interface provides several functional icons to help you quickly access common features:
+
+### Title Bar Icons
+
+- **Auto Read-Write Icon** - When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode. The icon appears blue when active.
+- **Tray Mode Icon** - When enabled, closing the window will minimize the application to the system tray instead of quitting. The icon appears purple when active.
+- **Prevent Sleep Icon** - When enabled, the system will prevent entering sleep mode to ensure devices remain accessible. The icon appears coffee-colored when active.
+- **About Icon** - Opens the about window to view application information and project links.
+- **Quit Icon** - Quits the application.
+
+### Tab Icons
+
+- **Logs Icon** - Switches to the "Operation Logs" tab to view records of all operations.
+
+### Device Management Icons
+
+- **Refresh Icon** - Refreshes the device list and re-detects connected NTFS devices.
+
 ## Usage Steps
 
 ### Check System Dependencies

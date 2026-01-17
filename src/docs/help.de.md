@@ -60,6 +60,26 @@ brew install ntfs-3g-mac
 
 **Hinweis**: Die Installationsreihenfolge ist wichtig. Bitte installieren Sie in der Reihenfolge: 1 → 2 → 3 → 4.
 
+## Benutzeroberflächen-Symbole
+
+Die Hauptoberfläche der Anwendung bietet mehrere Funktionssymbole, die Ihnen helfen, schnell auf häufig verwendete Funktionen zuzugreifen:
+
+### Titelleisten-Symbole
+
+- **Automatisches Lese-Schreib-Symbol** - Wenn aktiviert, werden neu eingefügte NTFS-Geräte automatisch im Lese-Schreib-Modus eingehängt. Das Symbol erscheint blau, wenn es aktiv ist.
+- **Systemleisten-Modus-Symbol** - Wenn aktiviert, wird die Anwendung beim Schließen des Fensters in die Systemleiste minimiert, anstatt beendet zu werden. Das Symbol erscheint lila, wenn es aktiv ist.
+- **Ruhezustand verhindern-Symbol** - Wenn aktiviert, verhindert das System, dass es in den Ruhezustand wechselt, um sicherzustellen, dass Geräte kontinuierlich verfügbar bleiben. Das Symbol erscheint kaffeefarben, wenn es aktiv ist.
+- **Info-Symbol** - Öffnet das Info-Fenster, um Anwendungsinformationen und Projektlinks anzuzeigen.
+- **Beenden-Symbol** - Beendet die Anwendung.
+
+### Registerkarten-Symbole
+
+- **Protokoll-Symbol** - Wechselt zur Registerkarte "Betriebsprotokolle", um Aufzeichnungen aller Vorgänge anzuzeigen.
+
+### Geräteverwaltungs-Symbole
+
+- **Aktualisieren-Symbol** - Aktualisiert die Geräteliste und erkennt angeschlossene NTFS-Geräte neu.
+
 ## Verwendungsschritte
 
 ### Systemabhängigkeiten prüfen

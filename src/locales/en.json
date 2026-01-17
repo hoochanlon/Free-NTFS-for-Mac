@@ -163,7 +163,48 @@
   "help": {
     "title": "Guide",
     "loadError": "Load failed: {error}",
-    "unknownError": "Unknown error"
+    "unknownError": "Unknown error",
+    "icons": {
+      "title": "Interface Icons Guide",
+      "intro": "The application's main interface provides several functional icons to help you quickly access common features:",
+      "titleBar": {
+        "title": "Title Bar Icons",
+        "autoMount": {
+          "name": "Auto Read-Write Icon",
+          "description": "When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode. The icon appears blue when active."
+        },
+        "trayMode": {
+          "name": "Tray Mode Icon",
+          "description": "When enabled, closing the window will minimize the application to the system tray instead of quitting. The icon appears purple when active."
+        },
+        "preventSleep": {
+          "name": "Prevent Sleep Icon",
+          "description": "When enabled, the system will prevent entering sleep mode to ensure devices remain accessible. The icon appears coffee-colored when active."
+        },
+        "about": {
+          "name": "About Icon",
+          "description": "Opens the about window to view application information and project links."
+        },
+        "quit": {
+          "name": "Quit Icon",
+          "description": "Quits the application."
+        }
+      },
+      "tabs": {
+        "title": "Tab Icons",
+        "logs": {
+          "name": "Logs Icon",
+          "description": "Switches to the \"Operation Logs\" tab to view records of all operations."
+        }
+      },
+      "devices": {
+        "title": "Device Management Icons",
+        "refresh": {
+          "name": "Refresh Icon",
+          "description": "Refreshes the device list and re-detects connected NTFS devices."
+        }
+      }
+    }
   },
   "settings": {
     "title": "Application Settings",
