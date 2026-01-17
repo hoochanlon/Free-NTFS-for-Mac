@@ -335,8 +335,8 @@
         iconsRow.className = 'about-icons-row';
 
         const links = [
-          { href: 'https://github.com/hoochanlon/Free-NTFS-for-Mac', icon: '../imgs/svg/github.svg', title: t('about.projectLink') || '项目地址' },
-          { href: 'mailto:hoochanlon@outlook.com', icon: '../imgs/svg/email.svg', title: t('about.email') || '邮箱' }
+          { href: 'https://github.com/hoochanlon/Free-NTFS-for-Mac', icon: '../imgs/svg/social/github.svg', title: t('about.projectLink') || '项目地址' },
+          { href: 'mailto:hoochanlon@outlook.com', icon: '../imgs/svg/social/email.svg', title: t('about.email') || '邮箱' }
         ];
 
         links.forEach(linkData => {

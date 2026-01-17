@@ -366,7 +366,7 @@
         if (refreshDevicesBtn) {
           refreshDevicesBtn.disabled = true;
           const refreshingText = t('tray.refreshing') || '刷新中...';
-          refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">`;
+          refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/actions/refresh.svg" alt="" class="btn-icon">`;
           try {
             await refreshDevices(true);
           } catch (error) {
@@ -376,7 +376,7 @@
             if (refreshDevicesBtn) {
               refreshDevicesBtn.disabled = false;
               const refreshText = t('devices.refreshDevices') || '刷新';
-              refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">`;
+              refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/actions/refresh.svg" alt="" class="btn-icon">`;
             }
           }
         }

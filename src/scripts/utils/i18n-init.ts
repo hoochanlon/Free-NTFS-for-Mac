@@ -92,7 +92,7 @@
       // 确保只有图标（如果没有图标，添加图标）
       const icon = refreshDevicesBtn.querySelector('.btn-icon');
       if (!icon) {
-        refreshDevicesBtn.innerHTML = '<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">';
+        refreshDevicesBtn.innerHTML = '<img src="../imgs/svg/actions/refresh.svg" alt="" class="btn-icon">';
       }
     }
 
@@ -108,7 +108,7 @@
         // 托盘窗口使用简单的黑色退出图标（与其它图标风格一致）
         const icon = quitBtn.querySelector('.btn-icon');
         if (!icon) {
-          quitBtn.innerHTML = '<img src="../imgs/svg/exit.svg" alt="" class="btn-icon">';
+          quitBtn.innerHTML = '<img src="../imgs/svg/actions/exit.svg" alt="" class="btn-icon">';
         }
       }
     }

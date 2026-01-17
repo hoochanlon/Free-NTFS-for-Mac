@@ -310,7 +310,7 @@
         if (refreshDevicesBtn) {
           refreshDevicesBtn.disabled = true;
           const refreshingText = AppUtils?.I18n?.t('tray.refreshing') || '刷新中...';
-          refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">`;
+          refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/actions/refresh.svg" alt="" class="btn-icon">`;
         }
         try {
           // 强制刷新设备列表（跳过缓存）
@@ -324,7 +324,7 @@
           if (refreshDevicesBtn) {
             refreshDevicesBtn.disabled = false;
             const refreshText = AppUtils?.I18n?.t('devices.refreshDevices') || '刷新';
-            refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/refresh.svg" alt="" class="btn-icon">`;
+            refreshDevicesBtn.innerHTML = `<img src="../imgs/svg/actions/refresh.svg" alt="" class="btn-icon">`;
           }
         }
       });

@@ -147,7 +147,7 @@
                   if (projectMatch) {
                     links.push({
                       url: projectMatch[1],
-                      icon: '../imgs/svg/github.svg',
+                      icon: '../imgs/svg/social/github.svg',
                       alt: '项目地址'
                     });
                   }
@@ -157,7 +157,7 @@
                   if (emailMatch) {
                     links.push({
                       url: emailMatch[1],
-                      icon: '../imgs/svg/email.svg',
+                      icon: '../imgs/svg/social/email.svg',
                       alt: '邮箱'
                     });
                   }
