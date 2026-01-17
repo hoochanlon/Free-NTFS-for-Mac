@@ -73,7 +73,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 
 主界面
 
-![ ](src/imgs/example/2026-01-05-12.54.22.png)
+![ ](src/imgs/example/2026-01-17-18-50-59.png)
 
 托盘
 
@@ -264,7 +264,7 @@ Download and use from [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tag
 
 **Main Interface**
 
-![ ](src/imgs/example/2026-01-05-12.54.22.png)
+![ ](src/imgs/example/2026-01-17-18-50-59.png)
 
 **Tray**
 
@@ -455,7 +455,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 
 **メインインターフェース**
 
-![ ](src/imgs/example/2026-01-05-12.54.22.png)
+![ ](src/imgs/example/2026-01-17-18-50-59.png)
 
 **トレイ**
 
