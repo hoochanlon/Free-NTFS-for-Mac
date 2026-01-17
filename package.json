@@ -30,7 +30,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "electron": "^28.3.3",
+    "electron": "28.3.3",
     "electron-builder": "^24.9.1",
     "electron-reloader": "^1.2.3",
     "sharp": "^0.34.5",
