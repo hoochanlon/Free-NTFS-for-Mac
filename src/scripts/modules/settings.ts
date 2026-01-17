@@ -19,11 +19,10 @@
     async initSettings(): Promise<void> {
       const savePasswordCheckbox = document.getElementById('savePasswordCheckbox') as HTMLInputElement;
       const deletePasswordBtn = document.getElementById('deletePasswordBtn') as HTMLButtonElement;
-      const startupTabSelect = document.getElementById('startupTabSelect') as HTMLSelectElement;
-      const languageSelect = document.getElementById('languageSelect') as HTMLSelectElement;
+      const startupTabSelectCustom = document.getElementById('startupTabSelectCustom') as HTMLElement;
       const autoStartCheckbox = document.getElementById('autoStartCheckbox') as HTMLInputElement;
 
-      if (!savePasswordCheckbox || !deletePasswordBtn || !startupTabSelect) {
+      if (!savePasswordCheckbox || !deletePasswordBtn || !startupTabSelectCustom) {
         return;
       }
 
@@ -34,10 +33,24 @@
         // 加载设置
         const settings = await electronAPI.getSettings();
         savePasswordCheckbox.checked = settings.savePassword;
-        startupTabSelect.value = settings.startupTab;
-        if (languageSelect) {
-          // 如果没有设置或设置为空，默认使用跟随系统
-          languageSelect.value = settings.language || 'system';
+
+        // 初始化启动标签页自定义下拉菜单
+        if (startupTabSelectCustom) {
+          // 设置初始值
+          const initialValue = settings.startupTab || 'dependencies';
+          startupTabSelectCustom.setAttribute('data-value', initialValue);
+          this.initCustomSelect(startupTabSelectCustom);
+          // 初始化后立即更新显示，确保显示正确的选中值
+          this.updateCustomSelectDisplay(startupTabSelectCustom);
+        }
+
+        // 初始化语言选择自定义下拉菜单
+        const languageSelectCustom = document.getElementById('languageSelectCustom') as HTMLElement;
+        if (languageSelectCustom) {
+          const initialLanguage = settings.language || 'system';
+          languageSelectCustom.setAttribute('data-value', initialLanguage);
+          this.initLanguageSelect(languageSelectCustom);
+          this.updateLanguageSelectDisplay(languageSelectCustom);
         }
         if (autoStartCheckbox) {
           autoStartCheckbox.checked = settings.autoStart || false;
@@ -101,20 +114,23 @@
           }
         });
 
-        // 启动标签页选择变化
-        startupTabSelect.addEventListener('change', async () => {
-          try {
-            await electronAPI.saveSettings({ startupTab: startupTabSelect.value as any });
-          } catch (error) {
-            console.error('保存设置失败:', error);
-          }
-        });
-
-        // 语言选择变化
-        if (languageSelect) {
-          languageSelect.addEventListener('change', async () => {
+        // 启动标签页选择变化（通过自定义下拉菜单）
+        if (startupTabSelectCustom) {
+          startupTabSelectCustom.addEventListener('tabChanged', async (e: any) => {
             try {
-              const newLanguage = languageSelect.value as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'de' | 'system';
+              const newValue = e.detail.value;
+              await electronAPI.saveSettings({ startupTab: newValue as any });
+            } catch (error) {
+              console.error('保存设置失败:', error);
+            }
+          });
+        }
+
+        // 语言选择变化（通过自定义下拉菜单）
+        if (languageSelectCustom) {
+          languageSelectCustom.addEventListener('languageChanged', async (e: any) => {
+            try {
+              const newLanguage = e.detail.value as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'de' | 'system';
               await electronAPI.saveSettings({ language: newLanguage });
               // 切换语言
               if (AppUtils && AppUtils.I18n) {
@@ -270,6 +286,191 @@
       } catch (error) {
         console.error('加载设置失败:', error);
       }
+    },
+
+    // 初始化自定义下拉菜单
+    initCustomSelect(customSelect: HTMLElement): void {
+
+      // 点击触发器打开/关闭下拉菜单
+      const trigger = customSelect.querySelector('.custom-select-trigger') as HTMLElement;
+      if (trigger) {
+        trigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpen = customSelect.classList.contains('open');
+          if (isOpen) {
+            customSelect.classList.remove('open');
+          } else {
+            // 关闭其他打开的下拉菜单
+            document.querySelectorAll('.custom-select.open').forEach(el => {
+              if (el !== customSelect) {
+                el.classList.remove('open');
+              }
+            });
+            customSelect.classList.add('open');
+          }
+        });
+      }
+
+      // 点击选项
+      const options = customSelect.querySelectorAll('.custom-select-option');
+      options.forEach(option => {
+        option.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const value = option.getAttribute('data-value');
+          if (value) {
+            // 更新data-value属性
+            customSelect.setAttribute('data-value', value);
+            // 更新显示
+            this.updateCustomSelectDisplay(customSelect);
+            // 触发自定义事件
+            customSelect.dispatchEvent(new CustomEvent('tabChanged', {
+              detail: { value },
+              bubbles: true
+            }));
+            // 关闭下拉菜单
+            customSelect.classList.remove('open');
+          }
+        });
+      });
+
+      // 点击外部关闭下拉菜单
+      document.addEventListener('click', (e) => {
+        if (!customSelect.contains(e.target as Node)) {
+          customSelect.classList.remove('open');
+        }
+      });
+    },
+
+    // 更新自定义下拉菜单显示
+    updateCustomSelectDisplay(customSelect: HTMLElement): void {
+      const iconMap: Record<string, string> = {
+        'dependencies': '../imgs/svg/ui/module.svg',
+        'devices': '../imgs/svg/devices/flash-drive.svg',
+        'logs': '../imgs/svg/ui/log.svg',
+        'help': '../imgs/svg/ui/help.svg'
+      };
+
+      const textMap: Record<string, string> = {
+        'dependencies': AppUtils && AppUtils.I18n ? AppUtils.I18n.t('tabs.dependencies') : '系统依赖',
+        'devices': AppUtils && AppUtils.I18n ? AppUtils.I18n.t('tabs.devices') : 'NTFS 设备',
+        'logs': AppUtils && AppUtils.I18n ? AppUtils.I18n.t('tabs.logs') : '操作日志',
+        'help': AppUtils && AppUtils.I18n ? AppUtils.I18n.t('tabs.help') : '指南手册'
+      };
+
+      const value = customSelect.getAttribute('data-value') || 'dependencies';
+      const icon = customSelect.querySelector('.custom-select-icon') as HTMLImageElement;
+      const text = customSelect.querySelector('.custom-select-text') as HTMLElement;
+
+      if (icon && iconMap[value]) {
+        icon.src = iconMap[value];
+      }
+      if (text && textMap[value]) {
+        text.textContent = textMap[value];
+      }
+
+      // 更新选中状态
+      const options = customSelect.querySelectorAll('.custom-select-option');
+      options.forEach(option => {
+        if (option.getAttribute('data-value') === value) {
+          option.classList.add('selected');
+        } else {
+          option.classList.remove('selected');
+        }
+      });
+    },
+
+    // 初始化语言选择自定义下拉菜单
+    initLanguageSelect(customSelect: HTMLElement): void {
+      // 点击触发器打开/关闭下拉菜单
+      const trigger = customSelect.querySelector('.custom-select-trigger') as HTMLElement;
+      if (trigger) {
+        trigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpen = customSelect.classList.contains('open');
+          if (isOpen) {
+            customSelect.classList.remove('open');
+          } else {
+            // 关闭其他打开的下拉菜单
+            document.querySelectorAll('.custom-select.open').forEach(el => {
+              if (el !== customSelect) {
+                el.classList.remove('open');
+              }
+            });
+            customSelect.classList.add('open');
+          }
+        });
+      }
+
+      // 点击选项
+      const options = customSelect.querySelectorAll('.custom-select-option');
+      options.forEach(option => {
+        option.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const value = option.getAttribute('data-value');
+          if (value) {
+            // 更新data-value属性
+            customSelect.setAttribute('data-value', value);
+            // 更新显示
+            this.updateLanguageSelectDisplay(customSelect);
+            // 触发自定义事件
+            customSelect.dispatchEvent(new CustomEvent('languageChanged', {
+              detail: { value },
+              bubbles: true
+            }));
+            // 关闭下拉菜单
+            customSelect.classList.remove('open');
+          }
+        });
+      });
+
+      // 点击外部关闭下拉菜单
+      document.addEventListener('click', (e) => {
+        if (!customSelect.contains(e.target as Node)) {
+          customSelect.classList.remove('open');
+        }
+      });
+    },
+
+    // 更新语言选择显示
+    updateLanguageSelectDisplay(customSelect: HTMLElement): void {
+      const iconMap: Record<string, string> = {
+        'system': '../imgs/svg/flags/earth.svg',
+        'zh-CN': '../imgs/svg/flags/cn.svg',
+        'zh-TW': '../imgs/svg/flags/tw.svg',
+        'ja': '../imgs/svg/flags/jp.svg',
+        'en': '../imgs/svg/flags/us.svg',
+        'de': '../imgs/svg/flags/de.svg'
+      };
+
+      const textMap: Record<string, string> = {
+        'system': AppUtils && AppUtils.I18n ? AppUtils.I18n.t('settings.languages.system') : '跟随系统',
+        'zh-CN': AppUtils && AppUtils.I18n ? AppUtils.I18n.t('settings.languages.zh-CN') : '简中 (CN)',
+        'zh-TW': AppUtils && AppUtils.I18n ? AppUtils.I18n.t('settings.languages.zh-TW') : '繁中 (TW)',
+        'ja': AppUtils && AppUtils.I18n ? AppUtils.I18n.t('settings.languages.ja') : '日本語 (JP)',
+        'en': AppUtils && AppUtils.I18n ? AppUtils.I18n.t('settings.languages.en') : 'English (US)',
+        'de': AppUtils && AppUtils.I18n ? AppUtils.I18n.t('settings.languages.de') : 'Deutsch (DE)'
+      };
+
+      const value = customSelect.getAttribute('data-value') || 'system';
+      const icon = customSelect.querySelector('.custom-select-icon') as HTMLImageElement;
+      const text = customSelect.querySelector('.custom-select-text') as HTMLElement;
+
+      if (icon && iconMap[value]) {
+        icon.src = iconMap[value];
+      }
+      if (text && textMap[value]) {
+        text.textContent = textMap[value];
+      }
+
+      // 更新选中状态
+      const options = customSelect.querySelectorAll('.custom-select-option');
+      options.forEach(option => {
+        if (option.getAttribute('data-value') === value) {
+          option.classList.add('selected');
+        } else {
+          option.classList.remove('selected');
+        }
+      });
     }
   };
 

@@ -630,6 +630,134 @@ body:not(.light-theme)
   &:hover
     border-color var(--accent)
 
+  // 如果select被隐藏（用于自定义下拉菜单），完全隐藏它
+  &[style*="display: none"],
+  &[style*="opacity: 0"]
+    display none !important
+    position absolute !important
+    opacity 0 !important
+    pointer-events none !important
+    width 0 !important
+    height 0 !important
+    overflow hidden !important
+    visibility hidden !important
+
+// 自定义下拉菜单（带图标）
+.custom-select-wrapper
+  position relative
+  min-width 140px
+  max-width 240px
+
+.custom-select
+  position relative
+  width 100%
+
+.custom-select-trigger
+  display flex
+  align-items center
+  gap 8px
+  padding 6px 10px
+  border 1px solid var(--border)
+  border-radius 6px
+  background var(--bg-primary)
+  color var(--text-primary)
+  font-size 13px
+  cursor pointer
+  transition all 0.2s ease
+  user-select none
+
+  &:hover
+    border-color var(--accent)
+
+  .custom-select-icon
+    width 16px
+    height 16px
+    flex-shrink 0
+    object-fit contain
+
+    // 国旗图标使用contain保持比例
+    &[src*="flags/"]
+      object-fit contain
+
+  .custom-select-text
+    flex 1
+    min-width 0
+
+  .custom-select-arrow
+    width 12px
+    height 12px
+    flex-shrink 0
+    color var(--text-secondary)
+    transition transform 0.2s ease
+
+.custom-select.open .custom-select-trigger
+  border-color var(--accent)
+
+  .custom-select-arrow
+    transform rotate(180deg)
+
+.custom-select-options
+  position absolute
+  top calc(100% + 4px)
+  left 0
+  right 0
+  background var(--bg-secondary)
+  border 1px solid var(--border)
+  border-radius 6px
+  box-shadow 0 4px 12px rgba(0, 0, 0, 0.15)
+  z-index 1000
+  max-height 200px
+  overflow-y auto
+  display none
+
+.custom-select.open .custom-select-options
+  display block
+
+.custom-select-option
+  display flex
+  align-items center
+  gap 8px
+  padding 8px 10px
+  cursor pointer
+  transition background-color 0.15s ease
+  font-size 13px
+  color var(--text-primary)
+  user-select none
+
+  &:hover
+    background var(--bg-tertiary)
+
+  &.selected
+    background var(--bg-tertiary)
+    color var(--accent)
+
+  .custom-select-option-icon
+    width 16px
+    height 16px
+    flex-shrink 0
+    object-fit contain
+    pointer-events none
+
+    // 国旗图标使用contain保持比例
+    &[src*="flags/"]
+      object-fit contain
+
+  span
+    pointer-events none
+
+// 夜间模式下图标变白
+body:not(.light-theme)
+  .custom-select-icon,
+  .custom-select-option-icon
+    dark-mode-icon-white()
+
+  // 但帮助图标和国旗图标不需要变白（保持原色）
+  .custom-select-icon[src*="help.svg"],
+  .custom-select-option-icon[src*="help.svg"],
+  .custom-select-icon[src*="flags/"],
+  .custom-select-option-icon[src*="flags/"]
+    filter none
+
 .setting-size-control
   display flex
   gap 16px

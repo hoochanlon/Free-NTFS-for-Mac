@@ -162,6 +162,7 @@
   },
   "help": {
     "title": "Anleitung",
+    "loading": "Laden...",
     "loadError": "Laden fehlgeschlagen: {error}",
     "unknownError": "Unbekannter Fehler",
     "icons": {
@@ -232,11 +233,11 @@
     "resetToDefault": "Auf Standard zurücksetzen",
     "languages": {
       "system": "System folgen",
-      "zh-CN": "简体中文",
-      "zh-TW": "繁體中文",
-      "ja": "日本語",
-      "en": "English",
-      "de": "Deutsch"
+      "zh-CN": "简中 (CN)",
+      "zh-TW": "繁中 (TW)",
+      "ja": "日本語 (JP)",
+      "en": "English (US)",
+      "de": "Deutsch (DE)"
     },
     "trayMode": "Tray-Modus",
     "trayModeDesc": "Wenn aktiviert, wird beim Schließen des Fensters die App nicht beendet, sondern in die Systemleiste minimiert. Sie können NTFS-Geräte schnell über das Tray-Symbol verwalten.",
@@ -266,6 +267,7 @@
     "tooltip": "Nigate - NTFS-Geräteverwaltung\nKlicken Sie, um die Geräteliste anzuzeigen"
   },
   "messages": {
+    "processing": "Verarbeitung...",
     "mounting": "Wird eingehängt {name}...",
     "mountSuccess": "Einhängen erfolgreich",
     "mountError": "Einhängen fehlgeschlagen",
@@ -315,6 +317,9 @@
     "devicesDetectedAllReadWrite": "{count} NTFS-Geräte erkannt (alle Lese-/Schreibzugriff)",
     "refreshFailed": "Aktualisierung der Geräteliste fehlgeschlagen: {error}",
     "unknownError": "Unbekannter Fehler"
+  },
+  "theme": {
+    "toggle": "Zu hellem Thema wechseln"
   },
   "about": {
     "title": "Über",

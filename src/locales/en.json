@@ -162,6 +162,7 @@
   },
   "help": {
     "title": "Guide",
+    "loading": "Loading...",
     "loadError": "Load failed: {error}",
     "unknownError": "Unknown error",
     "icons": {
@@ -232,11 +233,11 @@
     "resetToDefault": "Reset to Default",
     "languages": {
       "system": "Follow System",
-      "zh-CN": "简体中文",
-      "zh-TW": "繁體中文",
-      "ja": "日本語",
-      "en": "English",
-      "de": "Deutsch"
+      "zh-CN": "简中 (CN)",
+      "zh-TW": "繁中 (TW)",
+      "ja": "日本語 (JP)",
+      "en": "English (US)",
+      "de": "Deutsch (DE)"
     },
     "trayMode": "Tray Mode",
     "trayModeDesc": "When enabled, closing the window will minimize to the system tray instead of quitting the app. You can quickly manage NTFS devices through the tray icon.",
@@ -266,6 +267,7 @@
     "tooltip": "Nigate - NTFS Device Management\nClick to display device list"
   },
   "messages": {
+    "processing": "Processing...",
     "mounting": "Mounting {name}...",
     "mountSuccess": "Mount successful",
     "mountError": "Mount failed",
@@ -315,6 +317,9 @@
     "devicesDetectedAllReadWrite": "Detected {count} NTFS devices (all read-write)",
     "refreshFailed": "Failed to refresh device list: {error}",
     "unknownError": "Unknown error"
+  },
+  "theme": {
+    "toggle": "Switch to light theme"
   },
   "about": {
     "title": "About",

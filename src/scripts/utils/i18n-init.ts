@@ -99,7 +99,7 @@
     const quitBtn = document.getElementById('quitBtn');
     if (quitBtn) {
       // 区分主界面和托盘窗口：
-      // - 主界面：使用 HTML 中自带的 exit-red.svg + btn-about-icon，不修改 title 和内容
+      // - 主界面：使用 HTML 中自带的 exit-red.svg + btn-about-icon，添加 title 提示
       // - 托盘窗口：使用统一的 btn-icon 样式和退出提示文案
       const isTrayWindow = document.body && document.body.classList.contains('tray-window');
       if (isTrayWindow) {
@@ -110,6 +110,9 @@
         if (!icon) {
           quitBtn.innerHTML = '<img src="../imgs/svg/actions/exit.svg" alt="" class="btn-icon">';
         }
+      } else {
+        // 主界面：确保 title 属性已通过 data-i18n-title 处理
+        // title 属性会在上面的 data-i18n-title 处理逻辑中自动更新
       }
     }
 
@@ -161,25 +164,37 @@
     if (startupTabLabel) {
       startupTabLabel.textContent = t('settings.startupTab');
     }
-    const startupTabDesc = document.querySelector('#startupTabSelect')?.closest('.setting-item')?.querySelector('.setting-description');
+    const startupTabDesc = document.querySelector('label[for="startupTabSelect"]')?.closest('.setting-item')?.querySelector('.setting-description');
     if (startupTabDesc) {
       startupTabDesc.textContent = t('settings.startupTabDesc');
     }
     // 更新启动标签页下拉选项
-    const startupTabSelect = document.getElementById('startupTabSelect') as HTMLSelectElement;
-    if (startupTabSelect) {
-      Array.from(startupTabSelect.options).forEach(option => {
-        const tabKey = option.value;
-        if (tabKey === 'dependencies') {
-          option.textContent = t('tabs.dependencies');
-        } else if (tabKey === 'devices') {
-          option.textContent = t('tabs.devices');
-        } else if (tabKey === 'logs') {
-          option.textContent = t('tabs.logs');
-        } else if (tabKey === 'help') {
-          option.textContent = t('tabs.help');
+    // 更新自定义下拉菜单的文本和选项
+    const startupTabSelectCustom = document.getElementById('startupTabSelectCustom');
+    if (startupTabSelectCustom) {
+      // 更新选项文本
+      const options = startupTabSelectCustom.querySelectorAll('.custom-select-option');
+      options.forEach(option => {
+        const value = option.getAttribute('data-value');
+        const span = option.querySelector('span');
+        if (span && value) {
+          if (value === 'dependencies') {
+            span.textContent = t('tabs.dependencies');
+          } else if (value === 'devices') {
+            span.textContent = t('tabs.devices');
+          } else if (value === 'logs') {
+            span.textContent = t('tabs.logs');
+          } else if (value === 'help') {
+            span.textContent = t('tabs.help');
+          }
         }
       });
+
+      // 更新当前显示的文本
+      const AppModules = (window as any).AppModules;
+      if (AppModules && AppModules.Settings) {
+        AppModules.Settings.updateCustomSelectDisplay(startupTabSelectCustom);
+      }
     }
 
     // 启用操作日志复选框（在操作日志标签页）
@@ -206,7 +221,7 @@
     if (languageLabel) {
       languageLabel.textContent = t('settings.language');
     }
-    const languageDesc = document.querySelector('#languageSelect')?.closest('.setting-item')?.querySelector('.setting-description');
+    const languageDesc = document.querySelector('label[for="languageSelect"]')?.closest('.setting-item')?.querySelector('.setting-description');
     if (languageDesc) {
       languageDesc.textContent = t('settings.languageDesc');
     }
@@ -238,9 +253,9 @@
     if (resetSizeBtn) {
       resetSizeBtn.textContent = t('settings.resetToDefault');
     }
-    // 更新语言选择器的选项文本
-    const languageSelect = document.getElementById('languageSelect') as HTMLSelectElement;
-    if (languageSelect) {
+    // 更新语言选择器的选项文本（自定义下拉菜单）
+    const languageSelectCustom = document.getElementById('languageSelectCustom');
+    if (languageSelectCustom) {
       const langMap: Record<string, string> = {
         'system': t('settings.languages.system'),
         'zh-CN': t('settings.languages.zh-CN'),
@@ -249,11 +264,22 @@
         'en': t('settings.languages.en'),
         'de': t('settings.languages.de')
       };
-      Array.from(languageSelect.options).forEach(option => {
-        if (langMap[option.value]) {
-          option.textContent = langMap[option.value];
+
+      // 更新选项文本
+      const options = languageSelectCustom.querySelectorAll('.custom-select-option');
+      options.forEach(option => {
+        const value = option.getAttribute('data-value');
+        const span = option.querySelector('span');
+        if (span && value && langMap[value]) {
+          span.textContent = langMap[value];
         }
       });
+
+      // 更新当前显示的文本
+      const AppModules = (window as any).AppModules;
+      if (AppModules && AppModules.Settings) {
+        AppModules.Settings.updateLanguageSelectDisplay(languageSelectCustom);
+      }
     }
 
     // 加载遮罩
@@ -269,8 +295,8 @@
       if (key) {
         const translatedText = t(key);
         if (translatedText && translatedText !== key) {
-          // 如果是 span 或其他文本元素，直接更新文本
-          if (element.tagName === 'SPAN' || element.tagName === 'P' || element.tagName === 'DIV') {
+          // 如果是 span、label、p 或其他文本元素，直接更新文本
+          if (element.tagName === 'SPAN' || element.tagName === 'LABEL' || element.tagName === 'P' || element.tagName === 'DIV') {
             element.textContent = translatedText;
           } else if (element.tagName === 'BUTTON') {
             // 对于按钮，保留图标，只更新文本span
@@ -318,6 +344,30 @@
         const translatedText = t(key);
         if (translatedText && translatedText !== key) {
           element.setAttribute('title', translatedText);
+        }
+      }
+    });
+
+    // 处理所有带有 data-i18n-alt 属性的元素（用于 alt 属性）
+    const i18nAltElements = document.querySelectorAll('[data-i18n-alt]');
+    i18nAltElements.forEach((element) => {
+      const key = element.getAttribute('data-i18n-alt');
+      if (key) {
+        const translatedText = t(key);
+        if (translatedText && translatedText !== key) {
+          element.setAttribute('alt', translatedText);
+        }
+      }
+    });
+
+    // 处理所有带有 data-i18n-aria-label 属性的元素（用于 aria-label 属性）
+    const i18nAriaLabelElements = document.querySelectorAll('[data-i18n-aria-label]');
+    i18nAriaLabelElements.forEach((element) => {
+      const key = element.getAttribute('data-i18n-aria-label');
+      if (key) {
+        const translatedText = t(key);
+        if (translatedText && translatedText !== key) {
+          element.setAttribute('aria-label', translatedText);
         }
       }
     });

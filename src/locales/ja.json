@@ -162,6 +162,7 @@
   },
   "help": {
     "title": "ガイド",
+    "loading": "読み込み中...",
     "loadError": "読み込み失敗: {error}",
     "unknownError": "不明なエラー",
     "icons": {
@@ -232,11 +233,11 @@
     "resetToDefault": "デフォルトにリセット",
     "languages": {
       "system": "システムに従う",
-      "zh-CN": "简体中文",
-      "zh-TW": "繁體中文",
-      "ja": "日本語",
-      "en": "English",
-      "de": "Deutsch"
+      "zh-CN": "简中 (CN)",
+      "zh-TW": "繁中 (TW)",
+      "ja": "日本語 (JP)",
+      "en": "English (US)",
+      "de": "Deutsch (DE)"
     },
     "trayMode": "トレイモード",
     "trayModeDesc": "有効にすると、ウィンドウを閉じたときにアプリが終了せず、システムトレイに最小化されます。トレイアイコンから NTFS デバイスをすばやく管理できます。",
@@ -266,6 +267,7 @@
     "tooltip": "Nigate - NTFS デバイス管理\nクリックしてデバイスリストを表示"
   },
   "messages": {
+    "processing": "処理中...",
     "mounting": "{name} をマウント中...",
     "mountSuccess": "マウント成功",
     "mountError": "マウント失敗",
@@ -315,6 +317,9 @@
     "devicesDetectedAllReadWrite": "{count} 個の NTFS デバイスを検出（すべて読み書き可能）",
     "refreshFailed": "デバイスリストの更新に失敗しました: {error}",
     "unknownError": "不明なエラー"
+  },
+  "theme": {
+    "toggle": "ライトテーマに切り替え"
   },
   "about": {
     "title": "について",

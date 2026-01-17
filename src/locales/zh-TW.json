@@ -162,6 +162,7 @@
   },
   "help": {
     "title": "指南手冊",
+    "loading": "載入中...",
     "loadError": "載入失敗: {error}",
     "unknownError": "未知錯誤",
     "icons": {
@@ -232,11 +233,11 @@
     "resetToDefault": "重置為預設值",
     "languages": {
       "system": "跟隨系統",
-      "zh-CN": "簡體中文",
-      "zh-TW": "繁體中文",
-      "ja": "日本語",
-      "en": "English",
-      "de": "Deutsch"
+      "zh-CN": "簡中 (CN)",
+      "zh-TW": "繁中 (TW)",
+      "ja": "日本語 (JP)",
+      "en": "English (US)",
+      "de": "Deutsch (DE)"
     },
     "trayMode": "托盤模式",
     "trayModeDesc": "啟用後，關閉視窗時不會退出應用，而是最小化到系統托盤。可以通過托盤圖標快速管理 NTFS 設備。",
@@ -266,6 +267,7 @@
     "tooltip": "Nigate - NTFS 設備管理\n點擊顯示設備列表"
   },
   "messages": {
+    "processing": "處理中...",
     "mounting": "正在掛載 {name}...",
     "mountSuccess": "掛載成功",
     "mountError": "掛載失敗",
@@ -315,6 +317,9 @@
     "devicesDetectedAllReadWrite": "檢測到 {count} 個 NTFS 設備（全部可讀寫）",
     "refreshFailed": "重新整理設備列表失敗: {error}",
     "unknownError": "未知錯誤"
+  },
+  "theme": {
+    "toggle": "切換到淺色主題"
   },
   "about": {
     "title": "關於",

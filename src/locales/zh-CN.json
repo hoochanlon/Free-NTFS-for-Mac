@@ -162,6 +162,7 @@
   },
   "help": {
     "title": "指南手册",
+    "loading": "加载中...",
     "loadError": "加载失败: {error}",
     "unknownError": "未知错误",
     "icons": {
@@ -232,11 +233,11 @@
     "resetToDefault": "重置为默认值",
     "languages": {
       "system": "跟随系统",
-      "zh-CN": "简体中文",
-      "zh-TW": "繁體中文",
-      "ja": "日本語",
-      "en": "English",
-      "de": "Deutsch"
+      "zh-CN": "简中 (CN)",
+      "zh-TW": "繁中 (TW)",
+      "ja": "日本語 (JP)",
+      "en": "English (US)",
+      "de": "Deutsch (DE)"
     },
     "trayMode": "托盘模式",
     "trayModeDesc": "启用后，关闭窗口时不会退出应用，而是最小化到系统托盘。可以通过托盘图标快速管理 NTFS 设备。",
@@ -266,6 +267,7 @@
     "tooltip": "Nigate - NTFS 设备管理\n点击显示设备列表"
   },
   "messages": {
+    "processing": "处理中...",
     "mounting": "正在挂载 {name}...",
     "mountSuccess": "挂载成功",
     "mountError": "挂载失败",
@@ -315,6 +317,9 @@
     "devicesDetectedAllReadWrite": "检测到 {count} 个 NTFS 设备（全部可读写）",
     "refreshFailed": "刷新设备列表失败: {error}",
     "unknownError": "未知错误"
+  },
+  "theme": {
+    "toggle": "切换到浅色主题"
   },
   "about": {
     "title": "关于",

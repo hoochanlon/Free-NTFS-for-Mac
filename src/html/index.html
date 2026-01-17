@@ -17,22 +17,22 @@
       <div class="titlebar-content">
         <h1 class="app-title">Nigate（Free NTFS for Mac）</h1>
         <div class="titlebar-right">
-          <button class="btn-about" id="autoMountTitlebarBtn" title="自动读写">
-            <img src="../imgs/svg/devices/flash-auto.svg" alt="自动读写" class="btn-about-icon">
+          <button class="btn-about" id="autoMountTitlebarBtn" data-i18n-title="devices.autoMount" title="自动读写">
+            <img src="../imgs/svg/devices/flash-auto.svg" alt="自动读写" class="btn-about-icon" data-i18n-alt="devices.autoMount">
           </button>
-          <button class="btn-about" id="trayModeTitlebarBtn" title="托盘模式">
-            <img src="../imgs/svg/devices/tray.svg" alt="托盘模式" class="btn-about-icon">
+          <button class="btn-about" id="trayModeTitlebarBtn" data-i18n-title="settings.trayMode" title="托盘模式">
+            <img src="../imgs/svg/devices/tray.svg" alt="托盘模式" class="btn-about-icon" data-i18n-alt="settings.trayMode">
           </button>
-          <button class="btn-about" id="caffeinateBtn">
+          <button class="btn-about" id="caffeinateBtn" data-i18n-title="tray.preventSleep">
             <img src="../imgs/svg/system/caffe.svg" alt="" class="btn-about-icon" data-i18n-alt="tray.preventSleep">
           </button>
-          <button class="btn-about" id="aboutBtn">
-            <img src="../imgs/svg/ui/info.svg" alt="关于" class="btn-about-icon">
+          <button class="btn-about" id="aboutBtn" data-i18n-title="app.about">
+            <img src="../imgs/svg/ui/info.svg" alt="关于" class="btn-about-icon" data-i18n-alt="app.about">
           </button>
-          <button class="btn-about" id="quitBtn">
-            <img src="../imgs/svg/actions/exit-red.svg" alt="" class="btn-about-icon">
+          <button class="btn-about" id="quitBtn" data-i18n-title="menu.quit" title="退出">
+            <img src="../imgs/svg/actions/exit-red.svg" alt="" class="btn-about-icon" data-i18n-alt="menu.quit">
           </button>
-          <button class="theme-toggle" id="theme-toggle-btn" role="switch" aria-checked="false" aria-label="切换到浅色主题">
+          <button class="theme-toggle" id="theme-toggle-btn" role="switch" aria-checked="false" aria-label="切换到浅色主题" data-i18n-aria-label="theme.toggle">
             <div class="theme-toggle__container">
               <div class="theme-toggle__clouds"></div>
               <div class="theme-toggle__stars">
@@ -60,24 +60,24 @@
     <!-- 标签页 -->
     <div class="tabs-container">
       <button class="tab active" data-tab="dependencies">
-        <img src="../imgs/svg/ui/module.svg" alt="系统依赖" class="tab-icon">
-        <span>系统依赖</span>
+        <img src="../imgs/svg/ui/module.svg" alt="系统依赖" class="tab-icon" data-i18n-alt="tabs.dependencies">
+        <span data-i18n="tabs.dependencies">系统依赖</span>
       </button>
       <button class="tab" data-tab="devices">
-        <img src="../imgs/svg/devices/flash-drive.svg" alt="NTFS 设备" class="tab-icon">
-        <span>NTFS 设备</span>
+        <img src="../imgs/svg/devices/flash-drive.svg" alt="NTFS 设备" class="tab-icon" data-i18n-alt="tabs.devices">
+        <span data-i18n="tabs.devices">NTFS 设备</span>
       </button>
       <button class="tab" data-tab="logs">
-        <img src="../imgs/svg/ui/log.svg" alt="操作日志" class="tab-icon">
-        <span>操作日志</span>
+        <img src="../imgs/svg/ui/log.svg" alt="操作日志" class="tab-icon" data-i18n-alt="tabs.logs">
+        <span data-i18n="tabs.logs">操作日志</span>
       </button>
       <button class="tab" data-tab="help">
-        <img src="../imgs/svg/ui/help.svg" alt="指南手册" class="tab-icon">
-        <span>指南手册</span>
+        <img src="../imgs/svg/ui/help.svg" alt="指南手册" class="tab-icon" data-i18n-alt="tabs.help">
+        <span data-i18n="tabs.help">指南手册</span>
       </button>
       <button class="tab" data-tab="settings">
-        <img src="../imgs/svg/ui/setting.svg" alt="设置" class="tab-icon">
-        <span>设置</span>
+        <img src="../imgs/svg/ui/setting.svg" alt="设置" class="tab-icon" data-i18n-alt="tabs.settings">
+        <span data-i18n="tabs.settings">设置</span>
       </button>
     </div>
 
@@ -108,7 +108,7 @@
               <div class="header-actions-row">
                 <label class="auto-mount-checkbox">
                   <input type="checkbox" id="autoMountCheckbox">
-                  <span>自动读写</span>
+                  <span data-i18n="devices.autoMount">自动读写</span>
                 </label>
                 <label class="auto-mount-checkbox">
                   <input type="checkbox" id="trayModeCheckbox">
@@ -123,18 +123,18 @@
                 <button class="btn btn-secondary" id="refreshDevicesBtn">
                   <img src="../imgs/svg/actions/refresh.svg" alt="" class="btn-icon">
                 </button>
-                <button class="btn btn-primary" id="mountAllBtn">全读写</button>
-                <button class="btn btn-warning" id="restoreAllReadOnlyBtn">全只读</button>
-                <button class="btn btn-info" id="unmountAllBtn">全卸载</button>
-                <button class="btn btn-danger" id="ejectAllBtn">全推出</button>
+                <button class="btn btn-primary" id="mountAllBtn" data-i18n="devices.mountAll">全读写</button>
+                <button class="btn btn-warning" id="restoreAllReadOnlyBtn" data-i18n="devices.restoreAllReadOnly">全只读</button>
+                <button class="btn btn-info" id="unmountAllBtn" data-i18n="devices.unmountAll">全卸载</button>
+                <button class="btn btn-danger" id="ejectAllBtn" data-i18n="devices.ejectAll">全推出</button>
               </div>
             </div>
           </div>
           <div class="devices-list" id="devicesList">
             <div class="empty-state">
               <div class="empty-icon"></div>
-              <p>未检测到 NTFS 设备</p>
-              <p class="empty-hint">请插入 NTFS 格式的移动存储设备</p>
+              <p data-i18n="devices.emptyState">未检测到 NTFS 设备</p>
+              <p class="empty-hint" data-i18n="devices.emptyHint">请插入 NTFS 格式的移动存储设备</p>
             </div>
           </div>
         </div>
@@ -148,14 +148,14 @@
             <div class="header-actions">
               <label class="enable-logs-checkbox">
                 <input type="checkbox" id="enableLogsCheckbox">
-                <span>启用操作日志</span>
+                <span data-i18n="logs.enable">启用操作日志</span>
               </label>
-              <button class="btn btn-secondary" id="exportLogBtn">导出</button>
-              <button class="btn btn-danger" id="clearLogBtn">清空</button>
+              <button class="btn btn-secondary" id="exportLogBtn" data-i18n="logs.export">导出</button>
+              <button class="btn btn-danger" id="clearLogBtn" data-i18n="logs.clear">清空</button>
             </div>
           </div>
           <div class="log-container" id="logContainer">
-            <div class="log-empty">暂无日志</div>
+            <div class="log-empty" data-i18n="logs.empty">暂无日志</div>
           </div>
         </div>
       </div>
@@ -163,7 +163,7 @@
       <!-- 指南手册标签页 -->
       <div class="tab-content" id="helpTab">
         <div class="help-content">
-          <p>加载中...</p>
+          <p data-i18n="help.loading">加载中...</p>
         </div>
       </div>
 
@@ -176,9 +176,9 @@
           <div class="settings-content" id="settingsContent">
             <div class="setting-item">
               <div class="setting-label">
-                <label for="savePasswordCheckbox">保存管理员密码</label>
-                <p class="setting-description">启用后，应用将使用 macOS Keychain 安全保存您的管理员密码，以便自动输入</p>
-                <button class="btn btn-text btn-delete-password" id="deletePasswordBtn" style="display: none;">删除保存的密码</button>
+                <label for="savePasswordCheckbox" data-i18n="settings.savePassword">保存管理员密码</label>
+                <p class="setting-description" data-i18n="settings.savePasswordDesc">启用后，应用将使用 macOS Keychain 安全保存您的管理员密码，以便自动输入</p>
+                <button class="btn btn-text btn-delete-password" id="deletePasswordBtn" style="display: none;" data-i18n="settings.deletePassword">删除保存的密码</button>
               </div>
               <div class="setting-control">
                 <input type="checkbox" id="savePasswordCheckbox" class="setting-checkbox">
@@ -186,32 +186,84 @@
             </div>
             <div class="setting-item">
               <div class="setting-label">
-                <label for="startupTabSelect">启动时打开的标签页</label>
-                <p class="setting-description">选择应用启动时默认显示的标签页</p>
+                <label for="startupTabSelect" data-i18n="settings.startupTab">启动时打开的标签页</label>
+                <p class="setting-description" data-i18n="settings.startupTabDesc">选择应用启动时默认显示的标签页</p>
               </div>
               <div class="setting-control">
-                <select id="startupTabSelect" class="setting-select">
-                  <option value="dependencies">系统依赖</option>
-                  <option value="devices">NTFS 设备</option>
-                  <option value="logs">操作日志</option>
-                  <option value="help">指南手册</option>
-                </select>
+                <div class="custom-select-wrapper">
+                  <div class="custom-select" id="startupTabSelectCustom" data-value="dependencies">
+                    <div class="custom-select-trigger">
+                      <img class="custom-select-icon" src="../imgs/svg/ui/module.svg" alt="">
+                      <span class="custom-select-text">系统依赖</span>
+                      <svg class="custom-select-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <div class="custom-select-options">
+                      <div class="custom-select-option" data-value="dependencies">
+                        <img class="custom-select-option-icon" src="../imgs/svg/ui/module.svg" alt="">
+                        <span>系统依赖</span>
+                      </div>
+                      <div class="custom-select-option" data-value="devices">
+                        <img class="custom-select-option-icon" src="../imgs/svg/devices/flash-drive.svg" alt="">
+                        <span>NTFS 设备</span>
+                      </div>
+                      <div class="custom-select-option" data-value="logs">
+                        <img class="custom-select-option-icon" src="../imgs/svg/ui/log.svg" alt="">
+                        <span>操作日志</span>
+                      </div>
+                      <div class="custom-select-option" data-value="help">
+                        <img class="custom-select-option-icon" src="../imgs/svg/ui/help.svg" alt="">
+                        <span>指南手册</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="setting-item">
               <div class="setting-label">
-                <label for="languageSelect">语言</label>
-                <p class="setting-description">选择应用界面语言</p>
+                <label for="languageSelect" data-i18n="settings.language">语言</label>
+                <p class="setting-description" data-i18n="settings.languageDesc">选择应用界面语言</p>
               </div>
               <div class="setting-control">
-                <select id="languageSelect" class="setting-select">
-                  <option value="system">跟随系统</option>
-                  <option value="zh-CN">简体中文</option>
-                  <option value="zh-TW">繁體中文</option>
-                  <option value="ja">日本語</option>
-                  <option value="en">English</option>
-                  <option value="de">Deutsch</option>
-                </select>
+                <div class="custom-select-wrapper">
+                  <div class="custom-select" id="languageSelectCustom" data-value="system">
+                    <div class="custom-select-trigger">
+                      <img class="custom-select-icon" src="../imgs/svg/flags/earth.svg" alt="">
+                      <span class="custom-select-text">跟随系统</span>
+                      <svg class="custom-select-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <div class="custom-select-options">
+                      <div class="custom-select-option" data-value="system">
+                        <img class="custom-select-option-icon" src="../imgs/svg/flags/earth.svg" alt="">
+                        <span>跟随系统</span>
+                      </div>
+                      <div class="custom-select-option" data-value="zh-CN">
+                        <img class="custom-select-option-icon" src="../imgs/svg/flags/cn.svg" alt="">
+                        <span>简中 (CN)</span>
+                      </div>
+                      <div class="custom-select-option" data-value="zh-TW">
+                        <img class="custom-select-option-icon" src="../imgs/svg/flags/tw.svg" alt="">
+                        <span>繁中 (TW)</span>
+                      </div>
+                      <div class="custom-select-option" data-value="ja">
+                        <img class="custom-select-option-icon" src="../imgs/svg/flags/jp.svg" alt="">
+                        <span>日本語 (JP)</span>
+                      </div>
+                      <div class="custom-select-option" data-value="en">
+                        <img class="custom-select-option-icon" src="../imgs/svg/flags/us.svg" alt="">
+                        <span>English (US)</span>
+                      </div>
+                      <div class="custom-select-option" data-value="de">
+                        <img class="custom-select-option-icon" src="../imgs/svg/flags/de.svg" alt="">
+                        <span>Deutsch (DE)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="setting-item">
@@ -225,18 +277,18 @@
             </div>
             <div class="setting-item">
               <div class="setting-label">
-                <label>窗口尺寸</label>
-                <p class="setting-description">自定义应用窗口的宽度和高度（单位：像素）。修改后需要重启应用生效</p>
-                <button class="btn btn-text btn-reset-size" id="resetWindowSizeBtn">重置为默认值</button>
+                <label data-i18n="settings.windowSize">窗口尺寸</label>
+                <p class="setting-description" data-i18n="settings.windowSizeDesc">自定义应用窗口的宽度和高度（单位：像素）。修改后需要重启应用生效</p>
+                <button class="btn btn-text btn-reset-size" id="resetWindowSizeBtn" data-i18n="settings.resetToDefault">重置为默认值</button>
               </div>
               <div class="setting-control setting-size-control">
                 <div class="size-input-group">
-                  <label for="windowWidthInput" class="size-label">宽度</label>
+                  <label for="windowWidthInput" class="size-label" data-i18n="settings.width">宽度</label>
                   <input type="text" id="windowWidthInput" class="setting-size-input" inputmode="numeric" pattern="[0-9]*">
                   <span class="size-unit" data-i18n="settings.pixel">像素</span>
                 </div>
                 <div class="size-input-group">
-                  <label for="windowHeightInput" class="size-label">高度</label>
+                  <label for="windowHeightInput" class="size-label" data-i18n="settings.height">高度</label>
                   <input type="text" id="windowHeightInput" class="setting-size-input" inputmode="numeric" pattern="[0-9]*">
                   <span class="size-unit" data-i18n="settings.pixel">像素</span>
                 </div>
@@ -251,7 +303,7 @@
   <!-- 加载遮罩 -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-spinner"></div>
-    <p>处理中...</p>
+    <p data-i18n="messages.processing">处理中...</p>
   </div>
 
   <!-- 工具模块 -->
