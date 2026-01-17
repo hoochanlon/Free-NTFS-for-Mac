@@ -17,10 +17,15 @@ import { SettingsManager, AppSettings } from './utils/settings';
 import { WINDOW_SIZE_CONFIG } from '../config/window-config';
 import { KeychainManager } from './utils/keychain';
 import { rebuildApplicationMenu } from './app-config';
-import { initTray, destroyTray, updateTrayMenu, updateTrayTooltip } from './utils/tray-manager';
+import { initTray, destroyTray, updateTrayMenu, updateTrayTooltip, isTrayInitialized } from './utils/tray-manager';
 import { caffeinateManager } from './utils/caffeinate-manager';
 
 let quitWindow: BrowserWindow | null = null;
+
+// 托盘模式切换防抖定时器
+let trayModeToggleTimer: NodeJS.Timeout | null = null;
+// 当前 Dock 状态（用于避免重复调用）
+let currentDockHiddenState: boolean | null = null;
 
 // 辅助函数：向所有窗口广播最新设备列表（绕过 fswatch 可能的延迟）
 async function broadcastDevicesToAllWindows(): Promise<void> {
@@ -514,6 +519,24 @@ export function setupSystemHandlers(): void {
   });
 }
 
+/**
+ * 初始化 Dock 状态（在应用启动时调用）
+ */
+export async function initializeDockState(): Promise<void> {
+  if (process.platform === 'darwin' && app.dock) {
+    try {
+      const settings = await SettingsManager.getSettings();
+      // 根据托盘模式设置初始化 Dock 状态（不依赖托盘是否已初始化）
+      // 如果托盘模式启用，Dock 应该是隐藏的
+      currentDockHiddenState = settings.trayMode || false;
+    } catch (error) {
+      console.error('初始化 Dock 状态失败:', error);
+      // 默认设置为显示状态
+      currentDockHiddenState = false;
+    }
+  }
+}
+
 // 设置相关 IPC handlers
 export function setupSettingsHandlers(): void {
   // 获取设置
@@ -548,19 +571,46 @@ export function setupSettingsHandlers(): void {
     }
     // 如果托盘模式设置发生变化，初始化或销毁托盘
     if (settings.trayMode !== undefined && settings.trayMode !== oldSettings.trayMode) {
-      if (settings.trayMode) {
-        await initTray();
-        // 在 macOS 上，托盘模式下隐藏 Dock 图标
-        if (process.platform === 'darwin' && app.dock) {
-          app.dock.hide();
-        }
-      } else {
-        destroyTray();
-        // 在 macOS 上，退出托盘模式时显示 Dock 图标
-        if (process.platform === 'darwin' && app.dock) {
-          app.dock.show();
-        }
+      // 清除之前的防抖定时器
+      if (trayModeToggleTimer) {
+        clearTimeout(trayModeToggleTimer);
+        trayModeToggleTimer = null;
       }
+
+      // 使用防抖机制，避免频繁切换导致 Dock 状态失效
+      trayModeToggleTimer = setTimeout(async () => {
+        try {
+          if (settings.trayMode) {
+            await initTray();
+            // 在 macOS 上，托盘模式下隐藏 Dock 图标
+            if (process.platform === 'darwin' && app.dock) {
+              // 只有在当前状态不是隐藏时才调用 hide()，避免重复调用
+              if (currentDockHiddenState !== true) {
+                app.dock.hide();
+                currentDockHiddenState = true;
+                // 等待一小段时间确保状态生效
+                await new Promise(resolve => setTimeout(resolve, 100));
+              }
+            }
+          } else {
+            destroyTray();
+            // 在 macOS 上，退出托盘模式时显示 Dock 图标
+            if (process.platform === 'darwin' && app.dock) {
+              // 只有在当前状态不是显示时才调用 show()，避免重复调用
+              if (currentDockHiddenState !== false) {
+                app.dock.show();
+                currentDockHiddenState = false;
+                // 等待一小段时间确保状态生效
+                await new Promise(resolve => setTimeout(resolve, 100));
+              }
+            }
+          }
+        } catch (error) {
+          console.error('切换托盘模式失败:', error);
+        } finally {
+          trayModeToggleTimer = null;
+        }
+      }, 300); // 300ms 防抖延迟
     }
     // 如果系统自启设置发生变化，更新登录项设置
     if (settings.autoStart !== undefined && settings.autoStart !== oldSettings.autoStart) {

@@ -1,9 +1,13 @@
 import { app, BrowserWindow } from 'electron';
 import { setupHotReload } from './hot-reload';
 import { createMainWindow, mainWindow } from './window-manager';
-import { setupIpcHandlers } from './ipc-handlers';
+import { setupIpcHandlers, initializeDockState } from './ipc-handlers';
 import { setupAppConfig } from './app-config';
 import { initTray, destroyTray, updateTrayMenu } from './utils/tray-manager';
+
+// 初始化 Dock 状态（在 ipc-handlers.ts 中使用）
+// 注意：由于模块加载顺序，这里无法直接设置 ipc-handlers 中的变量
+// 但可以通过 IPC 通信来同步，或者在应用启动时通过其他方式初始化
 import { SettingsManager } from './utils/settings';
 import { caffeinateManager } from './utils/caffeinate-manager';
 
@@ -16,6 +20,9 @@ app.whenReady().then(async () => {
   await setupAppConfig();
   setupIpcHandlers();
 
+  // 初始化 Dock 状态（必须在托盘初始化之前调用）
+  await initializeDockState();
+
   // 检查是否启用托盘模式
   const settings = await SettingsManager.getSettings();
   if (settings.trayMode) {
@@ -24,6 +31,8 @@ app.whenReady().then(async () => {
       // 在 macOS 上，托盘模式下隐藏 Dock 图标
       if (process.platform === 'darwin' && app.dock) {
         app.dock.hide();
+        // 更新 Dock 状态标记
+        await initializeDockState();
       }
     } catch (error) {
       console.error('托盘初始化失败:', error);
