@@ -66,19 +66,19 @@ The application's main interface provides several functional icons to help you q
 
 ### Title Bar Icons
 
-- **Auto Read-Write Icon** - When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode. The icon appears blue when active.
-- **Tray Mode Icon** - When enabled, closing the window will minimize the application to the system tray instead of quitting. The icon appears purple when active.
-- **Prevent Sleep Icon** - When enabled, the system will prevent entering sleep mode to ensure devices remain accessible. The icon appears coffee-colored when active.
-- **About Icon** - Opens the about window to view application information and project links.
-- **Quit Icon** - Quits the application.
+- <img src="../imgs/svg/devices/flash-auto.svg" alt="Auto Read-Write" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Auto Read-Write Icon** - When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode. The icon appears blue when active.
+- <img src="../imgs/svg/devices/tray.svg" alt="Tray Mode" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Tray Mode Icon** - When enabled, closing the window will minimize the application to the system tray instead of quitting. The icon appears purple when active.
+- <img src="../imgs/svg/system/caffe.svg" alt="Prevent Sleep" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Prevent Sleep Icon** - When enabled, the system will prevent entering sleep mode to ensure devices remain accessible. The icon appears coffee-colored when active.
+- <img src="../imgs/svg/ui/info.svg" alt="About" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **About Icon** - Opens the about window to view application information and project links.
+- <img src="../imgs/svg/actions/exit-red.svg" alt="Quit" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Quit Icon** - Quits the application.
 
 ### Tab Icons
 
-- **Logs Icon** - Switches to the "Operation Logs" tab to view records of all operations.
+- <img src="../imgs/svg/ui/log.svg" alt="Logs" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Logs Icon** - Switches to the "Operation Logs" tab to view records of all operations.
 
 ### Device Management Icons
 
-- **Refresh Icon** - Refreshes the device list and re-detects connected NTFS devices.
+- <img src="../imgs/svg/actions/refresh.svg" alt="Refresh" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Refresh Icon** - Refreshes the device list and re-detects connected NTFS devices.
 
 ## Usage Steps
 

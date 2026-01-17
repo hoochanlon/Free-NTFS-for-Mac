@@ -314,6 +314,21 @@
     word-wrap break-word
     overflow-wrap break-word
 
+  // 确保内联图标大小正确（覆盖SVG默认尺寸）
+  // 针对列表项中的图标
+  li img[style*="height"],
+  p img[style*="height"]
+    max-width 100% !important
+    max-height 100% !important
+    object-fit contain
+    // 确保内联样式中的尺寸生效，覆盖SVG的默认width/height属性
+    &[style*="14px"]
+      height 14px !important
+      width 14px !important
+      max-width 14px !important
+      max-height 14px !important
+      flex-shrink 0
+
   code
     background var(--bg-tertiary)
     padding 2px 6px
@@ -470,6 +485,29 @@ body.light-theme
 body:not(.light-theme)
   .tab[data-tab="logs"] .tab-icon
     dark-mode-icon-white()
+
+// 夜间模式下指南手册中的图标优化（改为白色，提高可见性）
+body:not(.light-theme)
+  .help-content
+    // 自动读写图标
+    img[src*="flash-auto.svg"]
+      dark-mode-icon-white()
+
+    // 托盘模式图标
+    img[src*="tray.svg"]
+      dark-mode-icon-white()
+
+    // 防止休眠图标
+    img[src*="caffe.svg"]
+      dark-mode-icon-white()
+
+    // 日志图标
+    img[src*="log.svg"]
+      dark-mode-icon-white()
+
+    // 刷新图标
+    img[src*="refresh.svg"]
+      dark-mode-icon-white()
 
 // 设置界面样式
 .settings-content

@@ -66,19 +66,19 @@ Die Hauptoberfläche der Anwendung bietet mehrere Funktionssymbole, die Ihnen he
 
 ### Titelleisten-Symbole
 
-- **Automatisches Lese-Schreib-Symbol** - Wenn aktiviert, werden neu eingefügte NTFS-Geräte automatisch im Lese-Schreib-Modus eingehängt. Das Symbol erscheint blau, wenn es aktiv ist.
-- **Systemleisten-Modus-Symbol** - Wenn aktiviert, wird die Anwendung beim Schließen des Fensters in die Systemleiste minimiert, anstatt beendet zu werden. Das Symbol erscheint lila, wenn es aktiv ist.
-- **Ruhezustand verhindern-Symbol** - Wenn aktiviert, verhindert das System, dass es in den Ruhezustand wechselt, um sicherzustellen, dass Geräte kontinuierlich verfügbar bleiben. Das Symbol erscheint kaffeefarben, wenn es aktiv ist.
-- **Info-Symbol** - Öffnet das Info-Fenster, um Anwendungsinformationen und Projektlinks anzuzeigen.
-- **Beenden-Symbol** - Beendet die Anwendung.
+- <img src="../imgs/svg/devices/flash-auto.svg" alt="Automatisches Lese-Schreib" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Automatisches Lese-Schreib-Symbol** - Wenn aktiviert, werden neu eingefügte NTFS-Geräte automatisch im Lese-Schreib-Modus eingehängt. Das Symbol erscheint blau, wenn es aktiv ist.
+- <img src="../imgs/svg/devices/tray.svg" alt="Systemleisten-Modus" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Systemleisten-Modus-Symbol** - Wenn aktiviert, wird die Anwendung beim Schließen des Fensters in die Systemleiste minimiert, anstatt beendet zu werden. Das Symbol erscheint lila, wenn es aktiv ist.
+- <img src="../imgs/svg/system/caffe.svg" alt="Ruhezustand verhindern" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Ruhezustand verhindern-Symbol** - Wenn aktiviert, verhindert das System, dass es in den Ruhezustand wechselt, um sicherzustellen, dass Geräte kontinuierlich verfügbar bleiben. Das Symbol erscheint kaffeefarben, wenn es aktiv ist.
+- <img src="../imgs/svg/ui/info.svg" alt="Info" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Info-Symbol** - Öffnet das Info-Fenster, um Anwendungsinformationen und Projektlinks anzuzeigen.
+- <img src="../imgs/svg/actions/exit-red.svg" alt="Beenden" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Beenden-Symbol** - Beendet die Anwendung.
 
 ### Registerkarten-Symbole
 
-- **Protokoll-Symbol** - Wechselt zur Registerkarte "Betriebsprotokolle", um Aufzeichnungen aller Vorgänge anzuzeigen.
+- <img src="../imgs/svg/ui/log.svg" alt="Protokoll" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Protokoll-Symbol** - Wechselt zur Registerkarte "Betriebsprotokolle", um Aufzeichnungen aller Vorgänge anzuzeigen.
 
 ### Geräteverwaltungs-Symbole
 
-- **Aktualisieren-Symbol** - Aktualisiert die Geräteliste und erkennt angeschlossene NTFS-Geräte neu.
+- <img src="../imgs/svg/actions/refresh.svg" alt="Aktualisieren" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Aktualisieren-Symbol** - Aktualisiert die Geräteliste und erkennt angeschlossene NTFS-Geräte neu.
 
 ## Verwendungsschritte
 

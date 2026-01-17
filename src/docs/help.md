@@ -60,25 +60,25 @@ brew install ntfs-3g-mac
 
 **注意**：安装顺序很重要，请按照 1 → 2 → 3 → 4 的顺序依次安装。
 
-## 界面图标说明
+![1768637904211](image/help/1768637904211.png)## 界面图标说明
 
 应用主界面提供了多个功能图标，帮助您快速访问常用功能：
 
 ### 标题栏图标
 
-- **自动读写图标** - 启用后，新插入的 NTFS 设备会自动挂载为读写模式。图标激活时显示为蓝色。
-- **托盘模式图标** - 启用后，关闭窗口时应用会最小化到系统托盘而不是退出。图标激活时显示为紫色。
-- **防止休眠图标** - 启用后，系统将禁止进入休眠状态，确保设备持续可用。图标激活时显示为咖啡色。
-- **关于图标** - 打开关于窗口，查看应用信息和项目链接。
-- **退出图标** - 退出应用程序。
+- <img src="../imgs/svg/devices/flash-auto.svg" alt="自动读写" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **自动读写图标** - 启用后，新插入的 NTFS 设备会自动挂载为读写模式。图标激活时显示为蓝色。
+- <img src="../imgs/svg/devices/tray.svg" alt="托盘模式" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **托盘模式图标** - 启用后，关闭窗口时应用会最小化到系统托盘而不是退出。图标激活时显示为紫色。
+- <img src="../imgs/svg/system/caffe.svg" alt="防止休眠" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **防止休眠图标** - 启用后，系统将禁止进入休眠状态，确保设备持续可用。图标激活时显示为咖啡色。
+- <img src="../imgs/svg/ui/info.svg" alt="关于" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **关于图标** - 打开关于窗口，查看应用信息和项目链接。
+- <img src="../imgs/svg/actions/exit-red.svg" alt="退出" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **退出图标** - 退出应用程序。
 
 ### 标签页图标
 
-- **日志图标** - 切换到"操作日志"标签页，查看所有操作的记录。
+- <img src="../imgs/svg/ui/log.svg" alt="日志" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **日志图标** - 切换到"操作日志"标签页，查看所有操作的记录。
 
 ### 设备管理图标
 
-- **刷新图标** - 刷新设备列表，重新检测已连接的 NTFS 设备。
+- <img src="../imgs/svg/actions/refresh.svg" alt="刷新" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **刷新图标** - 刷新设备列表，重新检测已连接的 NTFS 设备。
 
 ## 使用步骤
 
