@@ -48,10 +48,11 @@
   const aboutBtn = document.getElementById('aboutBtn') as HTMLButtonElement;
   const quitBtn = document.getElementById('quitBtn') as HTMLButtonElement;
   const caffeinateBtn = document.getElementById('caffeinateBtn') as HTMLButtonElement | null;
-  const caffeinateMainBtn = document.getElementById('caffeinateMainBtn') as HTMLButtonElement | null;
-  const caffeinateMainBtnText = document.getElementById('caffeinateMainBtnText') as HTMLElement | null;
+  const caffeinateCheckbox = document.getElementById('caffeinateCheckbox') as HTMLInputElement | null;
   const autoMountCheckbox = document.getElementById('autoMountCheckbox') as HTMLInputElement;
   const trayModeCheckbox = document.getElementById('trayModeCheckbox') as HTMLInputElement;
+  const autoMountTitlebarBtn = document.getElementById('autoMountTitlebarBtn') as HTMLButtonElement | null;
+  const trayModeTitlebarBtn = document.getElementById('trayModeTitlebarBtn') as HTMLButtonElement | null;
 
   // 自动刷新间隔
   let autoRefreshInterval: NodeJS.Timeout | null = null;
@@ -163,17 +164,38 @@
     }
 
     // 初始化自动挂载复选框
+    // 更新标题栏自动读写按钮状态
+    const updateAutoMountTitlebarButton = () => {
+      if (autoMountTitlebarBtn && autoMountCheckbox) {
+        if (autoMountCheckbox.checked) {
+          autoMountTitlebarBtn.classList.add('active');
+        } else {
+          autoMountTitlebarBtn.classList.remove('active');
+        }
+      }
+    };
+
     if (autoMountCheckbox) {
       window.electronAPI.getSettings().then((settings: any) => {
         autoMountCheckbox.checked = settings.autoMount || false;
+        updateAutoMountTitlebarButton();
       });
 
       autoMountCheckbox.addEventListener('change', async () => {
         try {
           await window.electronAPI.saveSettings({ autoMount: autoMountCheckbox.checked });
+          updateAutoMountTitlebarButton();
         } catch (error) {
           console.error('保存自动挂载设置失败:', error);
         }
+      });
+    }
+
+    // 标题栏自动读写按钮点击事件
+    if (autoMountTitlebarBtn && autoMountCheckbox) {
+      autoMountTitlebarBtn.addEventListener('click', () => {
+        autoMountCheckbox.checked = !autoMountCheckbox.checked;
+        autoMountCheckbox.dispatchEvent(new Event('change'));
       });
     }
 
@@ -185,21 +207,10 @@
     };
 
     const updateMainCaffeinateButtonState = async () => {
-      if (!caffeinateMainBtn) return;
+      if (!caffeinateCheckbox) return;
       try {
-        const t = getT();
         const isActive = await window.electronAPI.caffeinateStatus();
-        if (isActive) {
-          caffeinateMainBtn.classList.add('active');
-          if (caffeinateMainBtnText) {
-            caffeinateMainBtnText.textContent = t('tray.preventSleepEnabled');
-          }
-        } else {
-          caffeinateMainBtn.classList.remove('active');
-          if (caffeinateMainBtnText) {
-            caffeinateMainBtnText.textContent = t('tray.preventSleep');
-          }
-        }
+        caffeinateCheckbox.checked = isActive;
       } catch (error) {
         console.error('获取防止休眠状态失败:', error);
       }
@@ -254,9 +265,9 @@
       caffeinateBtn.addEventListener('click', handleCaffeinateToggle);
     }
 
-    if (caffeinateMainBtn) {
+    if (caffeinateCheckbox) {
       await updateMainCaffeinateButtonState();
-      caffeinateMainBtn.addEventListener('click', handleCaffeinateToggle);
+      caffeinateCheckbox.addEventListener('change', handleCaffeinateToggle);
     }
 
     if (window.electronAPI.onCaffeinateStatusChange) {
@@ -270,20 +281,42 @@
       await syncCaffeinateButtons();
     });
 
+    // 更新标题栏托盘模式按钮状态
+    const updateTrayModeTitlebarButton = () => {
+      if (trayModeTitlebarBtn && trayModeCheckbox) {
+        if (trayModeCheckbox.checked) {
+          trayModeTitlebarBtn.classList.add('active');
+        } else {
+          trayModeTitlebarBtn.classList.remove('active');
+        }
+      }
+    };
+
     // 初始化托盘模式复选框
     if (trayModeCheckbox) {
       window.electronAPI.getSettings().then((settings: any) => {
         trayModeCheckbox.checked = settings.trayMode || false;
+        updateTrayModeTitlebarButton();
       });
 
       trayModeCheckbox.addEventListener('change', async () => {
         try {
           await window.electronAPI.saveSettings({ trayMode: trayModeCheckbox.checked });
+          updateTrayModeTitlebarButton();
         } catch (error) {
           console.error('保存托盘模式设置失败:', error);
           // 恢复复选框状态
           trayModeCheckbox.checked = !trayModeCheckbox.checked;
+          updateTrayModeTitlebarButton();
         }
+      });
+    }
+
+    // 标题栏托盘模式按钮点击事件
+    if (trayModeTitlebarBtn && trayModeCheckbox) {
+      trayModeTitlebarBtn.addEventListener('click', () => {
+        trayModeCheckbox.checked = !trayModeCheckbox.checked;
+        trayModeCheckbox.dispatchEvent(new Event('change'));
       });
     }
 

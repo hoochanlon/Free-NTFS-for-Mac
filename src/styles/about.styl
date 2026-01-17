@@ -173,6 +173,30 @@ body
   height 18px
   transform none
 
+// 自动读写按钮（标题栏）
+#autoMountTitlebarBtn
+  &.active
+    .btn-about-icon
+      opacity 1
+      // 蓝色：使用filter将图标转换为蓝色（与accent色一致）
+      filter brightness(0) saturate(100%) invert(40%) sepia(100%) saturate(2000%) hue-rotate(200deg) brightness(0.9) contrast(1.2)
+
+  &:hover:not(.active)
+    .btn-about-icon
+      opacity 1
+
+// 托盘模式按钮（标题栏）
+#trayModeTitlebarBtn
+  &.active
+    .btn-about-icon
+      opacity 1
+      // 紫色：使用filter将图标转换为紫色
+      filter brightness(0) saturate(100%) invert(30%) sepia(100%) saturate(2000%) hue-rotate(250deg) brightness(0.9) contrast(1.2)
+
+  &:hover:not(.active)
+    .btn-about-icon
+      opacity 1
+
 // 防止休眠按钮（标题栏）
 #caffeinateBtn
   &.active
@@ -190,11 +214,14 @@ body
   display inline-flex
   align-items center
   gap 6px
-  padding 6px 12px
+  padding 6px 14px
+  min-width auto
+  width auto
+  font-size 12px
 
   .btn-icon
-    width 14px
-    height 14px
+    width 12px
+    height 12px
     display block
     margin 0
     padding 0

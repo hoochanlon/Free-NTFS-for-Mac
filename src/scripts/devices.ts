@@ -99,10 +99,10 @@
         }
         if (Renderer && Renderer.renderDevices) {
           Renderer.renderDevices(devicesList, devicesList);
-        }
-      } catch (error) {
+            }
+          } catch (error) {
         console.error('刷新设备失败:', error);
-      }
+          }
     }
   }
 
@@ -112,14 +112,14 @@
       Renderer.renderDevices(devicesList, devicesList);
     } else {
       // 降级实现
-      if (devices.length === 0) {
-        devicesList.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon"></div>
-            <p>${t('devices.emptyState')}</p>
-            <p class="empty-hint">${t('devices.emptyHint')}</p>
-          </div>
-        `;
+    if (devices.length === 0) {
+      devicesList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon"></div>
+          <p>${t('devices.emptyState')}</p>
+          <p class="empty-hint">${t('devices.emptyHint')}</p>
+        </div>
+      `;
       }
     }
   }
@@ -129,7 +129,7 @@
     if (Refresh && Refresh.updateDeviceState) {
       await Refresh.updateDeviceState(devices, state);
     }
-  }
+      }
 
   // 设备操作函数（委托给 Operations 模块）
   async function mountDevice(device: any): Promise<void> {
@@ -207,7 +207,7 @@
           const target = mutation.target as HTMLElement;
           if (target.classList.contains('tray-window')) {
             setTimeout(() => {
-              refreshDevices();
+                refreshDevices();
             }, 100);
           }
         }
@@ -218,7 +218,7 @@
       observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
       if (document.body.classList.contains('tray-window')) {
         setTimeout(() => {
-          refreshDevices();
+            refreshDevices();
         }, 100);
       }
     }
@@ -229,7 +229,7 @@
           observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
           if (document.body.classList.contains('tray-window')) {
             setTimeout(() => {
-              refreshDevices();
+                refreshDevices();
             }, 100);
           }
         }

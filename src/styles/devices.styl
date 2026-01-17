@@ -439,7 +439,7 @@
 
       .header-actions-row
         display flex
-        gap 8px
+        gap 12px
         align-items center
         flex-wrap wrap
         justify-content flex-end
@@ -447,14 +447,16 @@
       .auto-mount-checkbox
         display flex
         align-items center
-        gap 6px
+        gap 8px
         font-size 13px
         color var(--text-primary)
         cursor pointer
         user-select none
-        padding 4px 8px
+        padding 6px 12px
         border-radius 4px
         transition background-color 0.15s ease
+        min-height 28px
+        box-sizing border-box
 
         &:hover
           background var(--bg-tertiary)
@@ -474,6 +476,8 @@
         align-items center
         justify-content center
         white-space nowrap
+        min-height 28px
+        box-sizing border-box
 
         .btn-icon
           width 12px
@@ -484,9 +488,10 @@
           flex-shrink 0
 
       #refreshDevicesBtn
-        padding 6px 12px
+        padding 6px 14px
         min-width auto
         width auto
+        height: 30px;
 
 // 设备列表容器
 .devices-list

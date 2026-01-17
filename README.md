@@ -17,7 +17,7 @@
 - 🔄 **一键挂载** - 轻松将只读 NTFS 设备挂载为读写模式
 - 📊 **状态显示** - 清晰显示设备状态和操作日志
 - 🛡️ **安全可靠** - 使用 Electron 安全最佳实践
-- ☕ **防止休眠** - 一键开启/关闭系统休眠防止功能，确保长时间操作时系统保持唤醒状态
+- ☕ **免睡眠** - 一键开启/关闭系统休眠防止功能，确保长时间操作时系统保持唤醒状态
 
 ## 使用说明
 
@@ -34,8 +34,8 @@
    - 对于只读设备，点击"挂载为读写"按钮
    - 输入管理员密码完成挂载
 
-3. **防止休眠功能**
-   - 在标题栏、主界面操作区域或托盘窗口中点击"防止休眠"按钮
+3. **免睡眠功能**
+   - 在标题栏、主界面操作区域或托盘窗口中点击"免睡眠"按钮
    - 启用后，系统将保持唤醒状态，防止进入休眠模式
    - 适用于长时间文件传输或批量操作场景
    - 操作完成后可随时关闭，节省系统资源
@@ -222,8 +222,8 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
    - For read-only devices, click the "Mount as Read-Write" button
    - Enter administrator password to complete mounting
 
-3. **Prevent Sleep Feature**
-   - Click the "Prevent Sleep" button in the title bar, main interface action area, or tray window
+3. **No Sleep Feature**
+   - Click the "No Sleep" button in the title bar, main interface action area, or tray window
    - When enabled, the system will stay awake and prevent entering sleep mode
    - Suitable for long file transfers or batch operations
    - Can be turned off at any time after completion to save system resources
