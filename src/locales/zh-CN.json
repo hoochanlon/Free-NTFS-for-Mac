@@ -239,8 +239,13 @@
       "en": "English (US)",
       "de": "Deutsch (DE)"
     },
+    "autoMount": "自动读写",
+    "autoMountDesc": "启用后，新插入的 NTFS 设备将自动以读写模式挂载",
     "trayMode": "托盘模式",
     "trayModeDesc": "启用后，关闭窗口时不会退出应用，而是最小化到系统托盘。可以通过托盘图标快速管理 NTFS 设备。",
+    "preventSleep": "禁止休眠",
+    "preventSleepDesc": "启用后，系统将防止进入休眠模式，确保设备保持可访问状态",
+    "enabled": "（已启用）",
     "autoStart": "系统自启",
     "autoStartDesc": "启用后，应用将在系统启动时自动运行"
   },

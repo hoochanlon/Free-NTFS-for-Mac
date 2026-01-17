@@ -239,8 +239,13 @@
       "en": "English (US)",
       "de": "Deutsch (DE)"
     },
+    "autoMount": "Automatisches Lesen/Schreiben",
+    "autoMountDesc": "Wenn aktiviert, werden neu eingefügte NTFS-Geräte automatisch im Lese-/Schreibmodus eingehängt",
     "trayMode": "Tray-Modus",
     "trayModeDesc": "Wenn aktiviert, wird beim Schließen des Fensters die App nicht beendet, sondern in die Systemleiste minimiert. Sie können NTFS-Geräte schnell über das Tray-Symbol verwalten.",
+    "preventSleep": "Ruhezustand verhindern",
+    "preventSleepDesc": "Wenn aktiviert, verhindert das System den Ruhezustand, um sicherzustellen, dass Geräte zugänglich bleiben",
+    "enabled": "（Aktiviert）",
     "autoStart": "Beim Anmelden starten",
     "autoStartDesc": "Wenn aktiviert, startet die App automatisch beim Systemstart"
   },

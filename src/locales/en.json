@@ -239,8 +239,13 @@
       "en": "English (US)",
       "de": "Deutsch (DE)"
     },
+    "autoMount": "Auto Read-Write",
+    "autoMountDesc": "When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode",
     "trayMode": "Tray Mode",
     "trayModeDesc": "When enabled, closing the window will minimize to the system tray instead of quitting the app. You can quickly manage NTFS devices through the tray icon.",
+    "preventSleep": "Prevent Sleep",
+    "preventSleepDesc": "When enabled, the system will prevent entering sleep mode to ensure devices remain accessible",
+    "enabled": "(Enabled)",
     "autoStart": "Launch at Login",
     "autoStartDesc": "When enabled, the app will automatically launch when the system starts"
   },

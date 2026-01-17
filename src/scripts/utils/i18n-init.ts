@@ -63,22 +63,8 @@
       unmountAllBtn.textContent = t('devices.unmountAll');
     }
 
-    const autoMountCheckbox = document.getElementById('autoMountCheckbox');
-    if (autoMountCheckbox) {
-      const label = autoMountCheckbox.parentElement?.querySelector('span');
-      if (label) {
-        label.textContent = t('devices.autoMount');
-      }
-    }
-
-    // 托盘模式（在设备标签页）
-    const trayModeCheckbox = document.getElementById('trayModeCheckbox');
-    if (trayModeCheckbox) {
-      const label = trayModeCheckbox.parentElement?.querySelector('span');
-      if (label) {
-        label.textContent = t('settings.trayMode');
-      }
-    }
+    // 注意：自动读写、托盘模式、禁止休眠的复选框已移至设置页面
+    // 这些选项的标签文本更新由 renderer.ts 中的 updateSettingLabel 函数处理
 
     const ejectAllBtn = document.getElementById('ejectAllBtn');
     if (ejectAllBtn) {
@@ -211,6 +197,9 @@
     if (autoStartLabel) {
       autoStartLabel.textContent = t('settings.autoStart');
     }
+
+    // 注意：自动读写、托盘模式、禁止休眠的选项已从设置页面移除
+    // 这些功能现在只能通过标题栏按钮控制
     const autoStartDesc = document.querySelector('#autoStartCheckbox')?.closest('.setting-item')?.querySelector('.setting-description');
     if (autoStartDesc) {
       autoStartDesc.textContent = t('settings.autoStartDesc');
