@@ -31,6 +31,7 @@
 ### 社区推广
 - [@grgerwcwetwet](https://x.com/grgerwcwetwet/) - 在 Twitter/X 上推荐本项目
 - [@amiaoapp](https://x.com/amiaoapp) - 在 Twitter/X 上推荐本项目
+- [@ilovek8s](https://x.com/ilovek8s/) - 在 Twitter/X 上推荐本项目
 - [iBeesoft](https://www.ibeesoft.com/howtos/free-ntfs-for-mac.html) - 在教程文章中推荐本项目
 - [MacBed](https://www.macbed.com/nigate/) - 在网站上介绍和推荐本项目
 - [阮一峰的网络日志](https://www.ruanyifeng.com/blog/2026/01/weekly-issue-381.html) - 投稿采纳
