@@ -176,8 +176,17 @@
         border-color var(--coffee-hover)
 
   .devices-list
+    display flex
+    flex-direction column
     gap 12px
     padding 12px
+    min-height 0
+
+    // 当只有空状态时，占据剩余空间并居中
+    &:has(.empty-state)
+      flex 1
+      justify-content center
+      align-items center
 
     // 托盘窗口中的列表更紧凑
     .tray-window &
@@ -373,7 +382,13 @@
       white-space nowrap
 
   .empty-state
+    display flex
+    flex-direction column
+    justify-content center
+    align-items center
+    text-align center
     padding 30px 12px
+    width 100%
 
     .empty-icon
       width 40px
@@ -499,6 +514,13 @@
   flex-direction column
   gap 8px
   flex-shrink 0
+  min-height 0
+
+  // 当只有空状态时，占据剩余空间并居中
+  &:has(.empty-state)
+    flex 1
+    justify-content center
+    align-items center
 
 // 设备项样式（macOS 风格）
 .device-item
@@ -678,11 +700,11 @@
   text-align center
   padding 60px 20px
   color var(--text-secondary)
-  flex 1
   display flex
   flex-direction column
   justify-content center
   align-items center
+  width 100%
 
   .empty-icon
     width 64px
