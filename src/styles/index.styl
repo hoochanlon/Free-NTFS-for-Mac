@@ -745,18 +745,17 @@ body:not(.light-theme)
   span
     pointer-events none
 
-// 夜间模式下图标变白
+// 夜间模式下图标变白（仅针对设置标签页中的日志和地球图标）
 body:not(.light-theme)
-  .custom-select-icon,
-  .custom-select-option-icon
+  // 日志图标
+  .custom-select-icon[src*="log.svg"],
+  .custom-select-option-icon[src*="log.svg"]
     dark-mode-icon-white()
 
-  // 但帮助图标和国旗图标不需要变白（保持原色）
-  .custom-select-icon[src*="help.svg"],
-  .custom-select-option-icon[src*="help.svg"],
-  .custom-select-icon[src*="flags/"],
-  .custom-select-option-icon[src*="flags/"]
-    filter none
+  // 地球图标
+  .custom-select-icon[src*="earth.svg"],
+  .custom-select-option-icon[src*="earth.svg"]
+    dark-mode-icon-white()
 
 .setting-size-control
   display flex
