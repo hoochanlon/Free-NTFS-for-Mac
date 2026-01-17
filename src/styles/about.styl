@@ -209,6 +209,41 @@ body
     .btn-about-icon
       opacity 1
 
+// 保护按钮（状态锁定）
+#protectBtn
+  position relative
+
+  &.locked
+    .btn-about-icon
+      opacity 1
+      // 锁定状态：使用filter将图标转换为红色
+      filter brightness(0) saturate(100%) invert(20%) sepia(100%) saturate(2000%) hue-rotate(0deg) brightness(0.9) contrast(1.2)
+      animation pulse 2s ease-in-out infinite
+
+  &:hover:not(.locked)
+    .btn-about-icon
+      opacity 0.8
+
+  // 禁用状态样式（当其他按钮被锁定时）
+  &:disabled
+    opacity 0.5
+    cursor not-allowed
+
+// 锁定状态脉冲动画
+@keyframes pulse
+  0%, 100%
+    opacity 1
+  50%
+    opacity 0.7
+
+// 当锁定状态时，禁用其他按钮的样式
+#autoMountTitlebarBtn:disabled,
+#trayModeTitlebarBtn:disabled,
+#caffeinateBtn:disabled
+  opacity 0.5
+  cursor not-allowed
+  pointer-events none
+
 // 防止休眠按钮（主界面操作按钮区域）
 #caffeinateMainBtn
   display inline-flex
@@ -463,4 +498,8 @@ body:not(.light-theme)
 
   // 防止休眠按钮图标
   #caffeinateBtn:not(.active) .btn-about-icon
+    dark-mode-icon-white()
+
+  // 保护按钮图标（仅在非锁定状态下应用白色效果）
+  #protectBtn:not(.locked) .btn-about-icon
     dark-mode-icon-white()

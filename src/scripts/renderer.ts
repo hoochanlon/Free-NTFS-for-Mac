@@ -45,7 +45,7 @@
   const themeToggleButton = document.getElementById('theme-toggle-btn') as HTMLButtonElement;
   const docBody = document.body;
   const helpTab = document.getElementById('helpTab') as HTMLElement;
-  const aboutBtn = document.getElementById('aboutBtn') as HTMLButtonElement;
+  const protectBtn = document.getElementById('protectBtn') as HTMLButtonElement;
   const quitBtn = document.getElementById('quitBtn') as HTMLButtonElement;
   const caffeinateBtn = document.getElementById('caffeinateBtn') as HTMLButtonElement | null;
   const autoMountTitlebarBtn = document.getElementById('autoMountTitlebarBtn') as HTMLButtonElement | null;
@@ -120,9 +120,106 @@
       AppUtils.Markdown.loadMarkdown('help.md', helpTab);
     }
 
-    // 初始化关于按钮
-    if (aboutBtn) {
-      AppModules.About.initAboutButton(aboutBtn);
+    // 获取翻译函数
+    const getT = () => {
+      return AppUtils && AppUtils.I18n && AppUtils.I18n.t
+        ? AppUtils.I18n.t
+        : ((key: string) => key);
+    };
+
+    // 状态锁定功能
+    let isLocked = false;
+    let longPressTimer: NodeJS.Timeout | null = null;
+    const LONG_PRESS_DURATION = 3000; // 3秒
+
+    // 更新锁定状态的视觉反馈
+    const updateLockState = () => {
+      if (protectBtn) {
+        if (isLocked) {
+          protectBtn.classList.add('locked');
+          protectBtn.title = '状态已锁定（长按3秒解锁）';
+        } else {
+          protectBtn.classList.remove('locked');
+          protectBtn.title = '状态锁定（长按3秒锁定）';
+        }
+      }
+
+      // 更新按钮禁用状态
+      if (autoMountTitlebarBtn) {
+        autoMountTitlebarBtn.disabled = isLocked;
+      }
+      if (trayModeTitlebarBtn) {
+        trayModeTitlebarBtn.disabled = isLocked;
+      }
+      if (caffeinateBtn) {
+        caffeinateBtn.disabled = isLocked;
+      }
+    };
+
+    // 初始化保护按钮
+    if (protectBtn) {
+      // 鼠标按下事件
+      protectBtn.addEventListener('mousedown', () => {
+        longPressTimer = setTimeout(() => {
+          isLocked = !isLocked;
+          updateLockState();
+          const t = getT();
+          const message = isLocked
+            ? (t('app.protectLocked') || '状态已锁定')
+            : (t('app.protectUnlocked') || '状态已解锁');
+          AppUtils.Logs.addLog(message, 'info').catch(console.error);
+          longPressTimer = null;
+        }, LONG_PRESS_DURATION);
+      });
+
+      // 鼠标释放事件
+      protectBtn.addEventListener('mouseup', () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      });
+
+      // 鼠标离开事件（防止拖拽时触发）
+      protectBtn.addEventListener('mouseleave', () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      });
+
+      // 触摸事件支持（移动端）
+      protectBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        longPressTimer = setTimeout(() => {
+          isLocked = !isLocked;
+          updateLockState();
+          const t = getT();
+          const message = isLocked
+            ? (t('app.protectLocked') || '状态已锁定')
+            : (t('app.protectUnlocked') || '状态已解锁');
+          AppUtils.Logs.addLog(message, 'info').catch(console.error);
+          longPressTimer = null;
+        }, LONG_PRESS_DURATION);
+      });
+
+      protectBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      });
+
+      protectBtn.addEventListener('touchcancel', () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      });
+
+      // 初始化锁定状态
+      updateLockState();
     }
 
     // 初始化退出按钮（使用统一 confirm-dialog 样式）
@@ -216,6 +313,11 @@
     // 标题栏自动读写按钮点击事件
     if (autoMountTitlebarBtn) {
       autoMountTitlebarBtn.addEventListener('click', async () => {
+        if (isLocked) {
+          const t = getT();
+          await AppUtils.Logs.addLog(t('app.protectLockedMessage') || '状态已锁定，无法修改', 'warning');
+          return;
+        }
         try {
           const settings = await window.electronAPI.getSettings();
           const newValue = !settings.autoMount;
@@ -228,12 +330,6 @@
     }
 
     // 防止休眠按钮（标题栏 + 主界面按钮）
-    const getT = () => {
-      return AppUtils && AppUtils.I18n && AppUtils.I18n.t
-        ? AppUtils.I18n.t
-        : ((key: string) => key);
-    };
-
     // 移除updateMainCaffeinateButtonState，不再需要更新设置页面的复选框
 
     const updateCaffeinateButtonState = async () => {
@@ -257,6 +353,11 @@
     };
 
     const handleCaffeinateToggle = async () => {
+      if (isLocked) {
+        const t = getT();
+        await AppUtils.Logs.addLog(t('app.protectLockedMessage') || '状态已锁定，无法修改', 'warning');
+        return;
+      }
       try {
         const result = await window.electronAPI.caffeinateToggle();
         if (result.success) {
@@ -341,6 +442,11 @@
     // 标题栏托盘模式按钮点击事件
     if (trayModeTitlebarBtn) {
       trayModeTitlebarBtn.addEventListener('click', async () => {
+        if (isLocked) {
+          const t = getT();
+          await AppUtils.Logs.addLog(t('app.protectLockedMessage') || '状态已锁定，无法修改', 'warning');
+          return;
+        }
         try {
           const settings = await window.electronAPI.getSettings();
           const newValue = !settings.trayMode;
