@@ -15,6 +15,7 @@
 - [kevintao0417](https://github.com/kevintao0417) - 早期发现并报告盘符命名不规范（存在空格和非法字符）导致无法正常使用 nigate 的问题
 - [ltlly](https://github.com/ltlly) - 报告 macOS 14 及其以上版本增加多个磁盘挂载的问题，以及系统预览版显示信息格式变化导致脚本解析字符串错误的问题
 - Ahmed Zidan - 邮件反馈空格密码无法识别问题、反馈增加德语支持
+- [timefoxi](https://linux.do/u/timefoxi/summary) - 发现频繁勾选取消托盘模式时，Dock 隐藏图标效果失效的问题
 
 ### 测试贡献者
 - [拾光壁纸](https://gallery.timeline.ink/) - 提供U盘识别测试帮助
