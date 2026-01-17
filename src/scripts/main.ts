@@ -36,6 +36,16 @@ app.whenReady().then(async () => {
     openAsHidden: false
   });
 
+  // 恢复禁止休眠状态
+  if (settings.preventSleep) {
+    try {
+      await caffeinateManager.start();
+      console.log('[Main] 已恢复禁止休眠状态');
+    } catch (error) {
+      console.error('[Main] 恢复禁止休眠状态失败:', error);
+    }
+  }
+
   app.on('activate', async () => {
     const settings = await SettingsManager.getSettings();
     // 在托盘模式下，点击托盘图标不应该自动显示窗口

@@ -9,6 +9,7 @@ export interface AppSettings {
   windowHeight: number;
   trayMode: boolean;
   autoStart: boolean;
+  preventSleep: boolean;
 }
 
 export interface ElectronAPI {

@@ -260,6 +260,8 @@
       try {
         const result = await window.electronAPI.caffeinateToggle();
         if (result.success) {
+          // 保存状态到设置
+          await window.electronAPI.saveSettings({ preventSleep: result.isActive });
           await syncCaffeinateButtons();
           const t = getT();
           const message = result.isActive
@@ -278,8 +280,35 @@
       }
     };
 
+    // 初始化时检查设置并恢复禁止休眠状态
+    const initPreventSleep = async () => {
+      try {
+        const settings = await window.electronAPI.getSettings();
+        const shouldBeActive = settings.preventSleep || false;
+        const currentStatus = await window.electronAPI.caffeinateStatus();
+
+        // 如果设置中启用了，但当前未激活，则启动
+        if (shouldBeActive && !currentStatus) {
+          const result = await window.electronAPI.caffeinateStart();
+          if (result.success) {
+            console.log('[Renderer] 已恢复禁止休眠状态');
+          }
+        }
+        // 如果设置中未启用，但当前已激活，则停止
+        else if (!shouldBeActive && currentStatus) {
+          await window.electronAPI.caffeinateStop();
+        }
+
+        // 更新按钮状态
+        await updateCaffeinateButtonState();
+      } catch (error) {
+        console.error('初始化禁止休眠状态失败:', error);
+        await updateCaffeinateButtonState();
+      }
+    };
+
     if (caffeinateBtn) {
-      await updateCaffeinateButtonState();
+      await initPreventSleep();
       caffeinateBtn.addEventListener('click', handleCaffeinateToggle);
     }
 

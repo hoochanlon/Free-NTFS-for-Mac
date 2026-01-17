@@ -493,6 +493,9 @@ export async function createTrayMenu(
         const result = await caffeinateManager.toggle();
         // 更新菜单项状态
         menuItem.checked = result.isActive;
+        // 保存状态到设置
+        const { SettingsManager } = await import('../utils/settings');
+        await SettingsManager.saveSettings({ preventSleep: result.isActive });
         // 广播状态变化到所有窗口
         const allWindows = BrowserWindow.getAllWindows();
         allWindows.forEach(window => {

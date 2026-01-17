@@ -22,7 +22,8 @@ const DEFAULT_SETTINGS = {
   windowWidth: WINDOW_SIZE_CONFIG.defaultWidth,
   windowHeight: WINDOW_SIZE_CONFIG.defaultHeight,
   trayMode: false, // 托盘模式，默认关闭
-  autoStart: false // 系统自启，默认关闭
+  autoStart: false, // 系统自启，默认关闭
+  preventSleep: false // 禁止休眠，默认关闭
 };
 
 export interface AppSettings {
@@ -35,6 +36,7 @@ export interface AppSettings {
   windowHeight: number;
   trayMode: boolean; // 托盘模式
   autoStart: boolean; // 系统自启
+  preventSleep: boolean; // 禁止休眠
 }
 
 /**
