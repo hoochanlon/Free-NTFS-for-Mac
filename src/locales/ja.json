@@ -6,8 +6,8 @@
     "protectLocked": "状態が保護されました",
     "protectUnlocked": "状態の保護が解除されました",
     "protectLockedMessage": "状態が保護されているため、変更できません",
-    "protectTooltip": "状態保護（3秒長押しで保護）",
-    "protectTooltipLocked": "状態が保護されています（3秒長押しで保護解除）"
+    "protectTooltip": "状態保護（3s長押しで保護）",
+    "protectTooltipLocked": "状態が保護されています（3s長押しで保護解除）"
   },
   "menu": {
     "about": "について",

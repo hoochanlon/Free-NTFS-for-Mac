@@ -6,8 +6,8 @@
     "protectLocked": "Status Protected",
     "protectUnlocked": "Status Protection Removed",
     "protectLockedMessage": "Status is protected, cannot modify",
-    "protectTooltip": "Status Protection (Long press 3 seconds to protect)",
-    "protectTooltipLocked": "Status Protected (Long press 3 seconds to remove protection)"
+    "protectTooltip": "Status Protection (Long press 3s to protect)",
+    "protectTooltipLocked": "Status Protected (Long press 3s to remove protection)"
   },
   "menu": {
     "about": "About",

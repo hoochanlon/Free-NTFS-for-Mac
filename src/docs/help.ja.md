@@ -69,7 +69,7 @@ brew install ntfs-3g-mac
 - <img src="../imgs/svg/devices/flash-auto.svg" alt="自動読み書き" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **自動読み書きアイコン** - 有効にすると、新しく挿入された NTFS デバイスが自動的に読み書きモードでマウントされます。アイコンがアクティブなときは青色で表示されます。
 - <img src="../imgs/svg/devices/tray.svg" alt="トレイモード" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **トレイモードアイコン** - 有効にすると、ウィンドウを閉じたときにアプリケーションが終了せず、システムトレイに最小化されます。アイコンがアクティブなときは紫色で表示されます。
 - <img src="../imgs/svg/system/caffe.svg" alt="スリープ防止" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **スリープ防止アイコン** - 有効にすると、システムがスリープモードに入ることを防ぎ、デバイスが継続的に利用可能であることを保証します。アイコンがアクティブなときはコーヒー色で表示されます。
-- <img src="../imgs/svg/system/protect.svg" alt="状態保護" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **状態保護アイコン** - 3秒長押しで保護状態を切り替えます。保護後、自動読み書き、トレイモード、スリープ防止機能が無効になり、誤操作を防ぎます。アイコンが保護されると緑色でパルスアニメーションが表示されます。
+- <img src="../imgs/svg/system/protect.svg" alt="状態保護" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **状態保護アイコン** - 3s長押しで保護状態を切り替えます。保護後、自動読み書き、トレイモード、スリープ防止機能が無効になり、誤操作を防ぎます。アイコンが保護されると緑色でパルスアニメーションが表示されます。
 - <img src="../imgs/svg/ui/info.svg" alt="情報" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **情報アイコン** - 情報ウィンドウを開き、アプリケーション情報とプロジェクトリンクを表示します。
 - <img src="../imgs/svg/actions/exit-red.svg" alt="終了" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **終了アイコン** - アプリケーションを終了します。
 

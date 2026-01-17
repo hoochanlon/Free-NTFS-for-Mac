@@ -6,8 +6,8 @@
     "protectLocked": "狀態已保護",
     "protectUnlocked": "狀態已解除保護",
     "protectLockedMessage": "狀態已保護，無法修改",
-    "protectTooltip": "狀態保護（長按3秒保護）",
-    "protectTooltipLocked": "狀態已保護（長按3秒解除保護）"
+    "protectTooltip": "狀態保護（長按3s保護）",
+    "protectTooltipLocked": "狀態已保護（長按3s解除保護）"
   },
   "menu": {
     "about": "關於",
