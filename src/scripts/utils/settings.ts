@@ -23,7 +23,8 @@ const DEFAULT_SETTINGS = {
   windowHeight: WINDOW_SIZE_CONFIG.defaultHeight,
   trayMode: false, // 托盘模式，默认关闭
   autoStart: false, // 系统自启，默认关闭
-  preventSleep: false // 禁止休眠，默认关闭
+  preventSleep: false, // 禁止休眠，默认关闭
+  manuallyReadOnlyDevices: [] as string[] // 用户手动设置为只读的设备列表（存储设备 disk 标识符）
 };
 
 export interface AppSettings {
@@ -37,6 +38,7 @@ export interface AppSettings {
   trayMode: boolean; // 托盘模式
   autoStart: boolean; // 系统自启
   preventSleep: boolean; // 禁止休眠
+  manuallyReadOnlyDevices?: string[]; // 用户手动设置为只读的设备列表
 }
 
 /**

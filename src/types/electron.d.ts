@@ -10,6 +10,7 @@ export interface AppSettings {
   trayMode: boolean;
   autoStart: boolean;
   preventSleep: boolean;
+  manuallyReadOnlyDevices?: string[]; // 用户手动设置为只读的设备列表（存储设备 disk 标识符）
 }
 
 export interface ElectronAPI {

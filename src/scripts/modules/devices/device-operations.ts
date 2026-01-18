@@ -131,6 +131,19 @@
         const result = await electronAPI.mountDevice(device);
 
         if (result.success) {
+          // 从手动只读列表中移除该设备，允许自动读写功能再次管理它
+          try {
+            const settings = await electronAPI.getSettings();
+            const manuallyReadOnlyDevices = settings.manuallyReadOnlyDevices || [];
+            const index = manuallyReadOnlyDevices.indexOf(device.disk);
+            if (index > -1) {
+              manuallyReadOnlyDevices.splice(index, 1);
+              await electronAPI.saveSettings({ manuallyReadOnlyDevices });
+            }
+          } catch (error) {
+            console.warn('更新手动只读设备列表失败:', error);
+          }
+
           if (result.result) {
             await addLog(result.result, 'success');
           }
@@ -177,6 +190,18 @@
         const result = await electronAPI.restoreToReadOnly(device);
 
         if (result.success) {
+          // 将设备添加到手动只读列表，防止自动读写功能再次将其设置为读写
+          try {
+            const settings = await electronAPI.getSettings();
+            const manuallyReadOnlyDevices = settings.manuallyReadOnlyDevices || [];
+            if (!manuallyReadOnlyDevices.includes(device.disk)) {
+              manuallyReadOnlyDevices.push(device.disk);
+              await electronAPI.saveSettings({ manuallyReadOnlyDevices });
+            }
+          } catch (error) {
+            console.warn('保存手动只读设备列表失败:', error);
+          }
+
           if (result.result) {
             await addLog(result.result, 'success');
           }
@@ -245,6 +270,17 @@
       const confirmed = await AppUtils.UI.showConfirm(title, message);
       if (!confirmed) {
         return;
+      }
+
+      // 将所有设备添加到手动只读列表
+      try {
+        const settings = await electronAPI.getSettings();
+        const manuallyReadOnlyDevices = settings.manuallyReadOnlyDevices || [];
+        const deviceDisks = readWriteDevices.map((d: any) => d.disk);
+        const newManuallyReadOnlyDevices = [...new Set([...manuallyReadOnlyDevices, ...deviceDisks])];
+        await electronAPI.saveSettings({ manuallyReadOnlyDevices: newManuallyReadOnlyDevices });
+      } catch (error) {
+        console.warn('保存手动只读设备列表失败:', error);
       }
 
       const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;

@@ -204,6 +204,19 @@ export async function createTrayMenu(
             label: t('devices.mount') || '配置为可读写',
             click: async () => {
               try {
+                // 从手动只读列表中移除该设备，允许自动读写功能再次管理它
+                try {
+                  const currentSettings = await SettingsManager.getSettings();
+                  const manuallyReadOnlyDevices = currentSettings.manuallyReadOnlyDevices || [];
+                  const index = manuallyReadOnlyDevices.indexOf(device.disk);
+                  if (index > -1) {
+                    manuallyReadOnlyDevices.splice(index, 1);
+                    await SettingsManager.saveSettings({ manuallyReadOnlyDevices });
+                  }
+                } catch (error) {
+                  console.warn('更新手动只读设备列表失败:', error);
+                }
+
                 // 直接在主进程中执行操作
                 await ntfsManager.mountDevice(device);
                 // 等待设备状态更新（最多等待3秒）
@@ -267,6 +280,18 @@ export async function createTrayMenu(
             label: t('devices.restoreReadOnly') || '还原为只读',
             click: async () => {
               try {
+                // 将设备添加到手动只读列表，防止自动读写功能再次将其设置为读写
+                try {
+                  const currentSettings = await SettingsManager.getSettings();
+                  const manuallyReadOnlyDevices = currentSettings.manuallyReadOnlyDevices || [];
+                  if (!manuallyReadOnlyDevices.includes(device.disk)) {
+                    manuallyReadOnlyDevices.push(device.disk);
+                    await SettingsManager.saveSettings({ manuallyReadOnlyDevices });
+                  }
+                } catch (error) {
+                  console.warn('保存手动只读设备列表失败:', error);
+                }
+
                 // 直接在主进程中执行操作
                 await ntfsManager.restoreToReadOnly(device);
                 // restoreToReadOnly 内部有1秒延迟，然后系统需要时间重新挂载
@@ -346,6 +371,17 @@ export async function createTrayMenu(
             if (readOnlyDevices.length === 0) {
               return;
             }
+            // 从手动只读列表中移除所有设备
+            try {
+              const currentSettings = await SettingsManager.getSettings();
+              const manuallyReadOnlyDevices = currentSettings.manuallyReadOnlyDevices || [];
+              const deviceDisks = readOnlyDevices.map(d => d.disk);
+              const updatedManuallyReadOnlyDevices = manuallyReadOnlyDevices.filter(disk => !deviceDisks.includes(disk));
+              await SettingsManager.saveSettings({ manuallyReadOnlyDevices: updatedManuallyReadOnlyDevices });
+            } catch (error) {
+              console.warn('更新手动只读设备列表失败:', error);
+            }
+
             for (const device of readOnlyDevices) {
               try {
                 await ntfsManager.mountDevice(device);
@@ -416,6 +452,18 @@ export async function createTrayMenu(
             if (readWriteDevices.length === 0) {
               return;
             }
+
+            // 将所有设备添加到手动只读列表
+            try {
+              const currentSettings = await SettingsManager.getSettings();
+              const manuallyReadOnlyDevices = currentSettings.manuallyReadOnlyDevices || [];
+              const deviceDisks = readWriteDevices.map(d => d.disk);
+              const newManuallyReadOnlyDevices = [...new Set([...manuallyReadOnlyDevices, ...deviceDisks])];
+              await SettingsManager.saveSettings({ manuallyReadOnlyDevices: newManuallyReadOnlyDevices });
+            } catch (error) {
+              console.warn('保存手动只读设备列表失败:', error);
+            }
+
             for (const device of readWriteDevices) {
               try {
                 await ntfsManager.restoreToReadOnly(device);
@@ -470,6 +518,57 @@ export async function createTrayMenu(
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.webContents.send('settings-updated', { autoMount: newValue });
         }
+
+        // 如果开启了自动读写功能，检查并自动挂载当前已存在的只读设备
+        if (newValue) {
+          try {
+            const devices = await ntfsManager.getNTFSDevices(true);
+            const currentSettings = await SettingsManager.getSettings();
+            const manuallyReadOnlyDevices = currentSettings.manuallyReadOnlyDevices || [];
+            const readOnlyDevices = devices.filter((d: any) =>
+              d.isReadOnly && !d.isUnmounted && !manuallyReadOnlyDevices.includes(d.disk)
+            );
+
+            if (readOnlyDevices.length > 0) {
+              // 通知主窗口显示日志（如果窗口存在）
+              if (mainWindow && !mainWindow.isDestroyed()) {
+                mainWindow.webContents.send('add-log', {
+                  message: `检测到 ${readOnlyDevices.length} 个只读设备，正在自动配置为可读写...`,
+                  type: 'info'
+                });
+              }
+
+              for (const device of readOnlyDevices) {
+                try {
+                  const result = await ntfsManager.mountDevice(device);
+                  // mountDevice 返回成功消息字符串
+                  if (mainWindow && !mainWindow.isDestroyed()) {
+                    mainWindow.webContents.send('add-log', {
+                      message: result || `设备 ${device.volumeName} 自动配置成功`,
+                      type: 'success'
+                    });
+                  }
+                } catch (error) {
+                  const errorMessage = error instanceof Error ? error.message : String(error);
+                  if (mainWindow && !mainWindow.isDestroyed()) {
+                    mainWindow.webContents.send('add-log', {
+                      message: `设备 ${device.volumeName} 自动配置失败: ${errorMessage}`,
+                      type: 'error'
+                    });
+                  }
+                }
+              }
+
+              // 通知主窗口刷新设备列表
+              if (mainWindow && !mainWindow.isDestroyed()) {
+                mainWindow.webContents.send('refresh-devices', { force: true });
+              }
+            }
+          } catch (error) {
+            console.error('检查并自动挂载现有设备失败:', error);
+          }
+        }
+
         // 立即更新托盘菜单，确保状态同步（不需要强制刷新，因为设置项本身已经更新）
         await updateMenuCallback(false);
       } catch (error) {

@@ -371,6 +371,64 @@
           const newValue = !settings.autoMount;
           await window.electronAPI.saveSettings({ autoMount: newValue });
           await updateAutoMountTitlebarButton();
+
+          // 如果开启了自动读写功能，检查并自动挂载当前已存在的只读设备
+          if (newValue) {
+            try {
+              const devices = await window.electronAPI.getNTFSDevices(true);
+              const settings = await window.electronAPI.getSettings();
+              const manuallyReadOnlyDevices = settings.manuallyReadOnlyDevices || [];
+              const readOnlyDevices = devices.filter((d: any) =>
+                d.isReadOnly && !d.isUnmounted && !manuallyReadOnlyDevices.includes(d.disk)
+              );
+
+              if (readOnlyDevices.length > 0) {
+                const t = getT();
+                await AppUtils.Logs.addLog(
+                  t('devices.autoMountingExistingDevices') || `检测到 ${readOnlyDevices.length} 个只读设备，正在自动配置为可读写...`,
+                  'info'
+                );
+
+                for (const device of readOnlyDevices) {
+                  try {
+                    const result = await window.electronAPI.mountDevice(device);
+                    if (result.success) {
+                      await AppUtils.Logs.addLog(
+                        t('devices.autoMountSuccess') || `设备 ${device.volumeName} 自动配置成功`,
+                        'success'
+                      );
+                    } else {
+                      await AppUtils.Logs.addLog(
+                        t('devices.autoMountFailed') || `设备 ${device.volumeName} 自动配置失败: ${result.error || '未知错误'}`,
+                        'error'
+                      );
+                    }
+                  } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    await AppUtils.Logs.addLog(
+                      t('devices.autoMountFailed') || `设备 ${device.volumeName} 自动配置失败: ${errorMessage}`,
+                      'error'
+                    );
+                  }
+                }
+
+                // 重新刷新设备列表以更新状态
+                if (AppModules && AppModules.Devices && AppModules.Devices.Refresh) {
+                  const devicesList = document.getElementById('devicesList') as HTMLElement;
+                  if (devicesList) {
+                    const state = {
+                      devices: devices,
+                      lastDeviceCount: devices.length,
+                      lastDeviceState: `${devices.length}-${readOnlyDevices.length}`
+                    };
+                    await AppModules.Devices.Refresh.refreshDevices(devicesList, true, state);
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('检查并自动挂载现有设备失败:', error);
+            }
+          }
         } catch (error) {
           console.error('切换自动挂载设置失败:', error);
         }
