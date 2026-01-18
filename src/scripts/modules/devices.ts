@@ -107,8 +107,16 @@
           try {
             const settings = await electronAPI.getSettings();
             if (settings.autoMount) {
-              // 自动挂载新插入的只读设备
+              // 获取手动设置为只读的设备列表
+              const manuallyReadOnlyDevices = settings.manuallyReadOnlyDevices || [];
+
+              // 自动挂载新插入的只读设备（跳过用户手动设置为只读的设备）
               for (const device of newDevices) {
+                // 如果设备在手动只读列表中，跳过自动挂载
+                if (manuallyReadOnlyDevices.includes(device.disk)) {
+                  console.log(`[主界面] 跳过自动挂载手动只读设备 ${device.volumeName} (${device.disk})`);
+                  continue;
+                }
                 try {
                   await AppUtils.Logs.addLog(`检测到新设备 ${device.volumeName}，正在自动配置为可读写...`, 'info');
                   const result = await electronAPI.mountDevice(device);

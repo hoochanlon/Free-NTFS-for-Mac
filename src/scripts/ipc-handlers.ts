@@ -123,20 +123,24 @@ export function setupNTFSHandlers(): void {
 
   ipcMain.handle('restore-to-readonly', async (event, device) => {
     try {
-      const result = await ntfsManager.restoreToReadOnly(device);
-
-      // 将设备添加到手动只读列表，防止自动读写功能再次将其设置为读写
+      // 在还原为只读之前，先将设备添加到手动只读列表，防止自动读写功能立即将其设置为读写
       try {
         const { SettingsManager } = await import('./utils/settings');
         const settings = await SettingsManager.getSettings();
-        const manuallyReadOnlyDevices = settings.manuallyReadOnlyDevices || [];
+        // 创建新数组，避免直接修改原数组引用
+        const manuallyReadOnlyDevices = [...(settings.manuallyReadOnlyDevices || [])];
         if (!manuallyReadOnlyDevices.includes(device.disk)) {
           manuallyReadOnlyDevices.push(device.disk);
           await SettingsManager.saveSettings({ manuallyReadOnlyDevices });
+          console.log(`[IPC] 已将设备 ${device.volumeName} (${device.disk}) 添加到手动只读列表（操作前），当前列表:`, manuallyReadOnlyDevices);
+        } else {
+          console.log(`[IPC] 设备 ${device.volumeName} (${device.disk}) 已在手动只读列表中`);
         }
       } catch (error) {
         console.warn('[restore-to-readonly] 保存手动只读设备列表失败:', error);
       }
+
+      const result = await ntfsManager.restoreToReadOnly(device);
 
       // 事件驱动：操作完成后立即更新托盘菜单
       // restoreToReadOnly 需要更长时间，等待系统重新挂载

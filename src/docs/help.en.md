@@ -109,6 +109,35 @@ For devices in read-only status, you can click the "Configure as Read-Write" but
   - System permission issues
 - Please safely eject the device after mounting to avoid data loss
 
+### Auto Read-Write Feature
+
+The auto read-write feature allows you to automatically mount newly inserted NTFS devices in read-write mode without manual operation.
+
+**How to Enable:**
+
+- Click the auto read-write icon (<img src="../imgs/svg/devices/flash-auto.svg" alt="Auto Read-Write" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;">) in the title bar. The icon turns blue when enabled
+- Check the "Auto Read-Write" option in the tray menu
+- Toggle the auto read-write button in the main interface title bar
+
+**Features:**
+
+- **Auto-detect New Devices**: When you insert a new NTFS device, the app will automatically detect and mount it in read-write mode
+- **Smart Skip Manually Read-Only Devices**: If you manually set a device to read-only, the auto read-write feature will respect your choice and will not mount it as read-write again
+- **Auto-process Existing Devices When Enabled**: When you enable the auto read-write feature, the app will automatically check currently connected read-only devices (excluding those you manually set to read-only) and attempt to mount them in read-write mode
+
+**Use Cases:**
+
+- Frequently using multiple NTFS devices and want automatic mounting without manual operation each time
+- When batch processing multiple devices, you can enable the auto read-write feature once
+- When temporarily needing automatic mounting, you can turn it on or off at any time
+
+**Notes:**
+
+- The auto read-write feature requires administrator privileges. You will be prompted for a password on the first mount
+- If you manually set a device to read-only, that device will be added to the "manually read-only devices" list, and the auto read-write feature will not mount it again
+- If you manually mount a device as read-write, that device will be removed from the "manually read-only devices" list, and the auto read-write feature can work normally on it afterwards
+- The auto read-write feature does not affect your manual operations. You can manually mount or unmount devices at any time
+
 ### Unmount Device
 
 For mounted devices, you can click the "Unmount" button to unmount them. Unmounting requires administrator privileges.

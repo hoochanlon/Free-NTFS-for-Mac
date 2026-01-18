@@ -15,6 +15,7 @@
 - 📱 **实时监控** - 自动检测 NTFS 设备接入
 - ✅ **依赖检查** - 自动检查并安装所需系统依赖
 - 🔄 **一键挂载** - 轻松将只读 NTFS 设备挂载为读写模式
+- ⚡ **自动读写** - 启用后，新插入的 NTFS 设备会自动挂载为读写模式，无需手动操作。智能跳过您手动设置为只读的设备，尊重您的选择
 - 📊 **状态显示** - 清晰显示设备状态和操作日志
 - 🛡️ **安全可靠** - 使用 Electron 安全最佳实践
 - ☕ **禁止休眠** - 一键开启/关闭系统休眠防止功能，确保长时间操作时系统保持唤醒状态
@@ -35,13 +36,19 @@
    - 对于只读设备，点击"挂载为读写"按钮
    - 输入管理员密码完成挂载
 
-3. **禁止休眠功能**
+3. **自动读写功能**
+   - 在标题栏点击自动读写图标（<img src="src/imgs/svg/devices/flash-auto.svg" alt="自动读写" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;">）启用自动读写功能
+   - 启用后，新插入的 NTFS 设备会自动挂载为读写模式，无需手动操作
+   - 如果您手动将某个设备设置为只读，自动读写功能会尊重您的选择，不会再次将其挂载为读写模式
+   - 当您启用自动读写功能时，应用会自动检查当前已连接的只读设备（不包括您手动设置为只读的设备），并尝试将它们挂载为读写模式
+
+4. **禁止休眠功能**
    - 在标题栏、主界面操作区域或托盘窗口中点击"禁止休眠"按钮
    - 启用后，系统将保持唤醒状态，防止进入休眠模式
    - 适用于长时间文件传输或批量操作场景
    - 操作完成后可随时关闭，节省系统资源
 
-4. **状态保护功能**
+5. **状态保护功能**
    - 在标题栏或托盘窗口中长按"状态保护"图标3s可切换保护状态
    - 保护后，自动读写、托盘模式和防止休眠功能将被禁用，防止误操作
    - 图标保护后显示为绿色并带有脉冲动画
@@ -243,6 +250,7 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 - 📱 **Real-time Monitoring** - Automatically detects NTFS device connections
 - ✅ **Dependency Check** - Automatically checks and installs required system dependencies
 - 🔄 **One-Click Mount** - Easily mount read-only NTFS devices in read-write mode
+- ⚡ **Auto Read-Write** - When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode without manual operation. Intelligently skips devices you manually set to read-only, respecting your choices
 - 📊 **Status Display** - Clearly displays device status and operation logs
 - 🛡️ **Secure & Reliable** - Uses Electron security best practices
 - ☕ **Prevent Sleep** - One-click toggle to prevent system sleep, ensuring the system stays awake during long operations
@@ -263,13 +271,19 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
    - For read-only devices, click the "Mount as Read-Write" button
    - Enter administrator password to complete mounting
 
-3. **No Sleep Feature**
+3. **Auto Read-Write Feature**
+   - Click the auto read-write icon (<img src="src/imgs/svg/devices/flash-auto.svg" alt="Auto Read-Write" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;">) in the title bar to enable the auto read-write feature
+   - When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode without manual operation
+   - If you manually set a device to read-only, the auto read-write feature will respect your choice and will not mount it as read-write again
+   - When you enable the auto read-write feature, the app will automatically check currently connected read-only devices (excluding those you manually set to read-only) and attempt to mount them in read-write mode
+
+4. **No Sleep Feature**
    - Click the "No Sleep" button in the title bar, main interface action area, or tray window
    - When enabled, the system will stay awake and prevent entering sleep mode
    - Suitable for long file transfers or batch operations
    - Can be turned off at any time after completion to save system resources
 
-4. **Status Protection Feature**
+5. **Status Protection Feature**
    - Long press the "Status Protection" icon for 3s in the title bar or tray window to toggle protection status
    - When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations
    - The icon appears green with a pulse animation when protected
@@ -474,6 +488,7 @@ Thank you to all developers, testers, and users who have contributed to this pro
 - 📱 **リアルタイム監視** - NTFS デバイスの接続を自動検出
 - ✅ **依存関係チェック** - 必要なシステム依存関係を自動チェック・インストール
 - 🔄 **ワンクリックマウント** - 読み取り専用 NTFS デバイスを読み書きモードで簡単にマウント
+- ⚡ **自動読み書き** - 有効にすると、新しく挿入された NTFS デバイスが自動的に読み書きモードでマウントされ、手動操作は不要です。手動で読み取り専用に設定したデバイスをインテリジェントにスキップし、ユーザーの選択を尊重します
 - 📊 **ステータス表示** - デバイスの状態と操作ログを明確に表示
 - 🛡️ **安全で信頼性が高い** - Electron のセキュリティベストプラクティスを使用
 - ☕ **スリープ防止** - ワンクリックでシステムスリープを防止し、長時間の操作中もシステムを起動状態に保つ
@@ -494,13 +509,19 @@ Thank you to all developers, testers, and users who have contributed to this pro
    - 読み取り専用デバイスの場合、「読み書きとしてマウント」ボタンをクリック
    - 管理者パスワードを入力してマウントを完了
 
-3. **スリープ防止機能**
+3. **自動読み書き機能**
+   - タイトルバーの自動読み書きアイコン（<img src="src/imgs/svg/devices/flash-auto.svg" alt="自動読み書き" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;">）をクリックして自動読み書き機能を有効にします
+   - 有効にすると、新しく挿入された NTFS デバイスが自動的に読み書きモードでマウントされ、手動操作は不要です
+   - 手動でデバイスを読み取り専用に設定した場合、自動読み書き機能はユーザーの選択を尊重し、再度読み書きモードでマウントすることはありません
+   - 自動読み書き機能を有効にすると、アプリケーションは現在接続されている読み取り専用デバイス（手動で読み取り専用に設定したデバイスを除く）を自動的にチェックし、それらを読み書きモードでマウントしようとします
+
+4. **スリープ防止機能**
    - タイトルバー、メインインターフェースの操作領域、またはトレイウィンドウで「スリープ防止」ボタンをクリック
    - 有効にすると、システムは起動状態を維持し、スリープモードに入ることを防ぎます
    - 長時間のファイル転送やバッチ操作に適しています
    - 操作完了後はいつでもオフにして、システムリソースを節約できます
 
-4. **状態保護機能**
+5. **状態保護機能**
    - タイトルバーまたはトレイウィンドウで「状態保護」アイコンを3s長押しして保護状態を切り替えます
    - 保護後、自動読み書き、トレイモード、スリープ防止機能が無効になり、誤操作を防ぎます
    - アイコンが保護されると緑色でパルスアニメーションが表示されます
