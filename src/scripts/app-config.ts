@@ -112,7 +112,10 @@ async function ensureWindowVisible(): Promise<boolean> {
           mainWindow.webContents.once('dom-ready', onDomReady);
           // 设置超时，避免无限等待
           setTimeout(() => {
-            mainWindow?.webContents.removeListener('dom-ready', onDomReady);
+            // 检查窗口和 webContents 是否仍然有效，避免访问已销毁的对象
+            if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.webContents.isDestroyed()) {
+              mainWindow.webContents.removeListener('dom-ready', onDomReady);
+            }
             resolve();
           }, 3000);
         }
