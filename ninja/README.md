@@ -28,10 +28,17 @@ pnpm run build:arm64
 ```
 
 **打包流程：**
-1. 同步版本号
-2. 编译 TypeScript 代码
-3. 编译 Stylus 样式文件
-4. 使用 electron-builder 打包
+1. 根据系统语言自动选择 DMG 使用说明文件（国际化支持）
+2. 同步版本号
+3. 编译 TypeScript 代码
+4. 编译 Stylus 样式文件
+5. 使用 electron-builder 打包
+
+**使用说明文件：**
+- DMG 中包含一个多语言 README.txt 文件
+- 该文件同时包含：英文、日文、中文三种语言
+- 文件位于 `dmg-docs/README.txt`
+- 用户可以根据自己的语言选择阅读对应的部分
 
 **输出位置：** `dist/` 目录
 

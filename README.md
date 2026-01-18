@@ -171,6 +171,39 @@ pnpm run setup
 - 使用 `./ninja/build.sh` 脚本进行更灵活的打包
 - 首次运行可能需要右键点击应用选择"打开"（macOS 安全限制）
 
+#### DMG 安装说明
+
+下载 DMG 文件后，按照以下步骤安装：
+
+1. **安装应用**
+   - 打开 DMG 文件
+   - 将 `Nigate.app` 拖拽到右侧的「应用程序」文件夹
+
+2. **首次运行解锁（如果遇到安全提示）**
+
+   如果首次运行时提示"无法打开，因为无法验证开发者"，请按照以下步骤解锁应用：
+
+   **方法一：推荐**
+   - 打开「终端」应用（在「应用程序」>「实用工具」中）
+   - 复制并运行以下命令：
+     ```bash
+     xattr -cr /Applications/Nigate.app
+     ```
+   - 然后再次尝试打开应用
+
+   **方法二：如果方法一无效**
+   - 在终端运行以下命令禁用 Gatekeeper：
+     ```bash
+     sudo spctl --master-disable
+     ```
+   - 然后在「系统设置」>「隐私与安全性」中选择「任何来源」选项
+
+3. **重要提示**
+   - 解锁命令中的路径请根据实际安装位置调整
+   - 如果应用安装在其他位置，请修改命令中的路径
+   - 例如：如果安装在桌面，命令为：`xattr -cr ~/Desktop/Nigate.app`
+   - DMG 中包含的 `README.txt` 文件也提供了多语言（英文/日文/中文）的详细安装说明
+
 ## 故障排除
 
 ### 挂载失败
@@ -369,6 +402,39 @@ After packaging, the following will be generated in the `dist` directory:
 - Use `./ninja/build.sh` script for more flexible packaging
 - First run may require right-clicking the application and selecting "Open" (macOS security restrictions)
 
+#### DMG Installation Instructions
+
+After downloading the DMG file, follow these steps to install:
+
+1. **Install Application**
+   - Open the DMG file
+   - Drag `Nigate.app` to the "Applications" folder on the right
+
+2. **First Run Unlock (if security prompt appears)**
+
+   If you see "Nigate.app cannot be opened because the developer cannot be verified" when first launching, please follow these steps to unlock the app:
+
+   **Method 1: Recommended**
+   - Open "Terminal" app (in Applications > Utilities)
+   - Copy and run the following command:
+     ```bash
+     xattr -cr /Applications/Nigate.app
+     ```
+   - Then try opening the app again
+
+   **Method 2: If Method 1 doesn't work**
+   - Run the following command in Terminal to disable Gatekeeper:
+     ```bash
+     sudo spctl --master-disable
+     ```
+   - Then go to "System Settings" > "Privacy & Security" and select "Anywhere" option
+
+3. **Important Notes**
+   - Adjust the path in the unlock command based on your actual installation location
+   - If the app is installed elsewhere, modify the path in the command accordingly
+   - Example: If installed on Desktop, the command would be: `xattr -cr ~/Desktop/Nigate.app`
+   - The `README.txt` file included in the DMG also provides detailed installation instructions in multiple languages (English/Japanese/Chinese)
+
 ### Troubleshooting
 
 #### Mount Failure
@@ -566,6 +632,40 @@ pnpm run setup
 **その他のパッケージングオプション**:
 - `./ninja/build.sh` スクリプトを使用してより柔軟なパッケージングを行う
 - 初回実行時は、アプリケーションを右クリックして「開く」を選択する必要がある場合があります（macOS セキュリティ制限）
+
+#### DMG インストール手順
+
+DMG ファイルをダウンロードした後、以下の手順でインストールしてください：
+
+1. **アプリケーションのインストール**
+   - DMG ファイルを開く
+   - `Nigate.app` を右側の「アプリケーション」フォルダにドラッグしてください
+
+2. **初回実行時の解除（セキュリティプロンプトが表示された場合）**
+
+   初回起動時に「開発元を確認できないため、Nigate.app を開けません」
+   と表示される場合は、以下の手順でアプリを解除してください：
+
+   **方法1：推奨**
+   - 「ターミナル」アプリ（「アプリケーション」>「ユーティリティ」内）を開く
+   - 以下のコマンドをコピーして実行してください：
+     ```bash
+     xattr -cr /Applications/Nigate.app
+     ```
+   - その後、再度アプリを開いてみてください
+
+   **方法2：方法1が効かない場合**
+   - ターミナルで以下のコマンドを実行して Gatekeeper を無効化します：
+     ```bash
+     sudo spctl --master-disable
+     ```
+   - その後、「システム設定」>「プライバシーとセキュリティ」で「すべてのソース」オプションを選択してください
+
+3. **重要な注意事項**
+   - 解除コマンドのパスは、実際のインストール場所に応じて調整してください
+   - アプリが他の場所にインストールされている場合は、コマンド内のパスを変更してください
+   - 例：デスクトップにインストールした場合、コマンドは：`xattr -cr ~/Desktop/Nigate.app`
+   - DMG に含まれる `README.txt` ファイルにも、複数言語（英語/日本語/中国語）での詳細なインストール手順が記載されています
 
 ### トラブルシューティング
 
