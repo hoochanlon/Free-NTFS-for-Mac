@@ -42,17 +42,42 @@
   // 加载语言文件
   async function loadLanguage(lang: SupportedLanguage): Promise<void> {
     try {
-      const response = await fetch(`../locales/${lang}.json`);
-      if (response.ok) {
-        translations = await response.json();
-        currentLanguage = lang;
-        // 更新 HTML lang 属性
-        document.documentElement.lang = lang;
-      } else {
-        console.error(`Failed to load language file: ${lang}.json`);
+      // 尝试多个可能的路径
+      const possiblePaths = [
+        `../locales/${lang}.json`,
+        `./locales/${lang}.json`,
+        `locales/${lang}.json`,
+        `../../locales/${lang}.json`
+      ];
+
+      let loaded = false;
+      for (const path of possiblePaths) {
+        try {
+          const response = await fetch(path);
+          if (response.ok) {
+            translations = await response.json();
+            currentLanguage = lang;
+            // 更新 HTML lang 属性
+            document.documentElement.lang = lang;
+            loaded = true;
+            console.log(`Language file loaded successfully: ${path}`);
+            break;
+          }
+        } catch (e) {
+          // 继续尝试下一个路径
+          continue;
+        }
+      }
+
+      if (!loaded) {
+        console.error(`Failed to load language file: ${lang}.json from any path`);
         // 如果加载失败，尝试加载默认语言（中文）
         if (lang !== 'zh-CN') {
           await loadLanguage('zh-CN');
+        } else {
+          // 如果连默认语言都加载失败，使用空对象避免错误
+          translations = {};
+          console.warn('Using empty translations object');
         }
       }
     } catch (error) {
@@ -60,12 +85,21 @@
       // 如果加载失败，尝试加载默认语言（中文）
       if (lang !== 'zh-CN') {
         await loadLanguage('zh-CN');
+      } else {
+        // 如果连默认语言都加载失败，使用空对象避免错误
+        translations = {};
+        console.warn('Using empty translations object');
       }
     }
   }
 
   // 获取翻译文本
   function t(key: string, params?: Record<string, string | number>): string {
+    // 如果 translations 为空或未初始化，返回 key（不输出警告，避免控制台噪音）
+    if (!translations || Object.keys(translations).length === 0) {
+      return key;
+    }
+
     const keys = key.split('.');
     let value: any = translations;
 
@@ -73,13 +107,28 @@
       if (value && typeof value === 'object' && k in value) {
         value = value[k];
       } else {
-        console.warn(`Translation key not found: ${key}`);
+        // 只在开发模式下显示警告，避免生产环境的控制台噪音
+        if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') {
+          console.warn(`Translation key not found: ${key}`);
+        }
         return key; // 如果找不到翻译，返回 key
       }
     }
 
     if (typeof value !== 'string') {
-      console.warn(`Translation value is not a string: ${key}`);
+      // 只在开发模式下显示警告
+      if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') {
+        console.warn(`Translation value is not a string: ${key}`);
+      }
+      return key;
+    }
+
+    // 如果翻译值为空字符串，返回 key 作为后备
+    if (value === '') {
+      // 只在开发模式下显示警告
+      if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') {
+        console.warn(`Translation value is empty string: ${key}`);
+      }
       return key;
     }
 

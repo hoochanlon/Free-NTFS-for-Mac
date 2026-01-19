@@ -1,4 +1,4 @@
-import { BrowserWindow, app, Event, screen } from 'electron';
+import { BrowserWindow, app, screen } from 'electron';
 import * as path from 'path';
 import { SettingsManager, WINDOW_SIZE_CONFIG } from './utils/settings';
 import { isTrayInitialized, getTrayBounds } from './utils/tray-manager';
@@ -55,7 +55,7 @@ export async function createMainWindow(): Promise<BrowserWindow> {
     console.error('__dirname:', __dirname);
   });
 
-  mainWindow.webContents.on('did-fail-load', (event: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
+  mainWindow.webContents.on('did-fail-load', (_event: any, errorCode: number, errorDescription: string, validatedURL: string) => {
     console.error('Failed to load page:', errorCode, errorDescription, validatedURL);
   });
 
@@ -93,7 +93,7 @@ export async function createMainWindow(): Promise<BrowserWindow> {
   });
 
   // 监听窗口关闭事件，如果启用托盘模式则最小化到托盘
-  mainWindow.on('close', async (event) => {
+  mainWindow.on('close', async (event: any) => {
     const settings = await SettingsManager.getSettings();
     if (settings.trayMode && isTrayInitialized()) {
       // 如果启用托盘模式，隐藏窗口而不是关闭
@@ -346,7 +346,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
   const trayDevicesPath = path.join(appPath, 'src', 'html', 'devices.html');
 
   // 监听加载错误
-  trayDevicesWindow.webContents.on('did-fail-load', (event: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
+  trayDevicesWindow.webContents.on('did-fail-load', (_event: any, errorCode: number, errorDescription: string, validatedURL: string) => {
     console.error('托盘设备窗口加载失败:', errorCode, errorDescription, validatedURL);
   });
 
