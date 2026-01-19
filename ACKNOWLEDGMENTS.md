@@ -3,6 +3,7 @@
 ## 贡献者
 
 - [@zhengxs2018](https://github.com/zhengxs2018) - 参与依赖脚本检查测试
+- [@zhangzjjjjjj](https://github.com/zhangzjjjjjj) - 提供 ext4 使用率信息帮助
 
 <!-- 在此添加贡献者。可以使用 GitHub 用户名或全名。 -->
 <!-- 示例格式：
