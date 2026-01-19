@@ -108,12 +108,14 @@ fi
 check_dmg_readme() {
   echo -e "${GREEN}检查 DMG 使用说明文件...${NC}"
 
-  # 检查多语言 README.txt 是否存在
-  if [ -f "dmg-docs/README.txt" ]; then
+  # 检查多语言 README.txt 是否存在（从 docs 文件夹）
+  if [ -f "docs/README.txt" ]; then
     echo -e "${GREEN}✓ 多语言使用说明文件 README.txt 已准备就绪${NC}"
+    # 将 README.txt 复制到项目根目录（DMG 中使用）
+    cp "docs/README.txt" "README.txt"
   else
     echo -e "${YELLOW}⚠️  警告: 未找到 README.txt 使用说明文件${NC}"
-    echo -e "${YELLOW}   请确保 dmg-docs/README.txt 文件存在${NC}"
+    echo -e "${YELLOW}   请确保 docs/README.txt 文件存在${NC}"
   fi
 }
 
@@ -198,5 +200,12 @@ fi
 # 打包完成，显示结果
 # ============================================================
 echo -e "${GREEN}打包完成！文件位于 dist 目录${NC}"
+
+# 清理临时生成的 README.txt 文件
+if [ -f "README.txt" ]; then
+  rm -f "README.txt"
+  echo -e "${GREEN}✓ 已清理临时文件 README.txt${NC}"
+fi
+
 # ls -lh: 列出文件，-l 显示详细信息，-h 显示人类可读的文件大小
 ls -lh dist/

@@ -51,8 +51,7 @@
       "cache": ".electron-cache"
     },
     "directories": {
-      "output": "dist",
-      "buildResources": "dmg-docs"
+      "output": "dist"
     },
     "files": [
       "scripts/**/*",
@@ -84,8 +83,6 @@
       "icon": "src/imgs/ico/flash.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
-      "entitlements": "dmg-docs/entitlements.mac.plist",
-      "entitlementsInherit": "dmg-docs/entitlements.mac.plist",
       "extendInfo": {
         "NSHighResolutionCapable": true,
         "NSRequiresAquaSystemAppearance": false
