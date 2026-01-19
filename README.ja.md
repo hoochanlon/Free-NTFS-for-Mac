@@ -81,6 +81,14 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 
 [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags) からダウンロードして使用。
 
+**メインインターフェース**
+
+![ ](src/imgs/example/2026-01-18-01.08.15.png)
+
+**トレイ**
+
+![ ](src/imgs/example/2026-01-16_10-41-58.png)
+
 ### 依存関係管理
 
 #### ワンクリック依存関係インストール

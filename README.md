@@ -80,7 +80,14 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 ## 图形化软件版（Electron）
 
 - 下载地址见 [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags)
-- 主界面预览与托盘示例请参见仓库中的截图
+
+主界面：
+
+![ ](src/imgs/example/2026-01-18-01.08.15.png)
+
+托盘：
+
+![ ](src/imgs/example/2026-01-16_10-41-58.png)
 
 ## 依赖管理
 

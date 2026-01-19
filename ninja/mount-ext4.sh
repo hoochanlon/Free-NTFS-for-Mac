@@ -25,7 +25,7 @@ fi
 echo ">>> 发现设备: /dev/$DEVICE_ID (卷名: ${VOL_NAME:-待挂载后检测})"
 
 # 3. 清理旧挂载防止冲突
-sudo anylinuxfs unmount -a > /dev/null 2>&1
+sudo anylinuxfs unmount > /dev/null 2>&1
 
 # 4. 执行挂载
 echo ">>> 正在执行挂载..."
