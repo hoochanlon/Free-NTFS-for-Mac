@@ -18,13 +18,11 @@
 | `shuriken.sh` | Shell | システム権限の設定 | 権限問題発生時 |
 | `download-electron.sh` | Shell | Electron のダウンロード | ネットワーク問題発生時 |
 | `restart-watch.sh` | Shell | TypeScript Watch の再起動 | 開発時 |
-| `cleanup-git-history.sh` | Shell | Git 履歴のクリーンアップ | リポジトリサイズが大きすぎる時 |
+| `okugi.sh` | Shell | Git 履歴のクリーンアップ | リポジトリサイズが大きすぎる時 |
 | `sync-version.js` | JavaScript | バージョン番号の同期 | リリース前 |
 | `filter-tsc-output.js` | JavaScript | TypeScript 出力のフィルタリング | 開発時（自動） |
 | `test-modules-cli.js` | JavaScript | モジュールテスト（コマンドライン） | テスト時 |
 | `test-modules-enhanced.html` | HTML | モジュールテストページ | テスト時 |
-| `anylinuxfs-readme.md` | Markdown | anylinuxfs ツールのドキュメント | 参考資料 |
-| `kamui.sh 多语言支持说明.md` | Markdown | kamui.sh 多言語使用説明 | 参考資料 |
 
 ## 🚀 クイックスタート
 
