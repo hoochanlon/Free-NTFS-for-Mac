@@ -4,9 +4,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Electron build output
+# build output
 dist/
 build/
+fuse-ext2.build
 out/
 .electron-cache/
 
