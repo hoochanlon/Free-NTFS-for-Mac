@@ -14,40 +14,8 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 - ☕ **Prevent Sleep** - One-click toggle to prevent system sleep, ensuring the system stays awake during long operations
 - 🍃 **Status Protection** - Long press for 3s to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations
 
-### Usage Instructions
-
-#### First Time Use
-
-1. **Check System Dependencies**
-   - After opening the application, click the "Check Dependencies" button
-   - The system will automatically check required dependencies (Xcode Command Line Tools, Homebrew, MacFUSE, ntfs-3g)
-   - If any dependencies are missing, click "Install Missing Dependencies" to install them
-
-2. **Mount NTFS Devices**
-   - Insert an NTFS-formatted removable storage device
-   - The application will automatically detect the device (refreshes every 5 seconds)
-   - For read-only devices, click the "Mount as Read-Write" button
-   - Enter administrator password to complete mounting
-
-3. **Auto Read-Write Feature**
-   - Click the auto read-write icon (<img src="src/imgs/svg/devices/flash-auto.svg" alt="Auto Read-Write" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;">) in the title bar to enable the auto read-write feature
-   - When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode without manual operation
-   - If you manually set a device to read-only, the auto read-write feature will respect your choice and will not mount it as read-write again
-   - When you enable the auto read-write feature, the app will automatically check currently connected read-only devices (excluding those you manually set to read-only) and attempt to mount them in read-write mode
-
-4. **No Sleep Feature**
-   - Click the "No Sleep" button in the title bar, main interface action area, or tray window
-   - When enabled, the system will stay awake and prevent entering sleep mode
-   - Suitable for long file transfers or batch operations
-   - Can be turned off at any time after completion to save system resources
-
-5. **Status Protection Feature**
-   - Long press the "Status Protection" icon for 3s in the title bar or tray window to toggle protection status
-   - When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations
-   - The icon appears green with a pulse animation when protected
-   - Long press again for 3s to remove protection
-
 ### Important Notes
+
 
 - **Administrator Privileges**: Mounting operations require administrator privileges, and the system will prompt for a password
 - **Windows Fast Startup**: If the device uses Fast Startup in Windows, mounting may fail. It is recommended to fully shut down (not hibernate) in Windows, or disable Fast Startup
