@@ -1,3 +1,130 @@
+# 🥷 忍者ツールセット
+
+このフォルダには、プロジェクトの開発、ビルド、テストに必要な各種スクリプトとツールファイルが含まれています。
+
+## 📁 ファイル一覧
+
+| ファイル名 | タイプ | 機能 | 使用頻度 |
+|--------|------|------|----------|
+| `build.sh` | Shell | アプリケーションのパッケージング | リリース時 |
+| `build-clean.sh` | Shell | ビルドキャッシュのクリーンアップ | ビルド問題発生時 |
+| `setup.sh` | Shell | プロジェクトの初期化 | 初回/問題修正時 |
+| `kunai.sh` | Shell | 依存関係のインストール | 初回/依存関係更新時 |
+| `ninpo.sh` | Shell | 依存関係のアンインストール | アンインストール時 |
+| `nigate.sh` | Shell | NTFS 自動マウント | 日常使用 |
+| `kamui.sh` | Shell | Linux ファイルシステムのマウント | Linux パーティションにアクセスする必要がある時 |
+| `kamui-lang.sh` | Shell | kamui.sh 多言語サポート | 自動読み込み |
+| `fix-electron.sh` | Shell | Electron の修復 | Electron 問題発生時 |
+| `shuriken.sh` | Shell | システム権限の設定 | 権限問題発生時 |
+| `download-electron.sh` | Shell | Electron のダウンロード | ネットワーク問題発生時 |
+| `restart-watch.sh` | Shell | TypeScript Watch の再起動 | 開発時 |
+| `cleanup-git-history.sh` | Shell | Git 履歴のクリーンアップ | リポジトリサイズが大きすぎる時 |
+| `sync-version.js` | JavaScript | バージョン番号の同期 | リリース前 |
+| `filter-tsc-output.js` | JavaScript | TypeScript 出力のフィルタリング | 開発時（自動） |
+| `test-modules-cli.js` | JavaScript | モジュールテスト（コマンドライン） | テスト時 |
+| `test-modules-enhanced.html` | HTML | モジュールテストページ | テスト時 |
+| `anylinuxfs-readme.md` | Markdown | anylinuxfs ツールのドキュメント | 参考資料 |
+| `kamui.sh 多语言支持说明.md` | Markdown | kamui.sh 多言語使用説明 | 参考資料 |
+
+## 🚀 クイックスタート
+
+### 初回プロジェクト使用
+
+```bash
+# 1. 依存関係のインストール
+pnpm install
+
+# 2. プロジェクトの初期化
+pnpm run setup
+
+# 3. システム依存関係のインストール（オプション）
+./ninja/kunai.sh
+
+# 4. 開発を開始
+pnpm run dev
+```
+
+### アプリケーションのビルド
+
+```bash
+# 基本ビルド
+pnpm run build
+
+# クリーン後にビルド
+pnpm run build:clean
+
+# DMG のみビルド
+pnpm run build:dmg
+```
+
+### NTFS 読み書き機能の使用
+
+```bash
+# 自動マウントスクリプトを実行
+./ninja/nigate.sh
+
+# 言語を設定
+LANG=zh_CN ./ninja/nigate.sh  # 中国語
+LANG=en_US ./ninja/nigate.sh  # 英語
+LANG=ja_JP ./ninja/nigate.sh  # 日本語
+```
+
+### Linux ファイルシステムのマウント
+
+```bash
+# 自動検出してマウント
+./ninja/kamui.sh
+
+# デバイスを指定
+./ninja/kamui.sh /dev/disk4s1
+
+# ntfs3 ドライバを使用（パフォーマンス向上）
+./ninja/kamui.sh /dev/disk4s1 -t ntfs3
+
+# 利用可能なデバイスを一覧表示
+./ninja/kamui.sh --list
+
+# デバイスをアンマウント
+./ninja/kamui.sh --unmount
+
+# 言語を設定
+LANG=zh_CN ./ninja/kamui.sh  # 中国語
+LANG=en_US ./ninja/kamui.sh  # 英語
+LANG=ja_JP ./ninja/kamui.sh  # 日本語
+```
+
+### よく使う操作
+
+```bash
+# バージョン番号を更新
+pnpm run sync-version
+
+# Electron インストール問題の修復
+./ninja/fix-electron.sh
+
+# システム権限の設定
+./ninja/shuriken.sh
+
+# ビルドキャッシュのクリーンアップ
+./ninja/build-clean.sh
+
+# 依存関係のアンインストール
+./ninja/ninpo.sh
+```
+
+## 📝 注意事項
+
+1. **パス参照：** すべてのスクリプトはプロジェクトルートディレクトリから実行することを想定しています
+2. **権限要件：** 一部のスクリプト（`nigate.sh`、`kunai.sh` など）には管理者権限が必要です
+3. **言語サポート：** 多言語対応のスクリプトは `LANG` 環境変数で言語を設定できます
+
+---
+
+**最終更新：** 2026-01-20
+
+
+<!--
+
 # 🥷 忍者工具集
 
 本文件夹包含项目开发、构建和测试所需的各种脚本和工具文件。
@@ -121,3 +248,6 @@ pnpm run sync-version
 ---
 
 **最后更新：** 2026-01-20
+
+
+-->
