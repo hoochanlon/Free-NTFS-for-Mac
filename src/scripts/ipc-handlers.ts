@@ -1,4 +1,4 @@
-import { ipcMain, dialog, shell, BrowserWindow } from 'electron';
+import { ipcMain, dialog, shell, BrowserWindow, type IpcMainInvokeEvent } from 'electron';
 import ntfsManager from './ntfs-manager';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -56,11 +56,11 @@ export function setupNTFSHandlers(): void {
     return await ntfsManager.checkDependencies();
   });
 
-  ipcMain.handle('get-ntfs-devices', async (event, forceRefresh: boolean = false) => {
+  ipcMain.handle('get-ntfs-devices', async (event: IpcMainInvokeEvent, forceRefresh: boolean = false) => {
     return await ntfsManager.getNTFSDevices(forceRefresh);
   });
 
-  ipcMain.handle('mount-device', async (event, device) => {
+  ipcMain.handle('mount-device', async (event: IpcMainInvokeEvent, device: any) => {
     try {
       const result = await ntfsManager.mountDevice(device);
 
@@ -99,7 +99,7 @@ export function setupNTFSHandlers(): void {
     }
   });
 
-  ipcMain.handle('unmount-device', async (event, device) => {
+  ipcMain.handle('unmount-device', async (event: IpcMainInvokeEvent, device: any) => {
     try {
       const result = await ntfsManager.unmountDevice(device);
       // 事件驱动：操作完成后立即更新托盘菜单
@@ -121,7 +121,7 @@ export function setupNTFSHandlers(): void {
     }
   });
 
-  ipcMain.handle('restore-to-readonly', async (event, device) => {
+  ipcMain.handle('restore-to-readonly', async (event: IpcMainInvokeEvent, device: any) => {
     try {
       // 在还原为只读之前，先将设备添加到手动只读列表，防止自动读写功能立即将其设置为读写
       try {
@@ -163,7 +163,7 @@ export function setupNTFSHandlers(): void {
     }
   });
 
-  ipcMain.handle('eject-device', async (event, device) => {
+  ipcMain.handle('eject-device', async (event: IpcMainInvokeEvent, device: any) => {
     try {
       const result = await ntfsManager.ejectDevice(device);
       // 事件驱动：操作完成后立即更新托盘菜单
@@ -190,7 +190,7 @@ export function setupNTFSHandlers(): void {
   // 但是每个窗口都需要注册自己的事件监听器来接收设备变化事件
   let hybridDetectionInitialized = false;
 
-  ipcMain.handle('start-hybrid-detection', async (event) => {
+  ipcMain.handle('start-hybrid-detection', async (event: IpcMainInvokeEvent) => {
     try {
       // 只在第一次调用时初始化混合检测（避免重复初始化）
       if (!hybridDetectionInitialized) {
@@ -238,7 +238,7 @@ export function setupNTFSHandlers(): void {
     }
   });
 
-  ipcMain.handle('update-window-visibility', async (event, isVisible: boolean) => {
+  ipcMain.handle('update-window-visibility', async (event: IpcMainInvokeEvent, isVisible: boolean) => {
     try {
       ntfsManager.updateWindowVisibility(isVisible);
       return { success: true };
@@ -255,7 +255,7 @@ export function setupNTFSHandlers(): void {
     return await ntfsManager.checkEventDrivenAvailable();
   });
 
-  ipcMain.handle('export-logs', async (event, content: string) => {
+  ipcMain.handle('export-logs', async (event: IpcMainInvokeEvent, content: string) => {
     try {
       const { dialog } = require('electron');
       const fs = require('fs').promises;
@@ -297,7 +297,7 @@ export function setupNTFSHandlers(): void {
   //   }
   // });
 
-  ipcMain.handle('request-sudo-password', async (event) => {
+  ipcMain.handle('request-sudo-password', async (event: IpcMainInvokeEvent) => {
     return new Promise<void>((resolve) => {
       // 优先使用调用方所属窗口，其次回退到 mainWindow
       const win = BrowserWindow.fromWebContents(event.sender) || mainWindow;
@@ -317,7 +317,7 @@ export function setupNTFSHandlers(): void {
   });
 
   // 自定义确认对话框
-  ipcMain.handle('show-confirm-dialog', async (event, options: { title: string; message: string }) => {
+  ipcMain.handle('show-confirm-dialog', async (event: IpcMainInvokeEvent, options: { title: string; message: string }) => {
     if (mainWindow) {
       const result = await dialog.showMessageBox(mainWindow, {
         type: 'question',
@@ -335,7 +335,7 @@ export function setupNTFSHandlers(): void {
   });
 
   // 显示消息对话框（替换 alert）
-  ipcMain.handle('show-message-dialog', async (event, options: { title: string; message: string; type?: 'info' | 'warning' | 'error' }) => {
+  ipcMain.handle('show-message-dialog', async (event: IpcMainInvokeEvent, options: { title: string; message: string; type?: 'info' | 'warning' | 'error' }) => {
     if (mainWindow) {
       await dialog.showMessageBox(mainWindow, {
         type: options.type || 'info',
@@ -370,7 +370,7 @@ export function setupNTFSHandlers(): void {
   });
 
   // 保存日志文件
-  ipcMain.handle('write-logs-file', async (event, content: string) => {
+  ipcMain.handle('write-logs-file', async (event: IpcMainInvokeEvent, content: string) => {
     try {
       const userDataPath = app.getPath('userData');
       const logsFilePath = path.join(userDataPath, 'logs.json');
@@ -394,11 +394,11 @@ export function setupWindowHandlers(): void {
     closeLogsWindow();
   });
 
-  ipcMain.handle('open-module-window', async (event, moduleName: string) => {
+  ipcMain.handle('open-module-window', async (event: IpcMainInvokeEvent, moduleName: string) => {
     await createModuleWindow(moduleName);
   });
 
-  ipcMain.handle('close-module-window', async (event) => {
+  ipcMain.handle('close-module-window', async (event: IpcMainInvokeEvent) => {
     const window = BrowserWindow.fromWebContents(event.sender);
     if (window) {
       closeModuleWindow(window);
@@ -467,7 +467,7 @@ export function setupWindowHandlers(): void {
     }
   });
 
-  ipcMain.handle('switch-to-tab', async (event, tabName: string) => {
+  ipcMain.handle('switch-to-tab', async (event: IpcMainInvokeEvent, tabName: string) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('switch-tab', tabName);
     }
@@ -478,14 +478,14 @@ export function setupWindowHandlers(): void {
   });
 
   // 根据设备数量调整托盘窗口高度
-  ipcMain.handle('adjust-tray-window-height-by-device-count', async (event, deviceCount: number) => {
+  ipcMain.handle('adjust-tray-window-height-by-device-count', async (event: IpcMainInvokeEvent, deviceCount: number) => {
     adjustTrayWindowHeightByDeviceCount(deviceCount);
   });
 }
 
 // 文件相关 IPC handlers
 export function setupFileHandlers(): void {
-  ipcMain.handle('read-markdown', async (event, filename: string) => {
+  ipcMain.handle('read-markdown', async (event: IpcMainInvokeEvent, filename: string) => {
     try {
       const appPath = app.getAppPath();
       const filePath = path.join(appPath, 'src', 'docs', filename);
@@ -500,7 +500,7 @@ export function setupFileHandlers(): void {
 
 // 系统相关 IPC handlers
 export function setupSystemHandlers(): void {
-  ipcMain.handle('open-external', async (event, url: string) => {
+  ipcMain.handle('open-external', async (event: IpcMainInvokeEvent, url: string) => {
     try {
       await shell.openExternal(url);
     } catch (error) {
@@ -523,10 +523,10 @@ export function setupSystemHandlers(): void {
     return 'dark';
   });
 
-  ipcMain.handle('broadcast-theme-change', async (event, isLightMode: boolean) => {
+  ipcMain.handle('broadcast-theme-change', async (event: IpcMainInvokeEvent, isLightMode: boolean) => {
     const allWindows = BrowserWindow.getAllWindows();
     const backgroundColor = isLightMode ? '#ffffff' : '#1e1e1e';
-    allWindows.forEach(window => {
+    allWindows.forEach((window: BrowserWindow) => {
       if (window && !window.isDestroyed()) {
         window.webContents.send('theme-changed', isLightMode);
         // 更新所有模块窗口和托盘设备窗口的背景色
@@ -583,13 +583,13 @@ export function setupSettingsHandlers(): void {
   });
 
   // 保存设置
-  ipcMain.handle('save-settings', async (event, settings: Partial<AppSettings>) => {
+  ipcMain.handle('save-settings', async (event: IpcMainInvokeEvent, settings: Partial<AppSettings>) => {
     const oldSettings = await SettingsManager.getSettings();
     await SettingsManager.saveSettings(settings);
 
     // 广播设置变化到所有窗口
     const allWindows = BrowserWindow.getAllWindows();
-    allWindows.forEach(window => {
+    allWindows.forEach((window: BrowserWindow) => {
       if (window && !window.isDestroyed()) {
         window.webContents.send('settings-changed', settings);
       }
@@ -675,7 +675,7 @@ export function setupCaffeinateHandlers(): void {
       const result = await caffeinateManager.start();
       // 广播状态变化到所有窗口
       const allWindows = BrowserWindow.getAllWindows();
-      allWindows.forEach(window => {
+      allWindows.forEach((window: BrowserWindow) => {
         if (!window.isDestroyed()) {
           window.webContents.send('caffeinate-status-changed', result.success);
         }
@@ -693,7 +693,7 @@ export function setupCaffeinateHandlers(): void {
       caffeinateManager.stop();
       // 广播状态变化到所有窗口
       const allWindows = BrowserWindow.getAllWindows();
-      allWindows.forEach(window => {
+      allWindows.forEach((window: BrowserWindow) => {
         if (!window.isDestroyed()) {
           window.webContents.send('caffeinate-status-changed', false);
         }
@@ -711,7 +711,7 @@ export function setupCaffeinateHandlers(): void {
       const result = await caffeinateManager.toggle();
       // 广播状态变化到所有窗口
       const allWindows = BrowserWindow.getAllWindows();
-      allWindows.forEach(window => {
+      allWindows.forEach((window: BrowserWindow) => {
         if (!window.isDestroyed()) {
           window.webContents.send('caffeinate-status-changed', result.isActive);
         }

@@ -163,7 +163,7 @@ export async function openAboutWindow(): Promise<void> {
   console.log('关于窗口已创建');
 
   // 添加错误处理
-  aboutWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+  aboutWindow.webContents.on('did-fail-load', (event: any, errorCode: number, errorDescription: string, validatedURL: string) => {
     console.error('关于窗口加载失败:', errorCode, errorDescription, validatedURL);
   });
 

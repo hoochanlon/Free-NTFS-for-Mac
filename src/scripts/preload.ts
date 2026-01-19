@@ -1,5 +1,5 @@
 // @ts-ignore: Electron types may not be present in web context
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron';
 import type { ElectronAPI } from '../types/electron';
 
 const electronAPI: ElectronAPI = {
@@ -13,7 +13,7 @@ const electronAPI: ElectronAPI = {
   // installDependencies: () => ipcRenderer.invoke('install-dependencies'),
   requestSudoPassword: () => ipcRenderer.invoke('request-sudo-password'),
   onDeviceUpdate: (callback: (data: any) => void) => {
-    ipcRenderer.on('device-update', (_event: unknown, data: any) => callback(data));
+    ipcRenderer.on('device-update', (_event: IpcRendererEvent, data: any) => callback(data));
   },
   openLogsWindow: () => ipcRenderer.invoke('open-logs-window'),
   closeLogsWindow: () => ipcRenderer.invoke('close-logs-window'),
@@ -24,29 +24,29 @@ const electronAPI: ElectronAPI = {
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
   broadcastThemeChange: (isLightMode: boolean) => ipcRenderer.invoke('broadcast-theme-change', isLightMode),
   onThemeChange: (callback: (isLightMode: boolean) => void) => {
-    ipcRenderer.on('theme-changed', (_event: unknown, isLightMode: boolean) => callback(isLightMode));
+    ipcRenderer.on('theme-changed', (_event: IpcRendererEvent, isLightMode: boolean) => callback(isLightMode));
   },
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings: Partial<import('../types/electron').AppSettings>) => ipcRenderer.invoke('save-settings', settings),
   getWindowSizeConfig: () => ipcRenderer.invoke('get-window-size-config'),
   onSettingsChange: (callback: (settings: Partial<import('../types/electron').AppSettings>) => void) => {
-    ipcRenderer.on('settings-changed', (_event: unknown, settings: Partial<import('../types/electron').AppSettings>) => callback(settings));
+    ipcRenderer.on('settings-changed', (_event: IpcRendererEvent, settings: Partial<import('../types/electron').AppSettings>) => callback(settings));
   },
   hasSavedPassword: () => ipcRenderer.invoke('has-saved-password'),
   deleteSavedPassword: () => ipcRenderer.invoke('delete-saved-password'),
   exportLogs: (content: string) => ipcRenderer.invoke('export-logs', content),
   switchToTab: (tabName: string) => ipcRenderer.invoke('switch-to-tab', tabName),
   onSwitchTab: (callback: (tabName: string) => void) => {
-    ipcRenderer.on('switch-tab', (_event: unknown, tabName: string) => callback(tabName));
+    ipcRenderer.on('switch-tab', (_event: IpcRendererEvent, tabName: string) => callback(tabName));
   },
   onShowAboutDialog: (callback: () => void) => {
     ipcRenderer.on('show-about-dialog', () => callback());
   },
   onTrayAction: (callback: (action: string) => void) => {
-    ipcRenderer.on('tray-action', (_event: unknown, action: string) => callback(action));
+    ipcRenderer.on('tray-action', (_event: IpcRendererEvent, action: string) => callback(action));
   },
   onTrayDeviceAction: (callback: (data: { action: string; device: any }) => void) => {
-    ipcRenderer.on('tray-device-action', (_event: unknown, data: { action: string; device: any }) => callback(data));
+    ipcRenderer.on('tray-device-action', (_event: IpcRendererEvent, data: { action: string; device: any }) => callback(data));
   },
   showConfirmDialog: (title: string, message: string) => ipcRenderer.invoke('show-confirm-dialog', { title, message }),
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => ipcRenderer.invoke('show-message-dialog', { title, message, type }),
@@ -68,7 +68,7 @@ const electronAPI: ElectronAPI = {
     }
 
     // 通过 IPC 启动混合检测，回调通过事件传递
-    const listener = (event: any, devices: any[]) => {
+    const listener = (event: IpcRendererEvent, devices: any[]) => {
       try {
         console.log('[preload] 收到设备变化事件，设备数量:', devices.length, '设备列表:', devices.map((d: any) => d.volumeName || d.disk));
         if (Array.isArray(devices)) {
@@ -106,7 +106,7 @@ const electronAPI: ElectronAPI = {
   caffeinateToggle: () => ipcRenderer.invoke('caffeinate-toggle'),
   caffeinateStatus: () => ipcRenderer.invoke('caffeinate-status'),
   onCaffeinateStatusChange: (callback: (isActive: boolean) => void) => {
-    ipcRenderer.on('caffeinate-status-changed', (_event: unknown, isActive: boolean) => callback(isActive));
+    ipcRenderer.on('caffeinate-status-changed', (_event: IpcRendererEvent, isActive: boolean) => callback(isActive));
   }
 };
 

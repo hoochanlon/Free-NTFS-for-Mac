@@ -76,11 +76,11 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
     const dialogPath = path.join(appPath, 'src/html/password-dialog.html');
 
     // 监听窗口加载错误
-    passwordDialogWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    passwordDialogWindow.webContents.on('did-fail-load', (event: any, errorCode: number, errorDescription: string) => {
       console.error('[PasswordDialog] 窗口加载失败:', errorCode, errorDescription);
     });
 
-    passwordDialogWindow.loadFile(dialogPath).catch((error) => {
+    passwordDialogWindow.loadFile(dialogPath).catch((error: any) => {
       console.error('[PasswordDialog] 加载密码对话框失败:', error);
       resolve(null);
     });

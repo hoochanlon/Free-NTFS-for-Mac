@@ -1,4 +1,4 @@
-import { Menu, app, BrowserWindow } from 'electron';
+import { Menu, app, BrowserWindow, type MenuItem } from 'electron';
 import { SettingsManager } from './settings';
 import { loadTranslations, t, detectLanguage } from './tray-translations';
 import { createDeviceIcon } from './tray-icons';
@@ -510,7 +510,7 @@ export async function createTrayMenu(
     label: t('devices.autoMount') || '自动读写',
     type: 'checkbox',
     checked: settings.autoMount || false,
-    click: async (menuItem) => {
+    click: async (menuItem: MenuItem) => {
       try {
         // 获取当前菜单项的状态（点击后已经切换了）
         const newValue = menuItem.checked;
@@ -591,7 +591,7 @@ export async function createTrayMenu(
     label: t('tray.preventSleep') || '防止休眠',
     type: 'checkbox',
     checked: caffeinateStatus,
-    click: async (menuItem) => {
+    click: async (menuItem: MenuItem) => {
       try {
         const result = await caffeinateManager.toggle();
         // 更新菜单项状态
@@ -601,7 +601,7 @@ export async function createTrayMenu(
         await SettingsManager.saveSettings({ preventSleep: result.isActive });
         // 广播状态变化到所有窗口
         const allWindows = BrowserWindow.getAllWindows();
-        allWindows.forEach(window => {
+        allWindows.forEach((window: BrowserWindow) => {
           if (!window.isDestroyed()) {
             window.webContents.send('caffeinate-status-changed', result.isActive);
           }
