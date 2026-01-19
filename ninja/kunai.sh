@@ -14,13 +14,13 @@
 #   - fswatch (可选，用于事件驱动检测)
 #
 # 使用方法：
-#   bash install-dependencies.sh
-#   或添加执行权限后: chmod +x install-dependencies.sh && ./install-dependencies.sh
+#   bash kunai.sh
+#   或添加执行权限后: chmod +x kunai.sh && ./kunai.sh
 #
 # 设置语言：
-#   LANG=zh_CN bash install-dependencies.sh  # 中文
-#   LANG=en_US bash install-dependencies.sh  # 英文
-#   LANG=ja_JP bash install-dependencies.sh  # 日文
+#   LANG=zh_CN bash kunai.sh  # 中文
+#   LANG=en_US bash kunai.sh  # 英文
+#   LANG=ja_JP bash kunai.sh  # 日文
 ################################################################################
 
 # 注意：不使用 set -e，因为某些命令（如 spctl）可能返回非零退出码但不影响功能

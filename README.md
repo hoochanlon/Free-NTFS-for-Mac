@@ -28,14 +28,26 @@
   3. 关掉终端，重启 Mac
   4. 重启以后可以在终端中运行 `csrutil status` 查看状态确认
 
-## 快速开始（Shell）
+## 快速开始（Shell - 忍者工具集）
+
+以下脚本来自 `ninja/` 文件夹的忍者工具集，提供命令行方式的 NTFS 和 Linux 文件系统读写支持。
 
 ### 在线体验
+
+#### NTFS 读写支持
 
 复制粘贴到 ***完全管理权限的终端*** 回车，一键起飞：
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
+```
+
+#### Linux ext4 等文件系统读写支持
+
+支持 ext2/3/4、btrfs、xfs、zfs、NTFS、exFAT、LUKS 加密、LVM、RAID 等多种文件系统：
+
+```shell
+/bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
 ```
 
 ### 下载到本地，之后直接输入 `nigate`

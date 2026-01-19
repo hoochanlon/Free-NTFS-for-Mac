@@ -27,14 +27,26 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
   3. Close Terminal and restart Mac
   4. After restart, you can run `csrutil status` in terminal to check the status
 
-### Quick Start - Shell
+### Quick Start - Shell (Ninja Tools)
+
+The following scripts are from the `ninja/` folder's Ninja Tools collection, providing command-line support for NTFS and Linux filesystem read-write access.
 
 #### Method 1: Online Experience
+
+##### NTFS Read-Write Support
 
 Copy and paste into a ***terminal with full administrative privileges*** and press Enter:
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
+```
+
+##### Linux ext4 and Other Filesystem Read-Write Support
+
+Supports ext2/3/4, btrfs, xfs, zfs, NTFS, exFAT, LUKS encryption, LVM, RAID, and many other filesystems:
+
+```shell
+/bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
 ```
 
 #### Method 2: Download Locally

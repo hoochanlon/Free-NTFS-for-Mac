@@ -4,7 +4,7 @@
 # Free NTFS for Mac - 依赖卸载脚本
 #
 # 功能说明：
-#   卸载通过 install-dependencies.sh 安装的依赖，包括：
+#   卸载通过 kunai.sh 安装的依赖，包括：
 #   - MacFUSE
 #   - ntfs-3g-mac
 #   - fswatch (如果已安装)
@@ -18,13 +18,13 @@
 #     如果确实需要卸载，请通过 系统设置 > 开发者工具 手动卸载。
 #
 # 使用方法：
-#   bash uninstall-dependencies.sh
-#   或添加执行权限后: chmod +x uninstall-dependencies.sh && ./uninstall-dependencies.sh
+#   bash ninpo.sh
+#   或添加执行权限后: chmod +x ninpo.sh && ./ninpo.sh
 #
 # 设置语言：
-#   LANG=zh_CN bash uninstall-dependencies.sh  # 中文
-#   LANG=en_US bash uninstall-dependencies.sh  # 英文
-#   LANG=ja_JP bash uninstall-dependencies.sh  # 日文
+#   LANG=zh_CN bash ninpo.sh  # 中文
+#   LANG=en_US bash ninpo.sh  # 英文
+#   LANG=ja_JP bash ninpo.sh  # 日文
 ################################################################################
 
 # ============================================================

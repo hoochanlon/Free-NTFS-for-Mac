@@ -50,6 +50,7 @@
 - [Electron](https://www.electronjs.org/) - 构建跨平台桌面应用
 - [MacFUSE](https://osxfuse.github.io/) - 文件系统集成
 - [ntfs-3g](https://www.tuxera.com/community/open-source-ntfs-3g/) - NTFS 文件系统驱动
+- [anylinuxfs](https://github.com/nohajc/anylinuxfs) - 使用 microVM 和 NFS 在 macOS 上挂载 Linux 文件系统的工具，支持 ext4、btrfs、xfs、zfs、NTFS、exFAT、LUKS 加密等多种文件系统
 - [Homebrew](https://brew.sh/) - macOS 包管理器
 - [fswatch](https://github.com/emcrisostomo/fswatch) - 文件系统事件监控工具，用于实现零延迟的设备检测
 

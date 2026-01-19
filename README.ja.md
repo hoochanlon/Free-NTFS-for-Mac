@@ -26,14 +26,26 @@
   3. ターミナルを閉じて、Mac を再起動する
   4. 再起動後、ターミナルで `csrutil status` を実行して状態を確認できます
 
-### クイックスタート - Shell
+### クイックスタート - Shell（忍者ツールセット）
+
+以下のスクリプトは `ninja/` フォルダの忍者ツールセットから提供され、NTFS および Linux ファイルシステムの読み書きをコマンドラインでサポートします。
 
 #### 方法1: オンライン体験
+
+##### NTFS 読み書きサポート
 
 ***完全な管理権限を持つターミナル***にコピー＆ペーストして Enter キーを押してください：
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
+```
+
+##### Linux ext4 などのファイルシステム読み書きサポート
+
+ext2/3/4、btrfs、xfs、zfs、NTFS、exFAT、LUKS 暗号化、LVM、RAID など、さまざまなファイルシステムをサポート：
+
+```shell
+/bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
 ```
 
 #### 方法2: ローカルにダウンロード
