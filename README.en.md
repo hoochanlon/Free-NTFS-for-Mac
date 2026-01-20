@@ -31,6 +31,8 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 
 The following scripts are from the `ninja/` folder's Ninja Tools collection, providing command-line support for NTFS and Linux filesystem read-write access.
 
+**🌍 All scripts support multiple languages!** Use `LANG=ja` or `LANG=zh` to set the language.
+
 #### Method 1: Online Experience
 
 ##### NTFS Read-Write Support
@@ -38,7 +40,14 @@ The following scripts are from the `ninja/` folder's Ninja Tools collection, pro
 Copy and paste into a ***terminal with full administrative privileges*** and press Enter:
 
 ```shell
+# English (default)
 /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
+
+# Japanese
+LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
+
+# Chinese
+LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
 ```
 
 ##### Linux ext4 and Other Filesystem Read-Write Support
@@ -46,7 +55,14 @@ Copy and paste into a ***terminal with full administrative privileges*** and pre
 Supports ext2/3/4, btrfs, xfs, zfs, NTFS, exFAT, LUKS encryption, LVM, RAID, and many other filesystems:
 
 ```shell
+# English (default)
 /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
+
+# Japanese
+LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
+
+# Chinese
+LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
 ```
 
 #### Method 2: Download Locally
@@ -60,6 +76,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 ### Quick Start - GUI Version (Electron)
 
 Download and use from [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags).
+- **🌍 Application interface supports multiple languages**: Chinese (Simplified/Traditional), Japanese, English, German, and more
 
 **Main Interface**
 
@@ -74,20 +91,66 @@ Download and use from [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tag
 #### One-Click Install Dependencies
 
 ```shell
+# English (default)
 /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
+
+# Japanese
+LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
+
+# Chinese
+LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
 ```
 
 #### One-Click Uninstall Dependencies
 
 ```shell
+# English (default)
 /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
+
+# Japanese
+LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
+
+# Chinese
+LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
 ```
 
-> For more information, see: [Ninja Tools Testing #39](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/39)
+> For more information, see: [Ninja Tools Testing #39](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/39) and [Ninja Tools Documentation](docs/07-忍者工具集内容说明.md)
 
 ### Operations & Development
 
-#### Installation Steps
+### 🚀 One-Click Run (Recommended for Beginners)
+
+**Users without any development environment can deploy in one step!**
+
+The project provides intelligent one-click run scripts that automatically detect and install all necessary tools (Node.js, pnpm, dependencies, etc.), then automatically compile and start the application.
+
+#### Method 1: Use One-Click Script in Project Root (Recommended)
+
+```bash
+# Clone project
+git clone <repository-url>
+cd Free-NTFS-for-Mac
+
+# One-click run (auto-install environment, compile, start)
+./dev.sh
+```
+
+Or use the script in the ninja directory:
+
+```bash
+./ninja/izanaki.sh
+```
+
+**The script automatically completes:**
+- ✅ Detects and installs Node.js (if not present)
+- ✅ Detects and installs pnpm (if not present)
+- ✅ Syncs version numbers
+- ✅ Installs project dependencies
+- ✅ Compiles TypeScript code
+- ✅ Compiles Stylus styles
+- ✅ Starts application (development mode)
+
+#### Method 2: Manual Installation (For Experienced Developers)
 
 1. **Clone and Initialize**
 
@@ -95,18 +158,15 @@ Download and use from [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tag
 git clone <repository-url>
 cd Free-NTFS-for-Mac
 pnpm install
-pnpm run setup  # One-click fix for common issues, initialize project
 ```
 
 2. **Run Application**
 
 ```bash
+# Production mode
 pnpm start
-```
 
-Or development mode (automatically opens DevTools):
-
-```bash
+# Development mode (automatically opens DevTools)
 pnpm run dev
 ```
 
@@ -115,6 +175,29 @@ pnpm run dev
 ```bash
 pnpm run build
 ```
+
+### 🌍 Multi-Language Support
+
+All scripts and tools support multiple languages, can be set via `LANG` environment variable:
+
+```bash
+# English (default)
+./dev.sh
+
+# Japanese
+LANG=ja ./dev.sh
+
+# Chinese
+LANG=zh ./dev.sh
+```
+
+Supported scripts include:
+- `dev.sh` / `ninja/izanaki.sh` - One-click run script
+- `ninja/kamui.sh` - Linux filesystem mount
+- `ninja/nigate.sh` - NTFS auto mount
+- `ninja/build.sh` - Application packaging
+- `ninja/shuriken.sh` - System permission settings
+- And all other ninja tools collection scripts
 
 #### Project Setup Script
 
@@ -127,7 +210,7 @@ pnpm run setup
 Or run directly:
 
 ```bash
-./ninja/setup.sh
+./ninja/izanaki.sh
 ```
 
 This script automatically:

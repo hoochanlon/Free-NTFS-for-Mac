@@ -32,6 +32,8 @@
 
 以下脚本来自 `ninja/` 文件夹的忍者工具集，提供命令行方式的 NTFS 和 Linux 文件系统读写支持。
 
+**🌍 所有脚本都支持多语言！** 使用 `LANG=ja` 或 `LANG=en` 设置语言。
+
 ### 在线体验
 
 #### NTFS 读写支持
@@ -39,7 +41,14 @@
 复制粘贴到 ***完全管理权限的终端*** 回车，一键起飞：
 
 ```shell
+# 中文（默认）
 /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
+
+# 日文
+LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
+
+# 英文
+LANG=en /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
 ```
 
 #### Linux ext4 等文件系统读写支持
@@ -47,7 +56,14 @@
 支持 ext2/3/4、btrfs、xfs、zfs、NTFS、exFAT、LUKS 加密、LVM、RAID 等多种文件系统：
 
 ```shell
+# 中文（默认）
 /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
+
+# 日文
+LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
+
+# 英文
+LANG=en /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
 ```
 
 ### 下载到本地，之后直接输入 `nigate`
@@ -59,6 +75,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 ## 软件版（Electron - 图形化）
 
 - 下载地址见 [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags)
+- **🌍 应用界面支持多语言**：中文（简体/繁体）、日文、英文、德文等
 
 主界面：
 
@@ -73,20 +90,66 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 ### 一键安装依赖
 
 ```shell
+# 中文（默认）
 /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
+
+# 日文
+LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
+
+# 英文
+LANG=en /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
 ```
 
 ### 一键卸载依赖
 
 ```shell
+# 中文（默认）
 /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
+
+# 日文
+LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
+
+# 英文
+LANG=en /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
 ```
 
-> 更多信息请参考：[忍者工具集测试 #39](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/39)
+> 更多信息请参考：[忍者工具集测试 #39](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/39) 和 [忍者工具集内容说明](docs/07-忍者工具集内容说明.md)
 
 ## 运维 & 开发
 
-### 安装步骤
+### 🚀 一键运行（推荐新手）
+
+**完全没有开发环境的用户也能一步到位部署！**
+
+项目提供了智能的一键运行脚本，会自动检测并安装所有必要的工具（Node.js、pnpm、依赖等），然后自动编译并启动应用。
+
+#### 方式一：使用项目根目录的一键脚本（推荐）
+
+```bash
+# 克隆项目
+git clone <repository-url>
+cd Free-NTFS-for-Mac
+
+# 一键运行（自动安装环境、编译、启动）
+./dev.sh
+```
+
+或使用 ninja 目录下的脚本：
+
+```bash
+./ninja/izanaki.sh
+```
+
+**脚本会自动完成：**
+- ✅ 检测并安装 Node.js（如果没有）
+- ✅ 检测并安装 pnpm（如果没有）
+- ✅ 同步版本号
+- ✅ 安装项目依赖
+- ✅ 编译 TypeScript 代码
+- ✅ 编译 Stylus 样式
+- ✅ 启动应用（开发模式）
+
+#### 方式二：手动安装（适合有经验的开发者）
 
 1. **克隆项目并初始化**
 
@@ -94,18 +157,15 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 git clone <repository-url>
 cd Free-NTFS-for-Mac
 pnpm install
-pnpm run setup  # 一键修复常见问题，初始化项目
 ```
 
 2. **运行应用**
 
 ```bash
+# 生产模式
 pnpm start
-```
 
-或开发模式（自动打开 DevTools）：
-
-```bash
+# 开发模式（自动打开 DevTools）
 pnpm run dev
 ```
 
@@ -114,6 +174,29 @@ pnpm run dev
 ```bash
 pnpm run build
 ```
+
+### 🌍 多语言支持
+
+所有脚本和工具都支持多语言，可通过 `LANG` 环境变量设置：
+
+```bash
+# 中文（默认）
+./dev.sh
+
+# 日文
+LANG=ja ./dev.sh
+
+# 英文
+LANG=en ./dev.sh
+```
+
+支持的脚本包括：
+- `dev.sh` / `ninja/izanaki.sh` - 一键运行脚本
+- `ninja/kamui.sh` - Linux 文件系统挂载
+- `ninja/nigate.sh` - NTFS 自动挂载
+- `ninja/build.sh` - 应用打包
+- `ninja/shuriken.sh` - 系统权限设置
+- 以及其他所有 ninja 工具集脚本
 
 ### 项目初始化脚本
 
@@ -126,7 +209,7 @@ pnpm run setup
 或直接运行：
 
 ```bash
-./ninja/setup.sh
+./ninja/izanaki.sh
 ```
 
 这个脚本会自动：

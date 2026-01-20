@@ -30,6 +30,8 @@
 
 以下のスクリプトは `ninja/` フォルダの忍者ツールセットから提供され、NTFS および Linux ファイルシステムの読み書きをコマンドラインでサポートします。
 
+**🌍 すべてのスクリプトが多言語対応！** `LANG=en` または `LANG=zh` で言語を設定できます。
+
 #### 方法1: オンライン体験
 
 ##### NTFS 読み書きサポート
@@ -37,7 +39,14 @@
 ***完全な管理権限を持つターミナル***にコピー＆ペーストして Enter キーを押してください：
 
 ```shell
+# 日本語（デフォルト）
 /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
+
+# 英語
+LANG=en /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
+
+# 中国語
+LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
 ```
 
 ##### Linux ext4 などのファイルシステム読み書きサポート
@@ -45,7 +54,14 @@
 ext2/3/4、btrfs、xfs、zfs、NTFS、exFAT、LUKS 暗号化、LVM、RAID など、さまざまなファイルシステムをサポート：
 
 ```shell
+# 日本語（デフォルト）
 /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
+
+# 英語
+LANG=en /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
+
+# 中国語
+LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
 ```
 
 #### 方法2: ローカルにダウンロード
@@ -59,6 +75,7 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 ### クイックスタート - グラフィカルソフトウェア版（Electron）
 
 [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags) からダウンロードして使用。
+- **🌍 アプリケーションインターフェースが多言語対応**：中国語（簡体字/繁体字）、日本語、英語、ドイツ語など
 
 **メインインターフェース**
 
@@ -73,20 +90,66 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 #### ワンクリック依存関係インストール
 
 ```shell
+# 日本語（デフォルト）
 /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
+
+# 英語
+LANG=en /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
+
+# 中国語
+LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
 ```
 
 #### ワンクリック依存関係アンインストール
 
 ```shell
+# 日本語（デフォルト）
 /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
+
+# 英語
+LANG=en /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
+
+# 中国語
+LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
 ```
 
-> 詳細情報については、[忍者ツールセットテスト #39](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/39) を参照してください。
+> 詳細情報については、[忍者ツールセットテスト #39](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/39) と [忍者ツールセット内容説明](docs/07-忍者工具集内容说明.md) を参照してください。
 
 ### 運用 & 開発
 
-#### インストール手順
+### 🚀 ワンクリック実行（初心者におすすめ）
+
+**開発環境が全くないユーザーでも、ワンステップでデプロイできます！**
+
+プロジェクトは、すべての必要なツール（Node.js、pnpm、依存関係など）を自動検出してインストールし、その後自動的にコンパイルしてアプリケーションを起動する、インテリジェントなワンクリック実行スクリプトを提供します。
+
+#### 方法1: プロジェクトルートのワンクリックスクリプトを使用（推奨）
+
+```bash
+# プロジェクトをクローン
+git clone <repository-url>
+cd Free-NTFS-for-Mac
+
+# ワンクリック実行（環境の自動インストール、コンパイル、起動）
+./dev.sh
+```
+
+または ninja ディレクトリのスクリプトを使用：
+
+```bash
+./ninja/izanaki.sh
+```
+
+**スクリプトは自動的に完了します：**
+- ✅ Node.js を検出してインストール（存在しない場合）
+- ✅ pnpm を検出してインストール（存在しない場合）
+- ✅ バージョン番号を同期
+- ✅ プロジェクト依存関係をインストール
+- ✅ TypeScript コードをコンパイル
+- ✅ Stylus スタイルをコンパイル
+- ✅ アプリケーションを起動（開発モード）
+
+#### 方法2: 手動インストール（経験豊富な開発者向け）
 
 1. **プロジェクトのクローンと初期化**
 
@@ -94,18 +157,15 @@ curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh
 git clone <repository-url>
 cd Free-NTFS-for-Mac
 pnpm install
-pnpm run setup  # 一般的な問題をワンクリックで修正、プロジェクトを初期化
 ```
 
 2. **アプリケーションの実行**
 
 ```bash
+# 本番モード
 pnpm start
-```
 
-または開発モード（DevTools を自動的に開く）：
-
-```bash
+# 開発モード（DevTools を自動的に開く）
 pnpm run dev
 ```
 
@@ -114,6 +174,29 @@ pnpm run dev
 ```bash
 pnpm run build
 ```
+
+### 🌍 多言語サポート
+
+すべてのスクリプトとツールが多言語対応で、`LANG` 環境変数で設定できます：
+
+```bash
+# 日本語（デフォルト）
+./dev.sh
+
+# 英語
+LANG=en ./dev.sh
+
+# 中国語
+LANG=zh ./dev.sh
+```
+
+対応スクリプト：
+- `dev.sh` / `ninja/izanaki.sh` - ワンクリック実行スクリプト
+- `ninja/kamui.sh` - Linux ファイルシステムマウント
+- `ninja/nigate.sh` - NTFS 自動マウント
+- `ninja/build.sh` - アプリケーションパッケージング
+- `ninja/shuriken.sh` - システム権限設定
+- その他のすべての忍者ツールセットスクリプト
 
 #### プロジェクトセットアップスクリプト
 
@@ -126,7 +209,7 @@ pnpm run setup
 または直接実行：
 
 ```bash
-./ninja/setup.sh
+./ninja/izanaki.sh
 ```
 
 このスクリプトは自動的に：
