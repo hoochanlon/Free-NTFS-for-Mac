@@ -54,6 +54,10 @@ body
   background var(--bg-primary)
   color var(--text-primary)
   overflow hidden
+  // 全局禁止文字选中（主界面/托盘一致），更贴近原生应用交互
+  user-select none
+  -webkit-user-select none
+  -webkit-touch-callout none
   -webkit-font-smoothing antialiased
   -moz-osx-font-smoothing grayscale
   font-feature-settings 'kern' 1
@@ -62,3 +66,10 @@ body
   transition color 0.25s cubic-bezier(0.4, 0, 0.2, 1)
   // 背景色立即切换，不应用过渡
   transition background-color 0s
+
+// 允许在输入控件中正常选中/复制（比如设置页输入框、对话框等）
+input,
+textarea,
+[contenteditable="true"]
+  user-select text
+  -webkit-user-select text
