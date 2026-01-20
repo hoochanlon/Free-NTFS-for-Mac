@@ -51,6 +51,14 @@
   const Renderer = AppModules.Devices.Renderer;
   const Operations = AppModules.Devices.Operations;
   const Events = AppModules.Devices.Events;
+  // 自动读写：记录本窗口已经尝试过的设备，避免多处刷新导致重复弹密码框
+  const autoMountAttemptedDisks: Set<string> =
+    (AppModules.Devices as any).autoMountAttemptedDisks || new Set<string>();
+  (AppModules.Devices as any).autoMountAttemptedDisks = autoMountAttemptedDisks;
+  // 自动读写冷却：用户刚刚手动设为只读时，短时间内禁止自动挂载
+  const autoMountCooldown: Map<string, number> =
+    (AppModules.Devices as any).autoMountCooldown || new Map<string, number>();
+  (AppModules.Devices as any).autoMountCooldown = autoMountCooldown;
 
   // 设备管理主对象（合并到现有对象，而不是覆盖）
   Object.assign(AppModules.Devices, {
@@ -97,27 +105,49 @@
         const readOnlyCount = AppModules.Devices.devices.filter((d: any) => d.isReadOnly).length;
         const currentState = `${currentDeviceCount}-${readOnlyCount}`;
 
-        // 检测新插入的设备并自动挂载
+        // 用于缓存/UI 的路径列表（避免 TS 变量缺失；新设备检测不依赖该字段）
         const currentDevicePaths = AppModules.Devices.devices.map((d: any) => d.devicePath);
-        const newDevices = AppModules.Devices.devices.filter((d: any) =>
-          !previousDevicePaths.includes(d.devicePath) && d.isReadOnly && !d.isUnmounted
-        );
 
-        if (newDevices.length > 0) {
+        // 自动读写：清理已移除设备的尝试记录，确保下次插入还能自动挂载
+        const currentDiskSet = new Set(AppModules.Devices.devices.map((d: any) => d.disk));
+        for (const disk of Array.from(autoMountAttemptedDisks)) {
+          if (!currentDiskSet.has(disk)) {
+            autoMountAttemptedDisks.delete(disk);
+          }
+        }
+
+        // 自动挂载候选：任何“只读且未卸载”的设备（不依赖“新设备检测”，避免多处刷新导致漏触发）
+        const candidates = AppModules.Devices.devices.filter((d: any) => d.isReadOnly && !d.isUnmounted);
+
+        if (candidates.length > 0) {
           try {
             const settings = await electronAPI.getSettings();
+            // 自动读写开启时，后台自动挂载新插入设备（状态保护仅用于防误触按钮，不应阻断后台自动挂载）
             if (settings.autoMount) {
               // 获取手动设置为只读的设备列表
               const manuallyReadOnlyDevices = settings.manuallyReadOnlyDevices || [];
 
-              // 自动挂载新插入的只读设备（跳过用户手动设置为只读的设备）
-              for (const device of newDevices) {
+              // 自动挂载候选只读设备（跳过用户手动设置为只读 & 已尝试过的设备 & 冷却期内的设备）
+              for (const device of candidates) {
+                const now = Date.now();
+                const inCooldown =
+                  (device.volumeUuid && (autoMountCooldown.get(device.volumeUuid) || 0) > now) ||
+                  (device.disk && (autoMountCooldown.get(device.disk) || 0) > now);
+                if (inCooldown) {
+                  continue;
+                }
                 // 如果设备在手动只读列表中，跳过自动挂载
-                if (manuallyReadOnlyDevices.includes(device.disk)) {
-                  console.log(`[主界面] 跳过自动挂载手动只读设备 ${device.volumeName} (${device.disk})`);
+                const manualId = device.volumeUuid || device.disk;
+                if (manuallyReadOnlyDevices.includes(manualId) || manuallyReadOnlyDevices.includes(device.disk)) {
+                  console.log(`[主界面] 跳过自动挂载手动只读设备 ${device.volumeName} (${manualId})`);
+                  continue;
+                }
+                // 已尝试过则跳过，避免重复弹框/重复执行
+                if (autoMountAttemptedDisks.has(device.disk)) {
                   continue;
                 }
                 try {
+                  autoMountAttemptedDisks.add(device.disk);
                   await AppUtils.Logs.addLog(`检测到新设备 ${device.volumeName}，正在自动配置为可读写...`, 'info');
                   const result = await electronAPI.mountDevice(device);
                   if (result.success) {

@@ -208,10 +208,10 @@ export async function createTrayMenu(
                 try {
                   const currentSettings = await SettingsManager.getSettings();
                   const manuallyReadOnlyDevices = currentSettings.manuallyReadOnlyDevices || [];
-                  const index = manuallyReadOnlyDevices.indexOf(device.disk);
-                  if (index > -1) {
-                    manuallyReadOnlyDevices.splice(index, 1);
-                    await SettingsManager.saveSettings({ manuallyReadOnlyDevices });
+                  const manualId = (device as any).volumeUuid || device.disk;
+                  const updated = manuallyReadOnlyDevices.filter(id => id !== manualId && id !== device.disk);
+                  if (updated.length !== manuallyReadOnlyDevices.length) {
+                    await SettingsManager.saveSettings({ manuallyReadOnlyDevices: updated });
                   }
                 } catch (error) {
                   console.warn('更新手动只读设备列表失败:', error);
@@ -285,12 +285,13 @@ export async function createTrayMenu(
                   const currentSettings = await SettingsManager.getSettings();
                   // 创建新数组，避免直接修改原数组引用
                   const manuallyReadOnlyDevices = [...(currentSettings.manuallyReadOnlyDevices || [])];
-                  if (!manuallyReadOnlyDevices.includes(device.disk)) {
-                    manuallyReadOnlyDevices.push(device.disk);
+                  const manualId = (device as any).volumeUuid || device.disk;
+                  if (manualId && !manuallyReadOnlyDevices.includes(manualId)) {
+                    manuallyReadOnlyDevices.push(manualId);
                     await SettingsManager.saveSettings({ manuallyReadOnlyDevices });
-                    console.log(`[托盘菜单] 已将设备 ${device.volumeName} (${device.disk}) 添加到手动只读列表（操作前），当前列表:`, manuallyReadOnlyDevices);
+                    console.log(`[托盘菜单] 已将设备 ${device.volumeName} (${manualId}) 添加到手动只读列表（操作前），当前列表:`, manuallyReadOnlyDevices);
                   } else {
-                    console.log(`[托盘菜单] 设备 ${device.volumeName} (${device.disk}) 已在手动只读列表中`);
+                    console.log(`[托盘菜单] 设备 ${device.volumeName} (${manualId}) 已在手动只读列表中`);
                   }
                 } catch (error) {
                   console.warn('保存手动只读设备列表失败:', error);

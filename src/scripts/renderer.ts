@@ -377,9 +377,13 @@
             try {
               const devices = await window.electronAPI.getNTFSDevices(true);
               const settings = await window.electronAPI.getSettings();
+
               const manuallyReadOnlyDevices = settings.manuallyReadOnlyDevices || [];
               const readOnlyDevices = devices.filter((d: any) =>
-                d.isReadOnly && !d.isUnmounted && !manuallyReadOnlyDevices.includes(d.disk)
+                d.isReadOnly &&
+                !d.isUnmounted &&
+                !manuallyReadOnlyDevices.includes(d.volumeUuid || d.disk) &&
+                !manuallyReadOnlyDevices.includes(d.disk)
               );
 
               if (readOnlyDevices.length > 0) {

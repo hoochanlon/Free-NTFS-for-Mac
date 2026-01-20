@@ -94,6 +94,9 @@ export interface NTFSDevice {
   devicePath: string;
   volume: string;
   volumeName: string;
+  // 稳定标识（来自 diskutil info 的 Volume UUID / Disk / Partition UUID 等）
+  // 用于“手动只读列表”等需要跨插拔持久化的场景；disk4s1 可能被系统复用，不可靠
+  volumeUuid?: string;
   isReadOnly: boolean;
   options: string;
   isMounted: boolean;

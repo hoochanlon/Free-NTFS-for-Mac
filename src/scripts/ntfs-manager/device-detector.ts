@@ -319,6 +319,13 @@ export class DeviceDetector {
                       const volumeNameMatch = diskutilInfo.match(/Volume Name:\s*(.+)/i);
                       const volumeName = volumeNameMatch ? volumeNameMatch[1].trim() : partitionId;
 
+                      // 提取稳定 UUID（优先 Volume UUID，其次 Disk / Partition UUID）
+                      const volumeUuidMatch =
+                        diskutilInfo.match(/Volume UUID:\s*([0-9A-Fa-f-]+)/i) ||
+                        diskutilInfo.match(/Disk \/ Partition UUID:\s*([0-9A-Fa-f-]+)/i) ||
+                        diskutilInfo.match(/Partition UUID:\s*([0-9A-Fa-f-]+)/i);
+                      const volumeUuid = volumeUuidMatch ? volumeUuidMatch[1].trim() : undefined;
+
                       // 检查是否已挂载
                       const mountPointMatch = diskutilInfo.match(/Mount Point:\s*(.+)/i);
                       const volume = mountPointMatch ? mountPointMatch[1].trim() : '';
@@ -340,6 +347,7 @@ export class DeviceDetector {
                         devicePath,
                         volume: volume || '',
                         volumeName,
+                        volumeUuid,
                         isReadOnly: true, // 未通过ntfs-3g挂载的设备默认只读
                         options: '',
                         isMounted: false,
@@ -388,6 +396,35 @@ export class DeviceDetector {
         const disk = devicePath.replace('/dev/', '');
         const options = optionsMatch ? optionsMatch[1] : '';
         const isReadOnly = options.includes('read-only');
+
+        // 尝试获取稳定 UUID（diskutil info；带缓存与超时，避免拖慢刷新）
+        let volumeUuid: string | undefined;
+        try {
+          let diskutilOutput = this.cache.getDiskutilInfo(devicePath);
+          if (!diskutilOutput) {
+            const result = await Promise.race([
+              this.batchExecutor.execute(
+                `diskutil info "${devicePath}" 2>/dev/null`,
+                `diskutil_uuid_${devicePath}`,
+                2500
+              ),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 900))
+            ]);
+            diskutilOutput = result.stdout || '';
+            if (diskutilOutput) {
+              this.cache.setDiskutilInfo(devicePath, diskutilOutput);
+            }
+          }
+          if (diskutilOutput) {
+            const uuidMatch =
+              diskutilOutput.match(/Volume UUID:\s*([0-9A-Fa-f-]+)/i) ||
+              diskutilOutput.match(/Disk \/ Partition UUID:\s*([0-9A-Fa-f-]+)/i) ||
+              diskutilOutput.match(/Partition UUID:\s*([0-9A-Fa-f-]+)/i);
+            volumeUuid = uuidMatch ? uuidMatch[1].trim() : undefined;
+          }
+        } catch {
+          volumeUuid = undefined;
+        }
 
         // 检查是否通过 ntfs-3g (FUSE) 挂载
         // ntfs-3g 挂载的设备会在 mount 输出中包含 fuse 或特定的挂载选项
@@ -467,6 +504,7 @@ export class DeviceDetector {
           devicePath,
           volume,
           volumeName,
+          volumeUuid,
           isReadOnly: finalIsReadOnly,
           options,
           isMounted: deviceIsMounted,

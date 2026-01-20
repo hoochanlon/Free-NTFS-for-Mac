@@ -27,11 +27,91 @@ let trayModeToggleTimer: NodeJS.Timeout | null = null;
 // 当前 Dock 状态（用于避免重复调用）
 let currentDockHiddenState: boolean | null = null;
 
+// 手动只读列表（插拔周期内临时状态）：
+// - 规则：只要设备不在线（拔出/推出/断开），就自动移除该设备的“手动只读”记录，恢复默认行为
+// - 标识：优先使用 volumeUuid（稳定），同时兼容 disk（旧数据/兜底）
+// - 为了避免“还原只读”操作的短暂卸载被误判为拔出，增加短暂宽限期
+const MANUAL_GRACE_MS = 9 * 1000; // 9 秒宽限
+const manualLastSeen = new Map<string, number>();
+let manualPruneTimer: NodeJS.Timeout | null = null;
+async function pruneManuallyReadOnlyDevices(devices?: Array<{ disk: string; volumeUuid?: string }>): Promise<void> {
+  try {
+    const settings = await SettingsManager.getSettings();
+    const list = settings.manuallyReadOnlyDevices || [];
+    if (list.length === 0) return;
+
+    // 兼容“空设备列表”场景：使用已有 lastSeen + 宽限期判断，不再直接跳过
+    // （之前直接返回会导致拔出后列表长期残留）
+    const normalizedDevices = devices || [];
+
+    // 当前在线设备 id 集合：同时包含 volumeUuid 与 disk
+    const currentIds = new Set<string>();
+    normalizedDevices.forEach(d => {
+      if (d.volumeUuid) currentIds.add(d.volumeUuid);
+      if (d.disk) currentIds.add(d.disk);
+      // 记录最后一次看到该设备的时间
+      if (d.volumeUuid) manualLastSeen.set(d.volumeUuid, Date.now());
+      if (d.disk) manualLastSeen.set(d.disk, Date.now());
+    });
+
+    // 迁移：如果列表里有 disk 但当前设备能拿到 uuid，则替换成 uuid（减少 disk 复用误判）
+    const diskToUuid = new Map<string, string>();
+    normalizedDevices.forEach(d => {
+      if (d.disk && d.volumeUuid) diskToUuid.set(d.disk, d.volumeUuid);
+    });
+    const migrated = list.map((id) => diskToUuid.get(id) || id);
+
+    // 确保新出现的手动记录有“最近一次看到”的时间（防止首次清理时被立即认为过期）
+    const now = Date.now();
+    migrated.forEach(id => {
+      if (!manualLastSeen.has(id)) {
+        manualLastSeen.set(id, now);
+      }
+    });
+
+    // 插拔周期内临时状态：只保留当前仍在线的设备 id
+    // 对“当前不在线但最近宽限期内出现过”的 id 保留，避免还原只读时短暂卸载被误清
+    const pruned = migrated.filter((id) => {
+      if (currentIds.has(id)) return true;
+      const lastSeen = manualLastSeen.get(id) || 0;
+      return now - lastSeen <= MANUAL_GRACE_MS;
+    });
+
+    // 去重
+    const deduped = Array.from(new Set(pruned));
+
+    if (deduped.length !== list.length || deduped.some((v, i) => v !== list[i])) {
+      await SettingsManager.saveSettings({ manuallyReadOnlyDevices: deduped });
+      console.log(`[Settings] 已整理手动只读设备列表: ${list.length} -> ${deduped.length}`);
+    }
+
+    // 如果存在“当前不在线”的手动只读设备，为避免长时间缺少事件导致无法清理，
+    // 在宽限期结束后再触发一次主动清理
+    const hasOfflineCandidates = migrated.some(id => !currentIds.has(id));
+    if (hasOfflineCandidates) {
+      if (manualPruneTimer) clearTimeout(manualPruneTimer);
+      manualPruneTimer = setTimeout(async () => {
+        manualPruneTimer = null;
+        try {
+          const latestDevices = await ntfsManager.getNTFSDevices(true);
+          await pruneManuallyReadOnlyDevices(latestDevices as any);
+        } catch (error) {
+          console.warn('[Settings] 延迟清理手动只读设备列表失败:', error);
+        }
+      }, MANUAL_GRACE_MS + 500);
+    }
+  } catch (error) {
+    console.warn('[Settings] 清理手动只读设备列表失败:', error);
+  }
+}
+
 // 辅助函数：向所有窗口广播最新设备列表（绕过 fswatch 可能的延迟）
 async function broadcastDevicesToAllWindows(): Promise<void> {
   try {
     // 使用强制刷新，确保获取最新状态（特别是读写/只读切换后）
     const devices = await ntfsManager.getNTFSDevices(true);
+    // 同步清理陈旧的“手动只读”列表，避免误判跳过自动读写
+    await pruneManuallyReadOnlyDevices(devices as any);
     const allWindows = BrowserWindow.getAllWindows();
     console.log(`[设备广播] 向 ${allWindows.length} 个窗口广播最新设备列表，设备数量:`, devices.length);
 
@@ -69,10 +149,10 @@ export function setupNTFSHandlers(): void {
         const { SettingsManager } = await import('./utils/settings');
         const settings = await SettingsManager.getSettings();
         const manuallyReadOnlyDevices = settings.manuallyReadOnlyDevices || [];
-        const index = manuallyReadOnlyDevices.indexOf(device.disk);
-        if (index > -1) {
-          manuallyReadOnlyDevices.splice(index, 1);
-          await SettingsManager.saveSettings({ manuallyReadOnlyDevices });
+        const manualId = device?.volumeUuid || device?.disk;
+        const updated = manuallyReadOnlyDevices.filter((id: string) => id !== manualId && id !== device.disk);
+        if (updated.length !== manuallyReadOnlyDevices.length) {
+          await SettingsManager.saveSettings({ manuallyReadOnlyDevices: updated });
         }
       } catch (error) {
         console.warn('[mount-device] 更新手动只读设备列表失败:', error);
@@ -129,12 +209,13 @@ export function setupNTFSHandlers(): void {
         const settings = await SettingsManager.getSettings();
         // 创建新数组，避免直接修改原数组引用
         const manuallyReadOnlyDevices = [...(settings.manuallyReadOnlyDevices || [])];
-        if (!manuallyReadOnlyDevices.includes(device.disk)) {
-          manuallyReadOnlyDevices.push(device.disk);
+        const manualId = device?.volumeUuid || device?.disk;
+        if (manualId && !manuallyReadOnlyDevices.includes(manualId)) {
+          manuallyReadOnlyDevices.push(manualId);
           await SettingsManager.saveSettings({ manuallyReadOnlyDevices });
-          console.log(`[IPC] 已将设备 ${device.volumeName} (${device.disk}) 添加到手动只读列表（操作前），当前列表:`, manuallyReadOnlyDevices);
+          console.log(`[IPC] 已将设备 ${device.volumeName} (${manualId}) 添加到手动只读列表（操作前），当前列表:`, manuallyReadOnlyDevices);
         } else {
-          console.log(`[IPC] 设备 ${device.volumeName} (${device.disk}) 已在手动只读列表中`);
+          console.log(`[IPC] 设备 ${device.volumeName} (${manualId}) 已在手动只读列表中`);
         }
       } catch (error) {
         console.warn('[restore-to-readonly] 保存手动只读设备列表失败:', error);
@@ -195,6 +276,8 @@ export function setupNTFSHandlers(): void {
       // 只在第一次调用时初始化混合检测（避免重复初始化）
       if (!hybridDetectionInitialized) {
         await ntfsManager.startHybridDetection((devices) => {
+          // 设备变化时清理陈旧的“手动只读”列表，避免 disk 复用导致误判
+          pruneManuallyReadOnlyDevices(devices as any).catch(() => {});
           // 通过事件通知所有窗口（包括已打开的托盘窗口）
           const allWindows = BrowserWindow.getAllWindows();
           console.log(`[混合检测] 设备变化，通知 ${allWindows.length} 个窗口，设备数量:`, devices.length);

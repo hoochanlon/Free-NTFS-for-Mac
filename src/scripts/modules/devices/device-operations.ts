@@ -52,6 +52,26 @@
     AppModules.Devices.Operations = {};
   }
 
+  // 自动读写：清理“已尝试”记录（卸载/推出/拔出等生命周期结束时应立即清理）
+  function clearAutoMountAttemptedDisk(disk: string | undefined): void {
+    try {
+      if (!disk) return;
+      const attempted = (AppModules.Devices as any).autoMountAttemptedDisks as Set<string> | undefined;
+      attempted?.delete(disk);
+    } catch {
+      // ignore
+    }
+  }
+
+  // 手动只读列表：设备的稳定标识（优先 volumeUuid，其次 disk）
+  function getManualReadOnlyId(device: any): string {
+    return device?.volumeUuid || device?.disk;
+  }
+
+  // 记录手动只读设备最后一次出现时间（用于宽限期，避免还原只读的临时卸载被误清）
+  const manualLastSeen = (AppModules.Devices as any).manualLastSeen as Map<string, number> || new Map<string, number>();
+  (AppModules.Devices as any).manualLastSeen = manualLastSeen;
+
   // 统一的设备列表刷新函数（确保操作后状态立即更新）
   // 增加重试机制，确保读写状态变化能被及时捕获
   async function refreshDeviceList(devicesList: HTMLElement, retryCount: number = 0): Promise<void> {
@@ -135,11 +155,13 @@
           try {
             const settings = await electronAPI.getSettings();
             const manuallyReadOnlyDevices = settings.manuallyReadOnlyDevices || [];
-            const index = manuallyReadOnlyDevices.indexOf(device.disk);
-            if (index > -1) {
-              manuallyReadOnlyDevices.splice(index, 1);
-              await electronAPI.saveSettings({ manuallyReadOnlyDevices });
+            const manualId = getManualReadOnlyId(device);
+            const updated = manuallyReadOnlyDevices.filter((id: string) => id !== manualId && id !== device.disk);
+            if (updated.length !== manuallyReadOnlyDevices.length) {
+              await electronAPI.saveSettings({ manuallyReadOnlyDevices: updated });
             }
+            if (manualId) manualLastSeen.delete(manualId);
+            manualLastSeen.delete(device.disk);
           } catch (error) {
             console.warn('更新手动只读设备列表失败:', error);
           }
@@ -192,16 +214,31 @@
           const settings = await electronAPI.getSettings();
           // 创建新数组，避免直接修改原数组引用
           const manuallyReadOnlyDevices = [...(settings.manuallyReadOnlyDevices || [])];
-          if (!manuallyReadOnlyDevices.includes(device.disk)) {
-            manuallyReadOnlyDevices.push(device.disk);
+          const manualId = getManualReadOnlyId(device);
+          if (manualId && !manuallyReadOnlyDevices.includes(manualId)) {
+            manuallyReadOnlyDevices.push(manualId);
             await electronAPI.saveSettings({ manuallyReadOnlyDevices });
-            console.log(`[设备操作] 已将设备 ${device.volumeName} (${device.disk}) 添加到手动只读列表（操作前），当前列表:`, manuallyReadOnlyDevices);
+            console.log(`[设备操作] 已将设备 ${device.volumeName} (${manualId}) 添加到手动只读列表（操作前），当前列表:`, manuallyReadOnlyDevices);
           } else {
-            console.log(`[设备操作] 设备 ${device.volumeName} (${device.disk}) 已在手动只读列表中`);
+            console.log(`[设备操作] 设备 ${device.volumeName} (${manualId}) 已在手动只读列表中`);
           }
+          if (manualId) manualLastSeen.set(manualId, Date.now());
+          if (device.disk) manualLastSeen.set(device.disk, Date.now());
+
+          // 设置自动挂载冷却：给手动只读操作一个窗口期，避免刚点击就被自动读写抢回
+          const cooldownMs = 8000; // 8 秒内不触发自动读写
+          const autoMountCooldown: Map<string, number> =
+            (AppModules.Devices as any).autoMountCooldown || new Map<string, number>();
+          (AppModules.Devices as any).autoMountCooldown = autoMountCooldown;
+          const until = Date.now() + cooldownMs;
+          if (manualId) autoMountCooldown.set(manualId, until);
+          if (device.disk) autoMountCooldown.set(device.disk, until);
         } catch (error) {
           console.warn('保存手动只读设备列表失败:', error);
         }
+
+        // 还原为只读：清理“已尝试自动挂载”记录，避免后续插回/重新挂载无法再次触发
+        clearAutoMountAttemptedDisk(device.disk);
 
         const result = await electronAPI.restoreToReadOnly(device);
 
@@ -362,6 +399,9 @@
         await addLog(t('messages.unmounting', { name: device.volumeName }), 'info');
         await addLog('提示：请在弹出的对话框中输入管理员密码', 'info');
 
+        // 卸载：立即清理“已尝试自动挂载”记录
+        clearAutoMountAttemptedDisk(device.disk);
+
         const result = await electronAPI.unmountDevice(device);
 
         if (result.success) {
@@ -503,6 +543,8 @@
         for (const device of mountedDevices) {
           try {
             await addLog(`正在卸载 ${device.volumeName}...`, 'info');
+            // 卸载：立即清理“已尝试自动挂载”记录
+            clearAutoMountAttemptedDisk(device.disk);
             const result = await electronAPI.unmountDevice(device);
 
             if (result.success) {
@@ -552,6 +594,9 @@
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
         await addLog(`正在推出 ${device.volumeName}...`, 'info');
+
+        // 推出：立即清理“已尝试自动挂载”记录
+        clearAutoMountAttemptedDisk(device.disk);
 
         const result = await electronAPI.ejectDevice(device);
 
@@ -614,6 +659,8 @@
         for (const device of mountedDevices) {
           try {
             await addLog(t('messages.ejecting', { name: device.volumeName }), 'info');
+            // 推出：立即清理“已尝试自动挂载”记录
+            clearAutoMountAttemptedDisk(device.disk);
             const result = await electronAPI.ejectDevice(device);
 
             if (result.success) {
