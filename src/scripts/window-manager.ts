@@ -34,6 +34,7 @@ export async function createMainWindow(): Promise<BrowserWindow> {
       nodeIntegration: false,
       contextIsolation: true
     },
+    // 主界面保留自定义标题栏（有系统红黄绿按钮）
     titleBarStyle: 'hidden',
     frame: false,
     backgroundColor: '#ffffff', // 默认浅色背景，减少深色残影
@@ -324,6 +325,9 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     transparent: false,
     backgroundColor: getThemeBackgroundColor(), // 动态主题背景
     resizable: false, // 固定大小，像系统菜单
+    movable: false, // 托盘弹窗固定位置，不允许用户拖动
+    minimizable: false, // 托盘弹窗不需要最小化
+    maximizable: false, // 托盘弹窗不需要最大化
     alwaysOnTop: false,
     skipTaskbar: true, // 不在任务栏显示
     show: false,
@@ -331,7 +335,8 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     opacity: 0, // 初始透明度为0，避免残影
     // macOS 特定设置
     ...(process.platform === 'darwin' ? {
-      titleBarStyle: 'hiddenInset', // 隐藏标题栏和控制按钮
+      // 关键：不要使用 titleBarStyle（尤其是 hiddenInset），否则 macOS 会把红黄绿按钮“叠”在内容上
+      // 托盘窗口是无边框弹窗，不应出现系统按钮
       vibrancy: 'sidebar', // 毛玻璃效果
       visualEffectState: 'active'
     } : {})

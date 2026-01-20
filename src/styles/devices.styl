@@ -26,6 +26,11 @@
   -webkit-app-region no-drag
   flex-shrink 0
 
+// 托盘窗口：不需要“红黄绿按钮占位区”，避免与系统按钮混淆
+body.tray-window
+  .devices-traffic-lights
+    display none
+
 
 
 .devices-content
