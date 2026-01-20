@@ -28,7 +28,7 @@
   3. 关掉终端，重启 Mac
   4. 重启以后可以在终端中运行 `csrutil status` 查看状态确认
 
-## 快速开始（Shell）
+## 快速开始（Shell - 忍者工具集）
 
 以下脚本来自 `ninja/` 文件夹的忍者工具集，提供命令行方式的 NTFS 和 Linux 文件系统读写支持。
 
@@ -56,7 +56,7 @@
 curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
 ```
 
-## 图形化软件版（Electron）
+## 软件版（Electron - 图形化）
 
 - 下载地址见 [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags)
 

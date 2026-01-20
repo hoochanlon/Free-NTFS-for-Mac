@@ -1,56 +1,41 @@
 #!/bin/bash
 
 ################################################################################
-# Free NTFS for Mac - Electron 应用打包脚本
+# Free NTFS for Mac - Electron 应用打包脚本 (Multi-language Support)
 #
-# 功能说明：
-#   这个脚本用于将 Electron 应用打包成 macOS 安装包（DMG 或 ZIP 格式）
-#
-# 打包流程：
-#   1. 编译 TypeScript 代码（.ts -> .js）
-#   2. 编译 Stylus 样式文件（.styl -> .css）
-#   3. 使用 electron-builder 打包成 macOS 应用
-#
-# 使用方法：
-#   基本打包: ./build.sh
-#   清理后打包: ./build.sh --clean
-#   仅打包 DMG: ./build.sh --dmg
-#   仅打包 ZIP: ./build.sh --zip
-#   明确指定 ARM64: ./build.sh --arm64（默认就是 ARM64）
-#
-# 输出位置：
-#   打包完成后，文件会在 dist/ 目录中
+# 设置语言: LANG=ja bash build.sh (日文) 或 LANG=en bash build.sh (英文)
 ################################################################################
 
-# ============================================================
-# 设置错误处理
-# ============================================================
-# set -e: 如果任何命令失败（返回非零退出码），立即退出脚本
-# 这样可以避免在出错时继续执行，导致更多问题
 set -e
+
+# ============================================================
+# 加载多语言支持
+# ============================================================
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/build-lang.sh" ]; then
+	source "$SCRIPT_DIR/build-lang.sh"
+else
+	t() { echo "$1"; }
+fi
 
 # ============================================================
 # 定义颜色输出（让终端输出更美观）
 # ============================================================
-# \033[0;32m: 绿色
-# \033[1;33m: 黄色（加粗）
-# \033[0m: 重置颜色
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
-NC='\033[0m' # No Color（无颜色，用于重置）
+NC='\033[0m'
 
 # ============================================================
 # 切换到项目根目录（脚本在 ninja/ 文件夹中）
 # ============================================================
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT" || {
-  echo "❌ 错误: 无法切换到项目根目录"
+  echo "$(t error_cd_failed)"
   exit 1
 }
 
-echo -e "${GREEN}开始构建 Free NTFS for Mac...${NC}"
+echo -e "${GREEN}$(t starting_build)${NC}"
 
 # ============================================================
 # 初始化变量：存储用户传入的参数
@@ -88,7 +73,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       # 未知参数，给出警告但继续执行
-      echo -e "${YELLOW}未知参数: $1${NC}"
+      echo -e "${YELLOW}$(t unknown_param "$1")${NC}"
       shift
       ;;
   esac
@@ -99,24 +84,22 @@ done
 # ============================================================
 # 清理旧的打包文件，确保重新打包时没有残留文件
 if [ "$CLEAN" = true ]; then
-  echo -e "${YELLOW}清理 dist 目录...${NC}"
-  rm -rf dist  # 删除 dist 目录及其所有内容
+  echo -e "${YELLOW}$(t cleaning_dist)${NC}"
+  rm -rf dist
 fi
 
 # ============================================================
 # 检查 DMG 使用说明文件
 # ============================================================
 check_dmg_readme() {
-  echo -e "${GREEN}检查 DMG 使用说明文件...${NC}"
+  echo -e "${GREEN}$(t checking_readme)${NC}"
 
-  # 检查多语言 README.txt 是否存在（从 docs 文件夹）
   if [ -f "docs/README.txt" ]; then
-    echo -e "${GREEN}✓ 多语言使用说明文件 README.txt 已准备就绪${NC}"
-    # 将 README.txt 复制到项目根目录（DMG 中使用）
+    echo -e "${GREEN}$(t readme_ready)${NC}"
     cp "docs/README.txt" "README.txt"
   else
-    echo -e "${YELLOW}⚠️  警告: 未找到 README.txt 使用说明文件${NC}"
-    echo -e "${YELLOW}   请确保 docs/README.txt 文件存在${NC}"
+    echo -e "${YELLOW}$(t warning_readme_not_found)${NC}"
+    echo -e "${YELLOW}$(t readme_ensure)${NC}"
   fi
 }
 
@@ -127,9 +110,9 @@ check_dmg_readme
 # 检查依赖是否已安装
 # ============================================================
 if [ ! -d "node_modules" ]; then
-  echo -e "${YELLOW}⚠️  警告: node_modules 不存在，正在安装依赖...${NC}"
+  echo -e "${YELLOW}$(t warning_no_node_modules)${NC}"
   pnpm install || {
-    echo -e "${RED}❌ 错误: 依赖安装失败${NC}"
+    echo -e "${RED}$(t error_install_failed)${NC}"
     exit 1
   }
 fi
@@ -137,32 +120,24 @@ fi
 # ============================================================
 # 同步版本号
 # ============================================================
-# 在编译之前，先同步版本号（从 package.json 更新到所有相关文件）
-echo -e "${GREEN}同步版本号...${NC}"
+echo -e "${GREEN}$(t syncing_version)${NC}"
 pnpm run sync-version
 
 # ============================================================
 # 编译源代码
 # ============================================================
-# 在打包之前，需要先编译 TypeScript 和 Stylus
-echo -e "${GREEN}编译 TypeScript 和 Stylus...${NC}"
-# pnpm run build:all: 运行 package.json 中定义的 build:all 脚本
-# 这个脚本会：
-#   - 同步版本号（已在上一步完成）
-#   - 编译 TypeScript (.ts -> .js)
-#   - 编译 Stylus (.styl -> .css)
-# 强制重新编译，确保使用最新代码
+echo -e "${GREEN}$(t compiling)${NC}"
 pnpm run build:stylus && pnpm run build:ts
 
 # 验证关键文件是否已更新
 if [ ! -f "styles.css" ]; then
-  echo -e "${YELLOW}警告: styles.css 不存在，重新编译...${NC}"
+  echo -e "${YELLOW}$(t warning_no_styles)${NC}"
   pnpm run build:stylus
 fi
 
 # 检查 styles.css 的修改时间，确保是最新的
 if [ -f "styles.css" ]; then
-  echo -e "${GREEN}✓ styles.css 已更新${NC}"
+  echo -e "${GREEN}$(t styles_updated)${NC}"
 fi
 
 # ============================================================
@@ -175,7 +150,7 @@ fi
 # ============================================================
 # 开始打包
 # ============================================================
-echo -e "${GREEN}开始打包...${NC}"
+echo -e "${GREEN}$(t starting_package)${NC}"
 
 # 设置 Electron Builder 的缓存目录
 # 下载的 Electron 二进制文件会缓存到这里，下次打包时就不需要重新下载了
@@ -211,12 +186,12 @@ fi
 # ============================================================
 # 打包完成，显示结果
 # ============================================================
-echo -e "${GREEN}打包完成！文件位于 dist 目录${NC}"
+echo -e "${GREEN}$(t package_complete)${NC}"
 
 # 清理临时生成的 README.txt 文件
 if [ -f "README.txt" ]; then
   rm -f "README.txt"
-  echo -e "${GREEN}✓ 已清理临时文件 README.txt${NC}"
+  echo -e "${GREEN}$(t cleaned_temp)${NC}"
 fi
 
 # ls -lh: 列出文件，-l 显示详细信息，-h 显示人类可读的文件大小

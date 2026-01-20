@@ -1,11 +1,23 @@
 #!/bin/bash
 
 ################################################################################
-# 一键运行脚本 - 自动检测并安装所有必要的工具
-# 适用于 macOS 系统，完全没有 npm、pnpm、ts、styl 环境的用户
+# Free NTFS for Mac - 一键运行脚本 (Multi-language Support)
+#
+# 设置语言: LANG=ja bash izanaki.sh (日文) 或 LANG=en bash izanaki.sh (英文)
 ################################################################################
 
 set -e
+
+# ============================================================
+# 加载多语言支持
+# ============================================================
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/izanaki-lang.sh" ]; then
+	source "$SCRIPT_DIR/izanaki-lang.sh"
+else
+	# 如果找不到语言文件，使用简单的回退函数
+	t() { echo "$1"; }
+fi
 
 # 颜色定义
 GREEN='\033[0;32m'
@@ -57,29 +69,29 @@ check_node_version() {
 # 检查是否为 macOS
 check_macos() {
     if [ "$(uname -s)" != "Darwin" ]; then
-        print_error "此脚本仅支持 macOS 系统"
+        print_error "$(t error_macos_only)"
         exit 1
     fi
 }
 
 # 安装 Node.js
 install_node() {
-    print_step "步骤 1/6: 检查 Node.js"
+    print_step "$(t step_check_nodejs)"
 
     if check_node_version; then
-        print_success "Node.js 已安装: $(node -v)"
+        print_success "$(t nodejs_installed "$(node -v)")"
         return 0
     fi
 
-    print_warning "未检测到 Node.js 或版本过低（需要 >= 16）"
+    print_warning "$(t nodejs_not_found)"
 
     if command_exists brew; then
-        print_info "使用 Homebrew 安装 Node.js..."
+        print_info "$(t nodejs_installing_homebrew)"
         brew install node
     else
-        print_warning "未检测到 Homebrew"
+        print_warning "$(t nodejs_homebrew_not_found)"
         echo ""
-        print_info "正在安装 Homebrew..."
+        print_info "$(t nodejs_installing_homebrew_now)"
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
         # 配置 PATH（Apple Silicon Mac）
@@ -87,47 +99,47 @@ install_node() {
             eval "$(/opt/homebrew/bin/brew shellenv)"
         fi
 
-        print_info "使用 Homebrew 安装 Node.js..."
+        print_info "$(t nodejs_installing)"
         brew install node
     fi
 
     # 验证安装
     if ! check_node_version; then
-        print_error "Node.js 安装失败或版本不正确"
+        print_error "$(t nodejs_install_failed)"
         exit 1
     fi
 
-    print_success "Node.js 安装成功: $(node -v)"
+    print_success "$(t nodejs_install_success "$(node -v)")"
 }
 
 # 安装 pnpm
 install_pnpm() {
-    print_step "步骤 2/6: 检查 pnpm"
+    print_step "$(t step_check_pnpm)"
 
     if command_exists pnpm; then
-        print_success "pnpm 已安装: $(pnpm -v)"
+        print_success "$(t pnpm_installed "$(pnpm -v)")"
         return 0
     fi
 
-    print_warning "未检测到 pnpm，正在安装..."
+    print_warning "$(t pnpm_not_found)"
 
     # macOS 上优先使用 npm 安装 pnpm
     if command_exists npm; then
-        print_info "使用 npm 安装 pnpm..."
+        print_info "$(t pnpm_installing)"
         npm install -g pnpm@latest
     else
-        print_error "未检测到 npm，请先安装 Node.js"
+        print_error "$(t pnpm_npm_not_found)"
         exit 1
     fi
 
     # 验证安装
     if ! command_exists pnpm; then
-        print_error "pnpm 安装失败，请手动安装："
-        echo "  npm install -g pnpm"
+        print_error "$(t pnpm_install_failed)"
+        echo "$(t pnpm_install_manual)"
         exit 1
     fi
 
-    print_success "pnpm 安装成功: $(pnpm -v)"
+    print_success "$(t pnpm_install_success "$(pnpm -v)")"
 }
 
 # 检查 Electron 是否正常工作
@@ -139,14 +151,14 @@ check_electron() {
     fi
 }
 
-# 修复 Electron 安装（参考 fix-electron.sh）
+# 修复 Electron 安装
 fix_electron() {
-    print_warning "Electron 安装异常，正在修复..."
+    print_warning "$(t electron_installing)"
 
     # 临时禁用 set -e，允许错误处理
     set +e
 
-    # 查找 Electron 安装脚本（参考 fix-electron.sh 的方法）
+    # 查找 Electron 安装脚本
     ELECTRON_INSTALL_SCRIPT=""
 
     # 方法1: 直接查找所有 electron 目录下的 install.js（最可靠）
@@ -172,20 +184,20 @@ fix_electron() {
     fi
 
     if [ -z "$ELECTRON_INSTALL_SCRIPT" ]; then
-        print_error "找不到 Electron 安装脚本"
-        print_info "尝试重新安装 Electron..."
+        print_error "$(t electron_script_not_found)"
+        print_info "$(t electron_reinstalling)"
 
         # 删除现有的 Electron 安装
         rm -rf node_modules/.pnpm/electron@* 2>/dev/null || true
         rm -rf node_modules/electron 2>/dev/null || true
 
         # 重新安装 Electron（允许构建脚本运行）
-        print_info "重新安装 Electron（允许构建脚本）..."
+        print_info "$(t electron_reinstalling_force)"
         pnpm install electron@28.3.3 --force --ignore-scripts=false 2>&1
         INSTALL_RESULT=$?
 
         if [ $INSTALL_RESULT -ne 0 ]; then
-            print_warning "强制安装失败，尝试普通安装..."
+            print_warning "$(t electron_reinstalling_normal)"
             pnpm install electron@28.3.3 --ignore-scripts=false 2>&1
             INSTALL_RESULT=$?
         fi
@@ -199,17 +211,19 @@ fix_electron() {
         fi
 
         if [ -z "$ELECTRON_INSTALL_SCRIPT" ]; then
-            print_error "重新安装后仍找不到 Electron 安装脚本"
-            print_info "建议手动运行修复脚本: ./ninja/fix-electron.sh"
+            print_error "$(t electron_script_not_found)"
+            print_info "$(t electron_clean_install)"
+            echo "$(t electron_clean_commands)"
+            echo "$(t electron_clean_commands2)"
             set -e
             return 1
         fi
     fi
 
-    print_info "找到 Electron 安装脚本: $ELECTRON_INSTALL_SCRIPT"
-    print_info "运行 Electron 安装脚本（下载二进制文件）..."
+    print_info "$(t electron_script_found "$ELECTRON_INSTALL_SCRIPT")"
+    print_info "$(t electron_running_script)"
     node "$ELECTRON_INSTALL_SCRIPT" 2>&1 || {
-        print_warning "安装脚本执行完成（可能没有输出）"
+        print_warning "$(t electron_script_complete)"
     }
 
     # 恢复 set -e
@@ -217,178 +231,179 @@ fix_electron() {
 
     # 再次验证
     if check_electron; then
-        print_success "Electron 修复成功"
+        print_success "$(t electron_fix_success)"
         return 0
     else
-        print_error "Electron 修复失败"
-        print_info "建议手动运行修复脚本: ./ninja/fix-electron.sh"
+        print_error "$(t electron_fix_failed)"
+        print_info "$(t electron_clean_install)"
+        echo "$(t electron_clean_commands)"
+        echo "$(t electron_clean_commands2)"
         return 1
     fi
 }
 
-# 安装项目依赖（参考 setup.sh）
+# 安装项目依赖
 install_dependencies() {
-    print_step "步骤 3/6: 安装项目依赖"
+    print_step "$(t step_install_dependencies)"
 
     if [ -d "node_modules" ] && [ -f "pnpm-lock.yaml" ]; then
-        print_info "检测到已安装的依赖，检查是否需要更新..."
+        print_info "$(t dependencies_checking)"
         # 注意：pnpm 可能会忽略构建脚本，我们需要确保 Electron 的安装脚本能运行
         pnpm install || {
-            print_error "依赖安装失败"
+            print_error "$(t dependencies_install_failed)"
             exit 1
         }
     else
-        print_info "安装项目依赖（这可能需要几分钟）..."
+        print_info "$(t dependencies_installing)"
         pnpm install || {
-            print_error "依赖安装失败"
+            print_error "$(t dependencies_install_failed)"
             exit 1
         }
     fi
 
     # 如果 pnpm 忽略了构建脚本，我们需要手动运行 Electron 安装脚本
     if ! check_electron; then
-        print_info "检测到 Electron 可能未正确安装，尝试运行安装脚本..."
+        print_info "$(t dependencies_installing_electron)"
         found_script=$(find node_modules -name "install.js" -path "*/electron/*" -type f 2>/dev/null | head -n 1)
         if [ -n "$found_script" ] && [ -f "$found_script" ]; then
-            print_info "运行 Electron 安装脚本..."
+            print_info "$(t dependencies_running_electron_script)"
             node "$found_script" 2>&1 || true
         fi
     fi
 
-    print_success "依赖安装完成"
+    print_success "$(t dependencies_install_success)"
 
-    # 检查 Electron 是否正常工作（参考 fix-electron.sh）
-    print_info "检查 Electron 安装..."
+    # 检查 Electron 是否正常工作
+    print_info "$(t electron_checking)"
     if ! check_electron; then
-        print_warning "Electron 安装异常，尝试修复..."
+        print_warning "$(t electron_installing)"
         if ! fix_electron; then
-            print_error "Electron 修复失败"
-            print_info "可以尝试手动运行: ./ninja/fix-electron.sh"
+            print_error "$(t electron_fix_failed)"
+            print_info "$(t electron_clean_install)"
+            echo "$(t electron_clean_commands)"
+            echo "$(t electron_clean_commands2)"
             exit 1
         fi
     else
-        print_success "Electron 安装正常"
+        print_success "$(t electron_install_normal)"
     fi
 }
 
-# 编译 TypeScript（参考 setup.sh）
+# 编译 TypeScript
 build_typescript() {
-    print_step "步骤 4/6: 编译 TypeScript"
+    print_step "$(t step_build_typescript)"
 
-    # 检查是否需要编译（参考 setup.sh）
+    # 检查是否需要编译
     if [ ! -d "scripts" ] || [ -z "$(ls -A scripts 2>/dev/null)" ]; then
-        print_info "scripts 目录为空，需要编译 TypeScript..."
-        print_info "编译 TypeScript..."
+        print_info "$(t typescript_scripts_empty)"
+        print_info "$(t typescript_compiling)"
         pnpm run build:ts || {
-            print_warning "TypeScript 编译失败，尝试使用本地 TypeScript..."
+            print_warning "$(t typescript_compile_failed)"
             npx tsc || {
-                print_error "TypeScript 编译失败"
+                print_error "$(t typescript_compile_error)"
                 exit 1
             }
         }
     elif [ -f "scripts/main.js" ]; then
-        print_info "检测到已编译的文件，跳过编译..."
+        print_info "$(t typescript_compiled_exists)"
     else
-        print_info "编译 TypeScript..."
+        print_info "$(t typescript_compiling)"
         pnpm run build:ts || {
-            print_warning "TypeScript 编译失败，尝试使用本地 TypeScript..."
+            print_warning "$(t typescript_compile_failed)"
             npx tsc || {
-                print_error "TypeScript 编译失败"
+                print_error "$(t typescript_compile_error)"
                 exit 1
             }
         }
     fi
 
-    # 验证编译结果（参考 setup.sh）
+    # 验证编译结果
     if [ ! -f "scripts/main.js" ]; then
-        print_error "编译失败：找不到 scripts/main.js"
-        print_info "尝试重新编译..."
+        print_error "$(t typescript_main_not_found)"
+        print_info "$(t typescript_recompiling)"
         pnpm run build:ts || {
-            print_error "TypeScript 编译失败，请检查错误信息"
+            print_error "$(t typescript_check_error)"
             exit 1
         }
     fi
 
-    print_success "TypeScript 编译完成"
+    print_success "$(t typescript_compile_success)"
 }
 
-# 编译 Stylus（参考 setup.sh）
+# 编译 Stylus
 build_stylus() {
-    print_step "步骤 5/6: 编译 Stylus"
+    print_step "$(t step_build_stylus)"
 
-    # 检查是否需要编译（参考 setup.sh）
+    # 检查是否需要编译
     if [ ! -f "styles.css" ]; then
-        print_info "styles.css 不存在，需要编译 Stylus..."
-        print_info "编译 Stylus..."
+        print_info "$(t stylus_css_not_found)"
+        print_info "$(t stylus_compiling)"
         pnpm run build:stylus || {
-            print_warning "Stylus 编译失败，尝试使用本地 Stylus..."
+            print_warning "$(t stylus_compile_failed)"
             npx stylus src/styles/main.styl -o styles.css || {
-                print_warning "Stylus 编译失败，但继续执行..."
+                print_warning "$(t stylus_compile_warning)"
             }
         }
     else
-        print_info "检测到 styles.css，跳过编译..."
+        print_info "$(t stylus_compiled_exists)"
     fi
 
     # 验证编译结果
     if [ -f "styles.css" ]; then
-        print_success "Stylus 编译完成"
+        print_success "$(t stylus_compile_success)"
     else
-        print_warning "styles.css 不存在，但继续执行..."
+        print_warning "$(t stylus_css_missing)"
     fi
 }
 
-# 同步版本号（参考 setup.sh）
+# 同步版本号
 sync_version() {
-    print_info "同步版本号..."
+    print_info "$(t version_syncing)"
     if [ -f "ninja/sync-version.js" ]; then
         node ninja/sync-version.js || {
-            print_warning "版本号同步失败，继续执行..."
+            print_warning "$(t version_sync_failed)"
         }
     else
-        print_warning "ninja/sync-version.js 不存在，跳过版本同步"
+        print_warning "$(t version_sync_not_found)"
     fi
 }
 
 # 运行应用
 run_app() {
-    print_step "步骤 6/6: 启动应用"
+    print_step "$(t step_start_app)"
 
     # 检查 Electron 是否可用
     if [ ! -d "node_modules/electron" ] && [ ! -d "node_modules/.pnpm/electron@*" ]; then
-        print_error "Electron 未安装，请先运行依赖安装"
+        print_error "$(t electron_not_installed)"
         exit 1
     fi
 
     # 最后验证 Electron 是否正常工作
-    print_info "最后验证 Electron..."
+    print_info "$(t electron_verifying)"
     if ! check_electron; then
-        print_warning "Electron 验证失败，尝试修复..."
+        print_warning "$(t electron_verify_failed)"
         if ! fix_electron; then
-            print_error "Electron 修复失败"
+            print_error "$(t electron_fix_failed)"
             echo ""
-            print_info "请尝试手动修复："
-            echo "  ./ninja/fix-electron.sh"
-            echo ""
-            print_info "或者清理后重新安装："
-            echo "  rm -rf node_modules"
-            echo "  pnpm install"
+            print_info "$(t electron_clean_install)"
+            echo "$(t electron_clean_commands)"
+            echo "$(t electron_clean_commands2)"
             exit 1
         fi
     fi
 
-    print_success "所有准备工作完成！"
+    print_success "$(t app_all_ready)"
     echo ""
-    print_info "启动 Electron 应用..."
+    print_info "$(t app_starting_dev)"
     echo ""
 
-    # 运行应用
-    pnpm start
+    # 运行应用（开发模式，带热重载和 DevTools）
+    pnpm run dev
 }
 
-# 检查必要文件（参考 setup.sh）
+# 检查必要文件和设置权限
 check_required_files() {
-    print_info "检查必要文件..."
+    print_info "$(t files_checking)"
 
     REQUIRED_FILES=(
         "package.json"
@@ -397,20 +412,46 @@ check_required_files() {
 
     for file in "${REQUIRED_FILES[@]}"; do
         if [ ! -f "$file" ]; then
-            print_error "找不到文件: $file"
+            print_error "$(t files_not_found "$file")"
             exit 1
         fi
     done
 
-    print_success "必要文件检查完成"
+    print_success "$(t files_check_success)"
+
+    # 设置脚本执行权限
+    print_info "$(t files_setting_permissions)"
+    chmod +x ninja/build.sh 2>/dev/null || true
+    chmod +x ninja/sync-version.js 2>/dev/null || true
+    chmod +x ninja/filter-tsc-output.js 2>/dev/null || true
+    chmod +x ninja/restart-watch.sh 2>/dev/null || true
+
+    # 检查并创建必要的目录
+    print_info "$(t files_checking_dirs)"
+    REQUIRED_DIRS=(
+        "scripts"
+        "src/html"
+        "src/scripts"
+        "src/styles"
+        "src/locales"
+        "src/imgs"
+        "config"
+    )
+
+    for dir in "${REQUIRED_DIRS[@]}"; do
+        if [ ! -d "$dir" ]; then
+            print_warning "$(t files_dir_not_found "$dir")"
+            mkdir -p "$dir"
+        fi
+    done
 }
 
 # 主函数
 main() {
     echo ""
     echo -e "${GREEN}╔════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║     Free NTFS for Mac - 一键运行脚本          ║${NC}"
-    echo -e "${GREEN}║           仅支持 macOS 系统                    ║${NC}"
+    echo -e "${GREEN}║     $(t script_title)          ║${NC}"
+    echo -e "${GREEN}║           $(t script_subtitle)                    ║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════════════╝${NC}"
     echo ""
 
@@ -419,11 +460,11 @@ main() {
 
     # 检查是否在项目根目录
     if [ ! -f "package.json" ]; then
-        print_error "请在项目根目录运行此脚本"
+        print_error "$(t error_not_root_dir)"
         exit 1
     fi
 
-    # 检查必要文件（参考 setup.sh）
+    # 检查必要文件
     check_required_files
 
     # 执行所有步骤
@@ -433,7 +474,15 @@ main() {
     install_dependencies
     build_typescript
     build_stylus
-    run_app
+
+    # 完成提示
+    print_step "$(t step_complete)"
+    print_success "$(t complete_all_ready)"
+    echo ""
+    print_info "$(t complete_commands)"
+    echo -e "  ${YELLOW}pnpm start${NC}        $(t complete_command_start)"
+    echo -e "  ${YELLOW}pnpm run dev${NC}     $(t complete_command_dev)"
+    echo ""
 }
 
 # 运行主函数

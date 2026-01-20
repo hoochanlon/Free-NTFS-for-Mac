@@ -6,6 +6,16 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline';">
   <title>Nigate</title>
   <script>
+    // 全局错误处理 - 捕获未定义的变量错误
+    window.addEventListener('error', function(event) {
+      // 如果是 dragEvent 未定义的错误，静默处理（可能是第三方库或控制台代码）
+      if (event.message && event.message.includes('dragEvent is not defined')) {
+        console.warn('检测到 dragEvent 未定义错误，已忽略（可能是第三方库或控制台代码）');
+        event.preventDefault();
+        return false;
+      }
+    }, true);
+
     // 在 CSS 加载前立即设置主题和内联样式，避免残影
     (function() {
       try {
