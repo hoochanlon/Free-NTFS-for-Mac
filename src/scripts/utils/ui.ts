@@ -18,6 +18,12 @@
   AppUtils.UI = {
     // 显示/隐藏加载遮罩
     showLoading(loadingOverlay: HTMLElement, show: boolean = true, text?: string): void {
+      // 如果是托盘窗口，不显示加载遮罩（无感刷新）
+      const isTrayWindow = document.body && document.body.classList.contains('tray-window');
+      if (isTrayWindow && show) {
+        return; // 托盘窗口不显示加载遮罩
+      }
+
       if (show) {
         loadingOverlay.classList.add('visible');
         // 如果提供了文本，更新加载文本（用于刷新设备时显示"刷新中..."）

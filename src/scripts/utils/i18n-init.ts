@@ -23,7 +23,7 @@
       // 检查是否是托盘窗口，托盘窗口不需要更新状态文本
       const isTrayWindow = document.body && document.body.classList.contains('tray-window');
       if (!isTrayWindow) {
-        statusText.textContent = t('status.checking');
+      statusText.textContent = t('status.checking');
       }
     }
 
@@ -282,7 +282,7 @@
       const isTrayWindow = document.body && document.body.classList.contains('tray-window');
       // 托盘窗口不显示加载遮罩，所以不需要设置文本
       if (!isTrayWindow) {
-        loadingText.textContent = t('status.checking');
+      loadingText.textContent = t('status.checking');
       }
     }
 

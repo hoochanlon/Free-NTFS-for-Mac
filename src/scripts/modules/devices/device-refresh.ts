@@ -140,8 +140,15 @@
       Utils.showLoading(show);
       return;
     }
+
+    // 降级逻辑：直接操作 loadingOverlay（但也要检查是否是托盘窗口，双重保险）
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) {
+      // 再次检查是否是托盘窗口（双重保险，防止降级逻辑绕过检查）
+      if (isTrayWindow) {
+        return;
+      }
+
       if (show) {
         loadingOverlay.classList.add('visible');
         // 更新加载文本为"刷新中..."而不是"正在检查..."
