@@ -376,10 +376,6 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     console.error('HTML path:', trayDevicesPath);
   });
 
-  // 开发模式下为托盘窗口打开 DevTools（方便调试）
-  // 说明：托盘窗口初始是 show:false + opacity:0，放到 ready-to-show 更稳定
-  const shouldOpenTrayDevTools = process.argv.includes('--dev');
-
   // 在页面加载完成后更新背景色和添加标识
   trayDevicesWindow.webContents.once('did-finish-load', async () => {
     if (trayDevicesWindow) {
@@ -436,12 +432,6 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
 
   trayDevicesWindow.once('ready-to-show', async () => {
     if (trayDevicesWindow) {
-      // DevTools：仅开发模式下打开（使用 detach，避免被主窗口 DevTools 混淆）
-      if (shouldOpenTrayDevTools && !trayDevicesWindow.webContents.isDevToolsOpened()) {
-        console.log('[TrayWindow] Opening DevTools (detach)...');
-        trayDevicesWindow.webContents.openDevTools({ mode: 'detach' });
-      }
-
       // 在显示前确保背景色已更新，避免残影
       await new Promise<void>((resolve) => {
         updateWindowBackgroundColor(trayDevicesWindow!);
