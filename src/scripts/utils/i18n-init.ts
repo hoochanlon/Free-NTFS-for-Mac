@@ -76,15 +76,32 @@
       ejectAllBtn.textContent = t('devices.ejectAll');
     }
 
+    // 更新图标按钮的 title 属性（用于 tooltip）
+    const autoMountBtn = document.getElementById('autoMountBtn');
+    if (autoMountBtn) {
+      autoMountBtn.title = t('tray.autoMount') || t('devices.autoMount') || '自动读写';
+    }
+
+    const caffeinateBtn = document.getElementById('caffeinateBtn');
+    if (caffeinateBtn) {
+      caffeinateBtn.title = t('tray.preventSleep') || '禁止休眠';
+    }
+
     const refreshDevicesBtn = document.getElementById('refreshDevicesBtn');
     if (refreshDevicesBtn) {
       // 更新标题（只更新 title，不更新内容，因为只有图标）
       const titleText = t('tray.refreshDevices') || t('devices.refreshDevices');
+      refreshDevicesBtn.title = titleText;
       // 确保只有图标（如果没有图标，添加图标）
       const icon = refreshDevicesBtn.querySelector('.btn-icon');
       if (!icon) {
         refreshDevicesBtn.innerHTML = '<img src="../imgs/svg/actions/refresh.svg" alt="" class="btn-icon">';
       }
+    }
+
+    const showMainWindowBtn = document.getElementById('showMainWindowBtn');
+    if (showMainWindowBtn) {
+      showMainWindowBtn.title = t('tray.showMainWindow') || '主界面';
     }
 
     const quitBtn = document.getElementById('quitBtn');
@@ -94,7 +111,8 @@
       // - 托盘窗口：使用统一的 btn-icon 样式和退出提示文案
       const isTrayWindow = document.body && document.body.classList.contains('tray-window');
       if (isTrayWindow) {
-        const titleText = t('tray.quit');
+        const titleText = t('tray.quit') || t('menu.quit') || '退出';
+        quitBtn.title = titleText;
 
         // 托盘窗口使用简单的黑色退出图标（与其它图标风格一致）
         const icon = quitBtn.querySelector('.btn-icon');

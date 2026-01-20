@@ -10,7 +10,8 @@ import {
   closeModuleWindow,
   mainWindow,
   showMainWindowAndCloseTray,
-  adjustTrayWindowHeightByDeviceCount
+  adjustTrayWindowHeightByDeviceCount,
+  trayDevicesWindow
 } from './window-manager';
 import { openAboutWindow, getAboutWindow } from './about-window';
 import { SettingsManager, AppSettings } from './utils/settings';
@@ -684,6 +685,37 @@ export function setupSettingsHandlers(): void {
       // 更新托盘提示文字
       await updateTrayTooltip();
       await updateTrayMenu();
+
+      // 通知托盘窗口语言已变更，重新加载语言文件（setLanguage 会自动触发 languageChanged 事件）
+      if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
+        try {
+          await trayDevicesWindow.webContents.executeJavaScript(`
+            // 重新加载语言文件，setLanguage 会自动触发 languageChanged 事件
+            (async () => {
+              const AppUtils = window.AppUtils;
+              if (AppUtils && AppUtils.I18n && AppUtils.I18n.setLanguage) {
+                try {
+                  // 重新加载语言文件（setLanguage 内部会触发 languageChanged 事件）
+                  await AppUtils.I18n.setLanguage('${settings.language}');
+                } catch (error) {
+                  console.error('托盘窗口重新加载语言失败:', error);
+                  // 如果失败，手动触发事件让 UI 尝试更新
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('languageChanged', { detail: '${settings.language}' }));
+                  }
+                }
+              } else {
+                // 如果 I18n 未初始化，直接触发事件
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('languageChanged', { detail: '${settings.language}' }));
+                }
+              }
+            })();
+          `);
+        } catch (error) {
+          console.error('通知托盘窗口语言变更失败:', error);
+        }
+      }
     }
     // 如果托盘模式设置发生变化，初始化或销毁托盘
     if (settings.trayMode !== undefined && settings.trayMode !== oldSettings.trayMode) {

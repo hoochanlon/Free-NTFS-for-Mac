@@ -239,19 +239,23 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     // 更新按钮文本（国际化）
-    const updateButtonTexts = () => {
+    const updateButtonTexts = (force: boolean = false) => {
       const AppUtils = (window as any).AppUtils;
       if (!AppUtils || !AppUtils.I18n || !AppUtils.I18n.t) {
         return;
       }
       const t = AppUtils.I18n.t;
 
-      const testTranslation = t('devices.title');
-      if (testTranslation === 'devices.title') {
-        setTimeout(updateButtonTexts, 100);
-        return;
+      // 如果不是强制更新，检查翻译是否已加载
+      if (!force) {
+        const testTranslation = t('devices.title');
+        if (testTranslation === 'devices.title') {
+          setTimeout(() => updateButtonTexts(false), 100);
+          return;
+        }
       }
 
+      // 更新文本按钮
       if (mountAllBtn) {
         mountAllBtn.textContent = t('devices.mountAll');
       }
@@ -260,6 +264,23 @@
       }
       if (ejectAllBtn) {
         ejectAllBtn.textContent = t('devices.ejectAll');
+      }
+
+      // 更新图标按钮的 title 属性（用于 tooltip）
+      if (autoMountBtn) {
+        autoMountBtn.title = t('tray.autoMount') || t('devices.autoMount') || '自动读写';
+      }
+      if (caffeinateBtn) {
+        caffeinateBtn.title = t('tray.preventSleep') || '禁止休眠';
+      }
+      if (refreshDevicesBtn) {
+        refreshDevicesBtn.title = t('tray.refreshDevices') || t('devices.refreshDevices') || '刷新';
+      }
+      if (showMainWindowBtn) {
+        showMainWindowBtn.title = t('tray.showMainWindow') || '主界面';
+      }
+      if (quitBtn) {
+        quitBtn.title = t('tray.quit') || t('menu.quit') || '退出';
       }
     };
 
@@ -290,8 +311,31 @@
 
     // 监听语言变更事件
     window.addEventListener('languageChanged', async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      updateButtonTexts();
+      // 等待翻译加载完成（最多等待500ms）
+      let retryCount = 0;
+      const maxRetries = 10;
+      const waitForTranslation = async (): Promise<void> => {
+        const AppUtils = (window as any).AppUtils;
+        if (AppUtils && AppUtils.I18n && AppUtils.I18n.t) {
+          const t = AppUtils.I18n.t;
+          const testTranslation = t('devices.title');
+          // 如果翻译已加载（返回值不等于键名），则更新按钮
+          if (testTranslation !== 'devices.title') {
+            updateButtonTexts(true); // 强制更新，跳过检查
+            return;
+          }
+        }
+        // 如果翻译还没加载，等待后重试
+        if (retryCount < maxRetries) {
+          retryCount++;
+          await new Promise(resolve => setTimeout(resolve, 50));
+          return waitForTranslation();
+        }
+        // 如果超时，仍然尝试更新（可能翻译已经加载但检查失败）
+        updateButtonTexts(true); // 强制更新
+      };
+      await waitForTranslation();
+
       if (Renderer && Renderer.lastRenderedDevices) {
         Renderer.lastRenderedDevices = [];
       }
