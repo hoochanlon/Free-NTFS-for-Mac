@@ -17,9 +17,14 @@
 
     // 标题栏（关于按钮不需要 tooltip）
 
+    // 只在主窗口（index.html）中更新状态文本，托盘窗口（devices.html）没有此元素
     const statusText = document.querySelector('.status-text');
     if (statusText) {
-      statusText.textContent = t('status.checking');
+      // 检查是否是托盘窗口，托盘窗口不需要更新状态文本
+      const isTrayWindow = document.body && document.body.classList.contains('tray-window');
+      if (!isTrayWindow) {
+        statusText.textContent = t('status.checking');
+      }
     }
 
     // 标签页
@@ -271,10 +276,14 @@
       }
     }
 
-    // 加载遮罩
+    // 加载遮罩（只在主窗口初始化时设置，托盘窗口应该在设备刷新完成后自动隐藏）
     const loadingText = document.querySelector('#loadingOverlay p');
     if (loadingText) {
-      loadingText.textContent = t('status.checking');
+      const isTrayWindow = document.body && document.body.classList.contains('tray-window');
+      // 托盘窗口不显示加载遮罩，所以不需要设置文本
+      if (!isTrayWindow) {
+        loadingText.textContent = t('status.checking');
+      }
     }
 
     // 处理所有带有 data-i18n 属性的元素（通用处理）

@@ -595,6 +595,16 @@
           }
           const result = await electronAPI.caffeinateToggle();
           if (result.success) {
+            // 关键：托盘窗口切换后也要把状态写回设置
+            // 否则主界面会按 settings.preventSleep 进行“纠偏”，把实际 caffeinate 状态关掉
+            try {
+              if (electronAPI.saveSettings) {
+                await electronAPI.saveSettings({ preventSleep: result.isActive });
+              }
+            } catch (error) {
+              console.warn('[托盘窗口] 保存防止休眠设置失败:', error);
+            }
+
             await updateCaffeinateButtonState();
             const message = result.isActive
               ? t('tray.preventSleepEnabled')
@@ -652,6 +662,15 @@
     // 绑定设备事件
     if (Events && Events.bindDeviceEvents) {
       Events.bindDeviceEvents(devicesList, devicesList);
+    }
+
+    // 确保加载遮罩在初始化时是隐藏的（托盘窗口不应该显示加载遮罩）
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+      const isTrayWindow = document.body && document.body.classList.contains('tray-window');
+      if (isTrayWindow) {
+        loadingOverlay.classList.remove('visible');
+      }
     }
 
     // 自动刷新
