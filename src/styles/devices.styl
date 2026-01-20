@@ -17,6 +17,7 @@
   flex-shrink 0
   -webkit-app-region drag
   position relative
+  justify-content flex-start
 
 
 
@@ -26,10 +27,41 @@
   -webkit-app-region no-drag
   flex-shrink 0
 
-// 托盘窗口：不需要“红黄绿按钮占位区”，避免与系统按钮混淆
+// 头部标题（Nigate 图标 + 文本）
+.devices-header-title
+  flex 1
+  display flex
+  align-items center
+  gap 6px
+  padding 0 10px
+  font-size 14px
+  font-weight 600
+  color var(--text-secondary)
+  -webkit-app-region no-drag
+  user-select none
+  -webkit-user-select none
+
+  .devices-header-icon
+    width 24px
+    height 24px
+    display block
+
+  .devices-header-text
+    letter-spacing 0.03em
+
+// 托盘窗口：标题靠左，不要被 traffic-lights 占位挤到中间
 body.tray-window
+  // 托盘窗口整体不允许选中文本（更像系统菜单交互）
+  user-select none
+  -webkit-user-select none
+  -webkit-touch-callout none
+
   .devices-traffic-lights
     display none
+
+  .devices-header-title
+    flex none
+    padding 0 10px
 
 
 
