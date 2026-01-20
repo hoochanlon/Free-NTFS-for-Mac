@@ -26,6 +26,7 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
   2. Find and open Terminal from the toolbar at the top of the screen, enter command: `csrutil disable`
   3. Close Terminal and restart Mac
   4. After restart, you can run `csrutil status` in terminal to check the status
+- **Bootable USB Drives**: If a USB drive has been used to create bootable media like Ventoy or WePE, it may take some time when mounting it in read-write mode
 
 ### Quick Start - Shell (Ninja Tools)
 
