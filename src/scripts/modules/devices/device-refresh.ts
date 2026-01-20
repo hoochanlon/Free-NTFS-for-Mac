@@ -290,17 +290,17 @@
           }
         }
 
-        // 读取设置并整理“手动只读”列表，确保拔出 9 秒后自动恢复默认（避免永久只读）
+        // 读取设置中的“手动只读”列表
+        // 说明：
+        // - 这里不再做自动清理 / 宽限期回收，避免用户设为只读后又被自动读写抢回
+        // - 只在用户主动执行“配置为可读写”“全读写”等操作时，才从手动只读列表中移除（见 device-operations.ts / ipc-handlers.ts）
         let settings: any = null;
         let manuallyReadOnlyDevices: string[] = [];
         try {
           settings = await electronAPI.getSettings();
-          manuallyReadOnlyDevices = await pruneManuallyReadOnlyDevices(
-            settings?.manuallyReadOnlyDevices || [],
-            devices
-          );
+          manuallyReadOnlyDevices = settings?.manuallyReadOnlyDevices || [];
         } catch (error) {
-          console.warn('[设备刷新] 获取或整理设置失败:', error);
+          console.warn('[设备刷新] 获取设置失败:', error);
         }
 
         // 自动挂载候选：任何“只读且未卸载”的设备（不依赖“新设备检测”，避免多处刷新导致漏触发）
