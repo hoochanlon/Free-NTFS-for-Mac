@@ -1,6 +1,6 @@
 # 🥷 忍者ツールセット
 
-![1.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEQFgRpb1kaCniY6FLy4S5EFKjwYp9logACZzQAAoxVeFdArRlmbLmJBDgE.png)
+![ ](https://i.meee.com.tw/sjxm1VW.png)
 
 このフォルダには、プロジェクトの開発、ビルド、テストに必要な各種スクリプトとツールファイルが含まれています。
 
