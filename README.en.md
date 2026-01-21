@@ -20,8 +20,13 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 - **Administrator Privileges**: Mounting operations require administrator privileges, and the system will prompt for a password
 - **Windows Fast Startup**: If the device uses Fast Startup in Windows, mounting may fail. It is recommended to fully shut down (not hibernate) in Windows, or disable Fast Startup
 - **Device Name**: USB drive names do not support spaces or illegal characters
+- **Read-Write Notes**:
+  - **Basic Operations**: Supports file copy, cut, delete, and rename (metadata-level operations)
+  - **Write Limitations (GUI Application)**: The GUI application (Electron GUI version) does not support direct in-place data modification on original files due to lack of kernel write permissions
+  - **Editing Recommendations**: Please use editors that support Atomic Write (such as VS Code / Kate). These tools save files by "creating new and replacing old files", thereby bypassing in-place overwrite limitations
+  - **Additional Note**: `/ninja/kamui.sh` supports direct in-place data modification on original files, suitable for scenarios requiring direct file editing
 - **Gatekeeper (Allow Anywhere)**: First-time use may require disabling Gatekeeper to allow unsigned applications. Run in terminal: `sudo spctl --master-disable`. After disabling, you can see the "Anywhere" option in "System Settings" > "Privacy & Security"
-- **System Integrity Protection (SIP)**: To disable SIP, you need to operate in Recovery Mode:
+- **System Integrity Protection (SIP)** (Optional): To disable SIP, you need to operate in Recovery Mode:
   1. Restart Mac, hold the power button until the Apple logo and progress bar appear, enter Recovery Mode
   2. Find and open Terminal from the toolbar at the top of the screen, enter command: `csrutil disable`
   3. Close Terminal and restart Mac
