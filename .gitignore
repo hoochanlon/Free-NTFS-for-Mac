@@ -10,6 +10,10 @@ build/
 fuse-ext2.build
 out/
 .electron-cache/
+# local packages / caches / archived assets (keep out of git history)
+shell_for_helpdesk/
+archived/
+shashin/
 
 # macOS
 .DS_Store
