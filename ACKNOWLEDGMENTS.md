@@ -13,6 +13,7 @@
 - [kevintao0417](https://github.com/kevintao0417) - 早期发现并报告盘符命名不规范（存在空格和非法字符）导致无法正常使用 nigate 的问题（shell）
 - [ltlly](https://github.com/ltlly) - 报告 macOS 14 及其以上版本增加多个磁盘挂载的问题，以及系统预览版显示信息格式变化导致脚本解析字符串错误的问题（shell）
 - Ahmed Zidan - 邮件反馈空格密码无法识别问题(mac原生是支持空密码输入的)、反馈增加德语支持
+- [Whys8182](https://github.com/Whys8182) - 反馈其他读写工具存在依赖冲突，以及相关的文件改写限制
 
 
 ### 测试贡献者
