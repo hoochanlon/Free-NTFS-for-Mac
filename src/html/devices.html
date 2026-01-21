@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self';">
+  <title>NTFS 设备 - Nigate</title>
+  <link rel="stylesheet" href="../../styles.css?v=11">
+  <script src="../../scripts/theme-init.js"></script>
+  <script src="../../scripts/utils/i18n.js"></script>
+  <script src="../../scripts/utils/i18n-init.js"></script>
+  <!-- 设备信息渲染工具（共享模块，统一管理设备信息渲染逻辑） -->
+  <script src="../../scripts/utils/device-info-renderer.js"></script>
+  <!-- 设备管理子模块（按顺序加载） -->
+  <script src="../../scripts/modules/devices/device-utils.js"></script>
+  <script src="../../scripts/modules/devices/device-renderer.js"></script>
+  <script src="../../scripts/modules/devices/device-operations.js"></script>
+  <script src="../../scripts/modules/devices/device-events.js"></script>
+  <script src="../../scripts/modules/devices/device-refresh.js"></script>
+  <script src="../../scripts/modules/devices/device-auto-refresh.js"></script>
+</head>
+<body>
+  <div class="devices-page">
+    <div class="devices-header">
+      <div class="devices-traffic-lights"></div>
+      <div class="devices-header-title">
+        <!-- 使用与应用一致的主图标，避免样式过滤导致看不到 -->
+        <img src="../imgs/ico/flash.svg" alt="Nigate" class="devices-header-icon">
+        <span class="devices-header-text">Nigate</span>
+      </div>
+    </div>
+    <div class="devices-content">
+      <div class="section">
+        <div class="devices-section-header">
+          <div class="devices-header-actions">
+            <div class="devices-action-buttons-row">
+              <button class="btn btn-secondary" id="autoMountBtn">
+                <img src="../imgs/svg/devices/flash-auto.svg" alt="" class="btn-icon">
+              </button>
+              <button class="btn btn-secondary" id="caffeinateBtn">
+                <img src="../imgs/svg/system/caffe.svg" alt="" class="btn-icon" data-i18n-alt="tray.preventSleep">
+              </button>
+              <button class="btn btn-secondary" id="protectBtn" data-i18n-title="app.protectTooltip" title="状态保护（长按3s）">
+                <img src="../imgs/svg/system/protect.svg" alt="状态保护" class="btn-icon" data-i18n-alt="app.protect">
+              </button>
+              <button class="btn btn-secondary" id="refreshDevicesBtn">
+                <img src="../imgs/svg/actions/refresh.svg" alt="" class="btn-icon">
+              </button>
+              <button class="btn btn-secondary" id="showMainWindowBtn">
+                <img src="../imgs/svg/ui/home.svg" alt="" class="btn-icon">
+              </button>
+              <button class="btn btn-secondary" id="quitBtn">
+                <img src="../imgs/svg/actions/exit.svg" alt="" class="btn-icon">
+              </button>
+            </div>
+            <div class="devices-action-buttons-row">
+              <button class="btn btn-primary" id="mountAllBtn">全读写</button>
+              <button class="btn btn-warning" id="restoreAllReadOnlyBtn">全只读</button>
+              <button class="btn btn-danger" id="ejectAllBtn">全推出</button>
+            </div>
+          </div>
+        </div>
+        <div class="devices-list" id="devicesList">
+          <div class="empty-state">
+            <div class="empty-icon"></div>
+            <p>未检测到 NTFS 设备</p>
+            <p class="empty-hint">请插入 NTFS 格式的移动存储设备</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 加载遮罩 -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <p>处理中...</p>
+  </div>
+
+  <!-- 使用重构后的 devices.js -->
+  <script src="../../scripts/devices.js"></script>
+</body>
+</html>

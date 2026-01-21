@@ -1,0 +1,18 @@
+// macOS 风格滚动条样式
+@import 'variables'
+
+::-webkit-scrollbar
+  width 7px
+  height 7px
+
+::-webkit-scrollbar-track
+  background transparent
+  transition background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+
+::-webkit-scrollbar-thumb
+  background var(--border)
+  border-radius 3px
+  transition background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+
+  &:hover
+    background var(--accent)

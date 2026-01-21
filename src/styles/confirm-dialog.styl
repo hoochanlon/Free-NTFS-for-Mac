@@ -1,0 +1,316 @@
+// 确认对话框样式
+@import 'variables'
+
+.confirm-dialog-overlay
+  position fixed
+  top 0
+  left 0
+  right 0
+  bottom 0
+  background rgba(0, 0, 0, 0.5)
+  display flex
+  align-items center
+  justify-content center
+  z-index 10000
+  backdrop-filter blur(8px) saturate(180%)
+  -webkit-backdrop-filter blur(8px) saturate(180%)
+  animation fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1)
+
+.confirm-dialog
+  background var(--bg-secondary)
+  border 1px solid var(--border)
+  border-radius 12px
+  box-shadow 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 0.5px rgba(255, 255, 255, 0.05) inset
+  min-width 360px
+  max-width 460px
+  max-height 85vh
+  overflow hidden
+  display flex
+  flex-direction column
+  animation slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1)
+  transform-origin center center
+
+.confirm-dialog-title
+  font-size 16px
+  font-weight 600
+  color var(--text-primary)
+  padding 18px 20px 14px 20px
+  border-bottom 1px solid var(--border)
+  letter-spacing -0.02em
+  line-height 1.3
+  user-select none
+  -webkit-user-select none
+  background linear-gradient(to bottom, var(--bg-secondary), var(--bg-primary))
+
+.confirm-dialog-content
+  padding 16px 20px
+  color var(--text-primary)
+  font-size 13px
+  line-height 1.5
+  overflow-y auto
+  flex 1
+  user-select none
+  -webkit-user-select none
+  scrollbar-width thin
+  scrollbar-color var(--border) transparent
+
+  &::-webkit-scrollbar
+    width 6px
+
+  &::-webkit-scrollbar-track
+    background transparent
+
+  &::-webkit-scrollbar-thumb
+    background var(--border)
+    border-radius 3px
+
+    &:hover
+      background var(--text-secondary)
+
+  p
+    margin 0 0 10px 0
+    padding 0
+    color var(--text-primary)
+
+    &:last-child
+      margin-bottom 0
+
+    strong
+      font-weight 600
+      color var(--text-primary)
+      letter-spacing -0.01em
+
+  ul
+    margin 10px 0
+    padding-left 0
+    list-style none
+
+    li
+      margin 6px 0
+      position relative
+      padding-left 18px
+      color var(--text-primary)
+      line-height 1.5
+
+      &::before
+        content '•'
+        position absolute
+        left 5px
+        color var(--text-secondary)
+        font-weight 600
+        font-size 14px
+        line-height 1.4
+
+      &:first-child
+        margin-top 0
+
+      &:last-child
+        margin-bottom 0
+
+.confirm-dialog-buttons
+  display flex
+  gap 10px
+  justify-content flex-end
+  padding 14px 20px
+  border-top 1px solid var(--border)
+  background var(--bg-primary)
+
+  .btn
+    min-width 72px
+    padding 6px 16px
+    font-size 13px
+    font-weight 500
+    transition none
+
+    &.btn-primary
+      box-shadow 0 2px 8px rgba(0, 122, 255, 0.3)
+
+      &:active
+        transform scale(0.98)
+        box-shadow 0 1px 4px rgba(0, 122, 255, 0.3)
+
+    &.btn-secondary
+      &:active
+        transform scale(0.98)
+
+@keyframes fadeIn
+  from
+    opacity 0
+  to
+    opacity 1
+
+@keyframes slideUp
+  from
+    transform translateY(24px) scale(0.96)
+    opacity 0
+  to
+    transform translateY(0) scale(1)
+    opacity 1
+
+// 退出确认窗口（独立 BrowserWindow 内使用，不需要 overlay）
+body.quit-window
+  margin 0
+  height 100vh
+  display flex
+  align-items center
+  justify-content center
+  background var(--bg-secondary)
+
+.quit-dialog
+  background var(--bg-secondary)
+  border 1px solid var(--border)
+  border-radius 12px
+  box-shadow 0 20px 60px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(255, 255, 255, 0.05) inset
+  min-width 360px
+  max-width 460px
+  overflow hidden
+  display flex
+  flex-direction column
+
+.quit-dialog-title
+  font-size 16px
+  font-weight 600
+  color var(--text-primary)
+  padding 18px 20px 14px 20px
+  border-bottom 1px solid var(--border)
+  letter-spacing -0.02em
+  line-height 1.3
+  user-select none
+  -webkit-user-select none
+  background linear-gradient(to bottom, var(--bg-secondary), var(--bg-primary))
+
+.quit-dialog-content
+  padding 16px 20px
+  color var(--text-primary)
+  font-size 13px
+  line-height 1.5
+  user-select none
+  -webkit-user-select none
+
+.quit-dialog-buttons
+  display flex
+  gap 10px
+  justify-content flex-end
+  padding 14px 20px
+  border-top 1px solid var(--border)
+  background var(--bg-primary)
+
+// 关于对话框样式
+.about-dialog
+  min-width 400px
+  max-width 500px
+
+  .confirm-dialog-buttons
+    justify-content center
+
+.about-dialog-content
+  .about-content
+    h1,
+    .about-title
+      font-size 18px
+      font-weight 600
+      color var(--text-primary)
+      margin 0 0 12px 0
+      letter-spacing -0.01em
+
+    h2
+      font-size 15px
+      font-weight 600
+      color var(--text-primary)
+      margin 16px 0 10px 0
+      letter-spacing -0.01em
+
+    p
+      color var(--text-primary)
+      line-height 1.6
+      margin 0 0 14px 0
+      font-size 13px
+
+    ul
+      color var(--text-primary)
+      line-height 1.6
+      margin 10px 0 16px 0
+      padding-left 0
+      list-style none
+      font-size 13px
+
+    li
+      margin 6px 0
+      position relative
+      padding-left 16px
+
+      &::before
+        content '•'
+        position absolute
+        left 4px
+        color var(--text-secondary)
+        font-weight 600
+        font-size 14px
+
+      strong
+        font-weight 600
+        color var(--text-primary)
+
+    .about-icons-row
+      display flex
+      align-items center
+      justify-content center
+      gap 12px
+      margin-top 18px
+      padding-top 18px
+      border-top 1px solid var(--border)
+      flex-wrap nowrap
+
+    .about-icon-link
+      display flex
+      align-items center
+      justify-content center
+      width 40px
+      height 40px
+      border-radius 6px
+      background transparent
+      border none
+      text-decoration none
+      cursor pointer
+      flex-shrink 0
+      transition none
+
+      &:active
+        transform scale(0.95)
+
+      .about-icon
+        width 24px
+        height 24px
+        opacity 0.8
+        display block
+        object-fit contain
+        max-width 24px
+        max-height 24px
+
+        img
+          width 24px
+          height 24px
+          max-width 24px
+          max-height 24px
+
+// 浅色模式
+body.light-theme
+  .confirm-dialog-overlay
+    background rgba(0, 0, 0, 0.25)
+    backdrop-filter blur(12px) saturate(180%)
+    -webkit-backdrop-filter blur(12px) saturate(180%)
+
+  .confirm-dialog
+    box-shadow 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 0.5px rgba(0, 0, 0, 0.05) inset
+    border-color rgba(0, 0, 0, 0.08)
+
+  .confirm-dialog-title
+    background linear-gradient(to bottom, var(--bg-secondary), var(--bg-primary))
+
+  .confirm-dialog-buttons
+    .btn
+      &.btn-primary
+        box-shadow 0 2px 8px rgba(0, 122, 255, 0.25)
+
+        &:hover
+          box-shadow 0 4px 12px rgba(0, 122, 255, 0.35)

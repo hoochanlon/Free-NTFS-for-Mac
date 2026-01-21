@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self';">
+  <title>退出</title>
+  <link rel="stylesheet" href="../../styles.css?v=12">
+  <script src="../../scripts/theme-init.js"></script>
+  <script src="../../scripts/utils/i18n.js"></script>
+</head>
+<body class="quit-window">
+  <div class="quit-dialog">
+    <div class="quit-dialog-title" id="quitTitle">确认退出</div>
+    <div class="quit-dialog-content" id="quitMessage">确定要退出应用吗？</div>
+    <div class="quit-dialog-buttons">
+      <button class="btn btn-secondary" id="quitCancelBtn">取消</button>
+      <button class="btn btn-danger" id="quitConfirmBtn">退出</button>
+    </div>
+  </div>
+
+  <script src="../../scripts/quit-window.js"></script>
+</body>
+</html>
+

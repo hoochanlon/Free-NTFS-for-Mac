@@ -1,0 +1,131 @@
+// macOS 风格指南手册标签页样式
+// 注意：基础帮助样式已在 index.styl 中定义
+// 此文件用于帮助页面的特殊样式
+
+@import 'variables'
+
+// 帮助页面特殊容器
+.help-page-container
+  max-width 800px
+  margin 0 auto
+  padding 32px
+
+// 帮助搜索框（如果将来需要）
+.help-search
+  margin-bottom 20px
+  position relative
+
+  input
+    width 100%
+    padding 10px 14px 10px 40px
+    background var(--bg-secondary)
+    border 1px solid var(--border)
+    border-radius 8px
+    color var(--text-primary)
+    font-size 13px
+    transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+
+    &:focus
+      outline none
+      border-color var(--accent)
+      box-shadow 0 0 0 3px rgba(0, 122, 255, 0.1)
+
+    &::placeholder
+      color var(--text-secondary)
+
+  &::before
+    content ''
+    position absolute
+    left 12px
+    top 50%
+    transform translateY(-50%)
+    width 16px
+    height 16px
+    background-image url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>')
+    background-size contain
+    opacity 0.5
+
+// 帮助目录（如果将来需要）
+.help-toc
+  background var(--bg-secondary)
+  border 1px solid var(--border)
+  border-radius 8px
+  padding 16px
+  margin-bottom 20px
+
+  h3
+    font-size 15px
+    font-weight 600
+    color var(--text-primary)
+    margin-bottom 10px
+    letter-spacing -0.01em
+
+  ul
+    list-style none
+    margin 0
+    padding 0
+
+  li
+    margin-bottom 6px
+
+    a
+      color var(--accent)
+      text-decoration none
+      font-size 13px
+      transition color 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+
+      &:hover
+        color var(--accent-hover)
+        text-decoration underline
+
+// 帮助表格样式
+.help-content
+  table
+    width 100%
+    border-collapse collapse
+    margin 20px 0
+    background var(--bg-secondary)
+    border-radius 8px
+    overflow hidden
+    border 1px solid var(--border)
+
+    th, td
+      padding 10px 14px
+      text-align left
+      border-bottom 1px solid var(--border)
+
+    th
+      background var(--bg-tertiary)
+      color var(--text-primary)
+      font-weight 600
+      font-size 13px
+
+    td
+      color var(--text-secondary)
+      font-size 13px
+
+    tr:last-child td
+      border-bottom none
+
+    tr:hover
+      background var(--bg-tertiary)
+
+// 浅色模式调整
+body.light-theme
+  .help-search
+    input
+      background var(--light-bg-secondary)
+
+  .help-toc
+    background var(--light-bg-secondary)
+
+  .help-content
+    table
+      background var(--light-bg-secondary)
+      border-color var(--light-border)
+
+      th
+        background var(--light-bg-tertiary)
+
+      tr:hover
+        background var(--light-bg-tertiary)

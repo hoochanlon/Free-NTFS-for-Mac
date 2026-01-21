@@ -1,0 +1,351 @@
+{
+  "app": {
+    "title": "Nigate",
+    "about": "について",
+    "protect": "状態保護",
+    "protectLocked": "状態が保護されました",
+    "protectUnlocked": "状態の保護が解除されました",
+    "protectLockedMessage": "状態が保護されているため、変更できません",
+    "protectTooltip": "状態保護（3s長押しで保護）",
+    "protectTooltipLocked": "状態が保護されています（3s長押しで保護解除）"
+  },
+  "menu": {
+    "about": "について",
+    "services": "サービス",
+    "hide": "非表示",
+    "hideOthers": "その他を非表示",
+    "showAll": "すべてを表示",
+    "quit": "終了",
+    "file": "ファイル",
+    "close": "閉じる",
+    "view": "表示",
+    "reload": "再読み込み",
+    "forceReload": "強制再読み込み",
+    "toggleDevTools": "開発者ツールを切り替え",
+    "actualSize": "実際のサイズ",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "toggleFullScreen": "フルスクリーンを切り替え",
+    "window": "ウィンドウ",
+    "minimize": "最小化",
+    "help": "ヘルプ",
+    "guide": "ガイド",
+    "github": "GitHub Issue にフィードバック"
+  },
+  "tabs": {
+    "dependencies": "システム依存",
+    "devices": "NTFS デバイス",
+    "logs": "操作ログ",
+    "help": "ガイド",
+    "settings": "設定"
+  },
+  "status": {
+    "checking": "チェック中...",
+    "ready": "準備完了",
+    "systemReady": "システム準備完了",
+    "missingDeps": "依存関係が不足",
+    "checkFailed": "チェック失敗",
+    "waitingDevices": "デバイス待機中",
+    "devicesReadOnly": "{count} 個のデバイスが読み取り専用",
+    "devicesReady": "{count} 個のデバイス準備完了",
+    "detectFailed": "検出失敗"
+  },
+  "dependencies": {
+    "title": "システム依存",
+    "checkButton": "依存関係を確認",
+    "checking": "チェック中...",
+    "installed": "インストール済み",
+    "installedOptional": "インストール済み（オプション）",
+    "missing": "未インストール",
+    "missingOptional": "未インストール（オプション、推奨）",
+    "versionSatisfied": "要件を満たしています",
+    "versionUnsatisfied": "要件を満たしていません",
+    "installGuide": "インストールガイド",
+    "installGuideIntro": "依存関係をインストールまたは再インストールする場合は、以下のガイドに従ってターミナルで手動でインストールしてください：",
+    "copyCommand": "コマンドをコピー",
+    "allInstalled": "すべての依存関係がインストール済み",
+    "missingDepsDetected": "不足している依存関係が検出されました。以下のインストールガイドを参照してください",
+    "checkFailed": "依存関係の確認に失敗しました: {error}",
+    "checkTimeout": "チェックがタイムアウトしました。もう一度お試しください",
+    "installCommandLabel": "インストールコマンド：",
+    "swift": {
+      "name": "Xcode Command Line Tools",
+      "description": "Apple公式開発ツール、Swiftコンパイラと基本開発ライブラリを提供",
+      "installGuide": "ターミナルで上記のコマンドを実行すると、インストールウィンドウが表示されます。プロンプトに従ってインストールを完了してください。インストールプロセスには数分から数十分かかる場合がありますので、お待ちください。"
+    },
+    "brew": {
+      "name": "Homebrew",
+      "description": "macOSのパッケージマネージャー、ソフトウェアパッケージのインストールと管理に使用",
+      "installGuide": "ターミナルで上記のコマンドを実行し、プロンプトに従ってインストールを完了してください。ネットワークが遅い場合は、国内ミラーソースを使用できます。"
+    },
+    "macfuse": {
+      "name": "MacFUSE",
+      "description": "ファイルシステムユーザー空間フレームワーク、ntfs-3gに必要",
+      "installGuide": "まずHomebrewをインストールする必要があります。ターミナルで上記のコマンドを実行してインストールします。"
+    },
+    "ntfs3g": {
+      "name": "ntfs-3g",
+      "description": "NTFSファイルシステムドライバー、NTFS読み書きサポートを提供",
+      "installGuide": "まずHomebrewとMacFUSEをインストールする必要があります。ターミナルで上記のコマンドを実行してインストールします。"
+    },
+    "fswatch": {
+      "name": "fswatch (オプション)",
+      "description": "ファイルシステムイベント監視ツール、ゼロレイテンシーのデバイス検出を実現（イベント駆動モード）",
+      "installCommand": "brew install fswatch",
+      "installGuide": "fswatchはオプションのパフォーマンス最適化ツールです。インストール後、ゼロレイテンシーのデバイス検出が可能になり、CPU使用率が90%以上削減されます。上記のコマンドを実行してインストールします。"
+    },
+    "macosVersion": {
+      "name": "macOS バージョン ({version})",
+      "description": "システムバージョンチェック、macOSバージョンが要件を満たしていることを確認（macOS 14以上が必要）",
+      "installGuide": "macOSバージョンが低すぎる場合は、システム設定 > ソフトウェアアップデートからシステムをアップグレードしてください。このツールは正常に動作するためにmacOS 14（Sonoma）以上が必要です。"
+    }
+  },
+  "devices": {
+    "title": "NTFS デバイス",
+    "emptyState": "NTFS デバイスが検出されませんでした",
+    "emptyHint": "NTFS 形式の移動ストレージデバイスを接続してください",
+    "showMainWindow": "メインウィンドウ",
+    "mountAll": "全読み書き",
+    "restoreAllReadOnly": "全読み取り専用",
+    "unmountAll": "全アンマウント",
+    "ejectAll": "全イジェクト",
+    "refreshDevices": "更新",
+    "mount": "読み書き可能に設定",
+    "remount": "再度読み書き可能に設定",
+    "unmount": "アンマウント",
+    "eject": "イジェクト",
+    "restoreReadOnly": "読み取り専用に戻す",
+    "autoMount": "自動読み書き接続",
+    "readOnly": "読み取り専用",
+    "readWrite": "読み書き可能",
+    "unmounted": "アンマウント済み",
+    "deviceLabel": "デバイス:",
+    "mountPointLabel": "マウントポイント:",
+    "deviceMountPointLabel": "デバイス・マウントポイント:",
+    "capacityLabel": "容量:",
+    "notMounted": "マウントされていません",
+    "available": "利用可能",
+    "total": "合計",
+    "usageRate": "使用率",
+    "mountConfirm": "{name} を読み書き可能モードに設定しますか？",
+    "mountConfirmNote": "注意：\n• これには管理者権限が必要で、システムがパスワード入力ダイアログを表示します\n• このNTFSデバイスが以前にWindowsコンピューターで使用され、Windowsで高速スタートアップ機能が有効になっていた場合、デバイスをWindowsコンピューターに再度接続して完全にシャットダウンしてから再試行する必要がある場合があります",
+    "unmountConfirm": "{name} をアンマウントしますか？",
+    "ejectConfirm": "{name} をイジェクトしますか？",
+    "ejectConfirmNote": "注意：\n• イジェクト後、デバイスはシステムから完全に切断されます\n• デバイスはリストから削除され、再度接続する必要があります\n• デバイスを使用しているプログラムがないことを確認してください",
+    "restoreConfirm": "{name} を読み取り専用モードに戻しますか？",
+    "restoreConfirmNote": "注意：これには管理者権限が必要で、システムがパスワード入力ダイアログを表示します",
+    "ejectAllConfirm": "すべての NTFS デバイスをイジェクトしてもよろしいですか？",
+    "ejectAllConfirmNote": "これらのデバイスを使用しているプログラムがないことを確認してください",
+    "noDevicesToRestore": "還元するデバイスがありません",
+    "noDevicesToEject": "イジェクトするデバイスがありません"
+  },
+  "dialog": {
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "ok": "OK"
+  },
+  "logs": {
+    "title": "操作ログ",
+    "empty": "ログがありません",
+    "clear": "クリア",
+    "export": "エクスポート",
+    "enable": "操作ログを有効化",
+    "exportSuccess": "ログをエクスポートしました",
+    "exportError": "エクスポートに失敗しました",
+    "noLogsToExport": "エクスポートするログがありません",
+    "clearConfirm": "すべてのログをクリアしてもよろしいですか？",
+    "exportPath": "ログをエクスポートしました: {path}",
+    "exportHeader": "Nigate - 操作ログ",
+    "exportTime": "エクスポート時間: {time}",
+    "exportCount": "合計 {count} ログ",
+    "logTypes": {
+      "info": "情報",
+      "success": "成功",
+      "error": "エラー",
+      "warning": "警告"
+    },
+    "logsEnabled": "操作ログが有効になりました"
+  },
+  "help": {
+    "title": "ガイド",
+    "loading": "読み込み中...",
+    "loadError": "読み込み失敗: {error}",
+    "unknownError": "不明なエラー",
+    "icons": {
+      "title": "インターフェースアイコンの説明",
+      "intro": "アプリケーションのメインインターフェースには、よく使う機能にすばやくアクセスできるよう、いくつかの機能アイコンが用意されています：",
+      "titleBar": {
+        "title": "タイトルバーアイコン",
+        "autoMount": {
+          "name": "自動読み書きアイコン",
+          "description": "有効にすると、新しく挿入された NTFS デバイスが自動的に読み書きモードでマウントされます。アイコンがアクティブなときは青色で表示されます。"
+        },
+        "trayMode": {
+          "name": "トレイモードアイコン",
+          "description": "有効にすると、ウィンドウを閉じたときにアプリケーションが終了せず、システムトレイに最小化されます。アイコンがアクティブなときは紫色で表示されます。"
+        },
+        "preventSleep": {
+          "name": "スリープ防止アイコン",
+          "description": "有効にすると、システムがスリープモードに入ることを防ぎ、デバイスが継続的に利用可能であることを保証します。アイコンがアクティブなときはコーヒー色で表示されます。"
+        },
+        "protect": {
+          "name": "状態保護アイコン",
+          "description": "3秒長押しで保護状態を切り替えます。保護後、自動読み書き、トレイモード、スリープ防止機能が無効になり、誤操作を防ぎます。アイコンが保護されると緑色でパルスアニメーションが表示されます。"
+        },
+        "about": {
+          "name": "情報アイコン",
+          "description": "情報ウィンドウを開き、アプリケーション情報とプロジェクトリンクを表示します。"
+        },
+        "quit": {
+          "name": "終了アイコン",
+          "description": "アプリケーションを終了します。"
+        }
+      },
+      "tabs": {
+        "title": "タブアイコン",
+        "logs": {
+          "name": "ログアイコン",
+          "description": "「操作ログ」タブに切り替えて、すべての操作の記録を表示します。"
+        }
+      },
+      "devices": {
+        "title": "デバイス管理アイコン",
+        "refresh": {
+          "name": "更新アイコン",
+          "description": "デバイスリストを更新し、接続されている NTFS デバイスを再検出します。"
+        }
+      }
+    }
+  },
+  "settings": {
+    "title": "アプリケーション設定",
+    "savePassword": "管理者パスワードを保存",
+    "savePasswordDesc": "有効にすると、アプリは macOS Keychain を使用して管理者パスワードを安全に保存し、自動入力できるようにします",
+    "deletePassword": "保存されたパスワードを削除",
+    "deletePasswordConfirm": "保存されたパスワードを削除してもよろしいですか？",
+    "deletePasswordSuccess": "保存されたパスワードを削除しました",
+    "deletePasswordError": "パスワードの削除に失敗しました。もう一度お試しください",
+    "startupTab": "起動時に開くタブ",
+    "startupTabDesc": "アプリ起動時にデフォルトで表示されるタブを選択します",
+    "enableLogs": "操作ログを有効化",
+    "enableLogsDesc": "デフォルトでは無効になっており、手動で有効にする必要があります。有効にすると、アプリはすべての操作ログを記録します。無効にすると、新しいログは記録されませんが、既に記録されたログは保持されます。デフォルトで最大30日間保存されます",
+    "resetLogsDaily": "毎日自動的にログをリセット",
+    "resetLogsDailyDesc": "有効にすると、アプリは毎日初回起動時に前日のログを自動的にクリアします",
+    "exportLogs": "操作ログをエクスポート",
+    "exportLogsDesc": "すべての操作ログをテキストファイルとしてエクスポートします",
+    "language": "言語",
+    "languageDesc": "アプリケーションのインターフェース言語を選択します",
+    "windowSize": "ウィンドウサイズ",
+    "windowSizeDesc": "アプリケーションウィンドウの幅と高さをカスタマイズします（単位：ピクセル）。変更はアプリケーションを再起動後に有効になります",
+    "width": "幅",
+    "height": "高さ",
+    "pixel": "px",
+    "resetToDefault": "デフォルトにリセット",
+    "languages": {
+      "system": "システムに従う",
+      "zh-CN": "简中 (CN)",
+      "zh-TW": "繁中 (TW)",
+      "ja": "日本語 (JP)",
+      "en": "English (US)",
+      "de": "Deutsch (DE)"
+    },
+    "autoMount": "自動読み書き",
+    "autoMountDesc": "有効にすると、新しく挿入された NTFS デバイスは自動的に読み書きモードでマウントされます",
+    "trayMode": "トレイモード",
+    "trayModeDesc": "有効にすると、ウィンドウを閉じたときにアプリが終了せず、システムトレイに最小化されます。トレイアイコンから NTFS デバイスをすばやく管理できます。",
+    "preventSleep": "スリープ無効",
+    "preventSleepDesc": "有効にすると、システムはスリープモードに入ることを防ぎ、デバイスがアクセス可能な状態を維持します",
+    "enabled": "（有効）",
+    "autoStart": "システム起動時に自動起動",
+    "autoStartDesc": "有効にすると、システム起動時にアプリが自動的に起動します"
+  },
+  "tray": {
+    "showWindow": "ウィンドウを表示",
+    "ntfsDevices": "NTFS デバイス",
+    "autoMount": "自動読み書き",
+    "preventSleep": "スリープ無効",
+    "preventSleepEnabled": "スリープ無効（有効）",
+    "preventSleepDisabled": "スリープ無効（無効）",
+    "showMainWindow": "メインインターフェース",
+    "refreshDevices": "デバイスリストを更新",
+    "refreshing": "更新中...",
+    "mountAll": "全読み書き",
+    "unmountAll": "全アンマウント",
+    "ejectAll": "全イジェクト",
+    "quickActions": "クイック操作",
+    "settings": "設定",
+    "logs": "操作ログ",
+    "about": "について",
+    "quit": "終了",
+    "quitConfirmTitle": "終了の確認",
+    "quitConfirmMessage": "アプリケーションを終了してもよろしいですか？",
+    "tooltip": "Nigate - NTFS デバイス管理\nクリックしてデバイスリストを表示"
+  },
+  "messages": {
+    "processing": "処理中...",
+    "mounting": "{name} をマウント中...",
+    "mountSuccess": "マウント成功",
+    "mountError": "マウント失敗",
+    "unmounting": "{name} をアンマウント中...",
+    "unmountSuccess": "アンマウント成功",
+    "unmountError": "アンマウント失敗",
+    "ejecting": "{name} をイジェクト中...",
+    "ejectSuccess": "イジェクト成功",
+    "ejectError": "イジェクト失敗",
+    "restoring": "{name} を読み取り専用モードに戻す中...",
+    "restoreSuccess": "復元成功",
+    "restoreError": "復元失敗",
+    "passwordError": "パスワードが間違っています。再試行してください",
+    "cancelled": "操作がキャンセルされました",
+    "enterPassword": "ヒント：表示されたダイアログで管理者パスワードを入力してください",
+    "passwordDialog": {
+      "title": "管理者権限が必要です",
+      "prompt": "Macアカウントのログインパスワードを入力してください：",
+      "cancel": "キャンセル",
+      "confirm": "OK",
+      "passwordEmpty": "パスワードを空にすることはできません",
+      "passwordParseError": "パスワード入力結果を解析できません：パスワードが空です",
+      "userCancelled": "ユーザーがパスワード入力をキャンセルしました",
+      "getPasswordFailed": "パスワードの取得に失敗しました",
+      "mountDevice": "デバイス {name} を読み書き可能モードにマウント",
+      "mountDeviceRetry": "デバイス {name} を読み書き可能モードにマウント（パスワードを再入力してください）",
+      "unmountDevice": "デバイス {name} をアンマウント",
+      "restoreToReadOnly": "デバイス {name} を読み取り専用モードに戻す"
+    },
+    "noDevicesToMount": "設定するデバイスがありません（すべてのデバイスが読み書き可能に設定されています）",
+    "noDevicesToUnmount": "読み書き可能モードでマウントされているデバイスがありません",
+    "mountAllStart": "{count} 個のデバイスを読み書き可能モードに設定開始...",
+    "mountAllSuccess": "{count} 個のデバイスを読み書き可能モードに設定成功",
+    "mountAllError": "{count} 個のデバイスが失敗",
+    "unmountAllStart": "{count} 個のデバイスをアンマウント開始...",
+    "unmountAllSuccess": "{count} 個のデバイスをアンマウント成功",
+    "unmountAllError": "{count} 個のデバイスが失敗",
+    "ejectAllStart": "{count} 個のデバイスをイジェクト開始...",
+    "ejectAllSuccess": "{count} 個のデバイスをイジェクト成功",
+    "ejectAllError": "{count} 個のデバイスが失敗",
+    "restoreAllStart": "{count} 個のデバイスを読み取り専用モードに戻す開始...",
+    "restoreAllSuccess": "{count} 個のデバイスを読み取り専用モードに戻す成功",
+    "restoreAllError": "{count} 個のデバイスが失敗",
+    "noDevicesDetected": "NTFS デバイスが検出されませんでした",
+    "devicesDetected": "{count} 個のデバイスを検出（{readOnly} 個読み取り専用、{readWrite} 個読み書き可能）",
+    "devicesDetectedAllReadOnly": "{count} 個の NTFS デバイスを検出（すべて読み取り専用）",
+    "devicesDetectedAllReadWrite": "{count} 個の NTFS デバイスを検出（すべて読み書き可能）",
+    "refreshFailed": "デバイスリストの更新に失敗しました: {error}",
+    "unknownError": "不明なエラー"
+  },
+  "theme": {
+    "toggle": "ライトテーマに切り替え"
+  },
+  "about": {
+    "title": "について",
+    "description": "Nigate は ntfs-3g ドライバーに基づいて作成された、NTFS 形式のストレージデバイスを無料で読み書きするツールです。",
+    "softwareInfo": "ソフトウェア情報",
+    "author": "作者：",
+    "version": "バージョン：",
+    "technology": "技術：",
+    "projectLink": "プロジェクトリポジトリ",
+    "email": "メール",
+    "bluesky": "Bluesky",
+    "ok": "OK"
+  }
+}

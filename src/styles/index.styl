@@ -1,0 +1,847 @@
+// macOS 风格标签页样式
+@import 'variables'
+
+.tabs-container
+  background var(--bg-secondary)
+  border-bottom 1px solid var(--border)
+  display flex
+  gap 0
+  padding 0
+  overflow-x auto
+  -webkit-app-region no-drag
+  position relative
+
+  // 滚动条样式
+  &::-webkit-scrollbar
+    height 2px
+
+  &::-webkit-scrollbar-track
+    background transparent
+
+  &::-webkit-scrollbar-thumb
+    background var(--border)
+    border-radius 1px
+
+    &:hover
+      background var(--accent)
+
+.tab
+  padding 10px 20px
+  background transparent
+  border none
+  border-bottom 2px solid transparent
+  cursor pointer
+  color var(--text-secondary)
+  font-size 13px
+  font-weight 500
+  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+  white-space nowrap
+  display flex
+  align-items center
+  gap 8px
+  position relative
+  min-height 44px
+  user-select none
+  letter-spacing -0.01em
+
+  // 图标样式
+  .tab-icon
+    width 18px
+    height 18px
+    opacity 0.6
+    transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+    flex-shrink 0
+
+  // 悬停效果
+  &:hover
+    background var(--bg-tertiary)
+    color var(--text-primary)
+
+    .tab-icon
+      opacity 0.8
+
+  // 激活状态
+  &.active
+    background transparent
+    color var(--text-primary)
+    border-bottom-color var(--accent)
+    font-weight 600
+
+    .tab-icon
+      opacity 1
+
+  // 点击时的反馈
+  &:active
+    transform scale(0.98)
+
+// 标签页内容区域
+.tab-content
+  flex 1
+  overflow hidden
+  display none
+  padding 0
+  animation fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+  min-height 0
+
+  &.active
+    display flex
+    flex-direction column
+
+  // 设备标签页特殊处理
+  &#devicesTab
+    display none
+    padding 0
+    overflow hidden
+    flex 1
+    min-height 0
+
+    &.active
+      display flex
+      flex-direction column
+      overflow hidden
+      flex 1
+      min-height 0
+
+  // 系统依赖标签页需要滚动
+  &#dependenciesTab
+    &.active
+      overflow-y auto
+      overflow-x hidden
+      display flex
+      flex-direction column
+      gap 20px
+
+    .section
+      // macOS 系统设置风格：更紧凑的设计
+      padding 16px 20px
+      border-radius 8px
+      box-shadow 0 1px 2px var(--shadow)
+
+      .section-header
+        margin-bottom 12px
+
+        h2
+          font-size 15px
+          font-weight 500
+
+  // 指南手册标签页需要滚动
+  &#helpTab
+    overflow-y auto
+    overflow-x hidden
+    // 确保在小尺寸时也能正常显示
+    min-width 0
+    padding 0
+
+  // 操作日志标签页需要滚动
+  &#logsTab
+    overflow-y auto
+    overflow-x hidden
+
+    .section
+      display flex
+      flex-direction column
+      height 100%
+      // macOS 系统设置风格：更紧凑的设计
+      padding 16px 20px
+      border-radius 8px
+      box-shadow 0 1px 2px var(--shadow)
+
+      .section-header
+        margin-bottom 12px
+
+        h2
+          font-size 15px
+          font-weight 500
+
+        .header-actions
+          display flex
+          gap 8px
+          align-items center
+          flex-wrap nowrap
+
+  // 设置标签页需要滚动
+  &#settingsTab
+    &.active
+      overflow-y auto
+      overflow-x hidden
+      display flex
+      flex-direction column
+      // 自定义滚动条样式，默认透明，悬停时显示
+      &::-webkit-scrollbar
+        width 6px
+
+      &::-webkit-scrollbar-track
+        background transparent
+
+      &::-webkit-scrollbar-thumb
+        background transparent
+        border-radius 3px
+        transition background 0.2s ease
+
+      // 悬停时显示滚动条
+      &:hover::-webkit-scrollbar-thumb
+        background var(--border)
+
+        &:hover
+          background var(--accent)
+
+    .section
+      display flex
+      flex-direction column
+      min-height 0
+      // 根据内容自适应高度，确保所有设置项都能显示
+      flex-shrink 0
+      // macOS 系统设置风格：更紧凑的设计
+      padding 16px 20px
+      border-radius 8px
+      box-shadow 0 1px 2px var(--shadow)
+
+      .section-header
+        margin-bottom 12px
+
+        h2
+          font-size 15px
+          font-weight 500
+
+// 淡入动画
+@keyframes fadeIn
+  from
+    opacity 0
+    transform translateY(4px)
+  to
+    opacity 1
+    transform translateY(0)
+
+// macOS 风格帮助内容样式（文档风格）
+.help-content
+  max-width 800px
+  margin 0 auto
+  padding 0 20px 24px 20px
+  font-size 14px
+  line-height 1.7
+  color var(--text-primary)
+  // 确保在小尺寸时也能正常显示
+  min-width 0
+  word-wrap break-word
+  overflow-wrap break-word
+
+  // 适配最小尺寸
+  @media (max-width: 600px)
+    padding 0 12px 16px 12px
+    max-width 100%
+    font-size 13px
+
+    h1
+      font-size 20px
+
+    h2
+      font-size 18px
+      margin-top 24px
+      margin-bottom 12px
+
+    h3
+      font-size 15px
+      margin-top 20px
+      margin-bottom 10px
+
+    p, li
+      font-size 13px
+      line-height 1.6
+
+  h1
+    font-size 24px
+    font-weight 700
+    color var(--text-primary)
+    margin-bottom 8px
+    margin-top 0
+    letter-spacing -0.02em
+
+  // 第一个元素的顶部间距 - 与系统依赖标签页保持一致
+  // 系统依赖标签页：section 的 padding 是 24px，所以第一个元素距离标签页底部是 32px + 24px = 56px
+  // 但用户反馈间距太高，调整为更小的值
+  > *:first-child
+    margin-top 0
+    padding-top 0
+
+  h2
+    font-size 20px
+    font-weight 600
+    color var(--text-primary)
+    margin-top 32px
+    margin-bottom 16px
+    padding-bottom 8px
+    border-bottom 1px solid var(--border)
+    letter-spacing -0.01em
+
+  h3
+    font-size 17px
+    font-weight 600
+    color var(--text-primary)
+    margin-top 24px
+    margin-bottom 12px
+    letter-spacing -0.01em
+
+  p
+    color var(--text-primary)
+    line-height 1.7
+    margin-bottom 16px
+    font-size 14px
+    // 确保文字可以换行
+    word-wrap break-word
+    overflow-wrap break-word
+    // 小尺寸时调整
+    @media (max-width: 600px)
+      margin-bottom 12px
+      font-size 13px
+      line-height 1.6
+
+  ul, ol
+    color var(--text-primary)
+    line-height 1.8
+    margin-left 24px
+    margin-bottom 20px
+    font-size 14px
+    // 小尺寸时调整
+    @media (max-width: 600px)
+      margin-left 20px
+      margin-bottom 16px
+      font-size 13px
+
+  li
+    margin-bottom 8px
+    position relative
+    // 确保文字可以换行
+    word-wrap break-word
+    overflow-wrap break-word
+
+  // 确保内联图标大小正确（覆盖SVG默认尺寸）
+  // 针对列表项中的图标
+  li img[style*="height"],
+  p img[style*="height"]
+    max-width 100% !important
+    max-height 100% !important
+    object-fit contain
+    // 确保内联样式中的尺寸生效，覆盖SVG的默认width/height属性
+    &[style*="14px"]
+      height 14px !important
+      width 14px !important
+      max-width 14px !important
+      max-height 14px !important
+      flex-shrink 0
+
+  code
+    background var(--bg-tertiary)
+    padding 2px 6px
+    border-radius 4px
+    font-family 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace
+    font-size 13px
+    color var(--text-primary)
+    border 1px solid var(--border)
+    display inline-block
+
+  // 代码块容器（带复制按钮）
+  .code-block-wrapper
+    position relative
+    margin 16px 0
+    border-radius 8px
+    overflow visible
+    background var(--bg-tertiary)
+    border 1px solid var(--border)
+    // 确保在小尺寸时也能正常显示
+    min-width 0
+    width 100%
+    box-sizing border-box
+
+    // 代码块样式
+    pre
+      background transparent
+      border none
+      border-radius 0
+      padding 12px
+      padding-right 48px
+      overflow-x auto
+      margin 0
+      font-family 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace
+      font-size 12px
+      line-height 1.5
+      // 确保代码可以横向滚动
+      word-break normal
+      white-space pre
+      min-width 0
+      // 在小尺寸时调整
+      @media (max-width: 600px)
+        padding 10px
+        padding-right 44px
+        font-size 11px
+
+      code
+        background transparent
+        padding 0
+        border none
+        color var(--text-primary)
+        font-size inherit
+        white-space pre
+        display block
+        min-width 0
+
+    // 复制按钮
+    .code-copy-btn
+      position absolute
+      top 6px
+      right 6px
+      width 28px
+      height 28px
+      min-width 28px
+      min-height 28px
+      display flex
+      align-items center
+      justify-content center
+      background var(--bg-secondary)
+      border 1px solid var(--border)
+      border-radius 6px
+      cursor pointer
+      transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+      color var(--text-secondary)
+      opacity 0.8
+      z-index 10
+      // 确保按钮在小尺寸时也能正常显示
+      flex-shrink 0
+      box-shadow 0 1px 3px rgba(0, 0, 0, 0.1)
+
+      &:hover
+        opacity 1
+        background var(--bg-primary)
+        border-color var(--accent)
+        color var(--accent)
+        box-shadow 0 2px 4px rgba(0, 0, 0, 0.15)
+
+      &:active
+        transform scale(0.95)
+
+      svg
+        width 14px
+        height 14px
+        flex-shrink 0
+        display block
+
+      // 复制成功状态
+      &.copied
+        color var(--success)
+        border-color var(--success)
+        background rgba(52, 199, 89, 0.15)
+        opacity 1
+
+  // 代码块样式（向后兼容，不带复制按钮的代码块）
+  pre:not(.code-block-wrapper pre)
+    background var(--bg-tertiary)
+    border 1px solid var(--border)
+    border-radius 8px
+    padding 12px
+    overflow-x auto
+    margin 16px 0
+    min-width 0
+    // 小尺寸时调整
+    @media (max-width: 600px)
+      padding 10px
+      margin 12px 0
+      font-size 11px
+
+    code
+      background transparent
+      padding 0
+      border none
+      color var(--text-primary)
+      white-space pre
+      display block
+
+  blockquote
+    margin 20px 0
+    padding 12px 16px
+    background var(--bg-tertiary)
+    border-left 3px solid var(--accent)
+    border-radius 4px
+    color var(--text-secondary)
+    font-style normal
+
+    p
+      margin 0
+      color var(--text-secondary)
+
+// 浅色模式下的调整
+body.light-theme
+  .help-content
+    code
+      background var(--light-bg-tertiary)
+      border-color var(--light-border)
+
+    pre
+      background var(--light-bg-tertiary)
+      border-color var(--light-border)
+
+    blockquote
+      background var(--light-bg-tertiary)
+
+// 夜间模式下日志标签页图标优化（改为白色，提高可见性）
+body:not(.light-theme)
+  .tab[data-tab="logs"] .tab-icon
+    dark-mode-icon-white()
+
+// 夜间模式下指南手册中的图标优化（改为白色，提高可见性）
+body:not(.light-theme)
+  .help-content
+    // 自动读写图标
+    img[src*="flash-auto.svg"]
+      dark-mode-icon-white()
+
+    // 托盘模式图标
+    img[src*="tray.svg"]
+      dark-mode-icon-white()
+
+    // 防止休眠图标
+    img[src*="caffe.svg"]
+      dark-mode-icon-white()
+
+    // 日志图标
+    img[src*="log.svg"]
+      dark-mode-icon-white()
+
+    // 刷新图标
+    img[src*="refresh.svg"]
+      dark-mode-icon-white()
+
+// 设置界面样式
+.settings-content
+  padding 0
+  // 确保内容自然流动，不强制高度
+  flex 1
+  min-height 0
+  // 确保最后一个设置项能够完全显示，即使窗口尺寸最小时也能滚动到底部
+  padding-bottom 16px
+
+.setting-item
+  display flex
+  justify-content space-between
+  align-items flex-start
+  padding 14px 0
+  border-bottom 1px solid var(--border)
+
+  &:last-child
+    border-bottom none
+    padding-bottom 0
+
+.setting-label
+  flex 1
+  margin-right 20px
+  min-width 0
+
+  label
+    display block
+    font-size 14px
+    font-weight 500
+    color var(--text-primary)
+    margin-bottom 4px
+
+  .setting-description
+    font-size 12px
+    color var(--text-secondary)
+    line-height 1.4
+    margin 0
+
+.setting-control
+  display flex
+  align-items flex-start
+  gap 12px
+  flex-shrink 0
+  min-width 160px
+  justify-content flex-end
+  padding-top 0
+
+  #deletePasswordBtn
+    color #E83C3C
+    font-size 13px
+    padding 6px 12px
+    border-radius 6px
+    transition all 0.2s ease
+
+    &:hover
+      background rgba(232, 60, 60, 0.1)
+      color #D32F2F
+
+    &:active
+      background rgba(232, 60, 60, 0.15)
+
+.btn-delete-password
+  margin-top 8px
+  color #E83C3C
+  font-size 13px
+  padding 6px 12px
+  border-radius 6px
+  transition all 0.2s ease
+  display inline-block
+  background transparent
+  border none
+  cursor pointer
+
+  &:hover
+    background rgba(232, 60, 60, 0.1)
+    color #D32F2F
+
+  &:active
+    background rgba(232, 60, 60, 0.15)
+
+.btn-reset-size
+  margin-top 8px
+  color var(--accent)
+  font-size 13px
+  padding 6px 12px
+  border-radius 6px
+  transition all 0.2s ease
+  display inline-block
+  background transparent
+  border none
+  cursor pointer
+
+  &:hover
+    background rgba(0, 122, 255, 0.1)
+    color var(--accent)
+
+  &:active
+    background rgba(0, 122, 255, 0.15)
+
+.setting-checkbox
+  width 18px
+  height 18px
+  cursor pointer
+  accent-color var(--accent)
+
+.setting-select
+  padding 6px 10px
+  border 1px solid var(--border)
+  border-radius 6px
+  background var(--bg-primary)
+  color var(--text-primary)
+  font-size 13px
+  cursor pointer
+  min-width 140px
+  max-width 180px
+  transition all 0.2s ease
+  height fit-content
+
+  &:hover
+    border-color var(--accent)
+
+  // 如果select被隐藏（用于自定义下拉菜单），完全隐藏它
+  &[style*="display: none"],
+  &[style*="opacity: 0"]
+    display none !important
+    position absolute !important
+    opacity 0 !important
+    pointer-events none !important
+    width 0 !important
+    height 0 !important
+    overflow hidden !important
+    visibility hidden !important
+
+// 自定义下拉菜单（带图标）
+.custom-select-wrapper
+  position relative
+  min-width 140px
+  max-width 240px
+
+.custom-select
+  position relative
+  width 100%
+
+.custom-select-trigger
+  display flex
+  align-items center
+  gap 8px
+  padding 6px 10px
+  border 1px solid var(--border)
+  border-radius 6px
+  background var(--bg-primary)
+  color var(--text-primary)
+  font-size 13px
+  cursor pointer
+  transition all 0.2s ease
+  user-select none
+
+  &:hover
+    border-color var(--accent)
+
+  .custom-select-icon
+    width 16px
+    height 16px
+    flex-shrink 0
+    object-fit contain
+
+    // 国旗图标使用contain保持比例
+    &[src*="flags/"]
+      object-fit contain
+
+  .custom-select-text
+    flex 1
+    min-width 0
+
+  .custom-select-arrow
+    width 12px
+    height 12px
+    flex-shrink 0
+    color var(--text-secondary)
+    transition transform 0.2s ease
+
+.custom-select.open .custom-select-trigger
+  border-color var(--accent)
+
+  .custom-select-arrow
+    transform rotate(180deg)
+
+.custom-select-options
+  position absolute
+  top calc(100% + 4px)
+  left 0
+  right 0
+  background var(--bg-secondary)
+  border 1px solid var(--border)
+  border-radius 6px
+  box-shadow 0 4px 12px rgba(0, 0, 0, 0.15)
+  z-index 1000
+  max-height 200px
+  overflow-y auto
+  display none
+
+.custom-select.open .custom-select-options
+  display block
+
+.custom-select-option
+  display flex
+  align-items center
+  gap 8px
+  padding 8px 10px
+  cursor pointer
+  transition background-color 0.15s ease
+  font-size 13px
+  color var(--text-primary)
+  user-select none
+
+  &:hover
+    background var(--bg-tertiary)
+
+  &.selected
+    background var(--bg-tertiary)
+    color var(--accent)
+
+  .custom-select-option-icon
+    width 16px
+    height 16px
+    flex-shrink 0
+    object-fit contain
+    pointer-events none
+
+    // 国旗图标使用contain保持比例
+    &[src*="flags/"]
+      object-fit contain
+
+  span
+    pointer-events none
+
+// 夜间模式下图标变白（仅针对设置标签页中的日志和地球图标）
+body:not(.light-theme)
+  // 日志图标
+  .custom-select-icon[src*="log.svg"],
+  .custom-select-option-icon[src*="log.svg"]
+    dark-mode-icon-white()
+
+  // 地球图标
+  .custom-select-icon[src*="earth.svg"],
+  .custom-select-option-icon[src*="earth.svg"]
+    dark-mode-icon-white()
+
+.setting-size-control
+  display flex
+  gap 16px
+  align-items flex-start
+  flex-wrap wrap
+
+.size-input-group
+  display flex
+  flex-direction column
+  gap 8px
+  min-width 85px
+  align-items center
+
+.size-label
+  font-size 12px
+  font-weight 600
+  color var(--text-secondary)
+  white-space nowrap
+  user-select none
+  letter-spacing 0.2px
+  transition color 0.2s ease
+
+.setting-size-input
+  width 85px
+  padding 10px 8px
+  border 1.5px solid var(--border)
+  border-radius 10px
+  background var(--bg-secondary)
+  color var(--text-primary)
+  font-size 14px
+  font-weight 600
+  text-align center
+  letter-spacing 0.3px
+  transition all 0.25s cubic-bezier(0.4, 0, 0.2, 1)
+  appearance none
+  -webkit-appearance none
+  box-shadow 0 1px 2px rgba(0, 0, 0, 0.05)
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button
+    -webkit-appearance none
+    margin 0
+    display none
+
+  &[type="number"]
+    -moz-appearance textfield
+
+  &::placeholder
+    color var(--text-tertiary)
+    opacity 0.4
+    font-weight 400
+    letter-spacing normal
+
+  &:hover
+    border-color var(--accent)
+    background var(--bg-primary)
+    box-shadow 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 122, 255, 0.1)
+
+  &:focus
+    outline none
+    border-color var(--accent)
+    background var(--bg-primary)
+    box-shadow 0 0 0 4px rgba(0, 122, 255, 0.12), 0 4px 12px rgba(0, 0, 0, 0.15)
+
+  &:active
+    box-shadow 0 1px 3px rgba(0, 0, 0, 0.1)
+
+  &:disabled
+    opacity 0.5
+    cursor not-allowed
+    transform none
+
+  // 输入验证失败时的样式
+  &.invalid
+    border-color #ff3b30
+    background rgba(255, 59, 48, 0.05)
+    box-shadow 0 0 0 3px rgba(255, 59, 48, 0.1)
+
+.size-unit
+  font-size 10px
+  color var(--text-tertiary)
+  white-space nowrap
+  text-align center
+  margin-top -4px
+  opacity 0.65
+  font-weight 500
+  letter-spacing 0.5px
+  text-transform uppercase

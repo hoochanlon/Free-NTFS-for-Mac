@@ -1,0 +1,59 @@
+// macOS 风格布局样式
+@import 'variables'
+
+.app-container
+  display flex
+  flex-direction column
+  height 100vh
+  overflow hidden
+  background var(--bg-primary)
+
+// 主内容区域
+.main-content
+  flex 1
+  overflow-y auto
+  padding 32px
+  display flex
+  flex-direction column
+  gap 20px
+  background var(--bg-primary)
+  min-height 0
+
+  // 隐藏滚动条
+  &::-webkit-scrollbar
+    display none
+
+  scrollbar-width none
+  -ms-overflow-style none
+
+  // 设备标签页激活时，主内容区域不滚动
+  &.devices-tab-active
+    overflow hidden
+
+  // 设备标签页不需要 padding
+  #devicesTab
+    margin -32px
+    padding 0
+    height 100%
+
+// 区域样式（macOS 风格）
+.section
+  background var(--bg-secondary)
+  border 1px solid var(--border)
+  border-radius 10px
+  padding 24px
+  box-shadow 0 1px 3px var(--shadow)
+  transition background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1)
+
+.section-header
+  display flex
+  justify-content space-between
+  align-items center
+  margin-bottom 20px
+
+  h2
+    font-size 17px
+    font-weight 600
+    color var(--text-primary)
+    letter-spacing -0.01em
+    transition color 0.2s cubic-bezier(0.4, 0, 0.2, 1)

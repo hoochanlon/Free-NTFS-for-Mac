@@ -1,0 +1,169 @@
+// 主题切换开关样式（参考 2.css）
+@import 'variables'
+
+.theme-toggle
+  --base-scale 16px
+  --toggle-width 3.5em
+  --toggle-height 1.6em
+  --radius-pill 100em
+  --sun-diameter 1.3em
+  --sun-offset calc((var(--toggle-height) - var(--sun-diameter)) / 2)
+
+  --bg-toggle-light #3d7eae
+  --bg-toggle-dark #1d1f2c
+  --color-sun #ecca2f
+  --color-moon #c4c9d1
+  --color-crater #959db1
+  --color-star #fff
+  --color-cloud-front #f3fdff
+  --color-cloud-back #aacadf
+
+  --shadow-primary rgba(0, 0, 0, 0.25)
+  --shadow-highlight rgba(255, 255, 255, 0.94)
+  --halo-color rgba(255, 255, 255, 0.1)
+
+  font-size var(--base-scale)
+  background none
+  border none
+  padding 0
+  cursor pointer
+  -webkit-app-region no-drag
+
+.theme-toggle__container
+  width var(--toggle-width)
+  height var(--toggle-height)
+  background-color var(--bg-toggle-dark)
+  border-radius var(--radius-pill)
+  cursor pointer
+  position relative
+  transition background-color 0.3s ease
+  overflow hidden
+  box-shadow 0.06em 0.06em 0.125em var(--shadow-highlight)
+
+body.light-theme .theme-toggle__container
+  background-color var(--bg-toggle-light)
+
+.theme-toggle__container::after
+  content ""
+  position absolute
+  inset 0
+  box-shadow 0em 0.05em 0.187em rgba(0, 0, 0, 0.5) inset
+  border-radius var(--radius-pill)
+  pointer-events none
+
+.theme-toggle__sun
+  width var(--sun-diameter)
+  height var(--sun-diameter)
+  background-color var(--color-sun)
+  border-radius 50%
+  position absolute
+  top var(--sun-offset)
+  // 默认（深色模式）：太阳在右边
+  transform translateX(
+    calc(var(--toggle-width) - var(--sun-diameter) - var(--sun-offset))
+  )
+  box-shadow 0.05em 0.125em 0.125em var(--shadow-primary),
+    0em 0.05em 0.125em var(--shadow-primary),
+    0.05em 0.05em 0.05em 0em rgba(254, 255, 239, 0.61) inset,
+    0em -0.05em 0.05em 0em #a1872a inset, 0 0 0 0.625em var(--halo-color),
+    0 0 0 1.25em var(--halo-color), 0 0 0 1.875em var(--halo-color)
+  transition transform 0.3s ease
+  overflow hidden
+
+// 浅色模式：太阳移到左边
+body.light-theme .theme-toggle__container .theme-toggle__sun
+  transform translateX(var(--sun-offset))
+
+.theme-toggle__moon-mask
+  position relative
+  width 100%
+  height 100%
+  background-color var(--color-moon)
+  border-radius inherit
+  // 默认（深色模式）：月亮遮罩在左边（显示月亮）
+  transform translateX(0)
+  transition transform 0.3s ease
+  box-shadow 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset,
+    0em -0.062em 0.062em 0em #969696 inset
+
+// 浅色模式：月亮遮罩移到右边（隐藏月亮，显示太阳）
+body.light-theme .theme-toggle__container .theme-toggle__moon-mask
+  transform translateX(100%)
+
+.theme-toggle__crater
+    position absolute
+  background-color var(--color-crater)
+    border-radius 50%
+  box-shadow 0em 0.03em 0.06em var(--shadow-primary) inset
+
+.theme-toggle__crater:nth-of-type(1)
+  top 0.5em
+  left 0.2em
+  width 0.5em
+  height 0.5em
+
+.theme-toggle__crater:nth-of-type(2)
+  top 0.6em
+  left 0.9em
+  width 0.25em
+  height 0.25em
+
+.theme-toggle__crater:nth-of-type(3)
+  top 0.2em
+  left 0.55em
+  width 0.15em
+  height 0.15em
+
+.theme-toggle__stars
+  position absolute
+  left 0.2em
+  // 默认（深色模式）：星星可见
+  transform translateY(0.3em)
+  transition transform 0.3s ease
+  width 1.8em
+  color var(--color-star)
+
+// 浅色模式：星星隐藏
+body.light-theme .theme-toggle__container .theme-toggle__stars
+  transform translateY(-1.3em)
+
+.theme-toggle__clouds
+    position absolute
+  left 0.2em
+  top 1.3em
+  // 默认（深色模式）：云朵隐藏
+  transform translateY(2em)
+  width 0.8em
+  height 0.8em
+  background-color var(--color-cloud-front)
+  border-radius 50%
+  box-shadow 0.6em 0.2em var(--color-cloud-front),
+    0.9em 0.25em var(--color-cloud-front), 1.4em 0 var(--color-cloud-front),
+    1.9em 0.2em var(--color-cloud-front),
+    2.3em -0.04em var(--color-cloud-front),
+    2.9em -0.2em var(--color-cloud-front),
+    3em -1.1em 0 0.28em var(--color-cloud-front),
+    -0.2em -0.2em var(--color-cloud-back),
+    0.32em -0.08em var(--color-cloud-back),
+    0.8em -0.04em var(--color-cloud-back),
+    1.3em -0.2em var(--color-cloud-back), 1.7em 0em var(--color-cloud-back),
+    2.2em -0.28em var(--color-cloud-back),
+    2.6em -0.4em var(--color-cloud-back),
+    2.7em -1.4em 0 0.28em var(--color-cloud-back)
+  transition transform 0.3s ease
+
+// 浅色模式：云朵可见
+body.light-theme .theme-toggle__container .theme-toggle__clouds
+  transform translateY(0)
+
+// 默认（深色模式）hover：太阳稍微左移
+.theme-toggle__container:hover .theme-toggle__sun
+  transform translateX(
+    calc(
+      var(--toggle-width) - var(--sun-diameter) - var(--sun-offset) - 0.15em
+    )
+  )
+
+// 浅色模式 hover：太阳稍微右移
+body.light-theme .theme-toggle__container:hover .theme-toggle__sun
+  transform translateX(calc(var(--sun-offset) + 0.15em))

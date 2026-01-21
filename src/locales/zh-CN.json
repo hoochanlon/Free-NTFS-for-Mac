@@ -1,0 +1,351 @@
+{
+  "app": {
+    "title": "Nigate",
+    "about": "关于",
+    "protect": "状态保护",
+    "protectLocked": "状态已保护",
+    "protectUnlocked": "状态已解除保护",
+    "protectLockedMessage": "状态已保护，无法修改",
+    "protectTooltip": "状态保护（长按3s保护）",
+    "protectTooltipLocked": "状态已保护（长按3s解除保护）"
+  },
+  "menu": {
+    "about": "关于",
+    "services": "服务",
+    "hide": "隐藏",
+    "hideOthers": "隐藏其他",
+    "showAll": "显示全部",
+    "quit": "退出",
+    "file": "文件",
+    "close": "关闭",
+    "view": "视图",
+    "reload": "重新加载",
+    "forceReload": "强制重新加载",
+    "toggleDevTools": "切换开发者工具",
+    "actualSize": "实际大小",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "toggleFullScreen": "切换全屏",
+    "window": "窗口",
+    "minimize": "最小化",
+    "help": "帮助",
+    "guide": "指南手册",
+    "github": "反馈到 GitHub Issue"
+  },
+  "tabs": {
+    "dependencies": "系统依赖",
+    "devices": "NTFS 设备",
+    "logs": "操作日志",
+    "help": "指南手册",
+    "settings": "设置"
+  },
+  "status": {
+    "checking": "正在检查...",
+    "ready": "就绪",
+    "systemReady": "系统就绪",
+    "missingDeps": "缺少依赖",
+    "checkFailed": "检查失败",
+    "waitingDevices": "等待设备",
+    "devicesReadOnly": "{count} 个设备只读",
+    "devicesReady": "{count} 个设备就绪",
+    "detectFailed": "检测失败"
+  },
+  "dependencies": {
+    "title": "系统依赖",
+    "checkButton": "检查依赖",
+    "checking": "正在检查...",
+    "installed": "已安装",
+    "installedOptional": "已安装（可选）",
+    "missing": "未安装",
+    "missingOptional": "未安装（可选，建议安装）",
+    "versionSatisfied": "符合要求",
+    "versionUnsatisfied": "不符合要求",
+    "installGuide": "安装指引",
+    "installGuideIntro": "如需安装或重新安装依赖，请按照以下指引在终端中手动安装：",
+    "copyCommand": "复制命令",
+    "allInstalled": "所有依赖已安装",
+    "missingDepsDetected": "检测到缺失的依赖，请查看下方安装指引",
+    "checkFailed": "检查依赖失败: {error}",
+    "checkTimeout": "检查超时，请重试",
+    "installCommandLabel": "安装命令：",
+    "swift": {
+      "name": "Xcode Command Line Tools",
+      "description": "Apple 官方开发工具，提供 Swift 编译器和基础开发库",
+      "installGuide": "在终端运行上述命令，会弹出安装窗口，按照提示完成安装。安装过程可能需要几分钟到几十分钟，请耐心等待。"
+    },
+    "brew": {
+      "name": "Homebrew",
+      "description": "macOS 的包管理器，用于安装和管理软件包",
+      "installGuide": "在终端运行上述命令，按照提示完成安装。如果网络较慢，可以使用国内镜像源。"
+    },
+    "macfuse": {
+      "name": "MacFUSE",
+      "description": "文件系统用户空间框架，ntfs-3g 需要此依赖",
+      "installGuide": "需要先安装 Homebrew。在终端运行上述命令即可安装。"
+    },
+    "ntfs3g": {
+      "name": "ntfs-3g",
+      "description": "NTFS 文件系统驱动，提供 NTFS 读写支持",
+      "installGuide": "需要先安装 Homebrew 和 MacFUSE。在终端运行上述命令即可安装。"
+    },
+    "fswatch": {
+      "name": "fswatch (可选)",
+      "description": "文件系统事件监控工具，用于实现零延迟的设备检测（事件驱动模式）",
+      "installCommand": "brew install fswatch",
+      "installGuide": "fswatch 是可选的性能优化工具。安装后可实现零延迟的设备检测，CPU使用率降低90%+。运行上述命令即可安装。"
+    },
+    "macosVersion": {
+      "name": "macOS 版本 ({version})",
+      "description": "系统版本检查，确保 macOS 版本满足要求（需要 macOS 14 或更高版本）",
+      "installGuide": "如果您的 macOS 版本过低，请通过系统设置 > 软件更新来升级系统。本工具需要 macOS 14 (Sonoma) 或更高版本才能正常运行。"
+    }
+  },
+  "devices": {
+    "title": "NTFS 设备",
+    "emptyState": "未检测到 NTFS 设备",
+    "emptyHint": "请插入 NTFS 格式的移动存储设备",
+    "showMainWindow": "主界面",
+    "mountAll": "全读写",
+    "restoreAllReadOnly": "全只读",
+    "unmountAll": "全卸载",
+    "ejectAll": "全推出",
+    "refreshDevices": "刷新",
+    "mount": "配置为可读写",
+    "remount": "重新配置为可读写",
+    "unmount": "卸载",
+    "eject": "推出",
+    "restoreReadOnly": "还原为只读",
+    "autoMount": "自动读写",
+    "readOnly": "只读",
+    "readWrite": "可读写",
+    "unmounted": "已卸载",
+    "deviceLabel": "设备:",
+    "mountPointLabel": "挂载点:",
+    "deviceMountPointLabel": "设备挂载点:",
+    "capacityLabel": "硬盘容量:",
+    "notMounted": "未挂载",
+    "available": "可用",
+    "total": "共",
+    "usageRate": "使用率",
+    "mountConfirm": "确定要将 {name} 配置为可读写模式吗？",
+    "mountConfirmNote": "注意：\n• 这需要管理员权限，系统会弹出密码输入对话框\n• 如果该 NTFS 设备之前在 Windows 电脑上使用过，且 Windows 启用了快速启动功能，可能需要将设备插回 Windows 电脑并完全关闭后再试",
+    "unmountConfirm": "确定要卸载 {name} 吗？",
+    "ejectConfirm": "确定要推出 {name} 吗？",
+    "ejectConfirmNote": "注意：\n• 推出后设备将从系统中完全断开\n• 设备将从列表中移除，需要重新插入才能使用\n• 请确保没有程序正在使用该设备",
+    "restoreConfirm": "确定要将 {name} 还原为只读模式吗？",
+    "restoreConfirmNote": "注意：这需要管理员权限，系统会弹出密码输入对话框",
+    "ejectAllConfirm": "确定要推出所有 NTFS 设备吗？",
+    "ejectAllConfirmNote": "请确保没有程序正在使用这些设备",
+    "noDevicesToRestore": "没有需要还原的设备",
+    "noDevicesToEject": "没有需要推出的设备"
+  },
+  "dialog": {
+    "cancel": "取消",
+    "confirm": "确认",
+    "ok": "确定"
+  },
+  "logs": {
+    "title": "操作日志",
+    "empty": "暂无日志",
+    "clear": "清空",
+    "export": "导出",
+    "enable": "启用操作日志",
+    "exportSuccess": "日志已导出",
+    "exportError": "导出失败",
+    "noLogsToExport": "没有日志可导出",
+    "clearConfirm": "确定要清空所有日志吗？",
+    "exportPath": "日志已导出到: {path}",
+    "exportHeader": "Nigate - 操作日志",
+    "exportTime": "导出时间: {time}",
+    "exportCount": "共 {count} 条日志",
+    "logTypes": {
+      "info": "信息",
+      "success": "成功",
+      "error": "错误",
+      "warning": "警告"
+    },
+    "logsEnabled": "操作日志已启用"
+  },
+  "help": {
+    "title": "指南手册",
+    "loading": "加载中...",
+    "loadError": "加载失败: {error}",
+    "unknownError": "未知错误",
+    "icons": {
+      "title": "界面图标说明",
+      "intro": "应用主界面提供了多个功能图标，帮助您快速访问常用功能：",
+      "titleBar": {
+        "title": "标题栏图标",
+        "autoMount": {
+          "name": "自动读写图标",
+          "description": "启用后，新插入的 NTFS 设备会自动挂载为读写模式。图标激活时显示为蓝色。"
+        },
+        "trayMode": {
+          "name": "托盘模式图标",
+          "description": "启用后，关闭窗口时应用会最小化到系统托盘而不是退出。图标激活时显示为紫色。"
+        },
+        "preventSleep": {
+          "name": "防止休眠图标",
+          "description": "启用后，系统将禁止进入休眠状态，确保设备持续可用。图标激活时显示为咖啡色。"
+        },
+        "protect": {
+          "name": "状态保护图标",
+          "description": "长按3秒可切换保护状态。保护后，自动读写、托盘模式和防止休眠功能将被禁用，防止误操作。图标保护后显示为绿色并带有脉冲动画。"
+        },
+        "about": {
+          "name": "关于图标",
+          "description": "打开关于窗口，查看应用信息和项目链接。"
+        },
+        "quit": {
+          "name": "退出图标",
+          "description": "退出应用程序。"
+        }
+      },
+      "tabs": {
+        "title": "标签页图标",
+        "logs": {
+          "name": "日志图标",
+          "description": "切换到\"操作日志\"标签页，查看所有操作的记录。"
+        }
+      },
+      "devices": {
+        "title": "设备管理图标",
+        "refresh": {
+          "name": "刷新图标",
+          "description": "刷新设备列表，重新检测已连接的 NTFS 设备。"
+        }
+      }
+    }
+  },
+  "settings": {
+    "title": "应用设置",
+    "savePassword": "保存管理员密码",
+    "savePasswordDesc": "启用后，应用将使用 macOS Keychain 安全保存您的管理员密码，以便自动输入",
+    "deletePassword": "删除保存的密码",
+    "deletePasswordConfirm": "确定要删除保存的密码吗？",
+    "deletePasswordSuccess": "已删除保存的密码",
+    "deletePasswordError": "删除密码失败，请重试",
+    "startupTab": "启动时打开的标签页",
+    "startupTabDesc": "选择应用启动时默认显示的标签页",
+    "enableLogs": "启用操作日志",
+    "enableLogsDesc": "默认关闭，需要手动开启。启用后，应用会记录所有操作日志。关闭后，将不再记录新的日志，但已记录的日志仍会保留。默认最长保存30天",
+    "resetLogsDaily": "每天自动重置日志",
+    "resetLogsDailyDesc": "启用后，应用会在每天首次启动时自动清空前一天的日志",
+    "exportLogs": "导出操作日志",
+    "exportLogsDesc": "将所有操作日志导出为文本文件",
+    "language": "语言",
+    "languageDesc": "选择应用界面语言",
+    "windowSize": "窗口尺寸",
+    "windowSizeDesc": "自定义应用窗口的宽度和高度（单位：像素）。修改后需要重启应用生效",
+    "width": "宽度",
+    "height": "高度",
+    "pixel": "像素",
+    "resetToDefault": "重置为默认值",
+    "languages": {
+      "system": "跟随系统",
+      "zh-CN": "简中 (CN)",
+      "zh-TW": "繁中 (TW)",
+      "ja": "日本語 (JP)",
+      "en": "English (US)",
+      "de": "Deutsch (DE)"
+    },
+    "autoMount": "自动读写",
+    "autoMountDesc": "启用后，新插入的 NTFS 设备将自动以读写模式挂载",
+    "trayMode": "托盘模式",
+    "trayModeDesc": "启用后，关闭窗口时不会退出应用，而是最小化到系统托盘。可以通过托盘图标快速管理 NTFS 设备。",
+    "preventSleep": "禁止休眠",
+    "preventSleepDesc": "启用后，系统将防止进入休眠模式，确保设备保持可访问状态",
+    "enabled": "（已启用）",
+    "autoStart": "系统自启",
+    "autoStartDesc": "启用后，应用将在系统启动时自动运行"
+  },
+  "tray": {
+    "showWindow": "显示窗口",
+    "ntfsDevices": "NTFS 设备",
+    "autoMount": "自动读写",
+    "preventSleep": "禁止休眠",
+    "preventSleepEnabled": "禁止休眠（已启用）",
+    "preventSleepDisabled": "禁止休眠（未启用）",
+    "showMainWindow": "主界面",
+    "refreshDevices": "刷新设备列表",
+    "refreshing": "刷新中...",
+    "mountAll": "全读写",
+    "unmountAll": "全卸载",
+    "ejectAll": "全推出",
+    "quickActions": "一键操作",
+    "settings": "设置",
+    "logs": "操作日志",
+    "about": "关于",
+    "quit": "退出",
+    "quitConfirmTitle": "确认退出",
+    "quitConfirmMessage": "确定要退出应用吗？",
+    "tooltip": "Nigate - NTFS 设备管理\n点击显示设备列表"
+  },
+  "messages": {
+    "processing": "处理中...",
+    "mounting": "正在挂载 {name}...",
+    "mountSuccess": "挂载成功",
+    "mountError": "挂载失败",
+    "unmounting": "正在卸载 {name}...",
+    "unmountSuccess": "卸载成功",
+    "unmountError": "卸载失败",
+    "ejecting": "正在推出 {name}...",
+    "ejectSuccess": "推出成功",
+    "ejectError": "推出失败",
+    "restoring": "正在还原 {name} 为只读模式...",
+    "restoreSuccess": "还原成功",
+    "restoreError": "还原失败",
+    "passwordError": "密码错误，请重试",
+    "cancelled": "已取消操作",
+    "enterPassword": "提示：请在弹出的对话框中输入管理员密码",
+    "passwordDialog": {
+      "title": "需要管理员权限",
+      "prompt": "请输入你的Mac账户登录密码：",
+      "cancel": "取消",
+      "confirm": "确定",
+      "passwordEmpty": "密码不能为空",
+      "passwordParseError": "无法解析密码输入结果：密码为空",
+      "userCancelled": "用户取消了密码输入",
+      "getPasswordFailed": "获取密码失败",
+      "mountDevice": "挂载设备 {name} 为读写模式",
+      "mountDeviceRetry": "挂载设备 {name} 为读写模式（请重新输入密码）",
+      "unmountDevice": "卸载设备 {name}",
+      "restoreToReadOnly": "还原设备 {name} 为只读模式"
+    },
+    "noDevicesToMount": "没有需要配置的设备（所有设备已配置为可读写）",
+    "noDevicesToUnmount": "没有已挂载为读写模式的设备",
+    "mountAllStart": "开始配置 {count} 个设备为可读写模式...",
+    "mountAllSuccess": "成功配置 {count} 个设备为可读写模式",
+    "mountAllError": "失败 {count} 个设备",
+    "unmountAllStart": "开始卸载 {count} 个设备...",
+    "unmountAllSuccess": "成功卸载 {count} 个设备",
+    "unmountAllError": "失败 {count} 个设备",
+    "ejectAllStart": "开始推出 {count} 个设备...",
+    "ejectAllSuccess": "成功推出 {count} 个设备",
+    "ejectAllError": "失败 {count} 个设备",
+    "restoreAllStart": "开始还原 {count} 个设备为只读模式...",
+    "restoreAllSuccess": "成功还原 {count} 个设备为只读模式",
+    "restoreAllError": "失败 {count} 个设备",
+    "noDevicesDetected": "未检测到 NTFS 设备",
+    "devicesDetected": "检测到 {count} 个设备（{readOnly} 个只读，{readWrite} 个读写）",
+    "devicesDetectedAllReadOnly": "检测到 {count} 个 NTFS 设备（全部只读）",
+    "devicesDetectedAllReadWrite": "检测到 {count} 个 NTFS 设备（全部可读写）",
+    "refreshFailed": "刷新设备列表失败: {error}",
+    "unknownError": "未知错误"
+  },
+  "theme": {
+    "toggle": "切换到浅色主题"
+  },
+  "about": {
+    "title": "关于",
+    "description": "Nigate 是基于 ntfs-3g 驱动制作的免费读写 NTFS 格式存储设备工具。",
+    "softwareInfo": "软件信息",
+    "author": "作者：",
+    "version": "软件版本：",
+    "technology": "基于技术：",
+    "projectLink": "项目地址",
+    "email": "邮箱",
+    "bluesky": "Bluesky",
+    "ok": "确定"
+  }
+}

@@ -1,0 +1,351 @@
+{
+  "app": {
+    "title": "Nigate",
+    "about": "About",
+    "protect": "Status Protection",
+    "protectLocked": "Status Protected",
+    "protectUnlocked": "Status Protection Removed",
+    "protectLockedMessage": "Status is protected, cannot modify",
+    "protectTooltip": "Status Protection (Long press 3s to protect)",
+    "protectTooltipLocked": "Status Protected (Long press 3s to remove protection)"
+  },
+  "menu": {
+    "about": "About",
+    "services": "Services",
+    "hide": "Hide",
+    "hideOthers": "Hide Others",
+    "showAll": "Show All",
+    "quit": "Quit",
+    "file": "File",
+    "close": "Close",
+    "view": "View",
+    "reload": "Reload",
+    "forceReload": "Force Reload",
+    "toggleDevTools": "Toggle Developer Tools",
+    "actualSize": "Actual Size",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "toggleFullScreen": "Toggle Full Screen",
+    "window": "Window",
+    "minimize": "Minimize",
+    "help": "Help",
+    "guide": "Guide",
+    "github": "Feedback to GitHub Issue"
+  },
+  "tabs": {
+    "dependencies": "System Dependencies",
+    "devices": "NTFS Devices",
+    "logs": "Operation Logs",
+    "help": "Guide",
+    "settings": "Settings"
+  },
+  "status": {
+    "checking": "Checking...",
+    "ready": "Ready",
+    "systemReady": "System Ready",
+    "missingDeps": "Missing Dependencies",
+    "checkFailed": "Check Failed",
+    "waitingDevices": "Waiting for Devices",
+    "devicesReadOnly": "{count} devices read-only",
+    "devicesReady": "{count} devices ready",
+    "detectFailed": "Detection Failed"
+  },
+  "dependencies": {
+    "title": "System Dependencies",
+    "checkButton": "Check Dependencies",
+    "checking": "Checking...",
+    "installed": "Installed",
+    "installedOptional": "Installed (Optional)",
+    "missing": "Not Installed",
+    "missingOptional": "Not Installed (Optional, Recommended)",
+    "versionSatisfied": "Meets Requirements",
+    "versionUnsatisfied": "Does Not Meet Requirements",
+    "installGuide": "Installation Guide",
+    "installGuideIntro": "To install or reinstall dependencies, please follow the instructions below to install manually in the terminal:",
+    "copyCommand": "Copy Command",
+    "allInstalled": "All dependencies installed",
+    "missingDepsDetected": "Missing dependencies detected, please see installation guide below",
+    "checkFailed": "Failed to check dependencies: {error}",
+    "checkTimeout": "Check timeout, please try again",
+    "installCommandLabel": "Installation command:",
+    "swift": {
+      "name": "Xcode Command Line Tools",
+      "description": "Apple official development tools, providing Swift compiler and basic development libraries",
+      "installGuide": "Run the above command in the terminal, an installation window will pop up, follow the prompts to complete the installation. The installation process may take several minutes to tens of minutes, please wait patiently."
+    },
+    "brew": {
+      "name": "Homebrew",
+      "description": "Package manager for macOS, used to install and manage software packages",
+      "installGuide": "Run the above command in the terminal, follow the prompts to complete the installation. If the network is slow, you can use a domestic mirror source."
+    },
+    "macfuse": {
+      "name": "MacFUSE",
+      "description": "File system user space framework, required by ntfs-3g",
+      "installGuide": "Homebrew must be installed first. Run the above command in the terminal to install."
+    },
+    "ntfs3g": {
+      "name": "ntfs-3g",
+      "description": "NTFS file system driver, providing NTFS read-write support",
+      "installGuide": "Homebrew and MacFUSE must be installed first. Run the above command in the terminal to install."
+    },
+    "fswatch": {
+      "name": "fswatch (Optional)",
+      "description": "File system event monitoring tool for zero-latency device detection (event-driven mode)",
+      "installCommand": "brew install fswatch",
+      "installGuide": "fswatch is an optional performance optimization tool. After installation, it enables zero-latency device detection and reduces CPU usage by 90%+. Run the above command to install."
+    },
+    "macosVersion": {
+      "name": "macOS Version ({version})",
+      "description": "System version check to ensure macOS version meets requirements (macOS 14 or higher required)",
+      "installGuide": "If your macOS version is too low, please upgrade your system through System Settings > Software Update. This tool requires macOS 14 (Sonoma) or higher to run properly."
+    }
+  },
+  "devices": {
+    "title": "NTFS Devices",
+    "emptyState": "No NTFS devices detected",
+    "emptyHint": "Please insert an NTFS formatted removable storage device",
+    "showMainWindow": "Main Window",
+    "mountAll": "All Read-Write",
+    "restoreAllReadOnly": "All Read-Only",
+    "unmountAll": "All Unmount",
+    "ejectAll": "All Eject",
+    "refreshDevices": "Refresh",
+    "mount": "Configure as Read-Write",
+    "remount": "Reconfigure as Read-Write",
+    "unmount": "Unmount",
+    "eject": "Eject",
+    "restoreReadOnly": "Restore to Read-Only",
+    "autoMount": "Auto Mount on Insert",
+    "readOnly": "Read-Only",
+    "readWrite": "Read-Write",
+    "unmounted": "Unmounted",
+    "deviceLabel": "Device:",
+    "mountPointLabel": "Mount Point:",
+    "deviceMountPointLabel": "Device & Mount Point:",
+    "capacityLabel": "Capacity:",
+    "notMounted": "Not Mounted",
+    "available": "available",
+    "total": "total",
+    "usageRate": "Usage Rate",
+    "mountConfirm": "Are you sure you want to configure {name} as read-write mode?",
+    "mountConfirmNote": "Note:\n• This requires administrator privileges, and the system will prompt for a password\n• If this NTFS device was previously used on a Windows computer with Fast Startup enabled, you may need to plug it back into the Windows computer and fully shut down before trying",
+    "unmountConfirm": "Are you sure you want to unmount {name}?",
+    "ejectConfirm": "Are you sure you want to eject {name}?",
+    "ejectConfirmNote": "Note:\n• After ejecting, the device will be completely disconnected from the system\n• The device will be removed from the list and needs to be reinserted to use\n• Please ensure no programs are using the device",
+    "restoreConfirm": "Are you sure you want to restore {name} to read-only mode?",
+    "restoreConfirmNote": "Note: This requires administrator privileges, and the system will prompt for a password",
+    "ejectAllConfirm": "Are you sure you want to eject all NTFS devices?",
+    "ejectAllConfirmNote": "Please ensure no programs are using these devices",
+    "noDevicesToRestore": "No devices to restore",
+    "noDevicesToEject": "No devices to eject"
+  },
+  "dialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "ok": "OK"
+  },
+  "logs": {
+    "title": "Operation Logs",
+    "empty": "No logs",
+    "clear": "Clear",
+    "export": "Export",
+    "enable": "Enable Operation Logs",
+    "exportSuccess": "Logs exported successfully",
+    "exportError": "Export failed",
+    "noLogsToExport": "No logs to export",
+    "clearConfirm": "Are you sure you want to clear all logs?",
+    "exportPath": "Logs exported to: {path}",
+    "exportHeader": "Nigate - Operation Logs",
+    "exportTime": "Export time: {time}",
+    "exportCount": "Total {count} logs",
+    "logTypes": {
+      "info": "Info",
+      "success": "Success",
+      "error": "Error",
+      "warning": "Warning"
+    },
+    "logsEnabled": "Operation logs enabled"
+  },
+  "help": {
+    "title": "Guide",
+    "loading": "Loading...",
+    "loadError": "Load failed: {error}",
+    "unknownError": "Unknown error",
+    "icons": {
+      "title": "Interface Icons Guide",
+      "intro": "The application's main interface provides several functional icons to help you quickly access common features:",
+      "titleBar": {
+        "title": "Title Bar Icons",
+        "autoMount": {
+          "name": "Auto Read-Write Icon",
+          "description": "When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode. The icon appears blue when active."
+        },
+        "trayMode": {
+          "name": "Tray Mode Icon",
+          "description": "When enabled, closing the window will minimize the application to the system tray instead of quitting. The icon appears purple when active."
+        },
+        "preventSleep": {
+          "name": "Prevent Sleep Icon",
+          "description": "When enabled, the system will prevent entering sleep mode to ensure devices remain accessible. The icon appears coffee-colored when active."
+        },
+        "protect": {
+          "name": "Status Protection Icon",
+          "description": "Long press for 3 seconds to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations. The icon appears green with a pulse animation when protected."
+        },
+        "about": {
+          "name": "About Icon",
+          "description": "Opens the about window to view application information and project links."
+        },
+        "quit": {
+          "name": "Quit Icon",
+          "description": "Quits the application."
+        }
+      },
+      "tabs": {
+        "title": "Tab Icons",
+        "logs": {
+          "name": "Logs Icon",
+          "description": "Switches to the \"Operation Logs\" tab to view records of all operations."
+        }
+      },
+      "devices": {
+        "title": "Device Management Icons",
+        "refresh": {
+          "name": "Refresh Icon",
+          "description": "Refreshes the device list and re-detects connected NTFS devices."
+        }
+      }
+    }
+  },
+  "settings": {
+    "title": "Application Settings",
+    "savePassword": "Save Administrator Password",
+    "savePasswordDesc": "When enabled, the app will securely save your administrator password using macOS Keychain for automatic input",
+    "deletePassword": "Delete Saved Password",
+    "deletePasswordConfirm": "Are you sure you want to delete the saved password?",
+    "deletePasswordSuccess": "Saved password deleted",
+    "deletePasswordError": "Failed to delete password, please try again",
+    "startupTab": "Tab to Open on Startup",
+    "startupTabDesc": "Select the default tab to display when the app starts",
+    "enableLogs": "Enable Operation Logs",
+    "enableLogsDesc": "Disabled by default, requires manual activation. When enabled, the app will record all operation logs. When disabled, new logs will not be recorded, but previously recorded logs will still be retained. Logs are saved for a maximum of 30 days by default",
+    "resetLogsDaily": "Automatically Reset Logs Daily",
+    "resetLogsDailyDesc": "When enabled, the app will automatically clear the previous day's logs on the first launch each day",
+    "exportLogs": "Export Operation Logs",
+    "exportLogsDesc": "Export all operation logs as a text file",
+    "language": "Language",
+    "languageDesc": "Select the application interface language",
+    "windowSize": "Window Size",
+    "windowSizeDesc": "Customize the width and height of the application window (in pixels). Changes will take effect after restarting the application",
+    "width": "Width",
+    "height": "Height",
+    "pixel": "px",
+    "resetToDefault": "Reset to Default",
+    "languages": {
+      "system": "Follow System",
+      "zh-CN": "简中 (CN)",
+      "zh-TW": "繁中 (TW)",
+      "ja": "日本語 (JP)",
+      "en": "English (US)",
+      "de": "Deutsch (DE)"
+    },
+    "autoMount": "Auto Read-Write",
+    "autoMountDesc": "When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode",
+    "trayMode": "Tray Mode",
+    "trayModeDesc": "When enabled, closing the window will minimize to the system tray instead of quitting the app. You can quickly manage NTFS devices through the tray icon.",
+    "preventSleep": "Prevent Sleep",
+    "preventSleepDesc": "When enabled, the system will prevent entering sleep mode to ensure devices remain accessible",
+    "enabled": "(Enabled)",
+    "autoStart": "Launch at Login",
+    "autoStartDesc": "When enabled, the app will automatically launch when the system starts"
+  },
+  "tray": {
+    "showWindow": "Show Window",
+    "ntfsDevices": "NTFS Devices",
+    "autoMount": "Auto Read/Write",
+    "preventSleep": "No Sleep",
+    "preventSleepEnabled": "No Sleep (Enabled)",
+    "preventSleepDisabled": "No Sleep (Disabled)",
+    "showMainWindow": "Main Interface",
+    "refreshDevices": "Refresh Device List",
+    "refreshing": "Refreshing...",
+    "mountAll": "All Read-Write",
+    "unmountAll": "All Unmount",
+    "ejectAll": "All Eject",
+    "quickActions": "Quick Actions",
+    "settings": "Settings",
+    "logs": "Operation Logs",
+    "about": "About",
+    "quit": "Quit",
+    "quitConfirmTitle": "Confirm Quit",
+    "quitConfirmMessage": "Are you sure you want to quit the application?",
+    "tooltip": "Nigate - NTFS Device Management\nClick to display device list"
+  },
+  "messages": {
+    "processing": "Processing...",
+    "mounting": "Mounting {name}...",
+    "mountSuccess": "Mount successful",
+    "mountError": "Mount failed",
+    "unmounting": "Unmounting {name}...",
+    "unmountSuccess": "Unmount successful",
+    "unmountError": "Unmount failed",
+    "ejecting": "Ejecting {name}...",
+    "ejectSuccess": "Eject successful",
+    "ejectError": "Eject failed",
+    "restoring": "Restoring {name} to read-only mode...",
+    "restoreSuccess": "Restore successful",
+    "restoreError": "Restore failed",
+    "passwordError": "Password incorrect, please try again",
+    "cancelled": "Operation cancelled",
+    "enterPassword": "Tip: Please enter the administrator password in the dialog that appears",
+    "passwordDialog": {
+      "title": "Administrator Privileges Required",
+      "prompt": "Please enter your Mac account login password:",
+      "cancel": "Cancel",
+      "confirm": "OK",
+      "passwordEmpty": "Password cannot be empty",
+      "passwordParseError": "Unable to parse password input: password is empty",
+      "userCancelled": "User cancelled password input",
+      "getPasswordFailed": "Failed to get password",
+      "mountDevice": "Mount device {name} as read-write mode",
+      "mountDeviceRetry": "Mount device {name} as read-write mode (please re-enter password)",
+      "unmountDevice": "Unmount device {name}",
+      "restoreToReadOnly": "Restore device {name} to read-only mode"
+    },
+    "noDevicesToMount": "No devices to configure (all devices are already configured as read-write)",
+    "noDevicesToUnmount": "No devices mounted in read-write mode",
+    "mountAllStart": "Starting to configure {count} devices as read-write mode...",
+    "mountAllSuccess": "Successfully configured {count} devices as read-write mode",
+    "mountAllError": "{count} devices failed",
+    "unmountAllStart": "Starting to unmount {count} devices...",
+    "unmountAllSuccess": "Successfully unmounted {count} devices",
+    "unmountAllError": "{count} devices failed",
+    "ejectAllStart": "Starting to eject {count} devices...",
+    "ejectAllSuccess": "Successfully ejected {count} devices",
+    "ejectAllError": "{count} devices failed",
+    "restoreAllStart": "Starting to restore {count} devices to read-only mode...",
+    "restoreAllSuccess": "Successfully restored {count} devices to read-only mode",
+    "restoreAllError": "{count} devices failed",
+    "noDevicesDetected": "No NTFS devices detected",
+    "devicesDetected": "Detected {count} devices ({readOnly} read-only, {readWrite} read-write)",
+    "devicesDetectedAllReadOnly": "Detected {count} NTFS devices (all read-only)",
+    "devicesDetectedAllReadWrite": "Detected {count} NTFS devices (all read-write)",
+    "refreshFailed": "Failed to refresh device list: {error}",
+    "unknownError": "Unknown error"
+  },
+  "theme": {
+    "toggle": "Switch to light theme"
+  },
+  "about": {
+    "title": "About",
+    "description": "Nigate is a free tool for reading and writing NTFS formatted storage devices, based on the ntfs-3g driver.",
+    "softwareInfo": "Software Information",
+    "author": "Author:",
+    "version": "Version:",
+    "technology": "Technology:",
+    "projectLink": "Project Repository",
+    "email": "Email",
+    "bluesky": "Bluesky",
+    "ok": "OK"
+  }
+}

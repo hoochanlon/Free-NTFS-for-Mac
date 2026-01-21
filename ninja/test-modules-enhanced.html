@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>设备模块加载测试（增强版）</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .test-item {
+      padding: 5px 0;
+      margin: 5px 0;
+    }
+    .pass { color: green; }
+    .fail { color: red; }
+    .info { color: #666; font-size: 0.9em; }
+    h2 { margin-top: 0; }
+  </style>
+</head>
+<body>
+  <h1>设备模块加载测试（增强版）</h1>
+  <div id="test-results"></div>
+
+  <script>
+    const results = [];
+    const details = [];
+
+    function test(name, condition, description = '') {
+      let passed = false;
+      let error = null;
+      try {
+        passed = condition();
+      } catch (e) {
+        error = e.message;
+      }
+      results.push({ name, passed, description, error });
+      console.log(`${passed ? '✅' : '❌'} ${name}: ${passed ? '通过' : '失败'}`);
+      if (error) {
+        console.error(`错误: ${error}`);
+      }
+    }
+
+    function testAsync(name, condition, description = '') {
+      return condition().then(passed => {
+        results.push({ name, passed, description });
+        console.log(`${passed ? '✅' : '❌'} ${name}: ${passed ? '通过' : '失败'}`);
+        return passed;
+      }).catch(error => {
+        results.push({ name, passed: false, description, error: error.message });
+        console.error(`❌ ${name}: 失败 - ${error.message}`);
+        return false;
+      });
+    }
+
+    // 等待模块加载
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        runTests();
+      }, 100);
+    });
+
+    function runTests() {
+      // 测试模块是否已加载
+      test('AppModules 命名空间存在', () => typeof window.AppModules !== 'undefined', '检查全局 AppModules 命名空间');
+      test('Devices 模块存在', () => window.AppModules && window.AppModules.Devices, '检查 Devices 模块');
+      test('Utils 模块存在', () => window.AppModules?.Devices?.Utils, '检查 Utils 子模块');
+      test('Renderer 模块存在', () => window.AppModules?.Devices?.Renderer, '检查 Renderer 子模块');
+      test('Operations 模块存在', () => window.AppModules?.Devices?.Operations, '检查 Operations 子模块');
+      test('Events 模块存在', () => window.AppModules?.Devices?.Events, '检查 Events 子模块');
+
+      // 测试工具函数
+      if (window.AppModules?.Devices?.Utils) {
+        const Utils = window.AppModules.Devices.Utils;
+        test('Utils.formatCapacity 存在', () => typeof Utils.formatCapacity === 'function', '检查 formatCapacity 函数');
+        test('Utils.addLog 存在', () => typeof Utils.addLog === 'function', '检查 addLog 函数');
+        test('Utils.showLoading 存在', () => typeof Utils.showLoading === 'function', '检查 showLoading 函数');
+        test('Utils.t 存在', () => typeof Utils.t === 'function', '检查翻译函数 t');
+        test('Utils.renderDeviceInfoHTML 存在', () => typeof Utils.renderDeviceInfoHTML === 'function', '检查 renderDeviceInfoHTML 函数');
+
+        // 测试 formatCapacity 功能
+        test('formatCapacity 格式化 1GB', () => {
+          const result = Utils.formatCapacity(1024 * 1024 * 1024);
+          return result.includes('GB') && parseFloat(result) === 1.00;
+        }, '测试 1GB 格式化');
+
+        test('formatCapacity 格式化 1MB', () => {
+          const result = Utils.formatCapacity(1024 * 1024);
+          return result.includes('MB') && parseFloat(result) === 1.0;
+        }, '测试 1MB 格式化');
+
+        test('formatCapacity 格式化 1KB', () => {
+          const result = Utils.formatCapacity(1024);
+          return result.includes('KB') && parseFloat(result) === 1.0;
+        }, '测试 1KB 格式化');
+
+        // 测试翻译函数
+        test('翻译函数返回 key（当 i18n 未初始化）', () => {
+          const result = Utils.t('test.key');
+          return result === 'test.key';
+        }, '测试翻译函数降级行为');
+      }
+
+      // 测试渲染函数
+      if (window.AppModules?.Devices?.Renderer) {
+        const Renderer = window.AppModules.Devices.Renderer;
+        test('Renderer.renderDevices 存在', () => typeof Renderer.renderDevices === 'function', '检查 renderDevices 函数');
+        test('Renderer.createDeviceItem 存在', () => typeof Renderer.createDeviceItem === 'function', '检查 createDeviceItem 函数');
+
+        // 测试创建设备项
+        test('createDeviceItem 创建 DOM 元素', () => {
+          const mockDevice = {
+            disk: 'disk1',
+            volumeName: 'Test Device',
+            isReadOnly: false,
+            isUnmounted: false,
+            devicePath: '/dev/disk1',
+            volume: '/Volumes/Test'
+          };
+          const item = Renderer.createDeviceItem(mockDevice);
+          return item instanceof HTMLElement && item.classList.contains('device-item');
+        }, '测试创建设备项 DOM 元素');
+      }
+
+      // 测试操作函数
+      if (window.AppModules?.Devices?.Operations) {
+        const Operations = window.AppModules.Devices.Operations;
+        test('Operations.mountDevice 存在', () => typeof Operations.mountDevice === 'function', '检查 mountDevice 函数');
+        test('Operations.restoreToReadOnly 存在', () => typeof Operations.restoreToReadOnly === 'function', '检查 restoreToReadOnly 函数');
+        test('Operations.ejectDevice 存在', () => typeof Operations.ejectDevice === 'function', '检查 ejectDevice 函数');
+        test('Operations.mountAllDevices 存在', () => typeof Operations.mountAllDevices === 'function', '检查 mountAllDevices 函数');
+        test('Operations.restoreAllToReadOnly 存在', () => typeof Operations.restoreAllToReadOnly === 'function', '检查 restoreAllToReadOnly 函数');
+        test('Operations.ejectAllDevices 存在', () => typeof Operations.ejectAllDevices === 'function', '检查 ejectAllDevices 函数');
+        test('Operations.unmountDevice 存在', () => typeof Operations.unmountDevice === 'function', '检查 unmountDevice 函数');
+        test('Operations.unmountAllDevices 存在', () => typeof Operations.unmountAllDevices === 'function', '检查 unmountAllDevices 函数');
+      }
+
+      // 测试事件函数
+      if (window.AppModules?.Devices?.Events) {
+        const Events = window.AppModules.Devices.Events;
+        test('Events.bindDeviceEvents 存在', () => typeof Events.bindDeviceEvents === 'function', '检查 bindDeviceEvents 函数');
+      }
+
+      // 显示结果
+      displayResults();
+    }
+
+    function displayResults() {
+      const resultsDiv = document.getElementById('test-results');
+      const passedCount = results.filter(r => r.passed).length;
+      const totalCount = results.length;
+      const passRate = ((passedCount / totalCount) * 100).toFixed(1);
+
+      let html = `
+        <div class="test-section">
+          <h2>测试结果: ${passedCount}/${totalCount} 通过 (${passRate}%)</h2>
+          <div style="margin: 10px 0;">
+            <div style="background: #f0f0f0; height: 20px; border-radius: 10px; overflow: hidden;">
+              <div style="background: ${passedCount === totalCount ? 'green' : passedCount > totalCount * 0.8 ? 'orange' : 'red'}; height: 100%; width: ${passRate}%; transition: width 0.3s;"></div>
+            </div>
+          </div>
+          <ul style="list-style: none; padding: 0;">
+      `;
+
+      results.forEach(r => {
+        html += `
+          <li class="test-item ${r.passed ? 'pass' : 'fail'}">
+            ${r.passed ? '✅' : '❌'} <strong>${r.name}</strong>
+            ${r.description ? `<span class="info"> - ${r.description}</span>` : ''}
+            ${r.error ? `<br><span style="color: red; font-size: 0.9em;">错误: ${r.error}</span>` : ''}
+          </li>
+        `;
+      });
+
+      html += `
+          </ul>
+        </div>
+      `;
+
+      // 按模块分组显示
+      const modules = {
+        '基础模块': results.filter(r => r.name.includes('AppModules') || r.name.includes('Devices 模块') || r.name.includes('Utils 模块') || r.name.includes('Renderer 模块') || r.name.includes('Operations 模块') || r.name.includes('Events 模块')),
+        '工具函数 (Utils)': results.filter(r => r.name.includes('Utils.')),
+        '渲染函数 (Renderer)': results.filter(r => r.name.includes('Renderer.')),
+        '操作函数 (Operations)': results.filter(r => r.name.includes('Operations.')),
+        '事件函数 (Events)': results.filter(r => r.name.includes('Events.'))
+      };
+
+      Object.keys(modules).forEach(moduleName => {
+        const moduleTests = modules[moduleName];
+        if (moduleTests.length > 0) {
+          const modulePassed = moduleTests.filter(r => r.passed).length;
+          html += `
+            <div class="test-section">
+              <h2>${moduleName}: ${modulePassed}/${moduleTests.length}</h2>
+              <ul style="list-style: none; padding: 0;">
+          `;
+          moduleTests.forEach(r => {
+            html += `
+              <li class="test-item ${r.passed ? 'pass' : 'fail'}">
+                ${r.passed ? '✅' : '❌'} ${r.name.replace(/^(Utils|Renderer|Operations|Events)\./, '')}
+              </li>
+            `;
+          });
+          html += `
+              </ul>
+            </div>
+          `;
+        }
+      });
+
+      resultsDiv.innerHTML = html;
+    }
+  </script>
+
+  <!-- 加载模块（按顺序） -->
+  <!-- 注意：HTML 文件在 ninja/ 文件夹中，需要使用 ../ 访问项目根目录的 scripts -->
+  <script src="../scripts/modules/devices/device-utils.js"></script>
+  <script src="../scripts/modules/devices/device-renderer.js"></script>
+  <script src="../scripts/modules/devices/device-operations.js"></script>
+  <script src="../scripts/modules/devices/device-events.js"></script>
+</body>
+</html>

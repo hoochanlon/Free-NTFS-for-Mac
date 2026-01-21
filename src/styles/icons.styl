@@ -1,0 +1,216 @@
+// ============================================
+// 图标样式统一管理文件
+// 所有图标相关的样式都在此文件中统一管理
+// ============================================
+@import 'variables'
+
+// ============================================
+// 标题栏按钮图标（btn-about-icon）
+// ============================================
+
+.btn-about-icon
+  width 18px
+  height 18px
+  opacity 0.8
+  pointer-events none
+
+// 退出按钮图标（需要缩小以匹配信息图标的视觉大小）
+#quitBtn .btn-about-icon
+  width 18px
+  height 18px
+  transform none
+
+// 自动读写按钮（标题栏）
+#autoMountTitlebarBtn
+  &.active
+    .btn-about-icon
+      opacity 1
+      // 蓝色：使用filter将图标转换为蓝色（与accent色一致）
+      filter brightness(0) saturate(100%) invert(40%) sepia(100%) saturate(2000%) hue-rotate(200deg) brightness(0.9) contrast(1.2)
+
+  &:hover:not(.active)
+    .btn-about-icon
+      opacity 1
+
+// 托盘模式按钮（标题栏）
+#trayModeTitlebarBtn
+  &.active
+    .btn-about-icon
+      opacity 1
+      // 紫色：使用filter将图标转换为紫色
+      filter brightness(0) saturate(100%) invert(30%) sepia(100%) saturate(2000%) hue-rotate(250deg) brightness(0.9) contrast(1.2)
+
+  &:hover:not(.active)
+    .btn-about-icon
+      opacity 1
+
+// 防止休眠按钮（标题栏）
+#caffeinateBtn
+  &.active
+    .btn-about-icon
+      opacity 1
+      // 咖啡色：使用filter将图标转换为咖啡色
+      filter brightness(0) saturate(100%) invert(35%) sepia(89%) saturate(1352%) hue-rotate(15deg) brightness(95%) contrast(92%)
+
+  &:hover:not(.active)
+    .btn-about-icon
+      opacity 1
+
+// 保护按钮（状态锁定）
+#protectBtn
+  position relative
+
+  &.locked
+    .btn-about-icon
+      opacity 1
+      // 锁定状态：使用filter将图标转换为绿色（匹配 success 颜色 #34c759）
+      filter brightness(0) saturate(100%) invert(60%) sepia(100%) saturate(2000%) hue-rotate(120deg) brightness(0.95) contrast(1.1)
+      animation pulse 2s ease-in-out infinite
+
+  &:hover:not(.locked)
+    .btn-about-icon
+      opacity 0.8
+
+  // 禁用状态样式（当其他按钮被锁定时）
+  &:disabled
+    opacity 0.5
+    cursor not-allowed
+
+// 锁定状态脉冲动画
+@keyframes pulse
+  0%, 100%
+    opacity 1
+  50%
+    opacity 0.7
+
+// 当锁定状态时，禁用其他按钮的样式
+#autoMountTitlebarBtn:disabled,
+#trayModeTitlebarBtn:disabled,
+#caffeinateBtn:disabled
+  opacity 0.5
+  cursor not-allowed
+  pointer-events none
+
+// ============================================
+// 标签页图标（tab-icon）
+// ============================================
+
+.tab-icon
+  width 18px
+  height 18px
+  opacity 0.6
+  transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+  flex-shrink 0
+
+// ============================================
+// 自定义选择器图标（custom-select-icon, custom-select-option-icon）
+// ============================================
+
+.custom-select-icon
+  width 16px
+  height 16px
+  flex-shrink 0
+  object-fit contain
+
+  // 国旗图标使用contain保持比例
+  &[src*="flags/"]
+    object-fit contain
+
+.custom-select-option-icon
+  width 16px
+  height 16px
+  flex-shrink 0
+  object-fit contain
+  pointer-events none
+
+  // 国旗图标使用contain保持比例
+  &[src*="flags/"]
+    object-fit contain
+
+// ============================================
+// 夜间模式下图标变白效果
+// ============================================
+
+body:not(.light-theme)
+  // 标题栏按钮图标
+  // 自动读写按钮图标
+  #autoMountTitlebarBtn:not(.active) .btn-about-icon
+    dark-mode-icon-white()
+
+  // 托盘模式按钮图标
+  #trayModeTitlebarBtn:not(.active) .btn-about-icon
+    dark-mode-icon-white()
+
+  // 防止休眠按钮图标
+  #caffeinateBtn:not(.active) .btn-about-icon
+    dark-mode-icon-white()
+
+  // 保护按钮图标（仅在非锁定状态下应用白色效果）
+  #protectBtn:not(.locked) .btn-about-icon
+    dark-mode-icon-white()
+
+  // 标签页图标
+  // 日志标签页图标
+  .tab[data-tab="logs"] .tab-icon
+    dark-mode-icon-white()
+
+  // 自定义选择器图标
+  // 日志图标
+  .custom-select-icon[src*="log.svg"],
+  .custom-select-option-icon[src*="log.svg"]
+    dark-mode-icon-white()
+
+  // 地球图标
+  .custom-select-icon[src*="earth.svg"],
+  .custom-select-option-icon[src*="earth.svg"]
+    dark-mode-icon-white()
+
+  // 帮助内容中的图标
+  .help-content
+    // 自动读写图标
+    img[src*="flash-auto.svg"]
+      dark-mode-icon-white()
+
+    // 托盘模式图标
+    img[src*="tray.svg"]
+      dark-mode-icon-white()
+
+    // 防止休眠图标
+    img[src*="caffe.svg"]
+      dark-mode-icon-white()
+
+    // 日志图标
+    img[src*="log.svg"]
+      dark-mode-icon-white()
+
+    // 刷新图标
+    img[src*="refresh.svg"]
+      dark-mode-icon-white()
+
+  // 设备相关图标
+  .devices-container
+    #refreshDevicesBtn .btn-icon
+      dark-mode-icon-white()
+
+// 夜间模式下托盘窗口按钮图标优化（改为白色，提高可见性）
+// 注意：tray-window 类是在 body 上，所以这里使用 body.tray-window:not(.light-theme)
+body.tray-window:not(.light-theme)
+  .devices-header-actions
+    .devices-action-buttons-row
+      .btn.btn-secondary
+        .btn-icon
+          // 将图标颜色改为白色，在深色背景下更清晰可见
+          dark-mode-icon-white()
+          opacity 0.9
+
+        &:hover .btn-icon
+          dark-mode-icon-white()
+          opacity 1
+
+        &.active .btn-icon
+          dark-mode-icon-white()
+          opacity 1
+
+        // 保护按钮图标（仅在非锁定状态下应用白色效果）
+        &#protectBtn:not(.locked) .btn-icon
+          dark-mode-icon-white()

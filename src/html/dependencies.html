@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self';">
+  <title>系统依赖 - Nigate</title>
+  <link rel="stylesheet" href="../../styles.css?v=11">
+</head>
+<body>
+  <div class="deps-page">
+    <div class="deps-header">
+      <h1>系统依赖</h1>
+      <div class="deps-actions">
+        <button class="btn btn-secondary" id="checkDepsBtn">检查依赖</button>
+        <button class="btn btn-text" id="closeBtn">关闭</button>
+      </div>
+    </div>
+    <div class="deps-content">
+      <div class="section">
+        <div class="deps-list" id="depsList">
+          <div class="dep-item">
+            <span class="dep-name">正在检查...</span>
+            <span class="dep-status">-</span>
+          </div>
+        </div>
+        <div class="install-section" id="installSection">
+          <button class="btn btn-primary" id="installDepsBtn">安装缺失依赖</button>
+          <div class="install-log" id="installLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 加载遮罩 -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <p>处理中...</p>
+  </div>
+
+  <script src="../../scripts/dependencies.js"></script>
+</body>
+</html>

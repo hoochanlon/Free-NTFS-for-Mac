@@ -1,0 +1,53 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020", "DOM"],
+    "outDir": "./",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "declaration": false,
+    "noEmitOnError": true,
+    "skipLibCheck": true,
+    "typeRoots": ["./node_modules/@types", "./src/types"]
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist/**/*",
+    "build",
+    "archived",
+    "archived/**/*",
+    "*.code-workspace",
+    "*.md",
+    "*.sh",
+    "*.lock",
+    "*.json",
+    "styles.css"
+  ],
+  "watchOptions": {
+    "excludeDirectories": [
+      "**/node_modules",
+      "**/dist",
+      "**/build",
+      "**/archived",
+      "dist",
+      "archived"
+    ],
+    "excludeFiles": [
+      "**/*.md",
+      "**/*.sh",
+      "**/*.lock",
+      "**/*.code-workspace"
+    ]
+  }
+}
