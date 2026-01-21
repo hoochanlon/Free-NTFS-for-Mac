@@ -88,11 +88,11 @@ Download and use from [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tag
 
 **Main Interface**
 
-![ ](src/imgs/example/2026-01-18-01.08.15.png)
+![ ](src/imgs/example/2026-01-21-10.51.01.png)
 
 **Tray**
 
-![ ](src/imgs/example/2026-01-16_10-41-58.png)
+![ ](src/imgs/example/2026-01-21-10.52.29.png)
 
 ### Dependency Management
 
