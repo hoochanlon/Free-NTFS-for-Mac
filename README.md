@@ -2,6 +2,8 @@
 
 **Language / 言語 / 语言**: [English](README.md) | [日本語](README.ja.md) | [中文](README.cn.md)
 
+![Main Interface](src/imgs/example/2026-01-21-10.51.01.png)
+
 This is the Electron GUI version of Nigate, which provides a modern and intuitive interface for NTFS device management while retaining the original geek terminal version.[^1]
 
 ### Features
@@ -37,13 +39,13 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
   4. After restart, you can run `csrutil status` in terminal to check the status
 - **Bootable USB Drives**: If a USB drive has been used to create bootable media like Ventoy or WePE, it may take some time when mounting it in read-write mode
 
-### Quick Start - Shell (Ninja Tools)
+### Quick Start
+
+#### Method 1: Online Experience (Shell - Ninja Tools)
 
 The following scripts are from the `ninja/` folder's Ninja Tools collection, providing command-line support for NTFS and Linux filesystem read-write access.
 
 **🌍 All scripts support multiple languages!** Use `LANG=ja` or `LANG=zh` to set the language.
-
-#### Method 1: Online Experience
 
 ##### NTFS Read-Write Support
 
@@ -75,7 +77,7 @@ LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-
 LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
 ```
 
-#### Method 2: Download Locally
+#### Method 2: Download Locally (Shell - Ninja Tools)
 
 After downloading, you can directly type `nigate` to start:
 
@@ -83,14 +85,11 @@ After downloading, you can directly type `nigate` to start:
 curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
 ```
 
-### Quick Start - GUI Version (Electron)
+#### Method 3: GUI Version (Electron)
 
 Download and use from [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags).
+
 - **🌍 Application interface supports multiple languages**: Chinese (Simplified/Traditional), Japanese, English, German, and more
-
-**Main Interface**
-
-![ ](src/imgs/example/2026-01-21-10.51.01.png)
 
 **Tray**
 
