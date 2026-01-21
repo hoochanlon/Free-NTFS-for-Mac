@@ -120,6 +120,21 @@ LANG=en /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-N
 LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
 ```
 
+### システム権限設定
+
+システム権限とセキュリティ設定（Gatekeeper、SIP など）を設定：
+
+```shell
+# 日本語（デフォルト）
+/bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/shuriken.sh)"
+
+# 英語
+LANG=en /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/shuriken.sh)"
+
+# 中国語
+LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/shuriken.sh)"
+```
+
 > 詳細情報については、[忍者ツールセットテスト #39](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/39) と [忍者ツールセット内容説明](docs/07-忍者工具集内容说明.md) を参照してください。
 
 ### 運用 & 開発
