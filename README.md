@@ -15,18 +15,20 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 - 🛡️ **Secure & Reliable** - Uses Electron security best practices
 - ☕ **Prevent Sleep** - One-click toggle to prevent system sleep, ensuring the system stays awake during long operations
 - 🍃 **Status Protection** - Long press for 3s to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations
+- 🥷 **Ninja Tools** - Provide cross-filesystem mounting and end-to-end scripts from development to release, with one-click permission fixes and multi-language output to simplify complex operations and lower the usage barrier
 
 ### Important Notes
 
+> [!important]
+> **Read-Write Notes**:
+>  - **Basic Operations**: Supports file copy, cut, delete, and rename (metadata-level operations)
+>  - **Write Limitations (GUI Application)**: The GUI application (Electron GUI version) does not support direct in-place data modification on original files due to lack of kernel write permissions
+>  - **Editing Recommendations**: Please use editors that support Atomic Write (such as VS Code / Kate). These tools save files by "creating new and replacing old files", thereby bypassing in-place overwrite limitations
+>  - **Additional Note**: Ninja Tools `/ninja/kamui.sh` supports direct in-place data modification on original files, suitable for scenarios requiring direct file editing [^2]
 
 - **Administrator Privileges**: Mounting operations require administrator privileges, and the system will prompt for a password
 - **Windows Fast Startup**: If the device uses Fast Startup in Windows, mounting may fail. It is recommended to fully shut down (not hibernate) in Windows, or disable Fast Startup
 - **Device Name**: USB drive names do not support spaces or illegal characters
-- **Read-Write Notes**:
-  - **Basic Operations**: Supports file copy, cut, delete, and rename (metadata-level operations)
-  - **Write Limitations (GUI Application)**: The GUI application (Electron GUI version) does not support direct in-place data modification on original files due to lack of kernel write permissions
-  - **Editing Recommendations**: Please use editors that support Atomic Write (such as VS Code / Kate). These tools save files by "creating new and replacing old files", thereby bypassing in-place overwrite limitations
-  - **Additional Note**: `/ninja/kamui.sh` supports direct in-place data modification on original files, suitable for scenarios requiring direct file editing [^2]
 - **Gatekeeper (Allow Anywhere)**: First-time use may require disabling Gatekeeper to allow unsigned applications. Run in terminal: `sudo spctl --master-disable`. After disabling, you can see the "Anywhere" option in "System Settings" > "Privacy & Security"
 - **System Integrity Protection (SIP)** (Optional): To disable SIP, you need to operate in Recovery Mode:
   1. Restart Mac, hold the power button until the Apple logo and progress bar appear, enter Recovery Mode
