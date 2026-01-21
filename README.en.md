@@ -24,7 +24,7 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
   - **Basic Operations**: Supports file copy, cut, delete, and rename (metadata-level operations)
   - **Write Limitations (GUI Application)**: The GUI application (Electron GUI version) does not support direct in-place data modification on original files due to lack of kernel write permissions
   - **Editing Recommendations**: Please use editors that support Atomic Write (such as VS Code / Kate). These tools save files by "creating new and replacing old files", thereby bypassing in-place overwrite limitations
-  - **Additional Note**: `/ninja/kamui.sh` supports direct in-place data modification on original files, suitable for scenarios requiring direct file editing
+  - **Additional Note**: `/ninja/kamui.sh` supports direct in-place data modification on original files, suitable for scenarios requiring direct file editing [^3]
 - **Gatekeeper (Allow Anywhere)**: First-time use may require disabling Gatekeeper to allow unsigned applications. Run in terminal: `sudo spctl --master-disable`. After disabling, you can see the "Anywhere" option in "System Settings" > "Privacy & Security"
 - **System Integrity Protection (SIP)** (Optional): To disable SIP, you need to operate in Recovery Mode:
   1. Restart Mac, hold the power button until the Apple logo and progress bar appear, enter Recovery Mode
@@ -265,3 +265,4 @@ Thank you to all developers, testers, and users who have contributed to this pro
 
 [^2]: **Note**: Using this tool to mount or modify NTFS devices carries a risk of data loss. It is strongly recommended to backup important data before operation. This tool is provided "as is" without any warranty. The developer is not responsible for data loss caused by using this tool.
 
+[^3]: Powered by [nohajc/anylinuxfs](https://github.com/nohajc/anylinuxfs) with secondary encapsulation
