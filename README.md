@@ -26,7 +26,7 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 > **Read-Write Notes**:
 >  - **Basic Operations**: Supports file copy, cut, delete, and rename (metadata-level operations)
 >  - **Write Limitations (GUI Application)**: The GUI application (Electron GUI version) does not support direct in-place data modification on original files due to lack of kernel write permissions
->  - **Editing Recommendations**: Please use editors that support Atomic Write (such as VS Code / Kate). These tools save files by "creating new and replacing old files", thereby bypassing in-place overwrite limitations
+>  - **Editing Recommendations**: Please use editors that support Atomic Write (such as VS Code / Kate). These tools save files by "creating new and replacing old files", thereby bypassing in-place overwrite limitations. Alternatively, we recommend copying files to your local Mac for editing, then copying them back
 >  - **Additional Note**: Ninja Tools `/ninja/kamui.sh` supports direct in-place data modification on original files, suitable for scenarios requiring direct file editing [^2]
 
 - **Administrator Privileges**: Mounting operations require administrator privileges, and the system will prompt for a password
