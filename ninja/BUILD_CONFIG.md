@@ -67,6 +67,8 @@ ELECTRON_MIRROR="" pnpm run build:universal
 
 6. **只打包 Intel (x64) 版本**：
    ```bash
+   pnpm run build:x64
+   # 或
    ./ninja/build.sh --x64
    ```
 

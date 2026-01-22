@@ -20,6 +20,7 @@
     "build:dmg": "./ninja/build.sh --dmg",
     "build:zip": "./ninja/build.sh --zip",
     "build:arm64": "./ninja/build.sh --arm64",
+    "build:x64": "./ninja/build.sh --x64",
     "build:universal": "./ninja/build.sh --universal"
   },
   "keywords": [
