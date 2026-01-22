@@ -30,6 +30,7 @@
 
 - [DreamBroke](https://github.com/DreamBroke) - 提供本项目外的其他技术支持
 - [zxc7563598](https://github.com/zxc7563598) - 提供本项目外的其他技术支持
+- [davi](https://linux.do/u/davi/summary) - 提供英特尔芯片 Mac 调试信息
 
 
 ### 项目组织与工作流程
