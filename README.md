@@ -18,6 +18,7 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 - ☕ **Prevent Sleep** - One-click toggle to prevent system sleep, ensuring the system stays awake during long operations
 - 🍃 **Status Protection** - Long press for 3s to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations
 - 🥷 **Ninja Tools** - Provide cross-filesystem mounting and end-to-end scripts from development to release, with one-click permission fixes and multi-language output to simplify complex operations and lower the usage barrier
+- 💻 **Intel Mac Support** - Full support for Intel-based Macs (x64 architecture)
 
 ### Important Notes
 
