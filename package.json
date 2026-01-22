@@ -85,6 +85,7 @@
           ]
         }
       ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
       "icon": "src/imgs/ico/flash.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
