@@ -19,8 +19,7 @@
     "build:clean": "./ninja/build-clean.sh",
     "build:dmg": "./ninja/build.sh --dmg",
     "build:zip": "./ninja/build.sh --zip",
-    "build:arm64": "./ninja/build.sh --arm64",
-    "build:universal": "./ninja/build.sh --universal"
+    "build:arm64": "./ninja/build.sh --arm64"
   },
   "keywords": [
     "ntfs",
@@ -49,8 +48,7 @@
     "icon": "src/imgs/ico/flash.icns",
     "npmRebuild": false,
     "electronDownload": {
-      "cache": ".electron-cache",
-      "mirror": "https://npmmirror.com/mirrors/electron/"
+      "cache": ".electron-cache"
     },
     "directories": {
       "output": "dist"
@@ -72,14 +70,12 @@
         {
           "target": "dmg",
           "arch": [
-            "x64",
             "arm64"
           ]
         },
         {
           "target": "zip",
           "arch": [
-            "x64",
             "arm64"
           ]
         }

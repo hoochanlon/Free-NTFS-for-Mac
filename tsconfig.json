@@ -15,7 +15,8 @@
     "declaration": false,
     "noEmitOnError": true,
     "skipLibCheck": true,
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["node"]
   },
   "include": [
     "src/**/*"

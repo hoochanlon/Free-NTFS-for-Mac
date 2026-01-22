@@ -1,4 +1,5 @@
 // NTFS-3G 路径查找模块
+/// <reference types="node" />
 import { execAsync, fileExists } from './utils';
 
 export class PathFinder {

@@ -42,7 +42,7 @@ echo -e "${GREEN}$(t starting_build)${NC}"
 # ============================================================
 CLEAN=false    # 是否清理 dist 目录
 TARGET=""      # 打包目标格式（dmg 或 zip）
-ARCH=""        # 架构（x64、arm64 或 universal）
+ARCH=""        # 架构（x64 或 arm64）
 
 # ============================================================
 # 解析命令行参数
@@ -67,18 +67,8 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --arm64)
-      # 用户想打包 Apple Silicon 版本
+      # 用户想打包 Apple Silicon 版本（默认就是 ARM64，这个选项主要用于明确指定）
       ARCH="--arm64"
-      shift
-      ;;
-    --x64)
-      # 用户想打包 Intel Mac 版本
-      ARCH="--x64"
-      shift
-      ;;
-    --universal)
-      # 用户想打包通用版本（同时支持 Intel 和 Apple Silicon）
-      ARCH="--universal"
       shift
       ;;
     *)
@@ -151,15 +141,11 @@ if [ -f "styles.css" ]; then
 fi
 
 # ============================================================
-# 设置 Electron 下载镜像（推荐）
+# 设置 Electron 下载镜像（可选）
 # ============================================================
-# 打通用包（--universal）时需要下载 darwin-x64 / darwin-arm64 两套 Electron，
-# 在部分网络环境下直连 GitHub 可能会 EOF / 超时，因此这里默认启用镜像。
-# 如需使用官方源，可在执行前显式设置：ELECTRON_MIRROR=""
-export ELECTRON_MIRROR="${ELECTRON_MIRROR:-https://npmmirror.com/mirrors/electron/}"
-
-# 可选：指定 Electron 缓存目录（加速二次打包）
-export ELECTRON_CACHE="${ELECTRON_CACHE:-${HOME}/.cache/electron}"
+# 如果从 GitHub 下载 Electron 很慢或失败，可以取消下面的注释
+# 使用国内镜像源（淘宝镜像）加速下载
+# export ELECTRON_MIRROR="https://npmmirror.com/mirrors/electron/"
 
 # ============================================================
 # 开始打包
@@ -178,32 +164,22 @@ export ELECTRON_BUILDER_CACHE="${HOME}/.cache/electron-builder"
 
 if [ -n "$TARGET" ] && [ -n "$ARCH" ]; then
   # 用户同时指定了格式和架构
-  # 例如: ./build.sh --dmg --arm64 或 ./build.sh --dmg --universal
-  if [ "$ARCH" = "--universal" ]; then
-    # 通用版本：创建一个包含 x64 和 arm64 的通用二进制文件
-    ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $TARGET --universal
-  else
-    ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $TARGET $ARCH
-  fi
+  # 例如: ./build.sh --dmg --arm64
+  ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $TARGET $ARCH
 
 elif [ -n "$TARGET" ]; then
   # 用户只指定了格式
-  # 例如: ./build.sh --dmg（使用 package.json 中的默认配置，现在是 x64 + arm64）
+  # 例如: ./build.sh --dmg
   ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $TARGET
 
 elif [ -n "$ARCH" ]; then
   # 用户只指定了架构
-  # 例如: ./build.sh --arm64 或 ./build.sh --universal
-  if [ "$ARCH" = "--universal" ]; then
-    # 通用版本
-    ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac --universal
-  else
-    ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $ARCH
-  fi
+  # 例如: ./build.sh --arm64
+  ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $ARCH
 
 else
   # 用户没有指定任何特殊参数，使用默认配置
-  # 默认配置在 package.json 的 "build" 字段中定义（现在是 x64 + arm64）
+  # 默认配置在 package.json 的 "build" 字段中定义
   ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder
 fi
 
