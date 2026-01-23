@@ -248,6 +248,21 @@ export async function createTrayMenu(
             label: t('devices.reset') || '重置',
             click: async () => {
               try {
+                // 在重置之前，先将设备添加到手动只读列表，防止自动读写功能立即将其设置为读写
+                // 重置操作和手动设置为只读保持一样的逻辑
+                try {
+                  const settings = await SettingsManager.getSettings();
+                  const manuallyReadOnlyDevices = [...(settings.manuallyReadOnlyDevices || [])];
+                  const manualId = device?.volumeUuid || device?.disk;
+                  if (manualId && !manuallyReadOnlyDevices.includes(manualId)) {
+                    manuallyReadOnlyDevices.push(manualId);
+                    await SettingsManager.saveSettings({ manuallyReadOnlyDevices });
+                    console.log(`[托盘菜单] 已将设备 ${device.volumeName} (${manualId}) 添加到手动只读列表（重置操作前），当前列表:`, manuallyReadOnlyDevices);
+                  }
+                } catch (error) {
+                  console.warn('[托盘菜单] 保存手动只读设备列表失败:', error);
+                }
+
                 await ntfsManager.resetDevice(device);
                 // 等待设备状态更新
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -348,6 +363,21 @@ export async function createTrayMenu(
             label: t('devices.reset') || '重置',
             click: async () => {
               try {
+                // 在重置之前，先将设备添加到手动只读列表，防止自动读写功能立即将其设置为读写
+                // 重置操作和手动设置为只读保持一样的逻辑
+                try {
+                  const settings = await SettingsManager.getSettings();
+                  const manuallyReadOnlyDevices = [...(settings.manuallyReadOnlyDevices || [])];
+                  const manualId = device?.volumeUuid || device?.disk;
+                  if (manualId && !manuallyReadOnlyDevices.includes(manualId)) {
+                    manuallyReadOnlyDevices.push(manualId);
+                    await SettingsManager.saveSettings({ manuallyReadOnlyDevices });
+                    console.log(`[托盘菜单] 已将设备 ${device.volumeName} (${manualId}) 添加到手动只读列表（重置操作前），当前列表:`, manuallyReadOnlyDevices);
+                  }
+                } catch (error) {
+                  console.warn('[托盘菜单] 保存手动只读设备列表失败:', error);
+                }
+
                 await ntfsManager.resetDevice(device);
                 // 等待设备状态更新
                 await new Promise(resolve => setTimeout(resolve, 1000));

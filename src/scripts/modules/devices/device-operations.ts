@@ -207,6 +207,38 @@
         await addLog(t('messages.resetting', { name: device.volumeName }) || `正在重置 ${device.volumeName}（卸载并修复）...`, 'info');
         await addLog(t('messages.enterPassword'), 'info');
 
+        // 在重置之前，先将设备添加到手动只读列表，防止自动读写功能立即将其设置为读写
+        // 重置操作和手动设置为只读保持一样的逻辑
+        try {
+          const settings = await electronAPI.getSettings();
+          // 创建新数组，避免直接修改原数组引用
+          const manuallyReadOnlyDevices = [...(settings.manuallyReadOnlyDevices || [])];
+          const manualId = getManualReadOnlyId(device);
+          if (manualId && !manuallyReadOnlyDevices.includes(manualId)) {
+            manuallyReadOnlyDevices.push(manualId);
+            await electronAPI.saveSettings({ manuallyReadOnlyDevices });
+            console.log(`[设备操作] 已将设备 ${device.volumeName} (${manualId}) 添加到手动只读列表（重置操作前），当前列表:`, manuallyReadOnlyDevices);
+          } else {
+            console.log(`[设备操作] 设备 ${device.volumeName} (${manualId}) 已在手动只读列表中`);
+          }
+          if (manualId) manualLastSeen.set(manualId, Date.now());
+          if (device.disk) manualLastSeen.set(device.disk, Date.now());
+
+          // 设置自动挂载冷却：给重置操作一个窗口期，避免刚点击就被自动读写抢回
+          const cooldownMs = 8000; // 8 秒内不触发自动读写
+          const autoMountCooldown: Map<string, number> =
+            (AppModules.Devices as any).autoMountCooldown || new Map<string, number>();
+          (AppModules.Devices as any).autoMountCooldown = autoMountCooldown;
+          const until = Date.now() + cooldownMs;
+          if (manualId) autoMountCooldown.set(manualId, until);
+          if (device.disk) autoMountCooldown.set(device.disk, until);
+        } catch (error) {
+          console.warn('保存手动只读设备列表失败:', error);
+        }
+
+        // 重置操作：清理"已尝试自动挂载"记录，避免后续插回/重新挂载无法再次触发
+        clearAutoMountAttemptedDisk(device.disk);
+
         const result = await electronAPI.resetDevice(device);
 
         if (result.success) {

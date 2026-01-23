@@ -204,6 +204,28 @@ export function setupNTFSHandlers(): void {
 
   ipcMain.handle('reset-device', async (event: IpcMainInvokeEvent, device: any) => {
     try {
+      // 在重置之前，先将设备添加到手动只读列表，防止自动读写功能立即将其设置为读写
+      // 重置操作和手动设置为只读保持一样的逻辑
+      try {
+        const { SettingsManager } = await import('./utils/settings');
+        const settings = await SettingsManager.getSettings();
+        // 创建新数组，避免直接修改原数组引用
+        const manuallyReadOnlyDevices = [...(settings.manuallyReadOnlyDevices || [])];
+        const manualId = device?.volumeUuid || device?.disk;
+        if (manualId && !manuallyReadOnlyDevices.includes(manualId)) {
+          manuallyReadOnlyDevices.push(manualId);
+          await SettingsManager.saveSettings({ manuallyReadOnlyDevices });
+          console.log(`[IPC] 已将设备 ${device.volumeName} (${manualId}) 添加到手动只读列表（重置操作前），当前列表:`, manuallyReadOnlyDevices);
+        } else {
+          console.log(`[IPC] 设备 ${device.volumeName} (${manualId}) 已在手动只读列表中`);
+        }
+        // 更新手动只读设备最后一次出现时间
+        if (manualId) manualLastSeen.set(manualId, Date.now());
+        if (device.disk) manualLastSeen.set(device.disk, Date.now());
+      } catch (error) {
+        console.warn('[reset-device] 保存手动只读设备列表失败:', error);
+      }
+
       const result = await ntfsManager.resetDevice(device);
       // 事件驱动：操作完成后立即更新托盘菜单
       setTimeout(() => {
