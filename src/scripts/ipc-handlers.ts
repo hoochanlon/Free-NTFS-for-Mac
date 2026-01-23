@@ -202,6 +202,28 @@ export function setupNTFSHandlers(): void {
     }
   });
 
+  ipcMain.handle('reset-device', async (event: IpcMainInvokeEvent, device: any) => {
+    try {
+      const result = await ntfsManager.resetDevice(device);
+      // 事件驱动：操作完成后立即更新托盘菜单
+      setTimeout(() => {
+        updateTrayMenu(true);
+      }, 500);
+      setTimeout(() => {
+        broadcastDevicesToAllWindows().catch(err => {
+          console.warn('[reset-device] 广播设备列表失败:', err);
+        });
+      }, 700);
+      return { success: true, result };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setTimeout(() => {
+        updateTrayMenu(true);
+      }, 300);
+      return { success: false, error: errorMessage };
+    }
+  });
+
   ipcMain.handle('restore-to-readonly', async (event: IpcMainInvokeEvent, device: any) => {
     try {
       // 在还原为只读之前，先将设备添加到手动只读列表，防止自动读写功能立即将其设置为读写

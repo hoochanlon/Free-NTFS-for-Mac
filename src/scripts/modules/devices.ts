@@ -148,7 +148,7 @@
                 }
                 try {
                   autoMountAttemptedDisks.add(device.disk);
-                  await AppUtils.Logs.addLog(`检测到新设备 ${device.volumeName}，正在自动配置为可读写...`, 'info');
+                  await AppUtils.Logs.addLog(`检测到新设备 ${device.volumeName}，正在自动挂载为读写模式...`, 'info');
                   const result = await electronAPI.mountDevice(device);
                   if (result.success) {
                     await AppUtils.Logs.addLog(`设备 ${device.volumeName} 自动配置成功`, 'success');
@@ -241,6 +241,7 @@
     createDeviceItem: Renderer.createDeviceItem,
     mountDevice: Operations.mountDevice,
     unmountDevice: Operations.unmountDevice,
+    resetDevice: Operations.resetDevice,
     restoreToReadOnly: Operations.restoreToReadOnly,
     mountAllDevices: Operations.mountAllDevices,
     restoreAllToReadOnly: Operations.restoreAllToReadOnly,

@@ -66,6 +66,11 @@ class NTFSManager {
     return await this.mountOperations.restoreToReadOnly(device);
   }
 
+  // 重置设备（卸载+修复）
+  async resetDevice(device: NTFSDevice): Promise<string> {
+    return await this.mountOperations.resetDevice(device);
+  }
+
   // 清理旧的挂载标记
   async cleanupOldMounts(): Promise<void> {
     return await this.mountOperations.cleanupOldMounts();

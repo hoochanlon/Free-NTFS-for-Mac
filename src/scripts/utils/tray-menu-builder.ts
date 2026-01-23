@@ -201,7 +201,7 @@ export async function createTrayMenu(
         icon: deviceIcon,
         submenu: [
           {
-            label: t('devices.mount') || '配置为可读写',
+            label: t('devices.mount') || '读写',
             click: async () => {
               try {
                 // 从手动只读列表中移除该设备，允许自动读写功能再次管理它
@@ -240,6 +240,23 @@ export async function createTrayMenu(
                 await new Promise(resolve => setTimeout(resolve, 300));
                 await updateMenuCallback(true);
                 // 刷新所有窗口的设备列表（包括托盘窗口）
+                await refreshAllWindowsDevices();
+              }
+            }
+          },
+          {
+            label: t('devices.reset') || '重置',
+            click: async () => {
+              try {
+                await ntfsManager.resetDevice(device);
+                // 等待设备状态更新
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await updateMenuCallback(true);
+                await refreshAllWindowsDevices();
+              } catch (error) {
+                console.error('重置设备失败:', error);
+                await new Promise(resolve => setTimeout(resolve, 300));
+                await updateMenuCallback(true);
                 await refreshAllWindowsDevices();
               }
             }
@@ -323,6 +340,23 @@ export async function createTrayMenu(
                 await new Promise(resolve => setTimeout(resolve, 500));
                 await updateMenuCallback(true);
                 // 刷新所有窗口的设备列表（包括托盘窗口）
+                await refreshAllWindowsDevices();
+              }
+            }
+          },
+          {
+            label: t('devices.reset') || '重置',
+            click: async () => {
+              try {
+                await ntfsManager.resetDevice(device);
+                // 等待设备状态更新
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await updateMenuCallback(true);
+                await refreshAllWindowsDevices();
+              } catch (error) {
+                console.error('重置设备失败:', error);
+                await new Promise(resolve => setTimeout(resolve, 300));
+                await updateMenuCallback(true);
                 await refreshAllWindowsDevices();
               }
             }
@@ -530,15 +564,19 @@ export async function createTrayMenu(
             const devices = await ntfsManager.getNTFSDevices(true);
             const currentSettings = await SettingsManager.getSettings();
             const manuallyReadOnlyDevices = currentSettings.manuallyReadOnlyDevices || [];
+            // 过滤只读设备：排除手动设置为只读的设备（同时检查 volumeUuid 和 disk）
             const readOnlyDevices = devices.filter((d: any) =>
-              d.isReadOnly && !d.isUnmounted && !manuallyReadOnlyDevices.includes(d.disk)
+              d.isReadOnly &&
+              !d.isUnmounted &&
+              !manuallyReadOnlyDevices.includes(d.volumeUuid || d.disk) &&
+              !manuallyReadOnlyDevices.includes(d.disk)
             );
 
             if (readOnlyDevices.length > 0) {
               // 通知主窗口显示日志（如果窗口存在）
               if (mainWindow && !mainWindow.isDestroyed()) {
                 mainWindow.webContents.send('add-log', {
-                  message: `检测到 ${readOnlyDevices.length} 个只读设备，正在自动配置为可读写...`,
+                  message: `检测到 ${readOnlyDevices.length} 个只读设备，正在自动挂载为读写模式...`,
                   type: 'info'
                 });
               }

@@ -98,7 +98,7 @@ Der Gerätestatus wird in zwei Typen unterteilt:
 
 ### Gerät als Lese-/Schreibzugriff einhängen
 
-Für Geräte im schreibgeschützten Status können Sie auf die Schaltfläche "Als Lese-/Schreibzugriff konfigurieren" klicken, um sie im Lese-/Schreibzugriff-Modus einzuhängen. Dieser Vorgang erfordert Administratorrechte, und das System zeigt einen Passworteingabedialog an.
+Für Geräte im schreibgeschützten Status können Sie auf die Schaltfläche "Lese-/Schreibzugriff" klicken, um sie im Lese-/Schreibzugriff-Modus einzuhängen. Dieser Vorgang erfordert Administratorrechte, und das System zeigt einen Passworteingabedialog an.
 
 **Hinweise:**
 
@@ -189,6 +189,13 @@ Wenn Sie auf `Error opening '/dev/diskXsX': Resource busy` stoßen, liegt dies n
 4. **Erneut einhängen**: Nach Abschluss der Reparatur versuchen Sie erneut, das Gerät einzuhängen
 
 **Ursache**: Dieser Fehler tritt normalerweise auf, wenn ein Einhängvorgang zwangsweise unterbrochen wurde (z. B. durch erzwungenes Beenden der Anwendung, Systemabsturz usw.), wodurch das Gerät in einem belegten Zustand verbleibt. Sie müssen es zuerst aushängen und reparieren, bevor Sie es erneut einhängen können.
+
+**Verwenden der Reset-Schaltfläche**: Wenn Sie auf einen "Resource busy" Fehler stoßen, können Sie auch direkt auf die "Reset"-Schaltfläche in der Geräteliste klicken. Die Reset-Funktion führt automatisch die folgenden Operationen aus:
+- Gerät aushängen
+- Dateisystem reparieren
+- Gerätebelegungsstatus löschen
+
+Die Reset-Operation erfordert Administratorrechte und eignet sich zur schnellen Lösung von Gerätebelegungsproblemen.
 
 ### Was tun, wenn die Installation von Abhängigkeiten fehlschlägt?
 

@@ -98,7 +98,7 @@ Device status is divided into two types:
 
 ### Mount Device as Read-Write Mode
 
-For devices in read-only status, you can click the "Configure as Read-Write" button to mount them in read-write mode. This operation requires administrator privileges, and the system will pop up a password input dialog.
+For devices in read-only status, you can click the "Read-Write" button to mount them in read-write mode. This operation requires administrator privileges, and the system will pop up a password input dialog.
 
 **Notes:**
 
@@ -218,6 +218,13 @@ If you encounter `Error opening '/dev/diskXsX': Resource busy`, this usually occ
 4. **Remount**: After the repair is complete, try mounting the device again
 
 **Cause**: This error typically occurs when a mounting operation is forcibly interrupted (such as force quitting the application, system crash, etc.), leaving the device in an occupied state. You need to unmount and repair it before you can remount it.
+
+**Using the Reset Button**: If you encounter a "Resource busy" error, you can also directly click the "Reset" button in the device list. The reset function will automatically perform the following operations:
+- Unmount the device
+- Fix the file system
+- Clear device occupancy status
+
+The reset operation requires administrator privileges and is suitable for quickly resolving device occupancy issues.
 
 ### What to do if dependency installation fails?
 

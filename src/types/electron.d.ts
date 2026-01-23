@@ -19,6 +19,7 @@ export interface ElectronAPI {
   getNTFSDevices: (forceRefresh?: boolean) => Promise<NTFSDevice[]>;
   mountDevice: (device: NTFSDevice) => Promise<OperationResult>;
   unmountDevice: (device: NTFSDevice) => Promise<OperationResult>;
+  resetDevice: (device: NTFSDevice) => Promise<OperationResult>;
   restoreToReadOnly: (device: NTFSDevice) => Promise<OperationResult>;
   ejectDevice: (device: NTFSDevice) => Promise<OperationResult>;
   // 已移除自动安装功能

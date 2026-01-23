@@ -13,7 +13,7 @@ const formatCapacity = (bytes: number): string => {
   }
 };
 
-export function renderDevices(devicesList: HTMLElement, devices: any[], mountDeviceFn: (device: any) => void, unmountDeviceFn: (device: any) => void): void {
+export function renderDevices(devicesList: HTMLElement, devices: any[], mountDeviceFn: (device: any) => void, unmountDeviceFn: (device: any) => void, resetDeviceFn?: (device: any) => void): void {
   if (devices.length === 0) {
     devicesList.innerHTML = `
       <div class="empty-state">
@@ -69,10 +69,20 @@ export function renderDevices(devicesList: HTMLElement, devices: any[], mountDev
           <button class="btn btn-success mount-btn" data-disk="${device.disk}">
             挂载为读写
           </button>
+          ${resetDeviceFn ? `
+          <button class="btn btn-purple reset-btn" data-disk="${device.disk}">
+            重置
+          </button>
+          ` : ''}
         ` : `
           <button class="btn btn-danger unmount-btn" data-disk="${device.disk}">
             卸载
           </button>
+          ${resetDeviceFn ? `
+          <button class="btn btn-purple reset-btn" data-disk="${device.disk}">
+            重置
+          </button>
+          ` : ''}
         `}
       </div>
     `;
@@ -96,6 +106,16 @@ export function renderDevices(devicesList: HTMLElement, devices: any[], mountDev
       if (device) unmountDeviceFn(device);
     });
   });
+
+  if (resetDeviceFn) {
+    devicesList.querySelectorAll('.reset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const disk = (btn as HTMLElement).dataset.disk;
+        const device = devices.find(d => d.disk === disk);
+        if (device) resetDeviceFn(device);
+      });
+    });
+  }
 }
 
 export async function refreshDevices(
@@ -184,6 +204,41 @@ export async function mountDevice(
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     addLogFn(`挂载失败: ${errorMessage}`, 'error');
+  } finally {
+    showLoadingFn(false);
+  }
+}
+
+export async function resetDevice(
+  electronAPI: any,
+  device: any,
+  addLogFn: (message: string, type?: 'info' | 'success' | 'error' | 'warning') => void,
+  showLoadingFn: (show: boolean) => void,
+  refreshDevicesFn: () => void
+): Promise<void> {
+  try {
+    showLoadingFn(true);
+    addLogFn(`正在重置 ${device.volumeName}（卸载并修复）...`, 'info');
+    addLogFn('提示：请在弹出的对话框中输入管理员密码', 'info');
+
+    const result = await electronAPI.resetDevice(device);
+
+    if (result.success) {
+      if (result.result) {
+        addLogFn(result.result, 'success');
+      }
+      await refreshDevicesFn();
+    } else {
+      addLogFn(`重置失败: ${result.error || '未知错误'}`, 'error');
+      if (result.error?.includes('密码错误')) {
+        addLogFn('提示：密码错误，请重试', 'warning');
+      } else if (result.error?.includes('用户取消')) {
+        addLogFn('提示：已取消操作', 'info');
+      }
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    addLogFn(`重置失败: ${errorMessage}`, 'error');
   } finally {
     showLoadingFn(false);
   }

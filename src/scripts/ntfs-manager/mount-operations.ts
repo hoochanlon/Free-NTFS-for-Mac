@@ -266,6 +266,81 @@ export class MountOperations {
     }
   }
 
+  // 重置设备（卸载+修复）- 用于解决 Resource busy 错误
+  async resetDevice(device: NTFSDevice): Promise<string> {
+    try {
+      let password = await this.passwordManager.getPassword('messages.passwordDialog.resetDevice', { name: device.volumeName });
+
+      // 步骤1：卸载设备
+      try {
+        await this.sudoExecutor.executeSudoWithPassword(['diskutil', 'unmount', device.devicePath], password);
+      } catch (error: any) {
+        // 如果密码错误，重新获取密码
+        if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
+          password = await this.passwordManager.getPassword('messages.passwordDialog.resetDevice', { name: device.volumeName });
+          try {
+            await this.sudoExecutor.executeSudoWithPassword(['diskutil', 'unmount', device.devicePath], password);
+          } catch {
+            // 卸载失败可能因为已经卸载，继续
+          }
+        } else {
+          // 卸载失败可能因为已经卸载，继续
+        }
+      }
+
+      // 从已挂载设备列表中移除
+      this.mountedDevices.delete(device.disk);
+      fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
+
+      // 等待一小段时间，确保设备完全卸载
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // 步骤2：修复文件系统
+      try {
+        await this.sudoExecutor.executeSudoWithPassword(['ntfsfix', device.devicePath], password);
+      } catch (error: any) {
+        // 如果密码错误，重新获取密码
+        if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
+          password = await this.passwordManager.getPassword('messages.passwordDialog.resetDevice', { name: device.volumeName });
+          await this.sudoExecutor.executeSudoWithPassword(['ntfsfix', device.devicePath], password);
+        } else {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          throw new Error(`修复文件系统失败: ${errorMessage}`);
+        }
+      }
+
+      // 等待一小段时间，确保修复完成
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // 步骤3：重新挂载设备为只读模式（使用系统默认的只读挂载）
+      try {
+        // 使用 diskutil mount 挂载为只读模式（macOS 默认行为）
+        try {
+          await execAsync(`diskutil mount ${device.devicePath}`);
+        } catch (error: any) {
+          // 如果挂载失败，可能是设备已经自动挂载，继续
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          console.log(`[MountOperations] 挂载为只读模式失败或已挂载: ${errorMessage}`);
+        }
+
+        // 重置后设备是只读状态，不添加到已挂载列表（因为不是读写模式）
+        // 也不从已卸载列表中移除，因为需要用户手动选择是否挂载为读写
+
+        return `设备 ${device.volumeName} 已重置并重新挂载为只读模式`;
+      } catch (error: any) {
+        // 如果挂载失败，至少返回修复成功的消息
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        throw new Error(`修复完成，但重新挂载失败: ${errorMessage}`);
+      }
+    } catch (error: any) {
+      if (error.message?.includes('密码') || error.message?.includes('password')) {
+        throw error;
+      }
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`重置设备失败: ${errorMessage}`);
+    }
+  }
+
   // 清理旧的挂载标记
   async cleanupOldMounts(): Promise<void> {
     try {

@@ -7,6 +7,7 @@ const electronAPI: ElectronAPI = {
   getNTFSDevices: (forceRefresh?: boolean) => ipcRenderer.invoke('get-ntfs-devices', forceRefresh),
   mountDevice: (device) => ipcRenderer.invoke('mount-device', device),
   unmountDevice: (device) => ipcRenderer.invoke('unmount-device', device),
+  resetDevice: (device) => ipcRenderer.invoke('reset-device', device),
   restoreToReadOnly: (device) => ipcRenderer.invoke('restore-to-readonly', device),
   ejectDevice: (device) => ipcRenderer.invoke('eject-device', device),
   // 已移除自动安装功能

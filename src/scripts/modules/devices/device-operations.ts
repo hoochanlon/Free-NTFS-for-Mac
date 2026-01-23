@@ -192,6 +192,50 @@
       }
     },
 
+    // 重置设备（卸载+修复）
+    async resetDevice(
+      device: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      devicesList: HTMLElement,
+      readWriteDevicesList: HTMLElement,
+      statusDot: HTMLElement,
+      statusText: HTMLElement
+    ): Promise<void> {
+      try {
+        if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
+          DeviceUtils.showLoading(true);
+        }
+        await addLog(t('messages.resetting', { name: device.volumeName }) || `正在重置 ${device.volumeName}（卸载并修复）...`, 'info');
+        await addLog(t('messages.enterPassword'), 'info');
+
+        const result = await electronAPI.resetDevice(device);
+
+        if (result.success) {
+          if (result.result) {
+            await addLog(result.result, 'success');
+          }
+          // 等待一小段时间，确保操作完全完成
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          // 强制刷新设备列表
+          await refreshDeviceList(devicesList, 0);
+        } else {
+          await addLog(`${t('messages.resetError') || '重置失败'}: ${result.error || t('messages.resetError') || '未知错误'}`, 'error');
+          if (result.error?.includes('密码错误') || result.error?.includes('password')) {
+            await addLog(t('messages.passwordError'), 'warning');
+          } else if (result.error?.includes('用户取消') || result.error?.includes('cancelled')) {
+            await addLog(t('messages.cancelled'), 'info');
+          }
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        await addLog(`${t('messages.resetError') || '重置失败'}: ${errorMessage}`, 'error');
+      } finally {
+        if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
+          DeviceUtils.showLoading(false);
+        }
+      }
+    },
+
     // 还原设备为只读模式
     async restoreToReadOnly(
       device: any, // eslint-disable-line @typescript-eslint/no-explicit-any

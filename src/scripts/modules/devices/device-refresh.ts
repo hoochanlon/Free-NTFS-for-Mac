@@ -297,15 +297,36 @@
           }
         }
 
-        // 读取设置中的“手动只读”列表
-        // 说明：
-        // - 这里不再做自动清理 / 宽限期回收，避免用户设为只读后又被自动读写抢回
-        // - 只在用户主动执行“配置为可读写”“全读写”等操作时，才从手动只读列表中移除（见 device-operations.ts / ipc-handlers.ts）
+        // 自动读写：清理已移除设备的冷却期记录，确保设备拔出后重置
+        const currentVolumeUuids = new Set(devices.map(d => d.volumeUuid).filter(Boolean));
+        for (const [id, until] of Array.from(autoMountCooldown.entries())) {
+          // 如果设备不在当前设备列表中（既不是 disk 也不是 volumeUuid），则清理冷却期记录
+          const isCurrentDisk = currentDiskSet.has(id);
+          const isCurrentVolumeUuid = currentVolumeUuids.has(id);
+          if (!isCurrentDisk && !isCurrentVolumeUuid) {
+            autoMountCooldown.delete(id);
+            console.log(`[设备刷新] 已清理已拔出设备的冷却期记录: ${id}`);
+          }
+        }
+
+        // 读取设置中的"手动只读"列表
+        // 智能策略：设备拔出8-9秒后自动从手动只读列表中移除，恢复默认行为
         let settings: any = null;
         let manuallyReadOnlyDevices: string[] = [];
         try {
           settings = await electronAPI.getSettings();
           manuallyReadOnlyDevices = settings?.manuallyReadOnlyDevices || [];
+          
+          // 调用清理函数，实现设备拔出后8-9秒重置的智能策略
+          if (manuallyReadOnlyDevices.length > 0) {
+            const prunedList = await pruneManuallyReadOnlyDevices(manuallyReadOnlyDevices, devices);
+            // 如果列表有变化，更新设置
+            if (prunedList.length !== manuallyReadOnlyDevices.length || 
+                prunedList.some((v, i) => v !== manuallyReadOnlyDevices[i])) {
+              manuallyReadOnlyDevices = prunedList;
+              // 注意：pruneManuallyReadOnlyDevices 内部已经保存了设置，这里不需要重复保存
+            }
+          }
         } catch (error) {
           console.warn('[设备刷新] 获取设置失败:', error);
         }
@@ -337,7 +358,7 @@
                 }
                 try {
                   autoMountAttemptedDisks.add(device.disk);
-                  await addLog(`检测到新设备 ${device.volumeName}，正在自动配置为可读写...`, 'info');
+                  await addLog(`检测到新设备 ${device.volumeName}，正在自动挂载为读写模式...`, 'info');
                   const result = await electronAPI.mountDevice(device);
                   if (result.success) {
                     await addLog(`设备 ${device.volumeName} 自动配置成功`, 'success');

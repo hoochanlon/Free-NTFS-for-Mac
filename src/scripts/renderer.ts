@@ -389,7 +389,7 @@
               if (readOnlyDevices.length > 0) {
                 const t = getT();
                 await AppUtils.Logs.addLog(
-                  t('devices.autoMountingExistingDevices') || `检测到 ${readOnlyDevices.length} 个只读设备，正在自动配置为可读写...`,
+                  t('devices.autoMountingExistingDevices') || `检测到 ${readOnlyDevices.length} 个只读设备，正在自动挂载为读写模式...`,
                   'info'
                 );
 
@@ -907,6 +907,9 @@
             break;
           case 'restore':
             AppModules.Devices.restoreToReadOnly(device, devicesList, readWriteDevicesList, statusDot, statusText);
+            break;
+          case 'reset':
+            AppModules.Devices.resetDevice(device, devicesList, readWriteDevicesList, statusDot, statusText);
             break;
         }
       });

@@ -250,12 +250,18 @@
                   <button class="btn btn-success mount-btn" data-disk="${device.disk}">
                     ${t('devices.mount')}
                   </button>
+                  <button class="btn btn-purple reset-btn" data-disk="${device.disk}">
+                    ${t('devices.reset') || '重置'}
+                  </button>
                   <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
                     ${t('devices.eject')}
                   </button>
                 ` : `
                   <button class="btn btn-secondary restore-readonly-btn" data-disk="${device.disk}">
                     ${t('devices.restoreReadOnly')}
+                  </button>
+                  <button class="btn btn-purple reset-btn" data-disk="${device.disk}">
+                    ${t('devices.reset') || '重置'}
                   </button>
                   <button class="btn btn-danger eject-btn" data-disk="${device.disk}">
                     ${t('devices.eject')}
@@ -325,6 +331,9 @@
               <button class="btn btn-success mount-btn" data-disk="${device.disk}">
                 ${t('devices.mount')}
               </button>
+              <button class="btn btn-purple reset-btn" data-disk="${device.disk}">
+                ${t('devices.reset') || '重置'}
+              </button>
               <button class="btn btn-info unmount-btn" data-disk="${device.disk}">
                 ${t('devices.unmount')}
               </button>
@@ -334,6 +343,9 @@
             ` : `
               <button class="btn btn-secondary restore-readonly-btn" data-disk="${device.disk}">
                 ${t('devices.restoreReadOnly')}
+              </button>
+              <button class="btn btn-purple reset-btn" data-disk="${device.disk}">
+                ${t('devices.reset') || '重置'}
               </button>
               <button class="btn btn-info unmount-btn" data-disk="${device.disk}">
                 ${t('devices.unmount')}

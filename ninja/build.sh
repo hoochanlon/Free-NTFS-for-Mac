@@ -183,7 +183,7 @@ if [ -n "$TARGET" ] && [ -n "$ARCH" ]; then
     # 通用版本：创建一个包含 x64 和 arm64 的通用二进制文件
     ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $TARGET --universal
   else
-    ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $TARGET $ARCH
+  ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $TARGET $ARCH
   fi
 
 elif [ -n "$TARGET" ]; then
@@ -198,7 +198,7 @@ elif [ -n "$ARCH" ]; then
     # 通用版本
     ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac --universal
   else
-    ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $ARCH
+  ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $ARCH
   fi
 
 else
