@@ -14,7 +14,7 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 - 🔄 **One-Click Mount** - Easily mount read-only NTFS devices in read-write mode
 - ⚡ **Auto Read-Write** - When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode without manual operation. Intelligently skips devices you manually set to read-only, respecting your choices
 - 📊 **Status Display** - Clearly displays device status and operation logs
-- 🛡️ **Secure & Reliable** - Uses Electron security best practices
+- 🛡️ **Secure & Reliable** - Uses Electron security best practices and provides a non-destructive disk repair **Reset** button
 - ☕ **Prevent Sleep** - One-click toggle to prevent system sleep, ensuring the system stays awake during long operations
 - 🍃 **Status Protection** - Long press for 3s to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations
 - 🥷 **Ninja Tools** - Provide cross-filesystem mounting and end-to-end scripts from development to release, with one-click permission fixes and multi-language output to simplify complex operations and lower the usage barrier
@@ -54,13 +54,13 @@ Copy and paste into a ***terminal with full administrative privileges*** and pre
 
 ```shell
 # English (default)
-/bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
+/bin/bash -c \"$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)\"
 
 # Japanese
-LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
+LANG=ja /bin/bash -c \"$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)\"
 
 # Chinese
-LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)"
+LANG=zh /bin/bash -c \"$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)\"
 ```
 
 ##### Linux ext4 and Other Filesystem Read-Write Support
@@ -69,13 +69,13 @@ Supports ext2/3/4, btrfs, xfs, zfs, NTFS, exFAT, LUKS encryption, LVM, RAID, and
 
 ```shell
 # English (default)
-/bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
+/bin/bash -c \"$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)\"
 
 # Japanese
-LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
+LANG=ja /bin/bash -c \"$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)\"
 
 # Chinese
-LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)"
+LANG=zh /bin/bash -c \"$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)\"
 ```
 
 #### Method 2: Download Locally (Shell - Ninja Tools)
@@ -83,7 +83,7 @@ LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-
 After downloading, you can directly type `nigate` to start:
 
 ```shell
-curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
+curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo \"alias nigate='bash nigate.shortcut'\" >> ~/.zshrc && osascript -e 'tell application \"Terminal\" to do script \"nigate\"'
 ```
 
 #### Method 3: GUI Version (Electron)
@@ -102,26 +102,26 @@ Download and use from [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tag
 
 ```shell
 # English (default)
-/bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
+/bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)\"
 
 # Japanese
-LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
+LANG=ja /bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)\"
 
 # Chinese
-LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)"
+LANG=zh /bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)\"
 ```
 
 #### One-Click Uninstall Dependencies
 
 ```shell
 # English (default)
-/bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
+/bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)\"
 
 # Japanese
-LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
+LANG=ja /bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)\"
 
 # Chinese
-LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)"
+LANG=zh /bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)\"
 ```
 
 ### System Permission Settings
@@ -130,13 +130,13 @@ Configure system permissions and security settings (Gatekeeper, SIP, etc.):
 
 ```shell
 # English (default)
-/bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/shuriken.sh)"
+/bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/shuriken.sh)\"
 
 # Japanese
-LANG=ja /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/shuriken.sh)"
+LANG=ja /bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/shuriken.sh)\"
 
 # Chinese
-LANG=zh /bin/bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/shuriken.sh)"
+LANG=zh /bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/shuriken.sh)\"
 ```
 
 > For more information, see: [Ninja Tools Testing #39](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/39) and [Ninja Tools Documentation](docs/07-忍者工具集内容说明.md)
@@ -256,7 +256,7 @@ After packaging, the following will be generated in the `dist` directory:
 
 Other notes:
 - Use `./ninja/build.sh` script for more flexible packaging
-- First run may require right-clicking the application and selecting "Open" (macOS security restrictions)
+- First run may require right-clicking the application and selecting \"Open\" (macOS security restrictions)
 
 ### Troubleshooting
 
@@ -282,6 +282,7 @@ Other notes:
 
 Thank you to all developers, testers, and users who have contributed to this project! See [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md) for details.
 
-[^1]: **Note**: Using this tool to mount or modify NTFS devices carries a risk of data loss. It is strongly recommended to backup important data before operation. This tool is provided "as is" without any warranty. The developer is not responsible for data loss caused by using this tool.
+[^1]: **Note**: Using this tool to mount or modify NTFS devices carries a risk of data loss. It is strongly recommended to backup important data before operation. This tool is provided \"as is\" without any warranty. The developer is not responsible for data loss caused by using this tool.
 
 [^2]: Powered by [nohajc/anylinuxfs](https://github.com/nohajc/anylinuxfs) with secondary encapsulation
+

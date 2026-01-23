@@ -39,6 +39,7 @@ export interface ElectronAPI {
   readMarkdown: (filename: string) => Promise<{ success: boolean; content?: string; error?: string }>;
   openAboutWindow: () => Promise<void>;
   openExternal: (url: string) => Promise<void>;
+  openPath: (targetPath: string) => Promise<void>;
   broadcastThemeChange: (isLightMode: boolean) => Promise<void>;
   onThemeChange: (callback: (isLightMode: boolean) => void) => void;
   getSettings: () => Promise<AppSettings>;

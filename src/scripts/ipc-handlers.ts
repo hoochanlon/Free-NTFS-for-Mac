@@ -636,6 +636,20 @@ export function setupSystemHandlers(): void {
     }
   });
 
+  // 打开本地路径（Finder）
+  ipcMain.handle('open-path', async (event: IpcMainInvokeEvent, targetPath: string) => {
+    try {
+      if (!targetPath || typeof targetPath !== 'string') return;
+      const result = await shell.openPath(targetPath);
+      // shell.openPath 返回空字符串表示成功；返回错误字符串表示失败
+      if (result) {
+        console.warn('[open-path] 打开路径失败:', result);
+      }
+    } catch (error) {
+      console.warn('[open-path] 打开路径异常:', error);
+    }
+  });
+
   ipcMain.handle('get-current-theme', async () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       try {

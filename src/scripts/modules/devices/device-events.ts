@@ -23,6 +23,35 @@
   AppModules.Devices.Events = {
     // 绑定设备事件
     bindDeviceEvents(devicesList: HTMLElement, readWriteDevicesList: HTMLElement): void {
+      // 双击设备项：在 Finder 打开挂载点（主窗口 & 托盘窗口通用）
+      // - 只对已挂载（非 unmounted）且有 volume 路径的设备生效
+      // - 双击按钮不触发（避免误操作）
+      devicesList.querySelectorAll('.device-item').forEach(item => {
+        item.addEventListener('dblclick', async (ev: Event) => {
+          try {
+            const target = ev.target as HTMLElement | null;
+            if (target && target.closest('button')) return;
+
+            const disk = (item as HTMLElement).dataset.disk;
+            const devices = AppModules.Devices.devices || [];
+            const device = devices.find((d: any) => d.disk === disk);
+            if (!device) return;
+            if (device.isUnmounted) return;
+
+            const volumePath = device.volume; // e.g. /Volumes/MyDisk
+            if (volumePath && typeof volumePath === 'string') {
+              const electronAPI = (window as any).electronAPI;
+              if (electronAPI && typeof electronAPI.openPath === 'function') {
+                await electronAPI.openPath(volumePath);
+              }
+            }
+          } catch (error) {
+            // 降级：不影响其他交互
+            console.warn('[设备事件] 双击打开失败:', error);
+          }
+        });
+      });
+
       devicesList.querySelectorAll('.mount-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const disk = (btn as HTMLElement).dataset.disk;

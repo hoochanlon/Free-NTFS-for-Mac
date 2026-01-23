@@ -23,6 +23,7 @@ const electronAPI: ElectronAPI = {
   readMarkdown: (filename: string) => ipcRenderer.invoke('read-markdown', filename),
   openAboutWindow: () => ipcRenderer.invoke('open-about-window'),
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
+  openPath: (targetPath: string) => ipcRenderer.invoke('open-path', targetPath),
   broadcastThemeChange: (isLightMode: boolean) => ipcRenderer.invoke('broadcast-theme-change', isLightMode),
   onThemeChange: (callback: (isLightMode: boolean) => void) => {
     ipcRenderer.on('theme-changed', (_event: IpcRendererEvent, isLightMode: boolean) => callback(isLightMode));

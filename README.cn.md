@@ -14,7 +14,7 @@
 - 🔄 **一键挂载** - 轻松将只读 NTFS 设备挂载为读写模式
 - ⚡ **自动读写** - 启用后，新插入的 NTFS 设备会自动挂载为读写模式，无需手动操作。智能跳过您手动设置为只读的设备，尊重您的选择
 - 📊 **状态显示** - 清晰显示设备状态和操作日志
-- 🛡️ **安全可靠** - 使用 Electron 安全最佳实践
+- 🛡️ **安全可靠** - 使用 Electron 安全最佳实践，并提供非格式化的磁盘修复“重置”按钮
 - ☕ **禁止休眠** - 一键开启/关闭系统休眠防止功能，确保长时间操作时系统保持唤醒状态
 - 🍃 **状态保护** - 长按3s可切换保护状态，保护后自动读写、托盘模式和防止休眠功能将被禁用，防止误操作
 - 🥷 **忍者工具集** - 提供跨文件系统挂载、覆盖开发到发布的全流程脚本支持，并通过一键权限修复与多语言输出，简化复杂操作、降低使用门槛
@@ -81,7 +81,7 @@ LANG=en /bin/bash -c "$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-
 ### 下载到本地，之后直接输入 `nigate`
 
 ```shell
-curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"'
+curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo "alias nigate='bash nigate.shortcut'" >> ~/.zshrc && osascript -e 'tell application "Terminal" to do script "nigate"' 
 ```
 
 ## 软件版（Electron - 图形化）
@@ -218,71 +218,4 @@ LANG=en ./dev.sh
 ```
 
 支持的脚本包括：
-- `dev.sh` / `ninja/izanaki.sh` - 一键运行脚本
-- `ninja/kamui.sh` - Linux 文件系统挂载
-- `ninja/nigate.sh` - NTFS 自动挂载
-- `ninja/build.sh` - 应用打包
-- `ninja/shuriken.sh` - 系统权限设置
-- 以及其他所有 ninja 工具集脚本
 
-### 项目初始化脚本
-
-如果遇到 `pnpm run dev` 报错，运行初始化脚本一键修复：
-
-```bash
-pnpm run setup
-```
-
-或直接运行：
-
-```bash
-./ninja/izanaki.sh
-```
-
-这个脚本会自动：
-- ✅ 检查必要文件是否存在
-- ✅ 设置脚本执行权限
-- ✅ 创建必要的目录结构
-- ✅ 同步版本号
-- ✅ 编译 TypeScript 和 Stylus
-- ✅ 验证关键文件
-
-构建完成后，可在 `dist` 目录找到打包好的应用。
-
-## Mac 打包说明
-
-打包完成后，会在 `dist` 目录生成：
-- **DMG 文件**：用于分发的安装包
-- **ZIP 文件**：压缩的应用包
-
-其他说明：
-- 使用 `./ninja/build.sh` 可进行更灵活的打包
-- 首次运行可能需要右键点击应用选择"打开"（macOS 安全限制）
-
-## 故障排除
-
-### 挂载失败
-
-1. 检查是否已安装所有依赖
-2. 确认设备未被其他程序占用
-3. 如果是 Windows 快速启动问题，请在 Windows 中完全关闭设备
-
-### 依赖安装失败
-
-1. 确保网络连接正常
-2. 检查 Homebrew 是否正确安装
-3. 可能需要手动在终端运行安装命令
-
-### 应用无法启动
-
-1. 检查 Node.js 版本是否符合要求
-2. 删除 `node_modules` 并重新运行 `pnpm install`
-3. 查看控制台错误信息
-
-## 致谢
-
-感谢所有为这个项目做出贡献的开发者、测试者和用户！查看 [致谢名单](ACKNOWLEDGMENTS.md) 了解详情。
-
-[^1]: 使用本工具挂载或修改 NTFS 设备存在数据丢失风险。强烈建议操作前备份重要数据。本工具按"现状"提供，不提供任何担保。因使用本工具造成的数据损失，开发者不承担责任。
-
-[^2]: 由 [nohajc/anylinuxfs](https://github.com/nohajc/anylinuxfs) 提供支持，并二次封装
