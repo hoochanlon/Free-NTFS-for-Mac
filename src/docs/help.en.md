@@ -198,6 +198,27 @@ If the mounting operation fails or times out, please check the following:
 - **Device Usage**: Check if other programs are using the device, close related programs and try again
 - **Operation Timeout**: If the operation times out, the application will automatically cancel the operation to prevent hanging. Please check the above reasons and try again
 
+#### "Resource busy" Error
+
+If you encounter `Error opening '/dev/diskXsX': Resource busy`, this usually occurs when the operation was forcibly interrupted, leaving the device still occupied. Solution:
+
+1. **Confirm device path**: Use `diskutil list` command to confirm the corresponding disk device (e.g., `/dev/disk5s1`)
+
+2. **Unmount the device**:
+   ```bash
+   sudo diskutil unmount /dev/disk5s1
+   ```
+   Note: Replace `/dev/disk5s1` with your actual device path
+
+3. **Fix the file system**: Complete the repair while the device is unmounted
+   ```bash
+   sudo ntfsfix /dev/disk5s1
+   ```
+
+4. **Remount**: After the repair is complete, try mounting the device again
+
+**Cause**: This error typically occurs when a mounting operation is forcibly interrupted (such as force quitting the application, system crash, etc.), leaving the device in an occupied state. You need to unmount and repair it before you can remount it.
+
 ### What to do if dependency installation fails?
 
 If you encounter problems during installation, please check the following:

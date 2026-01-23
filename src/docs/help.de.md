@@ -169,6 +169,27 @@ Wenn der Einhängevorgang fehlschlägt oder ein Timeout auftritt, prüfen Sie bi
 - **Gerätenutzung**: Prüfen Sie, ob andere Programme das Gerät verwenden, schließen Sie verwandte Programme und versuchen Sie es erneut
 - **Vorgangs-Timeout**: Wenn der Vorgang ein Timeout hat, bricht die Anwendung den Vorgang automatisch ab, um ein Hängen zu verhindern. Bitte prüfen Sie die oben genannten Gründe und versuchen Sie es erneut
 
+#### "Resource busy" Fehler
+
+Wenn Sie auf `Error opening '/dev/diskXsX': Resource busy` stoßen, liegt dies normalerweise daran, dass der Vorgang zwangsweise unterbrochen wurde und das Gerät noch belegt ist. Lösung:
+
+1. **Gerätepfad bestätigen**: Verwenden Sie den Befehl `diskutil list`, um das entsprechende Festplattengerät zu bestätigen (z. B. `/dev/disk5s1`)
+
+2. **Gerät aushängen**:
+   ```bash
+   sudo diskutil unmount /dev/disk5s1
+   ```
+   Hinweis: Ersetzen Sie `/dev/disk5s1` durch Ihren tatsächlichen Gerätepfad
+
+3. **Dateisystem reparieren**: Führen Sie die Reparatur durch, während das Gerät ausgehängt ist
+   ```bash
+   sudo ntfsfix /dev/disk5s1
+   ```
+
+4. **Erneut einhängen**: Nach Abschluss der Reparatur versuchen Sie erneut, das Gerät einzuhängen
+
+**Ursache**: Dieser Fehler tritt normalerweise auf, wenn ein Einhängvorgang zwangsweise unterbrochen wurde (z. B. durch erzwungenes Beenden der Anwendung, Systemabsturz usw.), wodurch das Gerät in einem belegten Zustand verbleibt. Sie müssen es zuerst aushängen und reparieren, bevor Sie es erneut einhängen können.
+
 ### Was tun, wenn die Installation von Abhängigkeiten fehlschlägt?
 
 Wenn Sie während der Installation auf Probleme stoßen, prüfen Sie bitte Folgendes:

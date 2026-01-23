@@ -193,6 +193,27 @@ brew install ntfs-3g-mac
 - 如果设备在 Windows 中使用过，请先在 Windows 中完全关闭设备
 - 检查设备是否有其他程序正在使用
 
+#### "Resource busy" 错误
+
+如果遇到 `Error opening '/dev/diskXsX': Resource busy` 错误，这通常是因为操作被非法强制中断导致设备仍被占用。解决方法：
+
+1. **确认设备路径**：使用 `diskutil list` 命令确认对应的磁盘设备（如 `/dev/disk5s1`）
+
+2. **卸载设备**：
+   ```bash
+   sudo diskutil unmount /dev/disk5s1
+   ```
+   注意：将 `/dev/disk5s1` 替换为你实际的设备路径
+
+3. **修复文件系统**：在卸载状态下完成修复
+   ```bash
+   sudo ntfsfix /dev/disk5s1
+   ```
+
+4. **重新挂载**：修复完成后，重新尝试挂载设备
+
+**原因说明**：此错误通常发生在挂载操作被强制中断（如强制退出应用、系统崩溃等）时，设备仍处于被占用状态，需要先卸载并修复后才能重新挂载。
+
 ### 安装依赖失败怎么办？
 
 如果安装过程中遇到问题，请检查以下几点：
