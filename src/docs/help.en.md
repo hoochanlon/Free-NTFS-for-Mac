@@ -149,6 +149,14 @@ The auto read-write feature allows you to automatically mount newly inserted NTF
 - If you manually mount a device as read-write, that device will be removed from the "manually read-only devices" list, and the auto read-write feature can work normally on it afterwards
 - The auto read-write feature does not affect your manual operations. You can manually mount or unmount devices at any time
 
+**State Reset Mechanism:**
+
+To ensure the intelligence and user experience of the auto read-write feature, the application implements the following state reset mechanisms:
+
+- **Cooldown Protection**: When you manually set a device to read-only or perform a reset operation, the system sets an 8-second cooldown period. During this time, the auto read-write feature will not trigger, preventing the newly set state from being immediately overwritten
+- **Device Removal Reset**: When a device is unplugged, if it is reinserted within 8-9 seconds, the manual read-only state will be preserved; if reinserted after more than 9 seconds, the device will automatically be removed from the "manually read-only devices" list, restoring default behavior and allowing normal use of the auto read-write feature
+- **Smart Cleanup**: The system automatically cleans up cooldown records and manual read-only states for unplugged devices, ensuring devices work properly when reinserted
+
 ### Unmount Device
 
 For mounted devices, you can click the "Unmount" button to unmount them. Unmounting requires administrator privileges.

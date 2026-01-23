@@ -107,6 +107,43 @@ In der Hauptoberfläche und im Systemleisten-Menü wird für jedes Gerät ein Ka
 - **Gelb** (75-89%): Speicherplatz ist knapp, mit 11%-25% freiem Speicherplatz. Es wird empfohlen, Dateien zeitnah zu bereinigen
 - **Rot** (90-100%): Speicherplatz ist kritisch niedrig, mit weniger als 10% freiem Speicherplatz. Dateien sollten sofort bereinigt werden, um Speicherplatz freizugeben
 
+### Automatisches Lese-Schreib-Funktion
+
+Die automatische Lese-Schreib-Funktion ermöglicht es Ihnen, neu eingefügte NTFS-Geräte automatisch im Lese-Schreib-Modus einzuhängen, ohne manuelle Bedienung.
+
+**Aktivierungsmethoden：**
+
+- Klicken Sie auf das automatische Lese-Schreib-Symbol (<img src="../imgs/svg/devices/flash-auto.svg" alt="Automatisches Lese-Schreib" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;">) in der Titelleiste. Das Symbol wird blau, wenn es aktiviert ist
+- Aktivieren Sie die Option "Automatisches Lese-Schreib" im Systemleisten-Menü
+- Schalten Sie die automatische Lese-Schreib-Schaltfläche in der Titelleiste der Hauptoberfläche um
+
+**Funktionsmerkmale：**
+
+- **Automatische Erkennung neuer Geräte**：Wenn Sie ein neues NTFS-Gerät einstecken, erkennt die Anwendung es automatisch und hängt es im Lese-Schreib-Modus ein
+- **Intelligentes Überspringen manuell schreibgeschützter Geräte**：Wenn Sie ein Gerät manuell auf schreibgeschützt setzen, respektiert die automatische Lese-Schreib-Funktion Ihre Wahl und hängt es nicht erneut im Lese-Schreib-Modus ein
+- **Automatische Verarbeitung vorhandener Geräte bei Aktivierung**：Wenn Sie die automatische Lese-Schreib-Funktion aktivieren, prüft die Anwendung automatisch aktuell angeschlossene schreibgeschützte Geräte (außer denen, die Sie manuell auf schreibgeschützt gesetzt haben) und versucht, sie im Lese-Schreib-Modus einzuhängen
+
+**Anwendungsfälle：**
+
+- Häufige Verwendung mehrerer NTFS-Geräte und automatisches Einhängen ohne manuelle Bedienung jedes Mal
+- Bei der Batch-Verarbeitung mehrerer Geräte können Sie die automatische Lese-Schreib-Funktion einmal aktivieren
+- Bei temporärem Bedarf an automatischem Einhängen können Sie es jederzeit ein- oder ausschalten
+
+**Hinweise：**
+
+- Die automatische Lese-Schreib-Funktion erfordert Administratorrechte. Sie werden beim ersten Einhängen zur Eingabe eines Passworts aufgefordert
+- Wenn Sie ein Gerät manuell auf schreibgeschützt setzen, wird dieses Gerät zur Liste der "manuell schreibgeschützten Geräte" hinzugefügt, und die automatische Lese-Schreib-Funktion hängt es nicht erneut ein
+- Wenn Sie ein Gerät manuell im Lese-Schreib-Modus einhängen, wird dieses Gerät aus der Liste der "manuell schreibgeschützten Geräte" entfernt, und die automatische Lese-Schreib-Funktion kann danach normal darauf arbeiten
+- Die automatische Lese-Schreib-Funktion beeinflusst Ihre manuellen Operationen nicht. Sie können Geräte jederzeit manuell ein- oder aushängen
+
+**Status-Reset-Mechanismus：**
+
+Um die Intelligenz und Benutzerfreundlichkeit der automatischen Lese-Schreib-Funktion sicherzustellen, implementiert die Anwendung die folgenden Status-Reset-Mechanismen：
+
+- **Abkühlschutz**：Wenn Sie ein Gerät manuell auf schreibgeschützt setzen oder einen Reset-Vorgang ausführen, setzt das System eine 8-Sekunden-Abkühlphase. Während dieser Zeit wird die automatische Lese-Schreib-Funktion nicht ausgelöst, um zu verhindern, dass der gerade gesetzte Status sofort überschrieben wird
+- **Geräteentfernung-Reset**：Wenn ein Gerät entfernt wird und innerhalb von 8-9 Sekunden wieder eingesteckt wird, bleibt der manuelle schreibgeschützte Status erhalten. Wenn es nach mehr als 9 Sekunden wieder eingesteckt wird, wird das Gerät automatisch aus der Liste der "manuell schreibgeschützten Geräte" entfernt, stellt das Standardverhalten wieder her und ermöglicht die normale Verwendung der automatischen Lese-Schreib-Funktion
+- **Intelligente Bereinigung**：Das System bereinigt automatisch Abkühlungsaufzeichnungen und manuelle schreibgeschützte Status für entfernte Geräte, um sicherzustellen, dass Geräte nach dem Wiedereinstecken ordnungsgemäß funktionieren
+
 ### Gerät als Lese-/Schreibzugriff einhängen
 
 Für Geräte im schreibgeschützten Status können Sie auf die Schaltfläche "Lese-/Schreibzugriff" klicken, um sie im Lese-/Schreibzugriff-Modus einzuhängen. Dieser Vorgang erfordert Administratorrechte, und das System zeigt einen Passworteingabedialog an.
