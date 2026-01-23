@@ -222,14 +222,17 @@
           }
         }
 
-        // 托盘窗口：显示磁盘名称、容量条和操作按钮
+        // 托盘窗口：显示磁盘名称、读写状态、容量条和操作按钮
         item.innerHTML = `
           <div class="device-card-tray">
             <div class="device-icon-large">
               <img src="../imgs/ico/drive.svg" alt="${device.volumeName}" class="device-icon-svg">
             </div>
             <div class="device-card-content">
-              <div class="device-name-large">${device.volumeName}</div>
+              <div class="device-card-header-tray">
+                <div class="device-name-large">${device.volumeName}</div>
+                <span class="device-status device-status-tray ${statusClass}">${statusText}</span>
+              </div>
               ${device.capacity && device.capacity.total > 0 && availableText && totalText ? `
               <div class="device-capacity-info-windows">
                 <span class="capacity-text-windows">${availableText} ${t('devices.available')}, ${t('devices.total')} ${totalText}</span>
