@@ -94,6 +94,10 @@ Klicken Sie im Tab "Systemabhängigkeiten" auf die Schaltfläche "Abhängigkeite
 
 Nach dem Einstecken eines NTFS-formatierten Wechselspeichergeräts können Sie alle angeschlossenen Geräte im Tab "NTFS-Geräte" anzeigen.
 
+#### Doppelklick zum Öffnen des Laufwerks (Finder)
+
+Im Tab **"NTFS-Geräte"** oder im **Systemleisten-Menü** zunächst **den entsprechenden Geräteeintrag auswählen** und anschließend **das Gerät doppelklicken**, um das zugehörige Einhängeverzeichnis direkt im Finder zu öffnen.
+
 Der Gerätestatus wird in zwei Typen unterteilt:
 
 - **Schreibgeschützt** - Das Gerät kann nur gelesen, nicht geschrieben werden. Dies ist die Standardbehandlung von NTFS-Geräten durch macOS.

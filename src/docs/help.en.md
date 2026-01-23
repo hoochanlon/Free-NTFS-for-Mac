@@ -94,6 +94,10 @@ In the "System Dependencies" tab, click the "Check Dependencies" button, and the
 
 After inserting an NTFS formatted removable storage device, you can view all connected devices in the "NTFS Devices" tab.
 
+#### Double-click to Open the Drive (Finder)
+
+In the **"NTFS Devices"** tab or the **tray menu**, first **select the corresponding device item**, then **double-click the device** to open its mount directory in Finder for quick access.
+
 Device status is divided into two types:
 
 - **Read-Only** - The device can only be read, not written. This is macOS's default handling of NTFS devices.
