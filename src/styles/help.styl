@@ -78,6 +78,20 @@
         color var(--accent-hover)
         text-decoration underline
 
+// 警告框样式
+.help-warning
+  margin 20px 0
+  padding 12px 16px
+  background rgba(255, 149, 0, 0.1)
+  border-left 3px solid var(--warning)
+  border-radius 4px
+  color var(--text-primary)
+
+  p
+    margin 0
+    color var(--text-primary)
+    line-height 1.6
+
 // 帮助表格样式
 .help-content
   table
@@ -118,6 +132,10 @@ body.light-theme
 
   .help-toc
     background var(--light-bg-secondary)
+
+  .help-warning
+    background rgba(255, 149, 0, 0.08)
+    border-left-color var(--warning)
 
   .help-content
     table

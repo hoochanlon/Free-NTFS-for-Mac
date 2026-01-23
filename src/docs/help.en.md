@@ -2,6 +2,9 @@
 
 Using this tool to mount and modify NTFS devices carries the risk of data loss. It is recommended to back up important data before use. This tool is provided "as is" without any express or implied warranties. The developer is not responsible for any data loss caused by using this tool.
 
+> [!WARN]
+> The stable operation and data integrity of this software depend on the performance of storage devices. To avoid data read/write errors, transfer interruptions, or device recognition failures, it is recommended to use USB drives made with high-quality flash memory chips that have reliable read/write performance.
+
 ## System Requirements
 
 This tool requires the following system dependencies:

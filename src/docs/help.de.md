@@ -2,6 +2,9 @@
 
 Die Verwendung dieses Tools zum Einhängen und Ändern von NTFS-Geräten birgt das Risiko von Datenverlust. Es wird empfohlen, wichtige Daten vor der Verwendung zu sichern. Dieses Tool wird "wie besehen" ohne jegliche ausdrückliche oder stillschweigende Garantien bereitgestellt. Der Entwickler übernimmt keine Verantwortung für Datenverluste, die durch die Verwendung dieses Tools verursacht werden.
 
+> [!WARN]
+> Der stabile Betrieb und die Datenintegrität dieser Software hängen von der Leistung der Speichergeräte ab. Um Datenlese-/schreibfehler, Übertragungsunterbrechungen oder Geräteerkennungsfehler zu vermeiden, wird empfohlen, USB-Laufwerke zu verwenden, die aus hochwertigen Flash-Speicherchips hergestellt sind und eine zuverlässige Lese-/Schreibleistung aufweisen.
+
 ## Systemanforderungen
 
 Dieses Tool erfordert die folgenden Systemabhängigkeiten:

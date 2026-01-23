@@ -123,6 +123,37 @@
               }
             }
 
+            // 处理 GitHub alert 语法：将 > [!WARN] 等转换为警告框
+            // marked 会将 blockquote 渲染为 <blockquote><p>[!WARN]<br>内容</p></blockquote>
+            // 或者 <blockquote><p>[!WARN]</p><p>内容</p></blockquote>
+            html = html.replace(
+              /<blockquote>\s*<p>\[!WARN\](?:<br>|<\/p>\s*<p>)([\s\S]*?)(?:<\/p>\s*)?<\/blockquote>/g,
+              (match: string, content: string) => {
+                // 移除多余的空白和换行，但保留 HTML 结构
+                let cleanedContent = content.trim();
+                // 移除开头的 <br>
+                cleanedContent = cleanedContent.replace(/^<br>\s*/, '');
+                // 如果内容包含 </p> 和 <p>，说明有多个段落，需要补充缺失的标签
+                if (cleanedContent.includes('</p>') && cleanedContent.includes('<p>')) {
+                  // 多个段落，补充开头的 <p> 和结尾的 </p>
+                  if (!cleanedContent.startsWith('<p>')) {
+                    cleanedContent = '<p>' + cleanedContent;
+                  }
+                  if (!cleanedContent.endsWith('</p>')) {
+                    cleanedContent = cleanedContent + '</p>';
+                  }
+                  return `<div class="help-warning">${cleanedContent}</div>`;
+                } else if (cleanedContent.includes('</p>')) {
+                  // 单个段落，移除末尾的 </p> 并重新包裹
+                  cleanedContent = cleanedContent.replace(/<\/p>\s*$/, '').trim();
+                  return `<div class="help-warning"><p>${cleanedContent}</p></div>`;
+                } else {
+                  // 纯文本内容，直接包裹
+                  return `<div class="help-warning"><p>${cleanedContent}</p></div>`;
+                }
+              }
+            );
+
             // 处理警告框：将包含 ⚠️ 的段落和后续列表包裹在 help-warning 中
             html = html.replace(
               /<p>(⚠️\s*\*\*(?:重要提示|注意事项)：\*\*[^<]*)<\/p>(\s*<ul>[\s\S]*?<\/ul>)?/g,
