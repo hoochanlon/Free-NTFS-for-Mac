@@ -80,37 +80,18 @@
         const previousDevices = AppModules.Devices.devices || [];
         const previousDevicePaths = previousDevices.map((d: any) => d.devicePath);
 
-        // 如果提供了新的设备列表（来自事件回调），优先使用；否则重新获取
+        // 如果提供了新的设备列表（来自事件回调），直接使用；否则重新获取
         if (providedDevices && Array.isArray(providedDevices)) {
-          let devicesFromEvent = providedDevices;
+          console.log('[主界面] 使用事件提供的设备列表，设备数量:', providedDevices.length);
           const previousCount = (AppModules.Devices.devices || []).length;
-
-          // 防抖：如果事件一次性报告“所有设备都消失”（0 个），但之前有设备，
-          // 很可能是瞬时检测失败，先做一次强制校验，避免误判设备被移除
-          if (devicesFromEvent.length === 0 && previousCount > 0) {
-            try {
-              console.warn('[主界面] 事件提供的设备列表为空，但之前有设备，进行一次强制校验以避免误判移除');
-              const verified = await electronAPI.getNTFSDevices(true);
-              if (verified && Array.isArray(verified) && verified.length > 0) {
-                console.warn('[主界面] 校验结果：设备仍存在，本次空列表视为瞬时噪声，使用校验结果替代');
-                devicesFromEvent = verified as any[];
-              } else {
-                console.log('[主界面] 校验结果：确实无设备，按移除处理');
-              }
-            } catch (error) {
-              console.warn('[主界面] 校验设备列表失败，本次仍按事件结果处理:', error);
-            }
-          }
-
-          console.log('[主界面] 使用事件提供的设备列表，设备数量:', devicesFromEvent.length);
-          const currentCount = devicesFromEvent.length;
+          const currentCount = providedDevices.length;
 
           // 如果设备数量减少，说明有设备被移除，立即更新UI
           if (currentCount < previousCount) {
             console.log(`[主界面] 检测到设备移除: ${previousCount} -> ${currentCount}，立即更新UI`);
           }
 
-          AppModules.Devices.devices = devicesFromEvent;
+          AppModules.Devices.devices = providedDevices;
         } else {
           // 主界面这里改为强制刷新，避免缓存导致的读写/只读状态延迟
           console.log('[主界面] 重新获取设备列表（强制刷新）');
