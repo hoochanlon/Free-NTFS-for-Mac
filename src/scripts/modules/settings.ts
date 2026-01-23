@@ -345,7 +345,7 @@
     updateCustomSelectDisplay(customSelect: HTMLElement): void {
       const iconMap: Record<string, string> = {
         'dependencies': '../imgs/svg/ui/module.svg',
-        'devices': '../imgs/svg/devices/flash-drive.svg',
+        'devices': '../imgs/svg/devices/drive.svg',
         'logs': '../imgs/svg/ui/log.svg',
         'help': '../imgs/svg/ui/help.svg'
       };

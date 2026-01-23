@@ -424,19 +424,26 @@ body.tray-window
 
   // 根据使用率调整颜色（剩余空间越小，颜色越危险）
   // 使用率 >= 90%（剩余空间 <= 10%）：红色
-  // 使用率 >= 80%（剩余空间 <= 20%）：黄色
-  // 使用率 < 80%（剩余空间 > 20%）：蓝色（默认）
+  // 使用率 75%–89%（剩余空间约 11%–25%）：黄色
+  // 使用率 < 75%（剩余空间 > 25%）：蓝色（默认）
   .device-item[data-capacity-percent]
     // 90%及以上：红色（优先级最高，放在前面）
     &[data-capacity-percent="100"] .capacity-bar-fill-windows,
     &[data-capacity-percent^="9"] .capacity-bar-fill-windows
       background-color #d13438
 
-    // 80-89%：黄色（优先级中等）
-    &[data-capacity-percent^="8"] .capacity-bar-fill-windows
+    // 75-89%：黄色（优先级中等）
+    // 80-89%
+    &[data-capacity-percent^="8"] .capacity-bar-fill-windows,
+    // 75-79%
+    &[data-capacity-percent="75"] .capacity-bar-fill-windows,
+    &[data-capacity-percent="76"] .capacity-bar-fill-windows,
+    &[data-capacity-percent="77"] .capacity-bar-fill-windows,
+    &[data-capacity-percent="78"] .capacity-bar-fill-windows,
+    &[data-capacity-percent="79"] .capacity-bar-fill-windows
       background-color #ffb900
 
-    // 0-79%：蓝色（默认，已在 .capacity-bar-fill-windows 中设置）
+    // 0-74%：蓝色（默认，已在 .capacity-bar-fill-windows 中设置）
 
   .device-actions
     justify-content flex-end

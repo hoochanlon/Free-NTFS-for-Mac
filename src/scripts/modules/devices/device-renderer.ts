@@ -226,11 +226,11 @@
         item.innerHTML = `
           <div class="device-card-tray">
             <div class="device-icon-large">
-              <img src="../imgs/ico/drive.svg" alt="${device.volumeName}" class="device-icon-svg">
+              <img src="../imgs/svg/devices/drive.svg" alt="${device.volumeName}" class="device-icon-svg">
             </div>
             <div class="device-card-content">
               <div class="device-card-header-tray">
-                <div class="device-name-large">${device.volumeName}</div>
+              <div class="device-name-large">${device.volumeName}</div>
                 <span class="device-status device-status-tray ${statusClass}">${statusText}</span>
               </div>
               ${device.capacity && device.capacity.total > 0 && availableText && totalText ? `
