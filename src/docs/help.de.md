@@ -70,11 +70,11 @@ Die Hauptoberfläche der Anwendung bietet mehrere Funktionssymbole, die Ihnen he
 ### Titelleisten-Symbole
 
 - <img src="../imgs/svg/devices/flash-auto.svg" alt="Automatisches Lese-Schreib" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Automatisches Lese-Schreib-Symbol** - Wenn aktiviert, werden neu eingefügte NTFS-Geräte automatisch im Lese-Schreib-Modus eingehängt. Das Symbol erscheint blau, wenn es aktiv ist.
-- <img src="../imgs/svg/devices/tray.svg" alt="Systemleisten-Modus" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Systemleisten-Modus-Symbol** - Wenn aktiviert, wird die Anwendung beim Schließen des Fensters in die Systemleiste minimiert, anstatt beendet zu werden. Das Symbol erscheint lila, wenn es aktiv ist.
+- <img src="../imgs/svg/devices/tray.svg" alt="Systemleisten-Modus" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Systemleisten-Modus-Symbol** - Wenn aktiviert, wird die Anwendung beim Schließen des Fensters in die Systemleiste minimiert, anstatt beendet zu werden. Das Symbol erscheint rot, wenn es aktiv ist.
 - <img src="../imgs/svg/system/caffe.svg" alt="Ruhezustand verhindern" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Ruhezustand verhindern-Symbol** - Wenn aktiviert, verhindert das System, dass es in den Ruhezustand wechselt, um sicherzustellen, dass Geräte kontinuierlich verfügbar bleiben. Das Symbol erscheint kaffeefarben, wenn es aktiv ist.
 - <img src="../imgs/svg/system/protect.svg" alt="Status-Schutz" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Status-Schutz Symbol** - 3s lang drücken, um den Schutzstatus umzuschalten. Wenn geschützt, werden automatisches Lesen/Schreiben, Tray-Modus und Ruhezustand verhindern deaktiviert, um versehentliche Vorgänge zu verhindern. Das Symbol erscheint grün mit einer Pulsanimation, wenn es geschützt ist.
 - <img src="../imgs/svg/ui/info.svg" alt="Info" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Info-Symbol** - Öffnet das Info-Fenster, um Anwendungsinformationen und Projektlinks anzuzeigen.
-- <img src="../imgs/svg/actions/exit-red.svg" alt="Beenden" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Beenden-Symbol** - Beendet die Anwendung.
+- <img src="../imgs/svg/actions/exit.svg" alt="Beenden" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Beenden-Symbol** - Beendet die Anwendung.
 
 ### Registerkarten-Symbole
 
@@ -98,6 +98,14 @@ Der Gerätestatus wird in zwei Typen unterteilt:
 
 - **Schreibgeschützt** - Das Gerät kann nur gelesen, nicht geschrieben werden. Dies ist die Standardbehandlung von NTFS-Geräten durch macOS.
 - **Lese-/Schreibzugriff** - Das Gerät ist im Lese-/Schreibzugriff-Modus eingehängt und kann Dateien normal lesen und schreiben.
+
+**Kapazitätsbalken-Anleitung：**
+
+In der Hauptoberfläche und im Systemleisten-Menü wird für jedes Gerät ein Kapazitätsbalken angezeigt, um die Speicherplatznutzung visuell darzustellen. Die Farbbedeutungen sind wie folgt:
+
+- **Blau** (0-74%): Ausreichend Speicherplatz, mit mehr als 25% freiem Speicherplatz
+- **Gelb** (75-89%): Speicherplatz ist knapp, mit 11%-25% freiem Speicherplatz. Es wird empfohlen, Dateien zeitnah zu bereinigen
+- **Rot** (90-100%): Speicherplatz ist kritisch niedrig, mit weniger als 10% freiem Speicherplatz. Dateien sollten sofort bereinigt werden, um Speicherplatz freizugeben
 
 ### Gerät als Lese-/Schreibzugriff einhängen
 

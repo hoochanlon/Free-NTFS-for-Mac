@@ -70,11 +70,11 @@ brew install ntfs-3g-mac
 ### 標題列圖示
 
 - <img src="../imgs/svg/devices/flash-auto.svg" alt="自動讀寫" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **自動讀寫圖示** - 啟用後，新插入的 NTFS 裝置會自動掛載為讀寫模式。圖示啟用時顯示為藍色。
-- <img src="../imgs/svg/devices/tray.svg" alt="托盤模式" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **托盤模式圖示** - 啟用後，關閉視窗時應用程式會最小化到系統托盤而不是退出。圖示啟用時顯示為紫色。
+- <img src="../imgs/svg/devices/tray.svg" alt="托盤模式" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **托盤模式圖示** - 啟用後，關閉視窗時應用程式會最小化到系統托盤而不是退出。圖示啟用時顯示為紅色。
 - <img src="../imgs/svg/system/caffe.svg" alt="防止休眠" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **防止休眠圖示** - 啟用後，系統將禁止進入休眠狀態，確保裝置持續可用。圖示啟用時顯示為咖啡色。
 - <img src="../imgs/svg/system/protect.svg" alt="狀態保護" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **狀態保護圖示** - 長按3s可切換保護狀態。保護後，自動讀寫、託盤模式和防止休眠功能將被禁用，防止誤操作。圖示保護後顯示為綠色並帶有脈衝動畫。
 - <img src="../imgs/svg/ui/info.svg" alt="關於" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **關於圖示** - 開啟關於視窗，查看應用程式資訊和專案連結。
-- <img src="../imgs/svg/actions/exit-red.svg" alt="退出" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **退出圖示** - 退出應用程式。
+- <img src="../imgs/svg/actions/exit.svg" alt="退出" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **退出圖示** - 退出應用程式。
 
 ### 標籤頁圖示
 
@@ -98,6 +98,14 @@ brew install ntfs-3g-mac
 
 - **只讀** - 設備只能讀取，無法寫入。這是 macOS 對 NTFS 設備的預設處理方式。
 - **讀寫** - 設備已掛載為讀寫模式，可以正常讀寫檔案。
+
+**容量條說明：**
+
+在主介面和托盤選單中，每個設備都會顯示一個容量條，直觀展示設備的儲存空間使用情況。顏色含義如下：
+
+- **藍色**（0-74%）：空間充足，剩餘空間大於 25%
+- **黃色**（75-89%）：空間緊張，剩餘空間在 11%-25% 之間，建議及時清理檔案
+- **紅色**（90-100%）：空間嚴重不足，剩餘空間小於 10%，需要立即清理檔案以釋放空間
 
 ### 掛載設備為讀寫模式
 

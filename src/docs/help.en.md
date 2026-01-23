@@ -70,11 +70,11 @@ The application's main interface provides several functional icons to help you q
 ### Title Bar Icons
 
 - <img src="../imgs/svg/devices/flash-auto.svg" alt="Auto Read-Write" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Auto Read-Write Icon** - When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode. The icon appears blue when active.
-- <img src="../imgs/svg/devices/tray.svg" alt="Tray Mode" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Tray Mode Icon** - When enabled, closing the window will minimize the application to the system tray instead of quitting. The icon appears purple when active.
+- <img src="../imgs/svg/devices/tray.svg" alt="Tray Mode" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Tray Mode Icon** - When enabled, closing the window will minimize the application to the system tray instead of quitting. The icon appears red when active.
 - <img src="../imgs/svg/system/caffe.svg" alt="Prevent Sleep" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Prevent Sleep Icon** - When enabled, the system will prevent entering sleep mode to ensure devices remain accessible. The icon appears coffee-colored when active.
 - <img src="../imgs/svg/system/protect.svg" alt="Status Protection" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Status Protection Icon** - Long press for 3s to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations. The icon appears green with a pulse animation when protected.
 - <img src="../imgs/svg/ui/info.svg" alt="About" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **About Icon** - Opens the about window to view application information and project links.
-- <img src="../imgs/svg/actions/exit-red.svg" alt="Quit" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Quit Icon** - Quits the application.
+- <img src="../imgs/svg/actions/exit.svg" alt="Quit" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Quit Icon** - Quits the application.
 
 ### Tab Icons
 
@@ -98,6 +98,14 @@ Device status is divided into two types:
 
 - **Read-Only** - The device can only be read, not written. This is macOS's default handling of NTFS devices.
 - **Read-Write** - The device is mounted in read-write mode and can read and write files normally.
+
+**Capacity Bar Guide:**
+
+In the main interface and tray menu, each device displays a capacity bar to visually show the storage space usage. The color meanings are as follows:
+
+- **Blue** (0-74%): Sufficient space, with more than 25% free space remaining
+- **Yellow** (75-89%): Space is tight, with 11%-25% free space remaining. It is recommended to clean up files promptly
+- **Red** (90-100%): Space is critically low, with less than 10% free space remaining. Files should be cleaned up immediately to free up space
 
 ### Mount Device as Read-Write Mode
 
