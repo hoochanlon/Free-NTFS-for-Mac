@@ -162,6 +162,45 @@ export ELECTRON_MIRROR="${ELECTRON_MIRROR:-https://npmmirror.com/mirrors/electro
 export ELECTRON_CACHE="${ELECTRON_CACHE:-${HOME}/.cache/electron}"
 
 # ============================================================
+# 清理可能挂载的 DMG（避免构建冲突）
+# ============================================================
+cleanup_mounted_dmg() {
+  echo -e "${YELLOW}$(t cleaning_mounted_dmg)${NC}"
+  
+  # 方法1: 使用 hdiutil 查找并卸载所有包含 "Nigate" 的 DMG
+  hdiutil info 2>/dev/null | grep -i "nigate" -A 10 | grep "/dev/disk" | awk '{print $1}' | sort -u | while read disk; do
+    if [ -n "$disk" ] && [ "$disk" != "/dev/disk" ]; then
+      echo -e "${YELLOW}Unmounting disk: $disk...${NC}"
+      hdiutil detach "$disk" -force 2>/dev/null || true
+    fi
+  done
+  
+  # 方法2: 直接卸载可能存在的卷（使用 diskutil，更可靠）
+  for volume in /Volumes/Nigate*; do
+    if [ -d "$volume" ]; then
+      echo -e "${YELLOW}Unmounting volume: $volume...${NC}"
+      diskutil unmount "$volume" 2>/dev/null || diskutil unmount force "$volume" 2>/dev/null || true
+    fi
+  done
+  
+  # 方法3: 使用 hdiutil detach 所有可能的设备（更彻底）
+  hdiutil info 2>/dev/null | grep -E "^/dev/disk[0-9]+" | awk '{print $1}' | while read disk; do
+    # 检查这个设备是否包含 "Nigate"
+    mount_point=$(diskutil info "$disk" 2>/dev/null | grep "Mount Point:" | awk '{print $3}')
+    if [ -n "$mount_point" ] && echo "$mount_point" | grep -qi "nigate"; then
+      echo -e "${YELLOW}Force unmounting: $disk (mount: $mount_point)...${NC}"
+      hdiutil detach "$disk" -force 2>/dev/null || diskutil unmount force "$mount_point" 2>/dev/null || true
+    fi
+  done
+  
+  # 等待一下确保卸载完成
+  sleep 2
+}
+
+# 执行清理
+cleanup_mounted_dmg
+
+# ============================================================
 # 开始打包
 # ============================================================
 echo -e "${GREEN}$(t starting_package)${NC}"
@@ -204,7 +243,14 @@ elif [ -n "$ARCH" ]; then
 else
   # 用户没有指定任何特殊参数，使用默认配置
   # 默认配置在 package.json 的 "build" 字段中定义（现在是 x64 + arm64）
-  ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder
+  # 为了避免并行构建时的 DMG 挂载冲突，我们分别构建每个架构
+  echo -e "${GREEN}Building x64 architecture...${NC}"
+  cleanup_mounted_dmg
+  ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac --x64
+  
+  echo -e "${GREEN}Building arm64 architecture...${NC}"
+  cleanup_mounted_dmg
+  ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac --arm64
 fi
 
 # ============================================================

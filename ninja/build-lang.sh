@@ -66,6 +66,7 @@ t() {
 				compiling) echo "编译 TypeScript 和 Stylus..." ;;
 				warning_no_styles) echo "警告: styles.css 不存在，重新编译..." ;;
 				styles_updated) echo "✓ styles.css 已更新" ;;
+				cleaning_mounted_dmg) echo "清理可能挂载的 DMG..." ;;
 				starting_package) echo "开始打包..." ;;
 				package_complete) echo "打包完成！文件位于 dist 目录" ;;
 				cleaned_temp) echo "✓ 已清理临时文件 README.txt" ;;
@@ -88,6 +89,7 @@ t() {
 				compiling) echo "TypeScript と Stylus をコンパイル中..." ;;
 				warning_no_styles) echo "警告: styles.css が存在しません。再コンパイル中..." ;;
 				styles_updated) echo "✓ styles.css が更新されました" ;;
+				cleaning_mounted_dmg) echo "マウントされている可能性のある DMG をクリーンアップ中..." ;;
 				starting_package) echo "パッケージングを開始中..." ;;
 				package_complete) echo "パッケージングが完了しました！ファイルは dist ディレクトリにあります" ;;
 				cleaned_temp) echo "✓ 一時ファイル README.txt をクリーンアップしました" ;;
@@ -110,6 +112,7 @@ t() {
 				compiling) echo "Compiling TypeScript and Stylus..." ;;
 				warning_no_styles) echo "Warning: styles.css does not exist, recompiling..." ;;
 				styles_updated) echo "✓ styles.css has been updated" ;;
+				cleaning_mounted_dmg) echo "Cleaning up potentially mounted DMG..." ;;
 				starting_package) echo "Starting packaging..." ;;
 				package_complete) echo "Packaging complete! Files are in dist directory" ;;
 				cleaned_temp) echo "✓ Cleaned up temporary file README.txt" ;;
