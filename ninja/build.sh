@@ -35,6 +35,19 @@ cd "$PROJECT_ROOT" || {
   exit 1
 }
 
+# ============================================================
+# 清理函数（在脚本退出时调用）
+# ============================================================
+cleanup_on_exit() {
+  # 清理临时 Python 目录
+  if [ -d "${PROJECT_ROOT}/.temp_bin" ]; then
+    rm -rf "${PROJECT_ROOT}/.temp_bin" 2>/dev/null || true
+  fi
+}
+
+# 注册退出时的清理函数
+trap cleanup_on_exit EXIT INT TERM
+
 echo -e "${GREEN}$(t starting_build)${NC}"
 
 # ============================================================
@@ -162,20 +175,34 @@ export ELECTRON_MIRROR="${ELECTRON_MIRROR:-https://npmmirror.com/mirrors/electro
 export ELECTRON_CACHE="${ELECTRON_CACHE:-${HOME}/.cache/electron}"
 
 # ============================================================
+# 修复 Python 路径（electron-builder 需要 python 命令）
+# ============================================================
+fix_python_path() {
+  # 检查 python 命令是否可用
+  if ! command -v python >/dev/null 2>&1; then
+    # 如果 python 不可用，但 python3 可用，创建临时链接
+    if command -v python3 >/dev/null 2>&1; then
+      PYTHON3_PATH=$(command -v python3)
+      # 在 PATH 最前面添加一个临时目录，创建 python 的符号链接
+      TEMP_BIN_DIR="${PROJECT_ROOT}/.temp_bin"
+      mkdir -p "$TEMP_BIN_DIR"
+      ln -sf "$PYTHON3_PATH" "$TEMP_BIN_DIR/python" 2>/dev/null || true
+      export PATH="$TEMP_BIN_DIR:$PATH"
+      echo -e "${GREEN}Fixed python path: $TEMP_BIN_DIR/python -> $PYTHON3_PATH${NC}"
+    fi
+  fi
+}
+
+# 执行 Python 路径修复
+fix_python_path
+
+# ============================================================
 # 清理可能挂载的 DMG（避免构建冲突）
 # ============================================================
 cleanup_mounted_dmg() {
   echo -e "${YELLOW}$(t cleaning_mounted_dmg)${NC}"
   
-  # 方法1: 使用 hdiutil 查找并卸载所有包含 "Nigate" 的 DMG
-  hdiutil info 2>/dev/null | grep -i "nigate" -A 10 | grep "/dev/disk" | awk '{print $1}' | sort -u | while read disk; do
-    if [ -n "$disk" ] && [ "$disk" != "/dev/disk" ]; then
-      echo -e "${YELLOW}Unmounting disk: $disk...${NC}"
-      hdiutil detach "$disk" -force 2>/dev/null || true
-    fi
-  done
-  
-  # 方法2: 直接卸载可能存在的卷（使用 diskutil，更可靠）
+  # 方法1: 直接卸载可能存在的卷（使用 diskutil，更可靠）
   for volume in /Volumes/Nigate*; do
     if [ -d "$volume" ]; then
       echo -e "${YELLOW}Unmounting volume: $volume...${NC}"
@@ -183,18 +210,28 @@ cleanup_mounted_dmg() {
     fi
   done
   
-  # 方法3: 使用 hdiutil detach 所有可能的设备（更彻底）
-  hdiutil info 2>/dev/null | grep -E "^/dev/disk[0-9]+" | awk '{print $1}' | while read disk; do
-    # 检查这个设备是否包含 "Nigate"
-    mount_point=$(diskutil info "$disk" 2>/dev/null | grep "Mount Point:" | awk '{print $3}')
-    if [ -n "$mount_point" ] && echo "$mount_point" | grep -qi "nigate"; then
-      echo -e "${YELLOW}Force unmounting: $disk (mount: $mount_point)...${NC}"
-      hdiutil detach "$disk" -force 2>/dev/null || diskutil unmount force "$mount_point" 2>/dev/null || true
+  # 方法2: 使用 hdiutil info 查找并卸载所有包含 "Nigate" 的 DMG
+  # 只处理实际存在的设备，避免错误
+  hdiutil info 2>/dev/null | grep -i "nigate" -B 5 -A 5 | grep -E "/dev/disk[0-9]+" | awk '{print $1}' | sort -u | while read disk; do
+    if [ -n "$disk" ] && [ -e "$disk" ]; then
+      echo -e "${YELLOW}Unmounting disk: $disk...${NC}"
+      hdiutil detach "$disk" -force 2>/dev/null || true
+    fi
+  done
+  
+  # 方法3: 使用 diskutil 查找挂载点包含 "Nigate" 的设备
+  diskutil list 2>/dev/null | grep -E "^/dev/disk[0-9]+" | awk '{print $1}' | while read disk; do
+    if [ -n "$disk" ] && [ -e "$disk" ]; then
+      mount_point=$(diskutil info "$disk" 2>/dev/null | grep "Mount Point:" | awk '{print $3}')
+      if [ -n "$mount_point" ] && echo "$mount_point" | grep -qi "nigate"; then
+        echo -e "${YELLOW}Force unmounting: $disk (mount: $mount_point)...${NC}"
+        diskutil unmount force "$mount_point" 2>/dev/null || hdiutil detach "$disk" -force 2>/dev/null || true
+      fi
     fi
   done
   
   # 等待一下确保卸载完成
-  sleep 2
+  sleep 1
 }
 
 # 执行清理
@@ -262,6 +299,12 @@ echo -e "${GREEN}$(t package_complete)${NC}"
 if [ -f "README.txt" ]; then
   rm -f "README.txt"
   echo -e "${GREEN}$(t cleaned_temp)${NC}"
+fi
+
+# 清理临时 Python 目录
+if [ -d "${PROJECT_ROOT}/.temp_bin" ]; then
+  rm -rf "${PROJECT_ROOT}/.temp_bin"
+  echo -e "${GREEN}Cleaned up temporary Python directory${NC}"
 fi
 
 # ls -lh: 列出文件，-l 显示详细信息，-h 显示人类可读的文件大小
