@@ -2,6 +2,8 @@
 
 **Language / 言語**: [English](README.md) | [日本語](README.ja.md) 
 
+![Main Interface](src/imgs/example/2026-01-21-10.51.01.png)
+
 これは Nigate の Electron グラフィカルインターフェース版で、元の極客ターミナル版を保持しながら、NTFS デバイス管理をより簡単で便利にする、現代的で直感的な操作インターフェースを提供します。[^1]
 
 ### 機能特性
