@@ -1,6 +1,6 @@
 ## Nigate
 
-**Language / 言語 / 语言**: [English](README.md) | [日本語](README.ja.md) 
+**Language / 言語**: [English](README.md) | [日本語](README.ja.md) 
 
 ![Main Interface](src/imgs/example/2026-01-21-10.51.01.png)
 
