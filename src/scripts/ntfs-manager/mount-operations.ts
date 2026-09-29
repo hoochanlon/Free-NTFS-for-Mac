@@ -6,13 +6,18 @@ import { promisify } from 'util';
 import type { NTFSDevice } from '../../types/electron';
 import type { PasswordManager } from './password-manager';
 import type { SudoExecutor } from './sudo-executor';
-import { buildMountArgs, currentMountIdentity, validateMountTarget } from './mount-policy';
+import { buildHibernationRemovalArgs, buildMountArgs, currentMountIdentity, validateMountTarget } from './mount-policy';
 import { assertDeviceIdentity, assertMountState, readMountSnapshot, readMountTable, waitForMountState } from './mount-state';
 import type { DiskInfo, MountSnapshot } from './mount-state';
 import { verifyFileWrites } from './write-verifier';
 
 const execFileAsync = promisify(execFile);
 type Authentication = { password: string };
+type HibernationConfirmation = (device: NTFSDevice, errorMessage: string) => Promise<boolean>;
+
+function isHibernationStateError(message: string): boolean {
+  return /hibernat|hiberfile|unclean|unsafe state|fast startup|fast restart|volume is dirty|ntfs.*inconsisten/i.test(message);
+}
 
 export class MountOperations {
   private activeDevices = new Set<string>();
@@ -24,7 +29,8 @@ export class MountOperations {
     private sudoExecutor: SudoExecutor,
     private getNTFS3GPath: () => Promise<string | null>,
     private runSystemCommand: (file: string, args: string[]) => Promise<unknown> =
-      (file, args) => execFileAsync(file, args, { timeout: 30000 })
+      (file, args) => execFileAsync(file, args, { timeout: 30000 }),
+    private confirmHibernationRemoval: HibernationConfirmation = async () => false
   ) {}
 
   private async exclusive(device: NTFSDevice, operation: (target: NTFSDevice) => Promise<string>): Promise<string> {
@@ -160,7 +166,34 @@ export class MountOperations {
         await this.markVerified(target);
         return '设备 ' + target.volumeName + ' 已成功挂载为读写模式，文件读写自检通过';
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        const firstMessage = error instanceof Error ? error.message : String(error);
+        let message = firstMessage;
+        let retainedHibernation = false;
+        let removalConfirmed = false;
+
+        if (changedMount && isHibernationStateError(firstMessage)) {
+          removalConfirmed = await this.confirmHibernationRemoval(target, firstMessage).catch(() => false);
+          if (!removalConfirmed) {
+            retainedHibernation = true;
+          } else {
+            try {
+              // The first attempt has failed. Establish a clean unmounted
+              // state before the explicitly confirmed recovery retry.
+              await this.unmountNormally(target, baseline, auth);
+              await this.prepareMountPoint(target, auth);
+              assertMountState(await readMountSnapshot(target.devicePath), target, baseline, 'unmounted');
+              await this.sudo(buildHibernationRemovalArgs(mountArgs), auth, target, 'messages.passwordDialog.mountDeviceRetry');
+              await waitForMountState(target, baseline, 'readWrite');
+              await verifyFileWrites(target.volume, identity);
+              assertMountState(await readMountSnapshot(target.devicePath), target, baseline, 'readWrite');
+              await this.markVerified(target);
+              return '设备 ' + target.volumeName + ' 已按你的选择删除 Windows 休眠状态并挂载为读写模式，文件读写自检通过';
+            } catch (retryError) {
+              message = retryError instanceof Error ? retryError.message : String(retryError);
+            }
+          }
+        }
+
         // Timeout is not proof that a privileged child stopped. Do not race
         // it with another mount or falsely report successful cancellation.
         if (/超时|timed? ?out|timeout/i.test(message)) {
@@ -176,8 +209,13 @@ export class MountOperations {
             recovery = '；恢复只读未完成，请刷新确认设备状态：' + String(recoveryError);
           }
         }
-        const windowsHint = /hibernat|unclean|unsafe state|fast restart|fast startup|dirty/i.test(message)
-          ? '；请在 Windows 中完全关机后再试，不会自动删除休眠文件或修复卷' : '';
+        const windowsHint = retainedHibernation
+          ? '；已保留 Windows 休眠状态，未删除；当前未继续读写挂载。请在 Windows 中完全关机后再试'
+          : isHibernationStateError(firstMessage) && !removalConfirmed
+            ? '；请在 Windows 中完全关机后再试，未自动删除休眠文件或修复卷'
+            : isHibernationStateError(firstMessage)
+              ? '；已尝试按你的选择删除 Windows 休眠状态，但读写挂载仍未通过；请刷新设备状态并检查卷'
+              : '';
         throw new Error('挂载失败：' + message + windowsHint + recovery);
       }
     });

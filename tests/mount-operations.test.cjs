@@ -10,6 +10,7 @@ test.afterEach(() => test.mock.restoreAll());
 function harness() {
   const device = { disk: 'disk999999s3', devicePath: '/dev/disk999999s3', volume: '/Volumes/Test Disk (数据)', volumeName: 'Test Disk (数据)', volumeUuid: 'AAA-BBB', isReadOnly: true, isMounted: false, options: '' };
   const h = { device, mode: 'readOnly', identity: { uid: 501, gid: 20 }, owner: { uid: 0, gid: 0 }, uuid: device.volumeUuid, calls: [], events: [], passwords: 0, probes: 0, markerWrites: 0, mounted: new Set(), unmounted: new Map(), busy: false, driverError: null, driverMode: 'readWrite', directoryEntries: [], symlink: false, readonlyActuallyWritable: false, ejectError: null, driverCalls: 0 };
+  h.removeHibernation = false;
   h.snapshot = () => ({
     info: { DeviceNode: device.devicePath, FilesystemType: 'ntfs', VolumeUUID: h.uuid, DiskUUID: 'CCC-DDD', Size: 12000, WritableMedia: true, WritableVolume: h.mode === 'unmounted' ? undefined : h.mode === 'readWrite', MountPoint: h.mode === 'unmounted' ? undefined : device.volume },
     entry: h.mode === 'unmounted' ? undefined : { devicePath: device.devicePath, volume: device.volume, options: h.mode === 'readWrite' ? 'macfuse, local' : 'ntfs, read-only', isReadOnly: h.mode === 'readOnly', isFuse: h.mode === 'readWrite' }
@@ -77,7 +78,7 @@ function harness() {
       } else if (args[0] !== '/bin/mkdir') throw new Error('Unexpected privileged command: ' + args[0]);
       return { stdout: '', stderr: '' };
     }
-  }, async () => '/opt/homebrew/bin/ntfs-3g', runSystemCommand);
+  }, async () => '/opt/homebrew/bin/ntfs-3g', runSystemCommand, async () => h.removeHibernation);
   return h;
 }
 
@@ -142,6 +143,43 @@ test('failed driver returns to verified readonly without repair', async () => {
   assert.equal(h.markerWrites, 0);
   assert.equal(h.probes, 0);
   assert.ok(!h.calls.some(args => args.includes('ntfsfix') || args.includes('force')));
+});
+
+test('hibernation error is offered to the user and remains readonly when declined', async () => {
+  const h = harness();
+  h.driverError = new Error('Windows is hibernated');
+  await assert.rejects(h.service.mountDevice(h.device), /已保留 Windows 休眠状态/);
+  assert.equal(h.driverCalls, 1);
+  assert.equal(h.mode, 'readOnly');
+  assert.ok(!h.calls.some(args => args.includes('-oremove_hiberfile')));
+});
+
+test('only explicit confirmation retries with remove_hiberfile', async () => {
+  const h = harness();
+  h.removeHibernation = true;
+  let first = true;
+  h.commandHook = async args => {
+    if (args[0].endsWith('ntfs-3g') && first) {
+      first = false;
+      throw new Error('Windows is hibernated');
+    }
+  };
+  assert.match(await h.service.mountDevice(h.device), /按你的选择删除 Windows 休眠状态/);
+  const mounts = h.calls.filter(args => args[0].endsWith('ntfs-3g'));
+  assert.equal(mounts.length, 2);
+  assert.ok(mounts[0].includes('-onorecover'));
+  assert.ok(mounts[1].includes('-oremove_hiberfile'));
+  assert.ok(!mounts[1].includes('-onorecover'));
+  assert.equal(h.markerWrites, 1);
+});
+
+test('ordinary driver errors do not offer hibernation removal', async () => {
+  const h = harness();
+  h.removeHibernation = true;
+  h.driverError = new Error('metadata permission denied');
+  await assert.rejects(h.service.mountDevice(h.device), /metadata permission denied/);
+  assert.equal(h.driverCalls, 1);
+  assert.ok(!h.calls.some(args => args.includes('-oremove_hiberfile')));
 });
 
 test('exit code zero is not sufficient if the actual mount stays readonly', async () => {

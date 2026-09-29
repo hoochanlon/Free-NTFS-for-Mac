@@ -27,7 +27,7 @@
 
 已有自动挂载和手动只读列表的设置/renderer 分支未改。新增互斥阻止同一服务同时操作同一设备，但跨用户、跨进程的并发挂载没有经过实测。显式“重置/修复”动作仍保留原有 ntfsfix 功能，现在先确认正常卸载；普通挂载和失败恢复不会自动调用它。
 
-新的 GUI 参数为：
+新的 GUI 默认参数为：
 
 ```text
 ntfs-3g -olocal -oallow_other -oauto_xattr -ovolname=<卷名>
@@ -35,7 +35,14 @@ ntfs-3g -olocal -oallow_other -oauto_xattr -ovolname=<卷名>
         <设备节点> <挂载点>
 ```
 
-不设置新的 umask/fmask/dmask，不改变原有 allow_other 策略。移除默认 remove_hiberfile，并显式使用 norecover。遇到休眠、脏卷或不安全状态由驱动拒绝，给出 Windows 完全关机提示；不自动删除休眠文件、清理 Windows 日志或运行修复。驱动挂载后的文件归属仍需自检通过，不能仅凭传入 uid/gid 假定生效。
+不设置新的 umask/fmask/dmask，不改变原有 allow_other 策略。默认移除 remove_hiberfile，并显式使用 norecover。遇到休眠、脏卷或不安全状态由驱动拒绝，给出 Windows 完全关机提示；默认不自动删除休眠文件、清理 Windows 日志或运行修复。驱动挂载后的文件归属仍需自检通过，不能仅凭传入 uid/gid 假定生效。
+
+如果驱动明确报告 Windows 休眠、快速启动或脏卷状态，GUI 会显示警告并提供两个选择：
+
+- **保留并只读**：保留 Windows 的恢复状态，停止读写挂载；这是默认按钮。
+- **删除并继续读写**：只有用户明确选择后，才重试并传入 `remove_hiberfile`。这会删除 Windows 的休眠/快速启动恢复状态，使 Windows 无法从本次休眠现场恢复，但不会主动删除普通文档。该操作不可逆，也不是 Windows `chkdsk` 的替代品。
+
+普通错误不会显示这个删除选项；取消或关闭警告不会运行 `ntfsfix`。设备容量显示使用二进制单位，在达到 1 TB、1 PB 等阈值后切换到对应单位，例如 `1.00 TB` 不再显示为 `1024.00 GB`。
 
 ## 构建与测试
 

@@ -7,6 +7,7 @@ import { PasswordManager } from './ntfs-manager/password-manager';
 import { SudoExecutor } from './ntfs-manager/sudo-executor';
 import { MountOperations } from './ntfs-manager/mount-operations';
 import { HybridDetector } from './ntfs-manager/hybrid-detector';
+import { BrowserWindow, dialog } from 'electron';
 
 class NTFSManager {
   private pathFinder: PathFinder;
@@ -29,7 +30,22 @@ class NTFSManager {
       this.unmountedDevices,
       this.passwordManager,
       this.sudoExecutor,
-      () => this.getNTFS3GPath()
+      () => this.getNTFS3GPath(),
+      undefined,
+      async (device, errorMessage) => {
+        const parent = BrowserWindow.getFocusedWindow();
+        const result = await dialog.showMessageBox(parent || undefined, {
+          type: 'warning',
+          title: '检测到 Windows 休眠状态',
+          message: `“${device.volumeName}”仍保留 Windows 休眠/快速启动状态。`,
+          detail: `继续读写前可以删除这部分系统恢复状态。删除后，Windows 将不能从本次休眠现场恢复；这不会主动删除普通文档，但属于不可逆的系统状态变更。\n\n选择“保留并只读”会保留它并停止读写挂载。选择“删除并继续读写”才会使用 remove_hiberfile。\n\n驱动信息：${errorMessage}`,
+          buttons: ['保留并只读', '删除并继续读写'],
+          defaultId: 0,
+          cancelId: 0,
+          noLink: true
+        });
+        return result.response === 1;
+      }
     );
 
     // 初始化混合检测器（延迟初始化，在需要时启动）

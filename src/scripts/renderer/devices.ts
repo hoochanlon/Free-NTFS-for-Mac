@@ -2,6 +2,8 @@
 
 // 格式化容量显示
 const formatCapacity = (bytes: number): string => {
+  const sharedFormatter = (globalThis as any).NigateFormatCapacity as ((value: number) => string) | undefined;
+  if (sharedFormatter) return sharedFormatter(bytes);
   if (bytes < 1024) {
     return `${bytes} B`;
   } else if (bytes < 1024 * 1024) {

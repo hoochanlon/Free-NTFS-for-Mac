@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { currentMountIdentity, buildMountArgs } = require('../scripts/ntfs-manager/mount-policy');
+const { currentMountIdentity, buildHibernationRemovalArgs, buildMountArgs } = require('../scripts/ntfs-manager/mount-policy');
 
 const source = (uid, gid, euid = uid, egid = gid) => ({
   getuid: () => uid, getgid: () => gid, geteuid: () => euid, getegid: () => egid,
@@ -28,4 +28,14 @@ test('rejects device mismatch, path traversal and injected mount options', () =>
   for (const patch of [{ disk: 'disk999999s30' }, { devicePath: '/dev/disk999999s3;id' }, { volume: '/' }, { volume: '/Volumes/../Users' }, { volume: '/Volumes/folder/subdir' }, { volumeName: 'DATA,remove_hiberfile' }, { volumeName: 'DATA\nnext' }]) {
     assert.throws(() => buildMountArgs('/opt/homebrew/bin/ntfs-3g', { ...device, ...patch }, { uid: 501, gid: 20 }));
   }
+});
+
+test('builds the hibernation removal retry only from the safe normal argv', () => {
+  const normal = buildMountArgs('/opt/homebrew/bin/ntfs-3g', device, { uid: 501, gid: 20 });
+  const recovery = buildHibernationRemovalArgs(normal);
+  assert.ok(!recovery.includes('-onorecover'));
+  assert.ok(recovery.includes('-oremove_hiberfile'));
+  assert.deepEqual(recovery.slice(-2), [device.devicePath, device.volume]);
+  assert.throws(() => buildHibernationRemovalArgs(recovery));
+  assert.throws(() => buildHibernationRemovalArgs(normal.filter(arg => arg !== '-onorecover')));
 });

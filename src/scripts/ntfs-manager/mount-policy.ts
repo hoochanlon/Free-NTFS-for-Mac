@@ -56,3 +56,20 @@ export function buildMountArgs(driver: string, device: NTFSDevice, identity: Mou
     device.devicePath, device.volume
   ];
 }
+
+/**
+ * Build the one explicit recovery retry that may remove Windows' hibernation
+ * state. This function is only called after the user confirms the warning.
+ */
+export function buildHibernationRemovalArgs(normalArgs: string[]): string[] {
+  if (!normalArgs.includes('-onorecover') || normalArgs.includes('-oremove_hiberfile')) {
+    throw new Error('休眠状态恢复参数不符合预期');
+  }
+  const deviceIndex = normalArgs.findIndex(arg => /^\/dev\/disk\d+(?:s\d+)*$/.test(arg));
+  if (deviceIndex < 0) throw new Error('休眠状态恢复参数缺少设备路径');
+  return [
+    ...normalArgs.slice(0, deviceIndex).filter(arg => arg !== '-onorecover'),
+    '-oremove_hiberfile',
+    ...normalArgs.slice(deviceIndex)
+  ];
+}
