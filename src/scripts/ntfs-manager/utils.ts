@@ -1,9 +1,10 @@
 // NTFS Manager 工具函数
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs/promises';
 
 export const execAsync = promisify(exec);
+export const execFileAsync = promisify(execFile);
 
 export interface ExecResult {
   stdout: string;

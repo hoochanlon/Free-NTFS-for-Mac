@@ -27,16 +27,16 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 
 > [!important]
 > **Read-Write Notes**:
->  - **Basic Operations**: Supports file copy, cut, delete, and rename (metadata-level operations)
->  - **Write Limitations (GUI Application)**: The GUI application (Electron GUI version) does not support direct in-place data modification on original files due to lack of kernel write permissions
->  - **Editing Recommendations**: Please use editors that support Atomic Write (such as VS Code / Kate). These tools save files by "creating new and replacing old files", thereby bypassing in-place overwrite limitations. Alternatively, we recommend copying files to your local Mac for editing, then copying them back
->  - **Additional Note**: Ninja Tools `/ninja/kamui.sh` supports direct in-place data modification on original files, suitable for scenarios requiring direct file editing [^2]
+>  - **Current Source Fix**: GUI mounts now map files to the initiating ordinary user's UID/GID and use `norecover`. Successful mounting requires actual device/state checks and a disposable create, overwrite, truncate, append, fsync, rename and delete probe.
+>  - **Evidence**: Controlled local NTFS-3G/macFUSE tests confirmed in-place writes and ordinary TextEdit/VS Code saves with user mapping. The modified GUI still needs end-to-end application and auto-mount regression testing; see [implementation and validation notes](docs/NTFS_MOUNT_FIX.md).
+>  - **Known Limits**: TextEdit permanent version history and `RENAME_SWAP` remain unsupported in the tested configuration. Word and other platforms have not been verified. UID/GID are chosen at each mount, not changed by switching accounts while the volume remains mounted.
+>  - **Alternative Backend**: Ninja Tools `/ninja/kamui.sh` remains optional; this fix keeps NTFS-3G/macFUSE as the GUI backend [^2].
 
 
 
 - **Administrator Privileges**: Mounting operations require administrator privileges, and the system will prompt for a password
 - **Windows Fast Startup**: If the device uses Fast Startup in Windows, mounting may fail. It is recommended to fully shut down (not hibernate) in Windows, or disable Fast Startup
-- **Device Name**: USB drive names do not support spaces or illegal characters
+- **Device Name**: The mount path parser accepts spaces and parentheses. Commas and control characters in volume labels are rejected because they can alter mount options.
 - **Gatekeeper (Allow Anywhere)**: First-time use may require disabling Gatekeeper to allow unsigned applications. Run in terminal: `sudo spctl --master-disable`. After disabling, you can see the "Anywhere" option in "System Settings" > "Privacy & Security"
 - **System Integrity Protection (SIP)** (Optional): To disable SIP, you need to operate in Recovery Mode:
   1. Restart Mac, hold the power button until the Apple logo and progress bar appear, enter Recovery Mode
@@ -290,4 +290,3 @@ Thank you to all developers, testers, and users who have contributed to this pro
 [^1]: **Note**: Using this tool to mount or modify NTFS devices carries a risk of data loss. It is strongly recommended to backup important data before operation. This tool is provided \"as is\" without any warranty. The developer is not responsible for data loss caused by using this tool.
 
 [^2]: Powered by [nohajc/anylinuxfs](https://github.com/nohajc/anylinuxfs) with secondary encapsulation
-

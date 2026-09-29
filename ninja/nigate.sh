@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Use the ordinary user's identity before any sudo command.
+if [ "$(id -u)" -eq 0 ]; then
+    echo "Please run Nigate as your ordinary macOS user, without sudo." >&2
+    exit 1
+fi
+
 ################################################################################
 # Free NTFS for Mac - NTFS 设备自动挂载脚本 (Multi-language Support)
 #
@@ -228,15 +234,24 @@ config_u_drive(){
 	    # 从挂载信息中提取设备名和卷名
 	    # ============================================================
 	    # 示例输入: /dev/disk4s1 on /Volumes/TOSHIBA (ntfs, ...)
-	    # awk '{split($1, a, "/"); print a[3]}':
-	    #   - $1 是第一个字段（/dev/disk4s1）
-	    #   - split 按 "/" 分割，a[3] 是第三个部分（disk4s1）
-	    disk=$(echo "$line" | awk '{split($1, a, "/"); print a[3]}')
-
-	    # awk '{split($3, a, "/"); print a[3]}':
-	    #   - $3 是第三个字段（/Volumes/TOSHIBA）
-	    #   - split 按 "/" 分割，a[3] 是第三个部分（TOSHIBA）
-	    volume=$(echo "$line" | awk '{split($3, a, "/"); print a[3]}')
+	    # Preserve spaces and parentheses in the complete mount path.
+	    device_path="${line%% on *}"
+	    mount_point="${line#* on }"
+	    mount_point="${mount_point% \(*}"
+	    disk="${device_path#/dev/}"
+	    volume="${mount_point#/Volumes/}"
+	    if ! [[ "$disk" =~ ^disk[0-9]+(s[0-9]+)*$ ]] ||
+	       [[ "$mount_point" != /Volumes/* || "$volume" == */* || "$volume" == *,* || "$volume" == . || "$volume" == .. || -z "$volume" ]]; then
+	        continue
+	    fi
+	    if printf '%s' "$volume" | LC_ALL=C grep -q '[[:cntrl:]]'; then
+	        continue
+	    fi
+	    MOUNT_UID=$(id -u)
+	    MOUNT_GID=$(id -g)
+	    mount_args=("/System/Volumes/Data${NTFS3G_PATH}" -olocal -oallow_other -oauto_xattr
+	        "-ovolname=$volume" -onoatime -onorecover "-ouid=$MOUNT_UID" "-ogid=$MOUNT_GID"
+	        "$device_path" "$mount_point")
 
 	    # ============================================================
 	    # 检查这个设备是否已经处理过（避免重复处理）
@@ -253,9 +268,8 @@ config_u_drive(){
 	    # ============================================================
 	    # 卸载当前设备（必须先卸载才能重新挂载）
 	    # ============================================================
-	    # sudo umount -f: 强制卸载（-f 表示 force）
-	    # 2>/dev/null: 隐藏错误信息（如果已经卸载了，会有错误，但可以忽略）
-	    sudo umount -f /dev/$disk 2>/dev/null
+	    # 普通卸载；卷忙时停止，不强制卸载或吞掉错误。
+	    sudo /usr/sbin/diskutil unmount "$device_path"
 
 	    # ============================================================
 	    # 检查卸载是否成功
@@ -274,6 +288,19 @@ config_u_drive(){
 	    # 这是最关键的一步：使用 ntfs-3g 将设备挂载为读写模式
 	    t mounting "$disk" "$volume"
 
+	    if [ -L "$mount_point" ]; then
+	        echo "Refusing a symlink mount point: $mount_point" >&2
+	        continue
+	    fi
+	    if [ ! -d "$mount_point" ]; then
+	        sudo /bin/mkdir -p "$mount_point" || continue
+	    fi
+	    mount_contents=$(/bin/ls -A "$mount_point") || continue
+	    if [ -L "$mount_point" ] || [ -n "$mount_contents" ]; then
+	        echo "Refusing a symlink or nonempty mount point: $mount_point" >&2
+	        continue
+	    fi
+
 	    # 为了防止挂载操作卡死（比如 Windows 快速启动导致的问题），
 	    # 我们使用超时机制：如果 10 秒内没完成，就终止操作
 
@@ -289,20 +316,21 @@ config_u_drive(){
 	        #   -oallow_other: 允许其他用户访问
 	        #   -oauto_xattr: 自动处理扩展属性
 	        #   -ovolname=$volume: 设置卷名
-	        #   -oremove_hiberfile: 删除 Windows 休眠文件（解决快速启动问题）
+	        #   -onorecover: 拒绝不安全状态，不删除休眠文件或清除 Windows 日志
+	        #   -ouid/-ogid: 使用启动脚本的普通用户身份
 	        #   -onoatime: 不更新访问时间（提高性能）
-	        timeout 10 sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ovolname=$volume -oremove_hiberfile -onoatime 2>&1
+	        timeout 10 sudo -S "${mount_args[@]}" 2>&1
 	        mount_result=$?  # 保存退出码
 
 	    # 方法 2: 如果系统没有 timeout，尝试使用 gtimeout（GNU 版本）
 	    elif command -v gtimeout >/dev/null 2>&1; then
-	        gtimeout 10 sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ovolname=$volume -oremove_hiberfile -onoatime 2>&1
+	        gtimeout 10 sudo -S "${mount_args[@]}" 2>&1
 	        mount_result=$?
 
 	    # 方法 3: 如果都没有，使用后台进程 + 手动超时控制
 	    else
 	        # & 表示在后台运行
-	        sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ovolname=$volume -oremove_hiberfile -onoatime 2>&1 &
+	        sudo -S "${mount_args[@]}" 2>&1 &
 	        mount_pid=$!  # $! 是最后一个后台进程的 PID（进程 ID）
 
 	        # 等待最多 10 秒，每秒检查一次进程是否还在运行

@@ -1,5 +1,6 @@
 // 设备检测模块（性能优化版）
-import { execAsync, fileExists } from './utils';
+import { execAsync, execFileAsync, fileExists } from './utils';
+import { parseMountTable } from './mount-state';
 import type { NTFSDevice } from '../../types/electron';
 import { DeviceCacheManager } from './device-cache';
 import { BatchExecutor } from './batch-executor';
@@ -32,7 +33,7 @@ export class DeviceDetector {
       // 方法1：尝试从挂载点获取（如果设备已挂载）
       try {
         const dfResult = await Promise.race([
-          execAsync(`df -k "${volume}" 2>/dev/null`) as Promise<{ stdout: string }>,
+          execFileAsync('/bin/df', ['-k', volume], { timeout: 1500 }) as Promise<{ stdout: string }>,
           new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 1500))
         ]);
         const dfLines = dfResult.stdout.trim().split('\n').filter(line => line.length > 0);
@@ -298,7 +299,7 @@ export class DeviceDetector {
                 }
 
                 // 如果这个设备不在mount输出中，尝试获取其信息
-                const alreadyInMount = lines.some(l => l.includes(devicePath));
+                const alreadyInMount = parseMountTable(stdout).some(entry => entry.devicePath === devicePath);
                 if (!alreadyInMount) {
                   // 标记为已处理，避免重复
                   allNTFSDevices.add(devicePath);
@@ -373,29 +374,11 @@ export class DeviceDetector {
           console.warn('[设备检测] 解析 diskutil list 失败:', error);
         }
       }
-      for (const line of lines) {
-        const parts = line.split(' on ');
-        if (parts.length !== 2) {
-          console.warn('[设备检测] 跳过无效行（无法分割）:', line);
-          continue;
-        }
-
-        const devicePath = parts[0].trim();
-        const rest = parts[1].trim();
-
-        const volumeMatch = rest.match(/^(\/Volumes\/[^\s(]+)/);
-        const optionsMatch = rest.match(/\(([^)]+)\)/);
-
-        if (!volumeMatch) {
-          console.warn('[设备检测] 跳过无效行（无法匹配卷名）:', line);
-          continue;
-        }
-
-        const volume = volumeMatch[1].trim();
+      for (const entry of parseMountTable(stdout)) {
+        const { devicePath, volume, options, isReadOnly, isFuse: isFuseMounted } = entry;
+        if (!volume.startsWith('/Volumes/')) continue;
         const volumeName = volume.replace('/Volumes/', '');
         const disk = devicePath.replace('/dev/', '');
-        const options = optionsMatch ? optionsMatch[1] : '';
-        const isReadOnly = options.includes('read-only');
 
         // 尝试获取稳定 UUID（diskutil info；带缓存与超时，避免拖慢刷新）
         let volumeUuid: string | undefined;
@@ -426,13 +409,6 @@ export class DeviceDetector {
           volumeUuid = undefined;
         }
 
-        // 检查是否通过 ntfs-3g (FUSE) 挂载
-        // ntfs-3g 挂载的设备会在 mount 输出中包含 fuse 或特定的挂载选项
-        // 系统默认的 ntfs 挂载会包含 fskit，不是 FUSE
-        const isFuseMounted = line.toLowerCase().includes('fuse') ||
-                              line.toLowerCase().includes('ntfs-3g') ||
-                              (options.includes('local') && options.includes('allow_other'));
-
         const markerFile = `/tmp/ntfs_mounted_${disk}`;
         let markerExists = false;
         try {
@@ -443,7 +419,8 @@ export class DeviceDetector {
 
         // 如果标记文件存在但设备不是通过 FUSE 挂载，说明设备被系统重新挂载为只读模式
         // 需要清理标记文件，避免误判
-        if (markerExists && !isFuseMounted) {
+        if (!isFuseMounted || isReadOnly) this.mountedDevices.delete(disk);
+        if (markerExists && (!isFuseMounted || isReadOnly)) {
           try {
             const fs = await import('fs/promises');
             await fs.unlink(markerFile);
@@ -455,7 +432,7 @@ export class DeviceDetector {
         }
 
         // 如果标记文件存在且设备通过 FUSE 挂载，将设备添加到 mountedDevices Set 中
-        if (markerExists && isFuseMounted) {
+        if (markerExists && isFuseMounted && !isReadOnly) {
           this.mountedDevices.add(disk);
         }
 
@@ -464,11 +441,10 @@ export class DeviceDetector {
         // 1. 标记文件存在（说明之前通过本应用挂载过）
         // 2. 当前通过 FUSE 挂载（说明确实是 ntfs-3g 挂载）
         const isInMountedSet = this.mountedDevices.has(disk);
-        const deviceIsMounted = (isInMountedSet || markerExists) && isFuseMounted;
+        const deviceIsMounted = (isInMountedSet || markerExists) && isFuseMounted && !isReadOnly;
 
-        // 如果设备已通过 ntfs-3g 挂载为读写模式，强制设置 isReadOnly 为 false
-        // 否则，使用 mount 命令检测到的实际状态
-        const finalIsReadOnly = deviceIsMounted ? false : isReadOnly;
+        // 标记文件仅记录本应用曾管理该卷，不能覆盖系统实际的只读标志。
+        const finalIsReadOnly = isReadOnly;
 
         // 获取磁盘容量信息（无论是否挂载都尝试获取）
         // 优先从挂载点获取，如果失败则从设备本身获取

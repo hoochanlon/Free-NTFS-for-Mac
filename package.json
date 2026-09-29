@@ -7,6 +7,7 @@
     "setup": "./ninja/izanaki.sh",
     "sync-version": "node ninja/sync-version.js",
     "build:ts": "tsc",
+    "test": "pnpm run build:ts && node --permission --allow-fs-read='*' --allow-fs-write='*' tests/run.cjs && node --test tests/write-verifier.test.cjs",
     "build:stylus": "stylus src/styles/main.styl -o styles.css",
     "build:all": "pnpm run sync-version && pnpm run build:stylus && pnpm run build:ts",
     "watch:ts": "tsc --watch 2>&1 | node ninja/filter-tsc-output.js || true",

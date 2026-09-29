@@ -1,367 +1,265 @@
-// 挂载操作模块
+// GUI mount service: privileged commands use SudoExecutor, while verification
+// always runs as the initiating ordinary user.
 import * as fs from 'fs/promises';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import type { NTFSDevice } from '../../types/electron';
-import { fileExists, execAsync } from './utils';
-import { PasswordManager } from './password-manager';
-import { SudoExecutor } from './sudo-executor';
+import type { PasswordManager } from './password-manager';
+import type { SudoExecutor } from './sudo-executor';
+import { buildMountArgs, currentMountIdentity, validateMountTarget } from './mount-policy';
+import { assertDeviceIdentity, assertMountState, readMountSnapshot, readMountTable, waitForMountState } from './mount-state';
+import type { DiskInfo, MountSnapshot } from './mount-state';
+import { verifyFileWrites } from './write-verifier';
+
+const execFileAsync = promisify(execFile);
+type Authentication = { password: string };
 
 export class MountOperations {
-  private mountedDevices: Set<string>;
-  private unmountedDevices: Map<string, NTFSDevice>;
-  private passwordManager: PasswordManager;
-  private sudoExecutor: SudoExecutor;
-  private getNTFS3GPath: () => Promise<string | null>;
+  private activeDevices = new Set<string>();
 
   constructor(
-    mountedDevices: Set<string>,
-    unmountedDevices: Map<string, NTFSDevice>,
-    passwordManager: PasswordManager,
-    sudoExecutor: SudoExecutor,
-    getNTFS3GPath: () => Promise<string | null>
-  ) {
-    this.mountedDevices = mountedDevices;
-    this.unmountedDevices = unmountedDevices;
-    this.passwordManager = passwordManager;
-    this.sudoExecutor = sudoExecutor;
-    this.getNTFS3GPath = getNTFS3GPath;
-  }
+    private mountedDevices: Set<string>,
+    private unmountedDevices: Map<string, NTFSDevice>,
+    private passwordManager: PasswordManager,
+    private sudoExecutor: SudoExecutor,
+    private getNTFS3GPath: () => Promise<string | null>,
+    private runSystemCommand: (file: string, args: string[]) => Promise<unknown> =
+      (file, args) => execFileAsync(file, args, { timeout: 30000 })
+  ) {}
 
-  // 卸载设备
-  async unmountDevice(device: NTFSDevice): Promise<string> {
+  private async exclusive(device: NTFSDevice, operation: (target: NTFSDevice) => Promise<string>): Promise<string> {
+    const target = { ...device, volume: device.volume || '/Volumes/' + device.volumeName };
+    validateMountTarget(target);
+    if (this.activeDevices.has(target.disk)) throw new Error('该设备正在执行其他操作，请稍后刷新重试');
+    this.activeDevices.add(target.disk);
     try {
-      const password = await this.passwordManager.getPassword('messages.passwordDialog.unmountDevice', { name: device.volumeName });
-      await this.sudoExecutor.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
-      this.mountedDevices.delete(device.disk);
-      fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
-
-      // 保存已卸载的设备信息，以便后续重新挂载
-      this.unmountedDevices.set(device.disk, {
-        ...device,
-        isUnmounted: true
-      });
-
-      return `设备 ${device.volumeName} 已卸载`;
-    } catch (error: any) {
-      // 如果密码错误，重新获取密码并重试
-      if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
-        try {
-          // 删除保存的密码后，重新获取
-          const password = await this.passwordManager.getPassword('messages.passwordDialog.unmountDevice', { name: device.volumeName });
-          await this.sudoExecutor.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
-          this.mountedDevices.delete(device.disk);
-          fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
-
-          // 保存已卸载的设备信息
-          this.unmountedDevices.set(device.disk, {
-            ...device,
-            isUnmounted: true
-          });
-
-          return `设备 ${device.volumeName} 已卸载`;
-        } catch (retryError) {
-          throw retryError;
-        }
-      }
-      if (error.message?.includes('密码') || error.message?.includes('password')) {
-        throw error;
-      }
-      try {
-        const result = await this.unmountWithDiskutil(device);
-        // 保存已卸载的设备信息
-        this.unmountedDevices.set(device.disk, {
-          ...device,
-          isUnmounted: true
-        });
-        return result;
-      } catch (diskutilError) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error(`卸载失败: ${errorMessage}`);
-      }
+      return await operation(target);
+    } finally {
+      this.activeDevices.delete(target.disk);
     }
   }
 
-  // 使用 diskutil 卸载（备用方法）
-  async unmountWithDiskutil(device: NTFSDevice): Promise<string> {
+  private async initialState(device: NTFSDevice): Promise<MountSnapshot> {
+    const snapshot = await readMountSnapshot(device.devicePath);
+    assertDeviceIdentity(snapshot.info, device);
+    if (snapshot.entry && snapshot.entry.volume !== device.volume) throw new Error('设备挂载点已变化，请刷新设备列表');
+    return snapshot;
+  }
+
+  private async authenticate(device: NTFSDevice, prompt: string): Promise<Authentication> {
+    return { password: await this.passwordManager.getPassword(prompt, { name: device.volumeName }) };
+  }
+
+  private async sudo(args: string[], auth: Authentication, device: NTFSDevice, prompt: string): Promise<void> {
     try {
-      await execAsync(`diskutil unmount force ${device.devicePath}`);
-      this.mountedDevices.delete(device.disk);
-      fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
-      return `设备 ${device.volumeName} 已卸载`;
+      await this.sudoExecutor.executeSudoWithPassword(args, auth.password);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`使用 diskutil 卸载失败: ${errorMessage}`);
+      const message = error instanceof Error ? error.message : String(error);
+      if (!/密码错误|密码不能为空|password is incorrect|Sorry, try again/i.test(message)) throw error;
+      auth.password = await this.passwordManager.getPassword(prompt, { name: device.volumeName });
+      await this.sudoExecutor.executeSudoWithPassword(args, auth.password);
     }
   }
 
-  // 推出设备（完全断开）
-  async ejectDevice(device: NTFSDevice): Promise<string> {
-    try {
-      // 先清理标记文件
-      this.mountedDevices.delete(device.disk);
-      fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
-      this.unmountedDevices.delete(device.disk);
-
-      // 使用 diskutil eject 推出设备
-      // 这会卸载所有卷并完全断开设备
-      await execAsync(`diskutil eject ${device.devicePath}`);
-      return `设备 ${device.volumeName} 已推出，可以安全拔出`;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`推出设备失败: ${errorMessage}`);
-    }
+  private async clearManaged(device: NTFSDevice): Promise<void> {
+    this.mountedDevices.delete(device.disk);
+    await fs.unlink('/tmp/ntfs_mounted_' + device.disk).catch(() => {});
   }
 
-  // 还原设备为只读模式
-  async restoreToReadOnly(device: NTFSDevice): Promise<string> {
-    try {
-      const password = await this.passwordManager.getPassword('messages.passwordDialog.restoreToReadOnly', { name: device.volumeName });
+  private async markVerified(device: NTFSDevice): Promise<void> {
+    this.mountedDevices.add(device.disk);
+    this.unmountedDevices.delete(device.disk);
+    // Never follow a marker symlink or truncate another user's file.
+    await fs.writeFile('/tmp/ntfs_mounted_' + device.disk, '', { flag: 'wx', mode: 0o600 }).catch(() => {});
+  }
 
-      // 先卸载当前挂载
+  private async unmountNormally(device: NTFSDevice, baseline: DiskInfo, auth: Authentication): Promise<void> {
+    const snapshot = await readMountSnapshot(device.devicePath);
+    assertDeviceIdentity(snapshot.info, device, baseline);
+    if (snapshot.entry) {
+      if (snapshot.entry.volume !== device.volume) throw new Error('挂载点已变化，已停止卸载');
+      // Busy volumes must fail here. Never force unmount or ignore errors.
+      await this.sudo(['/usr/sbin/diskutil', 'unmount', device.devicePath], auth, device, 'messages.passwordDialog.unmountDevice');
+    }
+    await waitForMountState(device, baseline, 'unmounted');
+    await this.clearManaged(device);
+    this.unmountedDevices.set(device.disk, { ...device, isMounted: false, isUnmounted: true });
+  }
+
+  private async systemReadOnly(device: NTFSDevice, baseline: DiskInfo, auth: Authentication): Promise<void> {
+    const snapshot = await readMountSnapshot(device.devicePath);
+    assertDeviceIdentity(snapshot.info, device, baseline);
+    if (snapshot.entry) {
+      assertMountState(snapshot, device, baseline, 'readOnly');
+    } else {
+      await this.prepareMountPoint(device, auth);
+      await this.runSystemCommand('/usr/sbin/diskutil', ['mount', 'readOnly', '-mountPoint', device.volume, device.devicePath]);
+    }
+    await waitForMountState(device, baseline, 'readOnly');
+    await this.clearManaged(device);
+    this.unmountedDevices.delete(device.disk);
+  }
+
+  private async prepareMountPoint(device: NTFSDevice, auth: Authentication): Promise<void> {
+    const inspect = async () => {
       try {
-        await this.sudoExecutor.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
+        const stat = await fs.lstat(device.volume);
+        if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error('挂载点不是普通目录');
+        if ((await fs.readdir(device.volume)).length) throw new Error('挂载点目录非空，已停止挂载');
+        return true;
       } catch (error: any) {
-        // 如果密码错误，重新获取密码
-        if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
-          const retryPassword = await this.passwordManager.getPassword('messages.passwordDialog.restoreToReadOnly', { name: device.volumeName });
-          try {
-            await this.sudoExecutor.executeSudoWithPassword(['umount', '-f', device.devicePath], retryPassword);
-          } catch {
-            // 卸载失败可能因为已经卸载，继续
-          }
-        } else {
-          // 卸载失败可能因为已经卸载，继续
-        }
-      }
-
-      // 从已挂载设备列表中移除
-      this.mountedDevices.delete(device.disk);
-      fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
-
-      // 等待一小段时间，让系统自动以只读模式重新挂载
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // 使用 diskutil mount 让系统以只读模式挂载
-      try {
-        await execAsync(`diskutil mount ${device.devicePath}`);
-      } catch {
-        // 如果 diskutil mount 失败，系统可能会自动挂载，继续
-      }
-
-      return `设备 ${device.volumeName} 已还原为只读模式`;
-    } catch (error: any) {
-      if (error.message?.includes('密码') || error.message?.includes('password')) {
+        if (error.code === 'ENOENT') return false;
         throw error;
       }
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`还原为只读模式失败: ${errorMessage}`);
+    };
+    if (!await inspect()) {
+      await this.sudo(['/bin/mkdir', '-p', device.volume], auth, device, 'messages.passwordDialog.mountDevice');
+      if (!await inspect()) throw new Error('无法创建挂载点');
     }
   }
 
-  // 挂载设备
   async mountDevice(device: NTFSDevice): Promise<string> {
-    const ntfs3gPath = await this.getNTFS3GPath();
-    if (!ntfs3gPath) {
-      throw new Error('未找到 ntfs-3g，请先安装依赖');
-    }
-
-    let fullPath = ntfs3gPath;
-    if (!(await fileExists(fullPath))) {
-      fullPath = `/System/Volumes/Data${ntfs3gPath}`;
-      if (!(await fileExists(fullPath))) {
-        throw new Error(`ntfs-3g 路径不存在: ${ntfs3gPath}`);
-      }
-    }
-
-    if (this.mountedDevices.has(device.disk)) {
+    return this.exclusive(device, async target => {
+      const identity = currentMountIdentity(); // before sudo, on every invocation
+      const ntfs3gPath = await this.getNTFS3GPath();
+      if (!ntfs3gPath) throw new Error('未找到 ntfs-3g，请先安装依赖');
+      let fullPath = ntfs3gPath;
       try {
-        const result = await execAsync(`mount | grep "${device.devicePath}"`) as { stdout: string };
-        if (!result.stdout.includes('read-only')) {
-          return `设备 ${device.volumeName} 已经是读写模式`;
-        }
+        await fs.access(fullPath);
       } catch {
-        // 继续挂载
+        fullPath = '/System/Volumes/Data' + ntfs3gPath;
+        await fs.access(fullPath).catch(() => { throw new Error('ntfs-3g 路径不存在: ' + ntfs3gPath); });
       }
-    }
+      const mountArgs = buildMountArgs(fullPath, target, identity);
+      const initial = await this.initialState(target);
+      const baseline = initial.info;
+      if (baseline.WritableMedia === false) throw new Error('设备介质为只读，不能挂载为读写');
 
-    try {
-      let password = await this.passwordManager.getPassword('messages.passwordDialog.mountDevice', { name: device.volumeName });
+      if (this.mountedDevices.has(target.disk) && initial.entry?.isFuse && !initial.entry.isReadOnly) {
+        const owner = await fs.lstat(target.volume);
+        if (!owner.isSymbolicLink() && owner.uid === identity.uid && owner.gid === identity.gid) {
+          assertMountState(initial, target, baseline, 'readWrite');
+          await verifyFileWrites(target.volume, identity);
+          assertMountState(await readMountSnapshot(target.devicePath), target, baseline, 'readWrite');
+          return '设备 ' + target.volumeName + ' 已是读写模式，文件读写自检通过';
+        }
+        // Old root-owned GUI mounts must use the normal remount flow.
+      }
 
+      const auth = await this.authenticate(target, 'messages.passwordDialog.mountDevice');
+      let changedMount = false;
       try {
-        await this.sudoExecutor.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
-      } catch (error: any) {
-        // 如果密码错误，重新获取密码
-        if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
-          password = await this.passwordManager.getPassword('messages.passwordDialog.mountDevice', { name: device.volumeName });
+        await this.unmountNormally(target, baseline, auth);
+        changedMount = true;
+        await this.prepareMountPoint(target, auth);
+        assertMountState(await readMountSnapshot(target.devicePath), target, baseline, 'unmounted');
+        await this.sudo(mountArgs, auth, target, 'messages.passwordDialog.mountDeviceRetry');
+        await waitForMountState(target, baseline, 'readWrite');
+        await verifyFileWrites(target.volume, identity);
+        assertMountState(await readMountSnapshot(target.devicePath), target, baseline, 'readWrite');
+        await this.markVerified(target);
+        return '设备 ' + target.volumeName + ' 已成功挂载为读写模式，文件读写自检通过';
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        // Timeout is not proof that a privileged child stopped. Do not race
+        // it with another mount or falsely report successful cancellation.
+        if (/超时|timed? ?out|timeout/i.test(message)) {
+          throw new Error('挂载等待超时，实际状态尚未确认；请刷新设备列表后再操作。' + message);
+        }
+        let recovery = '';
+        if (changedMount) {
           try {
-            await this.sudoExecutor.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
-          } catch {
-            // 卸载失败可能因为已经卸载，继续
-          }
-        } else {
-          // 卸载失败可能因为已经卸载，继续
-        }
-      }
-
-      const mountArgs = [
-        fullPath,
-        '-olocal',
-        '-oallow_other',
-        '-oauto_xattr',
-        `-ovolname=${device.volumeName}`,
-        '-oremove_hiberfile',
-        '-onoatime',
-        device.devicePath,
-        device.volume
-      ];
-
-      let retryCount = 0;
-      const maxRetries = 1; // 最多重试1次
-
-      while (retryCount <= maxRetries) {
-        try {
-          console.log(`[MountOperations] 尝试挂载设备 ${device.volumeName} (尝试 ${retryCount + 1}/${maxRetries + 1})`);
-          const mountPromise = this.sudoExecutor.executeSudoWithPassword(mountArgs, password);
-          const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('挂载操作超时（10秒），操作已取消以防止卡死。可能的原因：1) 文件系统处于脏状态（如果该 NTFS 设备之前在 Windows 电脑上使用过，且 Windows 启用了快速启动功能，请将设备插回 Windows 电脑并完全关闭后再试）；2) 设备被其他程序占用；3) 系统权限问题。')), 10000);
-          });
-
-          await Promise.race([mountPromise, timeoutPromise]);
-          // 如果成功，跳出循环
-          break;
-        } catch (error: any) {
-          const errorMessage = error.message || String(error);
-          console.error(`[MountOperations] 挂载失败 (尝试 ${retryCount + 1}):`, errorMessage);
-
-          // 检查是否是密码错误
-          const isPasswordError = errorMessage.includes('密码错误') ||
-                                  errorMessage.includes('password is incorrect') ||
-                                  errorMessage.includes('Sorry, try again') ||
-                                  errorMessage.includes('密码不能为空');
-
-          if (isPasswordError && retryCount < maxRetries) {
-            // 如果是密码错误且还有重试次数，重新获取密码
-            console.log('[MountOperations] 密码错误，重新获取密码...');
-            password = await this.passwordManager.getPassword('messages.passwordDialog.mountDeviceRetry', { name: device.volumeName });
-            retryCount++;
-          } else {
-            // 如果不是密码错误，或者已经达到最大重试次数，抛出错误
-            throw error;
+            await this.unmountNormally(target, baseline, auth);
+            await this.systemReadOnly(target, baseline, auth);
+            recovery = '；已验证恢复为只读模式';
+          } catch (recoveryError) {
+            recovery = '；恢复只读未完成，请刷新确认设备状态：' + String(recoveryError);
           }
         }
+        const windowsHint = /hibernat|unclean|unsafe state|fast restart|fast startup|dirty/i.test(message)
+          ? '；请在 Windows 中完全关机后再试，不会自动删除休眠文件或修复卷' : '';
+        throw new Error('挂载失败：' + message + windowsHint + recovery);
       }
-
-      this.mountedDevices.add(device.disk);
-      this.unmountedDevices.delete(device.disk); // 从已卸载列表中移除
-      fs.writeFile(`/tmp/ntfs_mounted_${device.disk}`, '').catch(() => {});
-      return `设备 ${device.volumeName} 已成功挂载为读写模式`;
-    } catch (error: any) {
-      if (error.message?.includes('超时')) {
-        throw error;
-      } else if (error.message?.includes('密码')) {
-        throw error;
-      } else {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error(`挂载失败: ${errorMessage}`);
-      }
-    }
+    });
   }
 
-  // 重置设备（卸载+修复）- 用于解决 Resource busy 错误
+  async unmountDevice(device: NTFSDevice): Promise<string> {
+    return this.exclusive(device, async target => {
+      const { info } = await this.initialState(target);
+      const auth = await this.authenticate(target, 'messages.passwordDialog.unmountDevice');
+      await this.unmountNormally(target, info, auth);
+      return '设备 ' + target.volumeName + ' 已卸载';
+    });
+  }
+
+  async unmountWithDiskutil(device: NTFSDevice): Promise<string> {
+    return this.exclusive(device, async target => {
+      const { info, entry } = await this.initialState(target);
+      if (entry) await this.runSystemCommand('/usr/sbin/diskutil', ['unmount', target.devicePath]);
+      await waitForMountState(target, info, 'unmounted');
+      await this.clearManaged(target);
+      this.unmountedDevices.set(target.disk, { ...target, isMounted: false, isUnmounted: true });
+      return '设备 ' + target.volumeName + ' 已卸载';
+    });
+  }
+
+  async restoreToReadOnly(device: NTFSDevice): Promise<string> {
+    return this.exclusive(device, async target => {
+      const initial = await this.initialState(target);
+      if (initial.entry?.isReadOnly && initial.info.WritableVolume === false) {
+        await waitForMountState(target, initial.info, 'readOnly');
+        await this.clearManaged(target);
+        this.unmountedDevices.delete(target.disk);
+        return '设备 ' + target.volumeName + ' 已是只读模式';
+      }
+      const auth = await this.authenticate(target, 'messages.passwordDialog.restoreToReadOnly');
+      await this.unmountNormally(target, initial.info, auth);
+      await this.systemReadOnly(target, initial.info, auth);
+      return '设备 ' + target.volumeName + ' 已还原为只读模式';
+    });
+  }
+
+  async ejectDevice(device: NTFSDevice): Promise<string> {
+    return this.exclusive(device, async target => {
+      await this.initialState(target);
+      await this.runSystemCommand('/usr/sbin/diskutil', ['eject', target.devicePath]);
+      if ((await readMountTable()).some(entry => entry.devicePath === target.devicePath)) {
+        throw new Error('推出后仍检测到挂载，不能确认安全拔出');
+      }
+      await this.clearManaged(target);
+      this.unmountedDevices.delete(target.disk);
+      return '设备 ' + target.volumeName + ' 已推出，可以安全拔出';
+    });
+  }
+
+  // Preserve the existing explicitly invoked repair action. Mounting and
+  // fallback recovery never call resetDevice or automatically run ntfsfix.
   async resetDevice(device: NTFSDevice): Promise<string> {
-    try {
-      let password = await this.passwordManager.getPassword('messages.passwordDialog.resetDevice', { name: device.volumeName });
-
-      // 步骤1：卸载设备
-      try {
-        await this.sudoExecutor.executeSudoWithPassword(['diskutil', 'unmount', device.devicePath], password);
-      } catch (error: any) {
-        // 如果密码错误，重新获取密码
-        if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
-          password = await this.passwordManager.getPassword('messages.passwordDialog.resetDevice', { name: device.volumeName });
-          try {
-            await this.sudoExecutor.executeSudoWithPassword(['diskutil', 'unmount', device.devicePath], password);
-          } catch {
-            // 卸载失败可能因为已经卸载，继续
-          }
-        } else {
-          // 卸载失败可能因为已经卸载，继续
-        }
-      }
-
-      // 从已挂载设备列表中移除
-      this.mountedDevices.delete(device.disk);
-      fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
-
-      // 等待一小段时间，确保设备完全卸载
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // 步骤2：修复文件系统
-      try {
-        await this.sudoExecutor.executeSudoWithPassword(['ntfsfix', device.devicePath], password);
-      } catch (error: any) {
-        // 如果密码错误，重新获取密码
-        if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
-          password = await this.passwordManager.getPassword('messages.passwordDialog.resetDevice', { name: device.volumeName });
-          await this.sudoExecutor.executeSudoWithPassword(['ntfsfix', device.devicePath], password);
-        } else {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          throw new Error(`修复文件系统失败: ${errorMessage}`);
-        }
-      }
-
-      // 等待一小段时间，确保修复完成
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // 步骤3：重新挂载设备为只读模式（使用系统默认的只读挂载）
-      try {
-        // 使用 diskutil mount 挂载为只读模式（macOS 默认行为）
-        try {
-          await execAsync(`diskutil mount ${device.devicePath}`);
-        } catch (error: any) {
-          // 如果挂载失败，可能是设备已经自动挂载，继续
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          console.log(`[MountOperations] 挂载为只读模式失败或已挂载: ${errorMessage}`);
-        }
-
-        // 重置后设备是只读状态，不添加到已挂载列表（因为不是读写模式）
-        // 也不从已卸载列表中移除，因为需要用户手动选择是否挂载为读写
-
-        return `设备 ${device.volumeName} 已重置并重新挂载为只读模式`;
-      } catch (error: any) {
-        // 如果挂载失败，至少返回修复成功的消息
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error(`修复完成，但重新挂载失败: ${errorMessage}`);
-      }
-    } catch (error: any) {
-      if (error.message?.includes('密码') || error.message?.includes('password')) {
-        throw error;
-      }
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`重置设备失败: ${errorMessage}`);
-    }
+    return this.exclusive(device, async target => {
+      const { info } = await this.initialState(target);
+      const auth = await this.authenticate(target, 'messages.passwordDialog.resetDevice');
+      await this.unmountNormally(target, info, auth);
+      await this.sudo(['ntfsfix', target.devicePath], auth, target, 'messages.passwordDialog.resetDevice');
+      await this.systemReadOnly(target, info, auth);
+      return '设备 ' + target.volumeName + ' 已重置并重新挂载为只读模式';
+    });
   }
 
-  // 清理旧的挂载标记
   async cleanupOldMounts(): Promise<void> {
     try {
-      const files = await fs.readdir('/tmp');
-      const markers = files.filter(f => f.startsWith('ntfs_mounted_'));
-
-      for (const marker of markers) {
-        const disk = marker.replace('ntfs_mounted_', '');
-        try {
-          const result = await execAsync(`mount | grep "/dev/${disk}"`) as { stdout: string };
-          if (!result.stdout.trim()) {
-            await fs.unlink(`/tmp/${marker}`);
-            this.mountedDevices.delete(disk);
-          }
-        } catch {
-          await fs.unlink(`/tmp/${marker}`).catch(() => {});
+      const entries = await readMountTable();
+      for (const marker of await fs.readdir('/tmp')) {
+        const match = marker.match(/^ntfs_mounted_(disk\d+(?:s\d+)*)$/);
+        if (!match) continue;
+        const disk = match[1];
+        const entry = entries.find(item => item.devicePath === '/dev/' + disk);
+        if (!entry?.isFuse || entry.isReadOnly) {
+          await fs.unlink('/tmp/' + marker).catch(() => {});
           this.mountedDevices.delete(disk);
         }
       }
-    } catch (error) {
-      // 忽略错误
+    } catch {
+      // Failed inspection never establishes that a volume is writable.
     }
   }
 }
