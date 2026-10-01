@@ -309,7 +309,16 @@
     ): Promise<void> {
       const title = t('devices.repairConfirm', { name: device.volumeName });
       const message = t('devices.repairConfirmNote', { name: device.volumeName });
-      const confirmed = await AppUtils.UI.showConfirm(title, message);
+      const isTrayWindow = document.body?.classList.contains('tray-window');
+      const confirmed = isTrayWindow
+        ? await electronAPI.showTrayRepairConfirmDialog({
+          title,
+          message,
+          cancelText: t('dialog.cancel') || '取消',
+          confirmText: t('dialog.confirm') || '确定',
+          isLightTheme: document.body.classList.contains('light-theme')
+        })
+        : await AppUtils.UI.showConfirm(title, message);
       if (!confirmed) return;
 
       const showRepairMessage = async (messageTitle: string, messageText: string, type: 'info' | 'error'): Promise<void> => {
