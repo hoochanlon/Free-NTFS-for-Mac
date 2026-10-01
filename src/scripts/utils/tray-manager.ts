@@ -113,6 +113,12 @@ export async function initTray(): Promise<void> {
     // 点击托盘图标时的处理逻辑：如果主窗口显示则聚焦主窗口，否则显示托盘设备窗口
     tray.on('click', async () => {
       try {
+        const settings = await SettingsManager.getSettings();
+        if (settings.trayMode) {
+          await toggleTrayDevicesWindow();
+          return;
+        }
+
         // 检查主窗口是否显示
         if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible()) {
           // 如果主窗口已显示，则聚焦主窗口

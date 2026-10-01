@@ -12,6 +12,9 @@ export interface PasswordDialogOptions {
   cancelText?: string;
   confirmText?: string;
   emptyPasswordText?: string;
+  togglePasswordText?: string;
+  showPasswordText?: string;
+  hidePasswordText?: string;
 }
 
 export function createPasswordDialog(options: PasswordDialogOptions): Promise<string | null> {
@@ -141,7 +144,10 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
           label: options.label || '密码:',
           cancelText: options.cancelText || '取消',
           confirmText: options.confirmText || '确定',
-          emptyPasswordText: options.emptyPasswordText || '密码不能为空'
+          emptyPasswordText: options.emptyPasswordText || '密码不能为空',
+          togglePasswordText: options.togglePasswordText || '显示/隐藏密码',
+          showPasswordText: options.showPasswordText || '显示密码',
+          hidePasswordText: options.hidePasswordText || '隐藏密码'
         });
 
         console.log('[PasswordDialog] 密码对话框已显示', {

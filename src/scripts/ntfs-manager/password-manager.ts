@@ -132,7 +132,10 @@ export class PasswordManager {
         label: passwordPrompt,
         cancelText: cancelButton,
         confirmText: confirmButton,
-        emptyPasswordText: t('messages.passwordDialog.passwordEmpty')
+        emptyPasswordText: t('messages.passwordDialog.passwordEmpty'),
+        togglePasswordText: t('messages.passwordDialog.togglePassword'),
+        showPasswordText: t('messages.passwordDialog.showPassword'),
+        hidePasswordText: t('messages.passwordDialog.hidePassword')
       });
 
       // 检查用户是否取消
