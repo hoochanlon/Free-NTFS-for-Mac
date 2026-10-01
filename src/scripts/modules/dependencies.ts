@@ -12,6 +12,7 @@
   const AppModules = (window as any).AppModules;
   const electronAPI = (window as any).electronAPI;
   const AppUtils = (window as any).AppUtils;
+  const macfuseInstallCommand = 'if brew list --cask macfuse >/dev/null 2>&1; then brew upgrade --cask --greedy macfuse; else brew install --cask macfuse; fi';
 
   // 获取翻译文本的辅助函数
   function t(key: string, params?: Record<string, string | number>): string {
@@ -37,7 +38,7 @@
       description: t(`dependencies.${key}.description`),
       installCommand: key === 'swift' ? 'xcode-select --install' :
                      key === 'brew' ? '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"' :
-                     key === 'macfuse' ? 'brew install --cask macfuse' :
+                     key === 'macfuse' ? macfuseInstallCommand :
                      key === 'fswatch' ? t(`dependencies.${key}.installCommand`) :
                      'brew tap gromgit/homebrew-fuse && brew install ntfs-3g-mac',
       installGuide: t(`dependencies.${key}.installGuide`)
@@ -61,7 +62,7 @@
     macfuse: {
       name: 'MacFUSE',
       description: '文件系统用户空间框架，ntfs-3g 需要此依赖',
-      installCommand: 'brew install --cask macfuse',
+      installCommand: macfuseInstallCommand,
       installGuide: '需要先安装 Homebrew。在终端运行上述命令即可安装。'
     },
     ntfs3g: {

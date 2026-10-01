@@ -1,6 +1,6 @@
 ## Nigate
 
-**Language / 言語**: [English](README.md) | [日本語](README.ja.md) 
+**Language / 言語**: [English](README.md) | [日本語](README.ja.md)
 
 ![Main Interface](src/imgs/example/2026-01-21-10.51.01.png)
 
@@ -18,7 +18,7 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 - ☕ **Prevent Sleep** - One-click toggle to prevent system sleep, ensuring the system stays awake during long operations
 - 🍃 **Status Protection** - Long press for 3s to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations
 - 🥷 **Ninja Tools** - Provide cross-filesystem mounting and end-to-end scripts from development to release, with one-click permission fixes and multi-language output to simplify complex operations and lower the usage barrier
-- 💻 **Arm & Intel Mac Support** - Full support for Apple Silicon (arm64) and Intel-based Macs (x64 architecture)
+- 💻 **Apple Silicon Support** - Built for Apple Silicon Macs (arm64)
 
 ### Important Notes
 

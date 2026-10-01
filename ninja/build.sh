@@ -55,7 +55,6 @@ echo -e "${GREEN}$(t starting_build)${NC}"
 # ============================================================
 CLEAN=false    # 是否清理 dist 目录
 TARGET=""      # 打包目标格式（dmg 或 zip）
-ARCH=""        # 架构（x64、arm64 或 universal）
 
 # ============================================================
 # 解析命令行参数
@@ -80,19 +79,11 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --arm64)
-      # 用户想打包 Apple Silicon 版本
-      ARCH="--arm64"
       shift
       ;;
-    --x64)
-      # 用户想打包 Intel Mac 版本
-      ARCH="--x64"
-      shift
-      ;;
-    --universal)
-      # 用户想打包通用版本（同时支持 Intel 和 Apple Silicon）
-      ARCH="--universal"
-      shift
+    --x64|--universal)
+      echo -e "${RED}Intel and universal builds are no longer supported; only Apple Silicon (arm64) is supported.${NC}"
+      exit 2
       ;;
     *)
       # 未知参数，给出警告但继续执行
@@ -166,8 +157,7 @@ fi
 # ============================================================
 # 设置 Electron 下载镜像（推荐）
 # ============================================================
-# 打通用包（--universal）时需要下载 darwin-x64 / darwin-arm64 两套 Electron，
-# 在部分网络环境下直连 GitHub 可能会 EOF / 超时，因此这里默认启用镜像。
+# 在部分网络环境下直连 GitHub 可能会 EOF / 超时，因此这里默认启用 Electron 镜像。
 # 如需使用官方源，可在执行前显式设置：ELECTRON_MIRROR=""
 export ELECTRON_MIRROR="${ELECTRON_MIRROR:-https://npmmirror.com/mirrors/electron/}"
 
@@ -201,7 +191,7 @@ fix_python_path
 # ============================================================
 cleanup_mounted_dmg() {
   echo -e "${YELLOW}$(t cleaning_mounted_dmg)${NC}"
-  
+
   # 方法1: 直接卸载可能存在的卷（使用 diskutil，更可靠）
   for volume in /Volumes/Nigate*; do
     if [ -d "$volume" ]; then
@@ -209,7 +199,7 @@ cleanup_mounted_dmg() {
       diskutil unmount "$volume" 2>/dev/null || diskutil unmount force "$volume" 2>/dev/null || true
     fi
   done
-  
+
   # 方法2: 使用 hdiutil info 查找并卸载所有包含 "Nigate" 的 DMG
   # 只处理实际存在的设备，避免错误
   hdiutil info 2>/dev/null | grep -i "nigate" -B 5 -A 5 | grep -E "/dev/disk[0-9]+" | awk '{print $1}' | sort -u | while read disk; do
@@ -218,7 +208,7 @@ cleanup_mounted_dmg() {
       hdiutil detach "$disk" -force 2>/dev/null || true
     fi
   done
-  
+
   # 方法3: 使用 diskutil 查找挂载点包含 "Nigate" 的设备
   diskutil list 2>/dev/null | grep -E "^/dev/disk[0-9]+" | awk '{print $1}' | while read disk; do
     if [ -n "$disk" ] && [ -e "$disk" ]; then
@@ -229,7 +219,7 @@ cleanup_mounted_dmg() {
       fi
     fi
   done
-  
+
   # 等待一下确保卸载完成
   sleep 1
 }
@@ -249,44 +239,11 @@ export ELECTRON_BUILDER_CACHE="${HOME}/.cache/electron-builder"
 # ============================================================
 # 根据用户参数选择打包命令
 # ============================================================
-# -n "$TARGET": 检查变量是否非空（用户指定了格式）
-# -n "$ARCH": 检查变量是否非空（用户指定了架构）
-
-if [ -n "$TARGET" ] && [ -n "$ARCH" ]; then
-  # 用户同时指定了格式和架构
-  # 例如: ./build.sh --dmg --arm64 或 ./build.sh --dmg --universal
-  if [ "$ARCH" = "--universal" ]; then
-    # 通用版本：创建一个包含 x64 和 arm64 的通用二进制文件
-    ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $TARGET --universal
-  else
-  ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $TARGET $ARCH
-  fi
-
-elif [ -n "$TARGET" ]; then
-  # 用户只指定了格式
-  # 例如: ./build.sh --dmg（使用 package.json 中的默认配置，现在是 x64 + arm64）
-  ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $TARGET
-
-elif [ -n "$ARCH" ]; then
-  # 用户只指定了架构
-  # 例如: ./build.sh --arm64 或 ./build.sh --universal
-  if [ "$ARCH" = "--universal" ]; then
-    # 通用版本
-    ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac --universal
-  else
-  ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac $ARCH
-  fi
-
+if [ -n "$TARGET" ]; then
+  # 只构建 Apple Silicon 版本
+  ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac "$TARGET" --arm64
 else
-  # 用户没有指定任何特殊参数，使用默认配置
-  # 默认配置在 package.json 的 "build" 字段中定义（现在是 x64 + arm64）
-  # 为了避免并行构建时的 DMG 挂载冲突，我们分别构建每个架构
-  echo -e "${GREEN}Building x64 architecture...${NC}"
-  cleanup_mounted_dmg
-  ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac --x64
-  
-  echo -e "${GREEN}Building arm64 architecture...${NC}"
-  cleanup_mounted_dmg
+  # 默认构建 Apple Silicon 版本的所有配置目标
   ELECTRON_MIRROR="${ELECTRON_MIRROR:-}" pnpm exec electron-builder --mac --arm64
 fi
 

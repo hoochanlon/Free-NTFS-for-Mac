@@ -1,6 +1,6 @@
 ## Nigate
 
-**Language / 言語**: [English](README.md) | [日本語](README.ja.md) 
+**Language / 言語**: [English](README.md) | [日本語](README.ja.md)
 
 ![Main Interface](src/imgs/example/2026-01-21-10.51.01.png)
 
@@ -18,7 +18,7 @@
 - ☕ **スリープ防止** - ワンクリックでシステムスリープを防止し、長時間の操作中もシステムを起動状態に保つ
 - 🍃 **状態保護** - 3s長押しで保護状態を切り替えます。保護後、自動読み書き、トレイモード、スリープ防止機能が無効になり、誤操作を防ぎます
 - 🥷 **忍者ツールセット** - クロスファイルシステムマウントと開発からリリースまでのエンドツーエンドスクリプトを提供し、ワンクリック権限修復と多言語出力により複雑な操作を簡素化し、利用ハードルを下げます
-- 💻 **Arm & Intel Mac サポート** - Apple Silicon（arm64）と Intel ベースの Mac（x64）を完全サポート
+- 💻 **Apple Silicon 対応** - Apple Silicon 搭載 Mac（arm64）向け
 
 ### 注意事項
 

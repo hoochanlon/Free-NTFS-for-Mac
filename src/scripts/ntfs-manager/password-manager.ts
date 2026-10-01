@@ -140,8 +140,8 @@ export class PasswordManager {
         throw new Error(t('messages.passwordDialog.userCancelled'));
       }
 
-      // 验证密码不为空或只包含空格（仅用于验证，不修改密码）
-      if (!password || password.trim().length === 0) {
+      // 只拒绝空密码，不修改密码内容
+      if (password.length === 0) {
         throw new Error(t('messages.passwordDialog.passwordEmpty'));
       }
 

@@ -1,6 +1,6 @@
 {
   "name": "free-ntfs-for-mac",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "description": "免费的 macOS NTFS 读写工具 - Electron 界面版",
   "main": "scripts/main.js",
   "scripts": {
@@ -19,9 +19,7 @@
     "build:clean": "./ninja/build-clean.sh",
     "build:dmg": "./ninja/build.sh --dmg",
     "build:zip": "./ninja/build.sh --zip",
-    "build:arm64": "./ninja/build.sh --arm64",
-    "build:x64": "./ninja/build.sh --x64",
-    "build:universal": "./ninja/build.sh --universal"
+    "build:arm64": "./ninja/build.sh --arm64"
   },
   "keywords": [
     "ntfs",
@@ -65,7 +63,8 @@
       "src/ico/**/*",
       "src/docs/**/*",
       "styles.css",
-      "package.json"
+      "package.json",
+      "!**/node_modules/node-pty/prebuilds/darwin-x64/**"
     ],
     "mac": {
       "category": "public.app-category.utilities",
@@ -73,14 +72,12 @@
         {
           "target": "dmg",
           "arch": [
-            "x64",
             "arm64"
           ]
         },
         {
           "target": "zip",
           "arch": [
-            "x64",
             "arm64"
           ]
         }

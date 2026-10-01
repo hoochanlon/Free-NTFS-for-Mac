@@ -9,7 +9,7 @@ export class SudoExecutor {
   async executeSudoWithPassword(args: string[], password: string): Promise<ExecResult> {
     return new Promise<ExecResult>((resolve, reject) => {
       // 验证密码不为空
-      if (!password || password.trim().length === 0) {
+      if (password.length === 0) {
         reject(new Error('密码不能为空'));
         return;
       }

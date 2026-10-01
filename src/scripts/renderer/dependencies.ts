@@ -1,4 +1,5 @@
 // 依赖信息和安装指引
+const macfuseInstallCommand = 'if brew list --cask macfuse >/dev/null 2>&1; then brew upgrade --cask --greedy macfuse; else brew install --cask macfuse; fi';
 const DEPENDENCY_INFO = {
   swift: {
     name: 'Xcode Command Line Tools',
@@ -15,7 +16,7 @@ const DEPENDENCY_INFO = {
   macfuse: {
     name: 'MacFUSE',
     description: '文件系统用户空间框架，ntfs-3g 需要此依赖',
-    installCommand: 'brew install --cask macfuse',
+    installCommand: macfuseInstallCommand,
     installGuide: '需要先安装 Homebrew。在终端运行上述命令即可安装。'
   },
   ntfs3g: {
