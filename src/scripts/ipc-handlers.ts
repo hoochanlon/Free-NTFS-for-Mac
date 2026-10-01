@@ -246,6 +246,51 @@ export function setupNTFSHandlers(): void {
     }
   });
 
+  ipcMain.handle('repair-device', async (_event: IpcMainInvokeEvent, device: any) => {
+    try {
+      const devices = await ntfsManager.getNTFSDevices(true);
+      const currentDevice = devices.find(candidate =>
+        candidate.disk === device?.disk && candidate.devicePath === device?.devicePath
+      );
+      if (!currentDevice) {
+        throw new Error('REPAIR_DEVICE_UNAVAILABLE');
+      }
+
+      const cooldownUntil = Date.now() + 120000;
+      BrowserWindow.getAllWindows().forEach(win => {
+        if (!win.isDestroyed()) {
+          win.webContents.send('device-auto-mount-cooldown', {
+            disk: currentDevice.disk,
+            volumeUuid: currentDevice.volumeUuid,
+            until: cooldownUntil
+          });
+        }
+      });
+
+      const result = await ntfsManager.repairDevice(currentDevice);
+      setTimeout(() => {
+        updateTrayMenu(true);
+      }, 500);
+      setTimeout(() => {
+        broadcastDevicesToAllWindows().catch(err => {
+          console.warn('[repair-device] 广播设备列表失败:', err);
+        });
+      }, 700);
+      return { success: true, result };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setTimeout(() => {
+        updateTrayMenu(true);
+      }, 300);
+      setTimeout(() => {
+        broadcastDevicesToAllWindows().catch(err => {
+          console.warn('[repair-device] 广播设备列表失败:', err);
+        });
+      }, 700);
+      return { success: false, error: errorMessage };
+    }
+  });
+
   ipcMain.handle('restore-to-readonly', async (event: IpcMainInvokeEvent, device: any) => {
     try {
       // 在还原为只读之前，先将设备添加到手动只读列表，防止自动读写功能立即将其设置为读写

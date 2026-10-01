@@ -52,8 +52,8 @@ class NTFSManager {
   }
 
   // 挂载设备
-  async mountDevice(device: NTFSDevice): Promise<string> {
-    return await this.mountOperations.mountDevice(device);
+  async mountDevice(device: NTFSDevice, passwordOverride?: string): Promise<string> {
+    return await this.mountOperations.mountDevice(device, passwordOverride);
   }
 
   // 卸载设备
@@ -69,6 +69,11 @@ class NTFSManager {
   // 重置设备（卸载+修复）
   async resetDevice(device: NTFSDevice): Promise<string> {
     return await this.mountOperations.resetDevice(device);
+  }
+
+  // 修复 NTFS 文件系统，不应用重置操作的持久只读状态
+  async repairDevice(device: NTFSDevice): Promise<string> {
+    return await this.mountOperations.repairDevice(device);
   }
 
   // 清理旧的挂载标记

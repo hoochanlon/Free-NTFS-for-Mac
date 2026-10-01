@@ -158,7 +158,7 @@ export class MountOperations {
   }
 
   // 挂载设备
-  async mountDevice(device: NTFSDevice): Promise<string> {
+  async mountDevice(device: NTFSDevice, passwordOverride?: string): Promise<string> {
     const ntfs3gPath = await this.getNTFS3GPath();
     if (!ntfs3gPath) {
       throw new Error('未找到 ntfs-3g，请先安装依赖');
@@ -184,7 +184,7 @@ export class MountOperations {
     }
 
     try {
-      let password = await this.passwordManager.getPassword('messages.passwordDialog.mountDevice', { name: device.volumeName });
+      let password = passwordOverride || await this.passwordManager.getPassword('messages.passwordDialog.mountDevice', { name: device.volumeName });
 
       try {
         await this.sudoExecutor.executeSudoWithPassword(['umount', '-f', device.devicePath], password);
@@ -347,6 +347,70 @@ export class MountOperations {
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`重置设备失败: ${errorMessage}`);
     }
+  }
+
+  // Repair an NTFS volume without applying resetDevice's persistent read-only behavior.
+  async repairDevice(device: NTFSDevice): Promise<string> {
+    if (!/^\/dev\/disk\d+s\d+$/.test(device.devicePath)) {
+      throw new Error('REPAIR_INVALID_PATH');
+    }
+
+    const wasReadOnly = device.isReadOnly;
+    let password = await this.passwordManager.getPassword('messages.passwordDialog.repairDevice', { name: device.volumeName });
+    const execute = async (args: string[]) => {
+      try {
+        return await this.sudoExecutor.executeSudoWithPassword(args, password);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (!/密码错误|password is incorrect|sorry, try again/i.test(errorMessage)) {
+          throw error;
+        }
+
+        password = await this.passwordManager.getPassword('messages.passwordDialog.repairDevice', { name: device.volumeName });
+        return await this.sudoExecutor.executeSudoWithPassword(args, password);
+      }
+    };
+
+    try {
+      await execute(['diskutil', 'unmount', device.devicePath]);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`REPAIR_UNMOUNT_FAILED:${errorMessage}`);
+    }
+
+    this.mountedDevices.delete(device.disk);
+    fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    let repairError: unknown;
+    try {
+      await execute(['ntfsfix', device.devicePath]);
+    } catch (error) {
+      repairError = error;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      if (wasReadOnly) {
+        await execute(['diskutil', 'mount', device.devicePath]);
+      } else {
+        await this.mountDevice(device, password);
+      }
+    } catch (mountError) {
+      const mountMessage = mountError instanceof Error ? mountError.message : String(mountError);
+      if (repairError) {
+        const repairMessage = repairError instanceof Error ? repairError.message : String(repairError);
+        throw new Error(`REPAIR_AND_REMOUNT_FAILED:${repairMessage}|${mountMessage}`);
+      }
+      throw new Error(`REPAIR_REMOUNT_FAILED:${mountMessage}`);
+    }
+
+    if (repairError) {
+      const errorMessage = repairError instanceof Error ? repairError.message : String(repairError);
+      throw new Error(`REPAIR_FILESYSTEM_FAILED:${errorMessage}`);
+    }
+
+    return `设备 ${device.volumeName} 的 NTFS 文件系统已修复并恢复原挂载模式`;
   }
 
   // 清理旧的挂载标记

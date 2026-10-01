@@ -761,6 +761,42 @@ body.tray-window
     font-size 11px
     word-break break-all
 
+.device-status-actions
+  display flex
+  align-items center
+  gap 5px
+  flex-shrink 0
+
+.repair-icon-btn
+  display inline-flex
+  align-items center
+  justify-content center
+  width 26px
+  height 26px
+  padding 4px
+  border 1px solid var(--border)
+  border-radius 5px
+  background var(--bg-secondary)
+  color var(--warning)
+  cursor pointer
+  flex-shrink 0
+
+  &:hover
+    background rgba(255, 149, 0, 0.12)
+    border-color var(--warning)
+
+  &:focus-visible
+    outline 2px solid var(--warning)
+    outline-offset 2px
+
+  span
+    display block
+    width 16px
+    height 16px
+    background-color currentColor
+    mask url('src/imgs/svg/actions/repair.svg') center / contain no-repeat
+    -webkit-mask url('src/imgs/svg/actions/repair.svg') center / contain no-repeat
+
 // 设备操作按钮
 .device-actions
   display flex

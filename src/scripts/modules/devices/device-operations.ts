@@ -68,6 +68,37 @@
     return device?.volumeUuid || device?.disk;
   }
 
+  function getRepairErrorMessage(error: unknown): string {
+    const message = error instanceof Error ? error.message : String(error);
+    if (/密码错误|password is incorrect|sorry, try again/i.test(message)) {
+      return t('messages.passwordError');
+    }
+    if (/用户取消|user cancelled|cancelled/i.test(message)) {
+      return t('messages.cancelled');
+    }
+
+    const separator = message.indexOf(':');
+    const code = separator === -1 ? message : message.slice(0, separator);
+    const detail = separator === -1 ? '' : message.slice(separator + 1);
+    switch (code) {
+      case 'REPAIR_INVALID_PATH':
+      case 'REPAIR_DEVICE_UNAVAILABLE':
+        return t('messages.repairDeviceUnavailable');
+      case 'REPAIR_UNMOUNT_FAILED':
+        return t('messages.repairUnmountFailed', { error: detail });
+      case 'REPAIR_FILESYSTEM_FAILED':
+        return t('messages.repairFilesystemFailed', { error: detail });
+      case 'REPAIR_REMOUNT_FAILED':
+        return t('messages.repairRemountFailed', { error: detail });
+      case 'REPAIR_AND_REMOUNT_FAILED': {
+        const [repairError, mountError] = detail.split('|', 2);
+        return t('messages.repairAndRemountFailed', { error: repairError, mountError });
+      }
+      default:
+        return `${t('messages.repairError')}: ${message}`;
+    }
+  }
+
   // 记录手动只读设备最后一次出现时间（用于宽限期，避免还原只读的临时卸载被误清）
   const manualLastSeen = (AppModules.Devices as any).manualLastSeen as Map<string, number> || new Map<string, number>();
   (AppModules.Devices as any).manualLastSeen = manualLastSeen;
@@ -261,6 +292,76 @@
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         await addLog(`${t('messages.resetError') || '重置失败'}: ${errorMessage}`, 'error');
+      } finally {
+        if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
+          DeviceUtils.showLoading(false);
+        }
+      }
+    },
+
+    // 修复 NTFS 文件系统
+    async repairDevice(
+      device: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      devicesList: HTMLElement,
+      readWriteDevicesList: HTMLElement,
+      statusDot: HTMLElement,
+      statusText: HTMLElement
+    ): Promise<void> {
+      const title = t('devices.repairConfirm', { name: device.volumeName });
+      const message = t('devices.repairConfirmNote', { name: device.volumeName });
+      const confirmed = await AppUtils.UI.showConfirm(title, message);
+      if (!confirmed) return;
+
+      const showRepairMessage = async (messageTitle: string, messageText: string, type: 'info' | 'error'): Promise<void> => {
+        await AppUtils.UI.showMessage(messageTitle, messageText, type);
+      };
+
+      try {
+        if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
+          DeviceUtils.showLoading(true);
+        }
+
+        await addLog(t('messages.repairing', { name: device.volumeName }), 'info');
+        await addLog(t('messages.enterPassword'), 'info');
+
+        const autoMountCooldown: Map<string, number> =
+          (AppModules.Devices as any).autoMountCooldown || new Map<string, number>();
+        (AppModules.Devices as any).autoMountCooldown = autoMountCooldown;
+        const cooldownUntil = Date.now() + 120000;
+        const manualId = getManualReadOnlyId(device);
+        if (manualId) autoMountCooldown.set(manualId, cooldownUntil);
+        if (device.disk) autoMountCooldown.set(device.disk, cooldownUntil);
+        clearAutoMountAttemptedDisk(device.disk);
+
+        const result = await electronAPI.repairDevice(device);
+        if (result.success) {
+          const successMessage = t('messages.repairSuccess', {
+            name: device.volumeName,
+            mode: t(device.isReadOnly ? 'devices.readOnly' : 'devices.readWrite')
+          });
+          await addLog(successMessage, 'success');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await refreshDeviceList(devicesList, 0);
+          await showRepairMessage(t('messages.repairResultTitle'), successMessage, 'info');
+        } else {
+          const errorMessage = getRepairErrorMessage(result.error || t('messages.unknownError'));
+          const errorType = errorMessage === t('messages.cancelled') ? 'info' :
+            errorMessage === t('messages.passwordError') ? 'warning' : 'error';
+          await addLog(errorMessage, errorType);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await refreshDeviceList(devicesList, 0);
+          if (errorType === 'error') {
+            await showRepairMessage(t('messages.repairFailedTitle'), errorMessage, 'error');
+          }
+        }
+      } catch (error) {
+        const errorMessage = getRepairErrorMessage(error);
+        const errorType = errorMessage === t('messages.cancelled') ? 'info' :
+          errorMessage === t('messages.passwordError') ? 'warning' : 'error';
+        await addLog(errorMessage, errorType);
+        if (errorType === 'error') {
+          await showRepairMessage(t('messages.repairFailedTitle'), errorMessage, 'error');
+        }
       } finally {
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
           DeviceUtils.showLoading(false);

@@ -8,6 +8,7 @@ const electronAPI: ElectronAPI = {
   mountDevice: (device) => ipcRenderer.invoke('mount-device', device),
   unmountDevice: (device) => ipcRenderer.invoke('unmount-device', device),
   resetDevice: (device) => ipcRenderer.invoke('reset-device', device),
+  repairDevice: (device) => ipcRenderer.invoke('repair-device', device),
   restoreToReadOnly: (device) => ipcRenderer.invoke('restore-to-readonly', device),
   ejectDevice: (device) => ipcRenderer.invoke('eject-device', device),
   // 已移除自动安装功能
@@ -15,6 +16,9 @@ const electronAPI: ElectronAPI = {
   requestSudoPassword: () => ipcRenderer.invoke('request-sudo-password'),
   onDeviceUpdate: (callback: (data: any) => void) => {
     ipcRenderer.on('device-update', (_event: IpcRendererEvent, data: any) => callback(data));
+  },
+  onDeviceAutoMountCooldown: (callback: (data: { disk: string; volumeUuid?: string; until: number }) => void) => {
+    ipcRenderer.on('device-auto-mount-cooldown', (_event: IpcRendererEvent, data: { disk: string; volumeUuid?: string; until: number }) => callback(data));
   },
   openLogsWindow: () => ipcRenderer.invoke('open-logs-window'),
   closeLogsWindow: () => ipcRenderer.invoke('close-logs-window'),

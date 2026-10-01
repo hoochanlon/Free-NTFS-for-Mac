@@ -233,7 +233,14 @@
             <div class="device-card-content">
               <div class="device-card-header-tray">
               <div class="device-name-large">${device.volumeName}</div>
-                <span class="device-status device-status-tray ${statusClass}">${statusText}</span>
+                <div class="device-status-actions">
+                  <span class="device-status device-status-tray ${statusClass}">${statusText}</span>
+                  ${!isUnmounted ? `
+                  <button class="repair-icon-btn repair-btn" type="button" data-disk="${device.disk}" title="${t('devices.repairTooltip')}" aria-label="${t('devices.repairTooltip')}">
+                    <span aria-hidden="true"></span>
+                  </button>
+                  ` : ''}
+                </div>
               </div>
               ${device.capacity && device.capacity.total > 0 && availableText && totalText ? `
               <div class="device-capacity-info-windows">
@@ -296,7 +303,14 @@
               <span class="device-icon"></span>
               ${device.volumeName}
             </div>
-            <span class="device-status ${statusClass}">${statusText}</span>
+            <div class="device-status-actions">
+              <span class="device-status ${statusClass}">${statusText}</span>
+              ${!isUnmounted ? `
+              <button class="repair-icon-btn repair-btn" type="button" data-disk="${device.disk}" title="${t('devices.repairTooltip')}" aria-label="${t('devices.repairTooltip')}">
+                <span aria-hidden="true"></span>
+              </button>
+              ` : ''}
+            </div>
           </div>
           <div class="device-info">
             ${(() => {

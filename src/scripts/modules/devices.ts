@@ -59,6 +59,12 @@
   const autoMountCooldown: Map<string, number> =
     (AppModules.Devices as any).autoMountCooldown || new Map<string, number>();
   (AppModules.Devices as any).autoMountCooldown = autoMountCooldown;
+  if (electronAPI && typeof electronAPI.onDeviceAutoMountCooldown === 'function') {
+    electronAPI.onDeviceAutoMountCooldown((data: { disk: string; volumeUuid?: string; until: number }) => {
+      autoMountCooldown.set(data.disk, data.until);
+      if (data.volumeUuid) autoMountCooldown.set(data.volumeUuid, data.until);
+    });
+  }
 
   // 设备管理主对象（合并到现有对象，而不是覆盖）
   Object.assign(AppModules.Devices, {
