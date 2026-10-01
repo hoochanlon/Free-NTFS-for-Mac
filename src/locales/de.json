@@ -225,6 +225,7 @@
   },
   "settings": {
     "title": "Anwendungseinstellungen",
+    "hideIconTooltips": "3 Sekunden gedrückt halten, um Symbol-Tooltips umzuschalten",
     "savePassword": "Administrator-Passwort speichern",
     "savePasswordDesc": "Wenn aktiviert, speichert die App Ihr Administrator-Passwort sicher mit macOS Keychain für automatische Eingabe",
     "deletePassword": "Gespeichertes Passwort löschen",

@@ -1,8 +1,16 @@
-## 免責聲明
+## 關於本軟體
 
-使用本工具掛載和修改 NTFS 設備存在資料遺失的風險。建議在使用前備份重要資料。本工具按"現狀"提供，不提供任何明示或暗示的擔保。使用本工具造成的任何資料損失，開發者不承擔責任。
+**Nigate** 是一款基於 ntfs-3g 的免費 macOS NTFS 儲存裝置讀寫工具，由胡成龍（Hoochanlon / ChengLung Hwu）開發。
+
+- <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 作者主頁：[https://github.com/hoochanlon](https://github.com/hoochanlon)
+- <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 軟體專案：[https://github.com/hoochanlon/Free-NTFS-for-Mac](https://github.com/hoochanlon/Free-NTFS-for-Mac)
+- <img src="../imgs/svg/social/email.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 聯絡電子郵件：[hoochanlon@outlook.com](mailto:hoochanlon@outlook.com)
 
 > [!WARN]
+> **免責聲明**
+>
+> 使用本工具掛載和修改 NTFS 設備存在資料遺失的風險。建議在使用前備份重要資料。本工具按"現狀"提供，不提供任何明示或暗示的擔保。使用本工具造成的任何資料損失，開發者不承擔責任。
+>
 > 該軟體的穩定運行和資料完整性依賴於儲存裝置的性能。為避免出現資料讀寫錯誤、傳輸中斷或裝置識別失敗等問題，推薦選用由優質快閃記憶體顆粒製成、讀寫性能有保障的U盤。
 
 ## 系統要求
@@ -76,6 +84,10 @@ brew install ntfs-3g-mac
 - <img src="../imgs/svg/ui/info.svg" alt="關於" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **關於圖示** - 開啟關於視窗，查看應用程式資訊和專案連結。
 - <img src="../imgs/svg/actions/exit.svg" alt="退出" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **退出圖示** - 退出應用程式。
 
+### 設定頁圖示
+
+- 🤫 **彩蛋圖示** - 位於「應用設定」標題旁，長按 3 秒可切換全域圖示按鈕懸停提示的顯示狀態；選擇會被保存。
+
 ### 標籤頁圖示
 
 - <img src="../imgs/svg/ui/log.svg" alt="日誌" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **日誌圖示** - 切換到「操作日誌」標籤頁，查看所有操作的記錄。
@@ -83,6 +95,7 @@ brew install ntfs-3g-mac
 ### 裝置管理圖示
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="重新整理" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **重新整理圖示** - 重新整理裝置列表，重新偵測已連接的 NTFS 裝置。
+- <img src="../imgs/svg/actions/repair.svg" alt="修復" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **修復圖示** - 點擊對應裝置的修復圖示並確認，可修復其 NTFS 檔案系統；操作需要管理員權限並輸入密碼。
 
 ## 使用步驟
 

@@ -24,6 +24,7 @@ const DEFAULT_SETTINGS = {
   trayMode: false, // 托盘模式，默认关闭
   autoStart: false, // 系统自启，默认关闭
   preventSleep: false, // 禁止休眠，默认关闭
+  hideIconTooltips: false,
   // 用户手动设置为只读的设备列表：
   // 优先存 volumeUuid（稳定，不会因插拔变化），拿不到时才存 disk（可能被系统复用，仅用于兼容旧数据）
   manuallyReadOnlyDevices: [] as string[]
@@ -40,6 +41,7 @@ export interface AppSettings {
   trayMode: boolean; // 托盘模式
   autoStart: boolean; // 系统自启
   preventSleep: boolean; // 禁止休眠
+  hideIconTooltips: boolean;
   manuallyReadOnlyDevices?: string[]; // 用户手动设置为只读的设备列表
 }
 

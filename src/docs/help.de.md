@@ -1,8 +1,17 @@
-## Haftungsausschluss
+## Über Nigate
 
-Die Verwendung dieses Tools zum Einhängen und Ändern von NTFS-Geräten birgt das Risiko von Datenverlust. Es wird empfohlen, wichtige Daten vor der Verwendung zu sichern. Dieses Tool wird "wie besehen" ohne jegliche ausdrückliche oder stillschweigende Garantien bereitgestellt. Der Entwickler übernimmt keine Verantwortung für Datenverluste, die durch die Verwendung dieses Tools verursacht werden.
+**Nigate** ist ein kostenloses macOS-Werkzeug zum Lesen und Schreiben von NTFS-Speichergeräten auf Basis von ntfs-3g. Entwickelt von Hoochanlon (胡成龙, ChengLung Hwu).
 
+- <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> Autorenseite: [https://github.com/hoochanlon](https://github.com/hoochanlon)
+- <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> Softwareprojekt: [https://github.com/hoochanlon/Free-NTFS-for-Mac](https://github.com/hoochanlon/Free-NTFS-for-Mac)
+- <img src="../imgs/svg/social/email.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> Kontakt-E-Mail: [hoochanlon@outlook.com](mailto:hoochanlon@outlook.com)
+
+##
 > [!WARN]
+> **Haftungsausschluss**
+>
+> Die Verwendung dieses Tools zum Einhängen und Ändern von NTFS-Geräten birgt das Risiko von Datenverlust. Es wird empfohlen, wichtige Daten vor der Verwendung zu sichern. Dieses Tool wird "wie besehen" ohne jegliche ausdrückliche oder stillschweigende Garantien bereitgestellt. Der Entwickler übernimmt keine Verantwortung für Datenverluste, die durch die Verwendung dieses Tools verursacht werden.
+>
 > Der stabile Betrieb und die Datenintegrität dieser Software hängen von der Leistung der Speichergeräte ab. Um Datenlese-/schreibfehler, Übertragungsunterbrechungen oder Geräteerkennungsfehler zu vermeiden, wird empfohlen, USB-Laufwerke zu verwenden, die aus hochwertigen Flash-Speicherchips hergestellt sind und eine zuverlässige Lese-/Schreibleistung aufweisen.
 
 ## Systemanforderungen
@@ -76,6 +85,10 @@ Die Hauptoberfläche der Anwendung bietet mehrere Funktionssymbole, die Ihnen he
 - <img src="../imgs/svg/ui/info.svg" alt="Info" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Info-Symbol** - Öffnet das Info-Fenster, um Anwendungsinformationen und Projektlinks anzuzeigen.
 - <img src="../imgs/svg/actions/exit.svg" alt="Beenden" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Beenden-Symbol** - Beendet die Anwendung.
 
+### Symbol im Einstellungsbereich
+
+- 🤫 **Easter-Egg-Symbol** - Neben der Überschrift „Anwendungseinstellungen“. 3 Sekunden gedrückt halten, um die Hover-Tooltips für Symbolschaltflächen in der gesamten App umzuschalten; die Auswahl wird gespeichert.
+
 ### Registerkarten-Symbole
 
 - <img src="../imgs/svg/ui/log.svg" alt="Protokoll" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Protokoll-Symbol** - Wechselt zur Registerkarte "Betriebsprotokolle", um Aufzeichnungen aller Vorgänge anzuzeigen.
@@ -83,6 +96,7 @@ Die Hauptoberfläche der Anwendung bietet mehrere Funktionssymbole, die Ihnen he
 ### Geräteverwaltungs-Symbole
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="Aktualisieren" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Aktualisieren-Symbol** - Aktualisiert die Geräteliste und erkennt angeschlossene NTFS-Geräte neu.
+- <img src="../imgs/svg/actions/repair.svg" alt="Reparieren" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Reparatur-Symbol** - Klicken Sie beim gewünschten Gerät auf das Reparatur-Symbol und bestätigen Sie, um dessen NTFS-Dateisystem zu reparieren. Dafür sind Administratorrechte und ein Passwort erforderlich.
 
 ## Verwendungsschritte
 

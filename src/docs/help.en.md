@@ -1,8 +1,16 @@
-## Disclaimer
+## About Nigate
 
-Using this tool to mount and modify NTFS devices carries the risk of data loss. It is recommended to back up important data before use. This tool is provided "as is" without any express or implied warranties. The developer is not responsible for any data loss caused by using this tool.
+**Nigate** is a free macOS utility for reading and writing NTFS storage devices, built on ntfs-3g. It is developed by Hoochanlon (胡成龙, ChengLung Hwu).
+
+- <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> Author page: [https://github.com/hoochanlon](https://github.com/hoochanlon)
+- <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> Software project: [https://github.com/hoochanlon/Free-NTFS-for-Mac](https://github.com/hoochanlon/Free-NTFS-for-Mac)
+- <img src="../imgs/svg/social/email.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> Contact email: [hoochanlon@outlook.com](mailto:hoochanlon@outlook.com)
 
 > [!WARN]
+> **Disclaimer**
+>
+> Using this tool to mount and modify NTFS devices carries the risk of data loss. It is recommended to back up important data before use. This tool is provided "as is" without any express or implied warranties. The developer is not responsible for any data loss caused by using this tool.
+>
 > The stable operation and data integrity of this software depend on the performance of storage devices. To avoid data read/write errors, transfer interruptions, or device recognition failures, it is recommended to use USB drives made with high-quality flash memory chips that have reliable read/write performance.
 
 ## System Requirements
@@ -76,6 +84,10 @@ The application's main interface provides several functional icons to help you q
 - <img src="../imgs/svg/ui/info.svg" alt="About" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **About Icon** - Opens the about window to view application information and project links.
 - <img src="../imgs/svg/actions/exit.svg" alt="Quit" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Quit Icon** - Quits the application.
 
+### Settings Header Icon
+
+- 🤫 **Easter Egg Icon** - Beside the "Application Settings" heading. Press and hold for 3 seconds to toggle hover tooltips for icon buttons throughout the app; the choice is saved.
+
 ### Tab Icons
 
 - <img src="../imgs/svg/ui/log.svg" alt="Logs" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Logs Icon** - Switches to the "Operation Logs" tab to view records of all operations.
@@ -83,6 +95,7 @@ The application's main interface provides several functional icons to help you q
 ### Device Management Icons
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="Refresh" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Refresh Icon** - Refreshes the device list and re-detects connected NTFS devices.
+- <img src="../imgs/svg/actions/repair.svg" alt="Repair" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Repair Icon** - Click the repair icon for a device and confirm to repair its NTFS file system. This requires administrator privileges and a password.
 
 ## Usage Steps
 

@@ -1,6 +1,55 @@
 // macOS 风格按钮样式
 @import 'variables'
 
+.icon-tooltip-toggle
+  position relative
+  display inline-flex
+  align-items center
+  justify-content center
+  width 34px
+  height 34px
+  padding 7px
+  overflow hidden
+  color var(--text-secondary)
+  background transparent
+  border 1px solid transparent
+  border-radius 8px
+  cursor pointer
+  transition background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease
+
+  svg
+    width 20px
+    height 20px
+
+  &::after
+    position absolute
+    right 5px
+    bottom 3px
+    left 5px
+    height 2px
+    background var(--accent)
+    content ''
+    transform scaleX(0)
+    transform-origin left
+
+  &:hover,
+  &.is-active
+    color var(--text-primary)
+    background var(--bg-primary)
+    border-color var(--border)
+
+  &:focus-visible
+    outline 2px solid var(--accent)
+    outline-offset 2px
+
+  &.is-holding::after
+    transform scaleX(1)
+    transition transform 3s linear
+
+  &.is-active::after
+    transform scaleX(1)
+    transition none
+
 .btn
   padding 6px 16px
   border none

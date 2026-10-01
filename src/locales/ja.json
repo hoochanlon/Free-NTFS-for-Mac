@@ -225,6 +225,7 @@
   },
   "settings": {
     "title": "アプリケーション設定",
+    "hideIconTooltips": "3 秒間長押ししてアイコンのツールチップを切り替え",
     "savePassword": "管理者パスワードを保存",
     "savePasswordDesc": "有効にすると、アプリは macOS Keychain を使用して管理者パスワードを安全に保存し、自動入力できるようにします",
     "deletePassword": "保存されたパスワードを削除",

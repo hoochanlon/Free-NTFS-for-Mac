@@ -1,8 +1,16 @@
-## 免責事項
+## Nigate について
 
-本ツールを使用してNTFSデバイスをマウントおよび変更することは、データ損失のリスクがあります。使用前に重要なデータをバックアップすることをお勧めします。本ツールは「現状のまま」提供され、明示的または黙示的な保証は一切ありません。本ツールの使用によって生じたデータ損失について、開発者は責任を負いません。
+**Nigate** は、ntfs-3g をベースにした無料の macOS 向け NTFS ストレージ読み書きツールです。Hoochanlon（胡成龙 / ChengLung Hwu）が開発しています。
+
+- <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 作者ページ：[https://github.com/hoochanlon](https://github.com/hoochanlon)
+- <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> ソフトウェアプロジェクト：[https://github.com/hoochanlon/Free-NTFS-for-Mac](https://github.com/hoochanlon/Free-NTFS-for-Mac)
+- <img src="../imgs/svg/social/email.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 連絡先メール：[hoochanlon@outlook.com](mailto:hoochanlon@outlook.com)
 
 > [!WARN]
+> **免責事項**
+>
+> 本ツールを使用してNTFSデバイスをマウントおよび変更することは、データ損失のリスクがあります。使用前に重要なデータをバックアップすることをお勧めします。本ツールは「現状のまま」提供され、明示的または黙示的な保証は一切ありません。本ツールの使用によって生じたデータ損失について、開発者は責任を負いません。
+>
 > このソフトウェアの安定動作とデータの整合性は、ストレージデバイスの性能に依存します。データの読み書きエラー、転送中断、またはデバイス認識失敗などの問題を避けるため、高品質なフラッシュメモリチップで製造され、信頼性のある読み書き性能を備えたUSBドライブの使用を推奨します。
 
 ## システム要件
@@ -76,6 +84,10 @@ brew install ntfs-3g-mac
 - <img src="../imgs/svg/ui/info.svg" alt="情報" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **情報アイコン** - 情報ウィンドウを開き、アプリケーション情報とプロジェクトリンクを表示します。
 - <img src="../imgs/svg/actions/exit.svg" alt="終了" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **終了アイコン** - アプリケーションを終了します。
 
+### 設定画面のアイコン
+
+- 🤫 **イースターエッグアイコン** - 「アプリケーション設定」の見出し横にあります。3 秒間長押しすると、アプリ全体のアイコンボタンのホバーツールチップを切り替えます。設定は保存されます。
+
 ### タブアイコン
 
 - <img src="../imgs/svg/ui/log.svg" alt="ログ" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **ログアイコン** - 「操作ログ」タブに切り替えて、すべての操作の記録を表示します。
@@ -83,6 +95,7 @@ brew install ntfs-3g-mac
 ### デバイス管理アイコン
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="更新" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **更新アイコン** - デバイスリストを更新し、接続されている NTFS デバイスを再検出します。
+- <img src="../imgs/svg/actions/repair.svg" alt="修復" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **修復アイコン** - 対象デバイスの修復アイコンをクリックして確認すると、NTFS ファイルシステムを修復します。管理者権限とパスワードが必要です。
 
 ## 使用手順
 

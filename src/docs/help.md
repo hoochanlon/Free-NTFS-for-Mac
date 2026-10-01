@@ -1,3 +1,11 @@
+## 关于本软件
+
+**Nigate** 是一款基于 ntfs-3g 的免费 macOS NTFS 存储设备读写工具，由胡成龙（Hoochanlon / ChengLung Hwu）开发。
+
+- <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 作者主页：[https://github.com/hoochanlon](https://github.com/hoochanlon)
+- <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 软件项目：[https://github.com/hoochanlon/Free-NTFS-for-Mac](https://github.com/hoochanlon/Free-NTFS-for-Mac)
+- <img src="../imgs/svg/social/email.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 联系邮箱：[hoochanlon@outlook.com](mailto:hoochanlon@outlook.com)
+
 ## 免责声明
 
 使用本工具挂载和修改 NTFS 设备存在数据丢失的风险。建议在使用前备份重要数据。本工具按"现状"提供，不提供任何明示或暗示的担保。使用本工具造成的任何数据损失，开发者不承担责任。
@@ -73,6 +81,10 @@ brew install ntfs-3g-mac
 - <img src="../imgs/svg/ui/info.svg" alt="关于" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **关于图标** - 打开关于窗口，查看应用信息和项目链接。
 - <img src="../imgs/svg/actions/exit.svg" alt="退出" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **退出图标** - 退出应用程序。
 
+### 设置页图标
+
+- 🤫 **彩蛋图标** - 位于“应用设置”标题旁，长按 3 秒可切换全局图标按钮悬停提示的显示状态；选择会被保存。
+
 ### 标签页图标
 
 - <img src="../imgs/svg/ui/log.svg" alt="日志" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **日志图标** - 切换到"操作日志"标签页，查看所有操作的记录。
@@ -80,6 +92,7 @@ brew install ntfs-3g-mac
 ### 设备管理图标
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="刷新" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **刷新图标** - 刷新设备列表，重新检测已连接的 NTFS 设备。
+- <img src="../imgs/svg/actions/repair.svg" alt="修复" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **修复图标** - 点击对应设备的修复图标并确认，可修复其 NTFS 文件系统；操作需要管理员权限并输入密码。
 
 ## 使用步骤
 

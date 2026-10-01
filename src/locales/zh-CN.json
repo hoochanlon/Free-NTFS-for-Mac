@@ -225,6 +225,7 @@
   },
   "settings": {
     "title": "应用设置",
+    "hideIconTooltips": "长按 3 秒切换图标按钮提示",
     "savePassword": "保存管理员密码",
     "savePasswordDesc": "启用后，应用将使用 macOS Keychain 安全保存您的管理员密码，以便自动输入",
     "deletePassword": "删除保存的密码",
