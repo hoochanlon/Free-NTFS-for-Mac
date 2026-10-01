@@ -202,11 +202,19 @@ export class MountOperations {
         }
       }
 
+      const mountUid = process.getuid?.();
+      const mountGid = process.getgid?.();
+      if (mountUid === undefined || mountGid === undefined) {
+        throw new Error('无法读取当前用户 UID/GID，已取消挂载');
+      }
+
       const mountArgs = [
         fullPath,
         '-olocal',
         '-oallow_other',
         '-oauto_xattr',
+        `-ouid=${mountUid}`,
+        `-ogid=${mountGid}`,
         `-ovolname=${device.volumeName}`,
         '-oremove_hiberfile',
         '-onoatime',

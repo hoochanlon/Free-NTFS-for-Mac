@@ -74,6 +74,8 @@ detect_language() {
 
 # 设置语言
 SCRIPT_LANG=$(detect_language)
+MOUNT_UID="${SUDO_UID:-$(id -u)}"
+MOUNT_GID="${SUDO_GID:-$(id -g)}"
 
 # 翻译函数
 t() {
@@ -291,18 +293,18 @@ config_u_drive(){
 	        #   -ovolname=$volume: 设置卷名
 	        #   -oremove_hiberfile: 删除 Windows 休眠文件（解决快速启动问题）
 	        #   -onoatime: 不更新访问时间（提高性能）
-	        timeout 10 sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ovolname=$volume -oremove_hiberfile -onoatime 2>&1
+	        timeout 10 sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ouid=$MOUNT_UID -ogid=$MOUNT_GID -ovolname=$volume -oremove_hiberfile -onoatime 2>&1
 	        mount_result=$?  # 保存退出码
 
 	    # 方法 2: 如果系统没有 timeout，尝试使用 gtimeout（GNU 版本）
 	    elif command -v gtimeout >/dev/null 2>&1; then
-	        gtimeout 10 sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ovolname=$volume -oremove_hiberfile -onoatime 2>&1
+	        gtimeout 10 sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ouid=$MOUNT_UID -ogid=$MOUNT_GID -ovolname=$volume -oremove_hiberfile -onoatime 2>&1
 	        mount_result=$?
 
 	    # 方法 3: 如果都没有，使用后台进程 + 手动超时控制
 	    else
 	        # & 表示在后台运行
-	        sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ovolname=$volume -oremove_hiberfile -onoatime 2>&1 &
+	        sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ouid=$MOUNT_UID -ogid=$MOUNT_GID -ovolname=$volume -oremove_hiberfile -onoatime 2>&1 &
 	        mount_pid=$!  # $! 是最后一个后台进程的 PID（进程 ID）
 
 	        # 等待最多 10 秒，每秒检查一次进程是否还在运行

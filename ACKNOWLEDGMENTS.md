@@ -7,6 +7,7 @@
 - [@nohajc](https://github.com/nohajc) - 对工具使用上的帮助热情解答
 - [@lezgomatt](https://github.com/lezgomatt) - 对工具使用上的帮助热情解答
 - [@zhangzjjjjjj](https://github.com/zhangzjjjjjj) - 提供 ext4 使用率信息帮助
+- [@snaildesu](https://github.com/snaildesu) - 探寻到了关于指令只能复制、删除，不能编辑与保存的问题
 
 ### Bug 报告者
 
@@ -46,6 +47,7 @@
 - [MacBed](https://www.macbed.com/nigate/) - 在网站上介绍和推荐本项目
 - [阮一峰的网络日志](https://www.ruanyifeng.com/blog/2026/01/weekly-issue-381.html) - 投稿采纳
 - [运维鸭](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MjM5OTc3NDM5OQ==&action=getalbum&album_id=1507905061002280960&scene=126&sessionid=1768560415163#wechat_redirect) - 早期终端脚本工具打包
+- [人生海海路](https://zhuanlan.zhihu.com/p/2006600538062616321) - 知乎专栏
 
 
 ## 开源库与工具
