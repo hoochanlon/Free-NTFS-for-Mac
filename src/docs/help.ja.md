@@ -1,6 +1,6 @@
 ## Nigate について
 
-**Nigate** は、ntfs-3g をベースにした無料の macOS 向け NTFS ストレージ読み書きツールです。Hoochanlon（胡成龙 / ChengLung Hwu）が開発しています。
+**Nigate** は、ntfs-3g をベースにした無料の macOS 向け NTFS ストレージ読み書きツールです。
 
 - <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 作者ページ：[https://github.com/hoochanlon](https://github.com/hoochanlon)
 - <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> ソフトウェアプロジェクト：[https://github.com/hoochanlon/Free-NTFS-for-Mac](https://github.com/hoochanlon/Free-NTFS-for-Mac)

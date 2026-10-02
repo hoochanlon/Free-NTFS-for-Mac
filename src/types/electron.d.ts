@@ -41,6 +41,15 @@ export interface ElectronAPI {
   closeModuleWindow: () => Promise<void>;
   readMarkdown: (filename: string) => Promise<{ success: boolean; content?: string; error?: string }>;
   openAboutWindow: () => Promise<void>;
+  getAppVersion: () => Promise<string>;
+  checkForUpdates: () => Promise<{
+    success: boolean;
+    currentVersion: string;
+    latestVersion?: string;
+    updateAvailable?: boolean;
+    currentAhead?: boolean;
+    releaseUrl: string;
+  }>;
   openExternal: (url: string) => Promise<void>;
   openPath: (targetPath: string) => Promise<void>;
   broadcastThemeChange: (isLightMode: boolean) => Promise<void>;

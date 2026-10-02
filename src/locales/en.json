@@ -371,6 +371,13 @@
     "projectLink": "Project Repository",
     "email": "Email",
     "bluesky": "Bluesky",
-    "ok": "OK"
+    "ok": "OK",
+    "checkUpdates": "Check for Updates",
+    "checkingUpdates": "Checking for updates...",
+    "upToDate": "You're using the latest version ({version}).",
+    "updateAvailable": "Version {version} is available.",
+    "versionAhead": "This version ({version}) is newer than the latest public release ({latestVersion}).",
+    "checkFailed": "Couldn't check for updates. Check your network connection.",
+    "viewReleases": "View Releases"
   }
 }

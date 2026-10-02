@@ -371,6 +371,13 @@
     "projectLink": "專案地址",
     "email": "郵箱",
     "bluesky": "Bluesky",
-    "ok": "確定"
+    "ok": "確定",
+    "checkUpdates": "檢查更新",
+    "checkingUpdates": "正在檢查更新...",
+    "upToDate": "目前已是最新版本（{version}）。",
+    "updateAvailable": "發現新版本 {version}。",
+    "versionAhead": "目前版本（{version}）高於最新公開版本（{latestVersion}）。",
+    "checkFailed": "檢查更新失敗，請檢查網路連線。",
+    "viewReleases": "查看發布頁"
   }
 }

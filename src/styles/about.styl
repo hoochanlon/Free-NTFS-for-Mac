@@ -87,15 +87,80 @@ body
     margin-bottom 12px
     font-size 13px
 
-  ul
-    color var(--text-primary)
-    line-height 1.7
-    margin-left 20px
-    margin-bottom 16px
+  .about-info-list
+    display grid
+    gap 9px
+    margin 0 0 18px
     font-size 13px
+    line-height 1.5
 
-  li
-    margin-bottom 6px
+  .about-info-row
+    display grid
+    grid-template-columns 104px minmax(0, 1fr)
+    gap 10px
+
+  .about-info-row dt
+    color var(--text-secondary)
+
+  .about-info-row dd
+    margin 0
+    color var(--text-primary)
+
+  .about-update-row
+    display grid
+    grid-template-columns max-content minmax(0, 1fr)
+    align-items center
+    column-gap 12px
+    row-gap 6px
+    min-height 34px
+    margin-top 4px
+
+  #updateStatus[hidden],
+  #openReleaseBtn[hidden]
+    display none
+
+  .about-update-status
+    display flex
+    align-items center
+    gap 7px
+    min-width 0
+    margin 0
+    color var(--text-secondary)
+    font-size 12px
+    line-height 1.45
+
+  .about-update-status[data-state='success']
+    color var(--success)
+
+  .about-update-status[data-state='update']
+    color var(--warning)
+
+  .about-update-status[data-state='error']
+    color var(--error)
+
+  .about-update-indicator
+    width 7px
+    height 7px
+    flex 0 0 7px
+    border-radius 50%
+    background currentColor
+
+  #checkUpdatesBtn
+    padding 5px 12px
+    white-space nowrap
+
+  .about-release-link
+    grid-column 2
+    justify-self start
+    padding 0
+    border 0
+    background transparent
+    color var(--accent)
+    font-size 12px
+    cursor pointer
+
+    &:hover
+      text-decoration underline
 
   // 图标行容器
   .about-icons-row

@@ -371,6 +371,13 @@
     "projectLink": "プロジェクトリポジトリ",
     "email": "メール",
     "bluesky": "Bluesky",
-    "ok": "OK"
+    "ok": "OK",
+    "checkUpdates": "アップデートを確認",
+    "checkingUpdates": "アップデートを確認中...",
+    "upToDate": "最新バージョン（{version}）を使用しています。",
+    "updateAvailable": "新しいバージョン {version} が利用可能です。",
+    "versionAhead": "現在のバージョン（{version}）は最新の公開版（{latestVersion}）より新しいです。",
+    "checkFailed": "アップデートを確認できませんでした。ネットワーク接続を確認してください。",
+    "viewReleases": "リリースを表示"
   }
 }

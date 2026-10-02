@@ -1,6 +1,6 @@
 ## 关于本软件
 
-**Nigate** 是一款基于 ntfs-3g 的免费 macOS NTFS 存储设备读写工具，由胡成龙（Hoochanlon / ChengLung Hwu）开发。
+**Nigate** 是一款基于 ntfs-3g 的免费 macOS NTFS 存储设备读写工具。
 
 - <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 作者主页：[https://github.com/hoochanlon](https://github.com/hoochanlon)
 - <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 软件项目：[https://github.com/hoochanlon/Free-NTFS-for-Mac](https://github.com/hoochanlon/Free-NTFS-for-Mac)

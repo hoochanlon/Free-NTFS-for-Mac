@@ -47,6 +47,7 @@
   const helpTab = document.getElementById('helpTab') as HTMLElement;
   const protectBtn = document.getElementById('protectBtn') as HTMLButtonElement;
   const quitBtn = document.getElementById('quitBtn') as HTMLButtonElement;
+  const aboutTitlebarBtn = document.getElementById('aboutTitlebarBtn') as HTMLButtonElement | null;
   const caffeinateBtn = document.getElementById('caffeinateBtn') as HTMLButtonElement | null;
   const autoMountTitlebarBtn = document.getElementById('autoMountTitlebarBtn') as HTMLButtonElement | null;
   const trayModeTitlebarBtn = document.getElementById('trayModeTitlebarBtn') as HTMLButtonElement | null;
@@ -56,6 +57,14 @@
 
   // 初始化
   document.addEventListener('DOMContentLoaded', async () => {
+    aboutTitlebarBtn?.addEventListener('click', async () => {
+      try {
+        await window.electronAPI.openAboutWindow();
+      } catch (error) {
+        console.error('打开关于窗口失败:', error);
+      }
+    });
+
     // 初始化主题（在 DOM 加载前设置，避免闪烁）
     AppUtils.Theme.initializeTheme(docBody, themeToggleButton);
 

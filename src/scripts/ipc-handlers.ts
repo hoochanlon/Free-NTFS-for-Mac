@@ -564,6 +564,59 @@ export function setupNTFSHandlers(): void {
 
 // 窗口相关 IPC handlers
 export function setupWindowHandlers(): void {
+  ipcMain.handle('get-app-version', () => app.getVersion());
+
+  ipcMain.handle('check-for-updates', async () => {
+    const currentVersion = app.getVersion();
+    const releaseUrl = 'https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/latest';
+
+    try {
+      const response = await fetch('https://api.github.com/repos/hoochanlon/Free-NTFS-for-Mac/releases/latest', {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          'User-Agent': 'Nigate-Update-Checker'
+        },
+        signal: AbortSignal.timeout(10000)
+      });
+      if (!response.ok) {
+        throw new Error(`GitHub API returned ${response.status}`);
+      }
+
+      const release = await response.json() as { tag_name?: string; draft?: boolean; prerelease?: boolean };
+      const latestVersion = release.tag_name?.replace(/^v/, '');
+      const parseVersion = (version: string) => {
+        const match = version.match(/^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/);
+        return match ? match.slice(1).map(Number) : null;
+      };
+      const currentParts = parseVersion(currentVersion);
+      const latestParts = latestVersion ? parseVersion(latestVersion) : null;
+
+      if (!latestParts || !currentParts || release.draft || release.prerelease) {
+        throw new Error('Invalid or unsupported release version');
+      }
+
+      let versionComparison = 0;
+      for (let index = 0; index < latestParts.length; index++) {
+        if (latestParts[index] !== currentParts[index]) {
+          versionComparison = latestParts[index] > currentParts[index] ? 1 : -1;
+          break;
+        }
+      }
+
+      return {
+        success: true,
+        currentVersion,
+        latestVersion,
+        updateAvailable: versionComparison > 0,
+        currentAhead: versionComparison < 0,
+        releaseUrl
+      };
+    } catch (error) {
+      console.error('[Update] 检查更新失败:', error);
+      return { success: false, currentVersion, releaseUrl };
+    }
+  });
+
   ipcMain.handle('open-logs-window', async () => {
     await createLogsWindow();
   });

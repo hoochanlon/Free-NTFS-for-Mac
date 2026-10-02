@@ -1,6 +1,6 @@
 ## Über Nigate
 
-**Nigate** ist ein kostenloses macOS-Werkzeug zum Lesen und Schreiben von NTFS-Speichergeräten auf Basis von ntfs-3g. Entwickelt von Hoochanlon (胡成龙, ChengLung Hwu).
+**Nigate** ist ein kostenloses macOS-Werkzeug zum Lesen und Schreiben von NTFS-Speichergeräten auf Basis von ntfs-3g.
 
 - <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> Autorenseite: [https://github.com/hoochanlon](https://github.com/hoochanlon)
 - <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> Softwareprojekt: [https://github.com/hoochanlon/Free-NTFS-for-Mac](https://github.com/hoochanlon/Free-NTFS-for-Mac)
