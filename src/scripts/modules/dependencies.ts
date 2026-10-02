@@ -351,7 +351,7 @@
             </div>
           </div>
           ` : ''}
-          <p class="guide-instructions">${info.installGuide}</p>
+          <p class="guide-instructions${dep.key === 'macfuse' ? ' guide-tip' : ''}">${info.installGuide}</p>
         `;
         depsList.appendChild(guideCard);
       });

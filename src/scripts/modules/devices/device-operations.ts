@@ -351,7 +351,14 @@
           await addLog(successMessage, 'success');
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refreshDeviceList(devicesList, 0);
-          await showRepairMessage(t('messages.repairResultTitle'), successMessage, 'info');
+          if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
+            DeviceUtils.showLoading(false);
+          }
+          const repairButton = Array.from(devicesList.querySelectorAll<HTMLElement>('.repair-btn'))
+            .find(button => button.dataset.disk === device.disk);
+          if (repairButton) {
+            await AppUtils.UI.showSuccessAnimation(successMessage, repairButton);
+          }
         } else {
           const errorMessage = getRepairErrorMessage(result.error || t('messages.unknownError'));
           const errorType = errorMessage === t('messages.cancelled') ? 'info' :

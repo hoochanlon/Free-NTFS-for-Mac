@@ -80,8 +80,8 @@
     },
     "macfuse": {
       "name": "MacFUSE",
-      "description": "File system user space framework, required by ntfs-3g",
-      "installGuide": "Homebrew must be installed first. Run the above command in the terminal to install."
+      "description": "File system user space framework, required by ntfs-3g.",
+      "installGuide": "Apple Silicon tip: Third-party kernel extensions are blocked by default. Shut down and press and hold the power button to enter startup options → Options → Continue → Utilities → Startup Security Utility. Select the system disk, open Security Policy, choose Reduced Security, and check “Allow user management of kernel extensions from identified developers.”"
     },
     "ntfs3g": {
       "name": "ntfs-3g",

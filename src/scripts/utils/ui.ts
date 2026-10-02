@@ -276,6 +276,28 @@
       });
     },
 
+    async showSuccessAnimation(message: string, repairButton: HTMLElement): Promise<void> {
+      const feedback = document.createElement('div');
+      feedback.className = 'repair-success-feedback';
+      feedback.setAttribute('role', 'status');
+      feedback.setAttribute('aria-live', 'polite');
+      feedback.setAttribute('aria-label', message);
+
+      const icon = document.createElement('img');
+      icon.src = '../imgs/svg/actions/check-okey-done.svg';
+      icon.alt = '';
+      icon.setAttribute('aria-hidden', 'true');
+      feedback.appendChild(icon);
+      repairButton.replaceWith(feedback);
+
+      await new Promise<void>((resolve) => {
+        window.setTimeout(() => {
+          if (feedback.isConnected) feedback.replaceWith(repairButton);
+          resolve();
+        }, 3100);
+      });
+    },
+
     // 关于对话框（自定义 HTML 对话框）
     async showAbout(): Promise<void> {
       return new Promise((resolve) => {

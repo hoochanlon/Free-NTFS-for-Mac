@@ -6,13 +6,12 @@
 - <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> Softwareprojekt: [https://github.com/hoochanlon/Free-NTFS-for-Mac](https://github.com/hoochanlon/Free-NTFS-for-Mac)
 - <img src="../imgs/svg/social/email.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> Kontakt-E-Mail: [hoochanlon@outlook.com](mailto:hoochanlon@outlook.com)
 
-##
-> [!WARN]
+> [!IMPORTANT]
 > **Haftungsausschluss**
 >
 > Die Verwendung dieses Tools zum Einhängen und Ändern von NTFS-Geräten birgt das Risiko von Datenverlust. Es wird empfohlen, wichtige Daten vor der Verwendung zu sichern. Dieses Tool wird "wie besehen" ohne jegliche ausdrückliche oder stillschweigende Garantien bereitgestellt. Der Entwickler übernimmt keine Verantwortung für Datenverluste, die durch die Verwendung dieses Tools verursacht werden.
->
-> Der stabile Betrieb und die Datenintegrität dieser Software hängen von der Leistung der Speichergeräte ab. Um Datenlese-/schreibfehler, Übertragungsunterbrechungen oder Geräteerkennungsfehler zu vermeiden, wird empfohlen, USB-Laufwerke zu verwenden, die aus hochwertigen Flash-Speicherchips hergestellt sind und eine zuverlässige Lese-/Schreibleistung aufweisen.
+
+Der stabile Betrieb und die Datenintegrität dieser Software hängen von der Leistung der Speichergeräte ab. Um Datenlese-/schreibfehler, Übertragungsunterbrechungen oder Geräteerkennungsfehler zu vermeiden, wird empfohlen, USB-Laufwerke zu verwenden, die aus hochwertigen Flash-Speicherchips hergestellt sind und eine zuverlässige Lese-/Schreibleistung aufweisen.
 
 ## Systemanforderungen
 
@@ -55,6 +54,9 @@ Folgen Sie den Anweisungen, um die Installation abzuschließen. Wenn das Netzwer
 
 #### 3. MacFUSE installieren
 
+> [!TIP]
+> Apple-Silicon-Macs blockieren Kernel-Erweiterungen von Drittanbietern standardmäßig. Fahren Sie den Mac herunter und halten Sie die Ein-/Aus-Taste gedrückt, bis die Startoptionen erscheinen → Optionen → Fortfahren → Dienstprogramme → Startsicherheitsdienstprogramm. Wählen Sie das Systemvolume, öffnen Sie die Sicherheitsrichtlinie, wählen Sie „Reduzierte Sicherheit“ und aktivieren Sie „Verwaltung von Kernel-Erweiterungen von identifizierten Entwicklern durch Benutzer erlauben“.
+
 Führen Sie den folgenden Befehl im Terminal aus:
 
 ```bash
@@ -96,7 +98,9 @@ Die Hauptoberfläche der Anwendung bietet mehrere Funktionssymbole, die Ihnen he
 ### Geräteverwaltungs-Symbole
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="Aktualisieren" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Aktualisieren-Symbol** - Aktualisiert die Geräteliste und erkennt angeschlossene NTFS-Geräte neu.
-- <img src="../imgs/svg/actions/repair.svg" alt="Reparieren" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Reparatur-Symbol** - Klicken Sie beim gewünschten Gerät auf das Reparatur-Symbol und bestätigen Sie, um dessen NTFS-Dateisystem zu reparieren. Dafür sind Administratorrechte und ein Passwort erforderlich.
+- <img src="../imgs/svg/actions/repair.svg" alt="Reparieren" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Reparatur-Symbol** - Klicken Sie beim gewünschten Gerät auf das Reparatur-Symbol und bestätigen Sie, um eine Reparatur des NTFS-Dateisystems zu versuchen. Dafür sind Administratorrechte und ein Passwort erforderlich. Fehler vom Typ "Resource busy" können automatisch behandelt werden.
+
+**Hinweis: `ntfsfix` bietet nur begrenzte Reparaturmöglichkeiten und kann Windows `chkdsk /f` nicht ersetzen.**
 
 ## Verwendungsschritte
 
@@ -256,7 +260,7 @@ Wenn Sie auf `Error opening '/dev/diskXsX': Resource busy` stoßen, liegt dies n
 
 **Ursache**: Dieser Fehler tritt normalerweise auf, wenn ein Einhängvorgang zwangsweise unterbrochen wurde (z. B. durch erzwungenes Beenden der Anwendung, Systemabsturz usw.), wodurch das Gerät in einem belegten Zustand verbleibt. Sie müssen es zuerst aushängen und reparieren, bevor Sie es erneut einhängen können.
 
-**Verwenden der Reset-Schaltfläche**: Wenn Sie auf einen "Resource busy" Fehler stoßen, können Sie auch direkt auf die "Reset"-Schaltfläche in der Geräteliste klicken. Die Reset-Funktion führt automatisch die folgenden Operationen aus:
+**Verwenden der Reset-Schaltfläche**: Bei einem "Resource busy"-Fehler können Sie direkt auf die Reset-Schaltfläche klicken. Die Reset-Funktion führt automatisch folgende Operationen aus:
 - Gerät aushängen
 - Dateisystem reparieren
 - Gerätebelegungsstatus löschen

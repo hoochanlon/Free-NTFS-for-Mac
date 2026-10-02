@@ -6,12 +6,12 @@
 - <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> Software project: [https://github.com/hoochanlon/Free-NTFS-for-Mac](https://github.com/hoochanlon/Free-NTFS-for-Mac)
 - <img src="../imgs/svg/social/email.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> Contact email: [hoochanlon@outlook.com](mailto:hoochanlon@outlook.com)
 
-> [!WARN]
+> [!IMPORTANT]
 > **Disclaimer**
 >
 > Using this tool to mount and modify NTFS devices carries the risk of data loss. It is recommended to back up important data before use. This tool is provided "as is" without any express or implied warranties. The developer is not responsible for any data loss caused by using this tool.
->
-> The stable operation and data integrity of this software depend on the performance of storage devices. To avoid data read/write errors, transfer interruptions, or device recognition failures, it is recommended to use USB drives made with high-quality flash memory chips that have reliable read/write performance.
+
+The stable operation and data integrity of this software depend on the performance of storage devices. To avoid data read/write errors, transfer interruptions, or device recognition failures, it is recommended to use USB drives made with high-quality flash memory chips that have reliable read/write performance.
 
 ## System Requirements
 
@@ -54,6 +54,9 @@ Follow the prompts to complete the installation. If the network is slow, you can
 
 #### 3. Install MacFUSE
 
+> [!TIP]
+> Apple Silicon Macs block third-party kernel extensions by default. Shut down, then press and hold the power button to enter startup options → Options → Continue → Utilities → Startup Security Utility. Select the system disk, open Security Policy, choose Reduced Security, and check “Allow user management of kernel extensions from identified developers.”
+
 Run the following command in Terminal:
 
 ```bash
@@ -95,7 +98,9 @@ The application's main interface provides several functional icons to help you q
 ### Device Management Icons
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="Refresh" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Refresh Icon** - Refreshes the device list and re-detects connected NTFS devices.
-- <img src="../imgs/svg/actions/repair.svg" alt="Repair" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Repair Icon** - Click the repair icon for a device and confirm to repair its NTFS file system. This requires administrator privileges and a password.
+- <img src="../imgs/svg/actions/repair.svg" alt="Repair" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Repair Icon** - Click the repair icon for a device and confirm to attempt to repair its NTFS file system. Administrator privileges and a password are required. Resource busy errors can be handled automatically.
+
+**Note: `ntfsfix` has limited repair capabilities and cannot replace Windows `chkdsk /f`.**
 
 ## Usage Steps
 
@@ -255,7 +260,7 @@ If you encounter `Error opening '/dev/diskXsX': Resource busy`, this usually occ
 
 **Cause**: This error typically occurs when a mounting operation is forcibly interrupted (such as force quitting the application, system crash, etc.), leaving the device in an occupied state. You need to unmount and repair it before you can remount it.
 
-**Using the Reset Button**: If you encounter a "Resource busy" error, you can also directly click the "Reset" button in the device list. The reset function will automatically perform the following operations:
+**Using the Reset Button**: When you encounter a "Resource busy" error, you can click the Reset button directly. The reset function automatically performs the following operations:
 - Unmount the device
 - Fix the file system
 - Clear device occupancy status

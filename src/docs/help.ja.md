@@ -6,12 +6,12 @@
 - <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> ソフトウェアプロジェクト：[https://github.com/hoochanlon/Free-NTFS-for-Mac](https://github.com/hoochanlon/Free-NTFS-for-Mac)
 - <img src="../imgs/svg/social/email.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 連絡先メール：[hoochanlon@outlook.com](mailto:hoochanlon@outlook.com)
 
-> [!WARN]
+> [!IMPORTANT]
 > **免責事項**
 >
 > 本ツールを使用してNTFSデバイスをマウントおよび変更することは、データ損失のリスクがあります。使用前に重要なデータをバックアップすることをお勧めします。本ツールは「現状のまま」提供され、明示的または黙示的な保証は一切ありません。本ツールの使用によって生じたデータ損失について、開発者は責任を負いません。
->
-> このソフトウェアの安定動作とデータの整合性は、ストレージデバイスの性能に依存します。データの読み書きエラー、転送中断、またはデバイス認識失敗などの問題を避けるため、高品質なフラッシュメモリチップで製造され、信頼性のある読み書き性能を備えたUSBドライブの使用を推奨します。
+
+このソフトウェアの安定動作とデータの整合性は、ストレージデバイスの性能に依存します。データの読み書きエラー、転送中断、またはデバイス認識失敗などの問題を避けるため、高品質なフラッシュメモリチップで製造され、信頼性のある読み書き性能を備えたUSBドライブの使用を推奨します。
 
 ## システム要件
 
@@ -54,6 +54,9 @@ xcode-select --install
 
 #### 3. MacFUSEのインストール
 
+> [!TIP]
+> Apple Silicon では、デフォルトでサードパーティ製カーネル拡張機能がブロックされます。Mac をシステム終了し、電源ボタンを長押しして起動オプションを表示します →「オプション」→「続ける」→「ユーティリティ」→「起動セキュリティユーティリティ」の順に進みます。システムディスクを選択して「セキュリティポリシー」を開き、「低セキュリティ」を選択し、「確認済みの開発元によるカーネル拡張機能のユーザー管理を許可」にチェックを入れてください。
+
 ターミナルで以下のコマンドを実行します：
 
 ```bash
@@ -95,7 +98,9 @@ brew install ntfs-3g-mac
 ### デバイス管理アイコン
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="更新" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **更新アイコン** - デバイスリストを更新し、接続されている NTFS デバイスを再検出します。
-- <img src="../imgs/svg/actions/repair.svg" alt="修復" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **修復アイコン** - 対象デバイスの修復アイコンをクリックして確認すると、NTFS ファイルシステムを修復します。管理者権限とパスワードが必要です。
+- <img src="../imgs/svg/actions/repair.svg" alt="修復" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **修復アイコン** - 対象デバイスの修復アイコンをクリックして確認すると、NTFS ファイルシステムの修復を試みます。管理者権限とパスワードが必要です。Resource busy エラーには自動で対処できます。
+
+**注意：`ntfsfix` の修復機能には限界があり、Windows の `chkdsk /f` の代わりにはなりません。**
 
 ## 使用手順
 
@@ -255,7 +260,7 @@ NTFS形式の移動ストレージデバイスを挿入すると、「NTFSデバ
 
 **原因**：このエラーは、マウント操作が強制的に中断された場合（アプリケーションの強制終了、システムクラッシュなど）に、デバイスがまだ占有状態のままになっているときに発生します。再マウントする前に、アンマウントして修復する必要があります。
 
-**リセットボタンの使用**："Resource busy" エラーが発生した場合、デバイスリストの「リセット」ボタンを直接クリックすることもできます。リセット機能は以下の操作を自動的に実行します：
+**リセットボタンの使用**：「Resource busy」エラーが発生した場合は、リセットボタンを直接クリックできます。リセット機能は以下の操作を自動的に実行します：
 - デバイスのアンマウント
 - ファイルシステムの修復
 - デバイス占有状態のクリア

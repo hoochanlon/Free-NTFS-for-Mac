@@ -123,12 +123,16 @@
               }
             }
 
-            // 处理 GitHub alert 语法：将 > [!WARN] 等转换为警告框
+            // 处理 GitHub alert 语法，并保留旧版 [!WARN] 写法
             // marked 会将 blockquote 渲染为 <blockquote><p>[!WARN]<br>内容</p></blockquote>
             // 或者 <blockquote><p>[!WARN]</p><p>内容</p></blockquote>
             html = html.replace(
-              /<blockquote>\s*<p>\[!WARN\](?:<br>|<\/p>\s*<p>)([\s\S]*?)(?:<\/p>\s*)?<\/blockquote>/g,
-              (match: string, content: string) => {
+              /<blockquote>\s*<p>\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION|WARN)\](?:<br>|<\/p>\s*<p>)([\s\S]*?)(?:<\/p>\s*)?<\/blockquote>/gi,
+              (match: string, alertType: string, content: string) => {
+                const normalizedType = alertType.toUpperCase();
+                const calloutClass = normalizedType === 'WARN' || normalizedType === 'WARNING'
+                  ? 'help-warning'
+                  : `help-${normalizedType.toLowerCase()}`;
                 // 移除多余的空白和换行，但保留 HTML 结构
                 let cleanedContent = content.trim();
                 // 移除开头的 <br>
@@ -142,14 +146,14 @@
                   if (!cleanedContent.endsWith('</p>')) {
                     cleanedContent = cleanedContent + '</p>';
                   }
-                  return `<div class="help-warning">${cleanedContent}</div>`;
+                  return `<div class="${calloutClass}">${cleanedContent}</div>`;
                 } else if (cleanedContent.includes('</p>')) {
                   // 单个段落，移除末尾的 </p> 并重新包裹
                   cleanedContent = cleanedContent.replace(/<\/p>\s*$/, '').trim();
-                  return `<div class="help-warning"><p>${cleanedContent}</p></div>`;
+                  return `<div class="${calloutClass}"><p>${cleanedContent}</p></div>`;
                 } else {
                   // 纯文本内容，直接包裹
-                  return `<div class="help-warning"><p>${cleanedContent}</p></div>`;
+                  return `<div class="${calloutClass}"><p>${cleanedContent}</p></div>`;
                 }
               }
             );

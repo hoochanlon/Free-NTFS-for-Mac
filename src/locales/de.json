@@ -80,8 +80,8 @@
     },
     "macfuse": {
       "name": "MacFUSE",
-      "description": "Dateisystem-Benutzerraum-Framework, erforderlich für ntfs-3g",
-      "installGuide": "Homebrew muss zuerst installiert sein. Führen Sie den obigen Befehl im Terminal aus, um zu installieren."
+      "description": "Dateisystem-Benutzerraum-Framework, erforderlich für ntfs-3g.",
+      "installGuide": "Tipp für Apple Silicon: Kernel-Erweiterungen von Drittanbietern werden standardmäßig blockiert. Fahren Sie den Mac herunter und halten Sie die Ein-/Aus-Taste gedrückt, bis die Startoptionen erscheinen → Optionen → Fortfahren → Dienstprogramme → Startsicherheitsdienstprogramm. Wählen Sie das Systemvolume, öffnen Sie die Sicherheitsrichtlinie, wählen Sie „Reduzierte Sicherheit“ und aktivieren Sie „Verwaltung von Kernel-Erweiterungen von identifizierten Entwicklern durch Benutzer erlauben“."
     },
     "ntfs3g": {
       "name": "ntfs-3g",

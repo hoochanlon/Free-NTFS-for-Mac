@@ -51,6 +51,9 @@ xcode-select --install
 
 #### 3. 安装 MacFUSE
 
+> [!TIP]
+> Apple Silicon 默认阻止第三方内核扩展。关机后长按电源键进入启动选项 → 选项 → 继续 → 实用工具 → 启动安全性实用工具，选中系统盘，打开安全策略，选择降低安全性，并勾选“允许用户管理来自被认可开发者的内核扩展”。
+
 在终端运行以下命令：
 
 ```bash
@@ -92,7 +95,9 @@ brew install ntfs-3g-mac
 ### 设备管理图标
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="刷新" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **刷新图标** - 刷新设备列表，重新检测已连接的 NTFS 设备。
-- <img src="../imgs/svg/actions/repair.svg" alt="修复" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **修复图标** - 点击对应设备的修复图标并确认，可修复其 NTFS 文件系统；操作需要管理员权限并输入密码。
+- <img src="../imgs/svg/actions/repair.svg" alt="修复" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **修复图标** - 点击对应设备的修复图标并确认，即可尝试修复该设备的 NTFS 文件系统。操作需要管理员权限并输入密码，可自动处理 Resource busy 错误。
+
+**注意：ntfsfix 修复能力有限，无法替代 Windows 的 `chkdsk /f`。**
 
 ## 使用步骤
 
@@ -247,6 +252,13 @@ brew install ntfs-3g-mac
 4. **重新挂载**：修复完成后，重新尝试挂载设备
 
 **原因说明**：此错误通常发生在挂载操作被强制中断（如强制退出应用、系统崩溃等）时，设备仍处于被占用状态，需要先卸载并修复后才能重新挂载。
+
+**使用重置按钮**：遇到"Resource busy"错误，也可以直接点击该按钮。重置功能会自动执行以下操作：
+- 卸载设备
+- 修复文件系统
+- 清理设备占用状态
+
+重置操作需要管理员权限，适用于快速解决设备占用问题。
 
 ### 安装依赖失败怎么办？
 

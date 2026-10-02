@@ -6,12 +6,12 @@
 - <img src="../imgs/svg/social/github.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 軟體專案：[https://github.com/hoochanlon/Free-NTFS-for-Mac](https://github.com/hoochanlon/Free-NTFS-for-Mac)
 - <img src="../imgs/svg/social/email.svg" alt="" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> 聯絡電子郵件：[hoochanlon@outlook.com](mailto:hoochanlon@outlook.com)
 
-> [!WARN]
+> [!IMPORTANT]
 > **免責聲明**
 >
 > 使用本工具掛載和修改 NTFS 設備存在資料遺失的風險。建議在使用前備份重要資料。本工具按"現狀"提供，不提供任何明示或暗示的擔保。使用本工具造成的任何資料損失，開發者不承擔責任。
->
-> 該軟體的穩定運行和資料完整性依賴於儲存裝置的性能。為避免出現資料讀寫錯誤、傳輸中斷或裝置識別失敗等問題，推薦選用由優質快閃記憶體顆粒製成、讀寫性能有保障的U盤。
+
+該軟體的穩定運行和資料完整性依賴於儲存裝置的性能。為避免出現資料讀寫錯誤、傳輸中斷或裝置識別失敗等問題，推薦選用由優質快閃記憶體顆粒製成、讀寫性能有保障的U盤。
 
 ## 系統要求
 
@@ -54,6 +54,10 @@ xcode-select --install
 
 #### 3. 安裝 MacFUSE
 
+> [!TIP]
+> Apple Silicon 預設會阻止第三方核心擴充功能。關機後長按電源鍵進入啟動選項 → 選項 → 繼續 → 工具程式 → 啟動安全性工具程式，選取系統磁碟，開啟安全性政策，選擇降低安全性，並勾選「允許使用者管理來自已識別開發者的核心擴充功能」。
+
+
 在終端執行以下命令：
 
 ```bash
@@ -95,7 +99,9 @@ brew install ntfs-3g-mac
 ### 裝置管理圖示
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="重新整理" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **重新整理圖示** - 重新整理裝置列表，重新偵測已連接的 NTFS 裝置。
-- <img src="../imgs/svg/actions/repair.svg" alt="修復" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **修復圖示** - 點擊對應裝置的修復圖示並確認，可修復其 NTFS 檔案系統；操作需要管理員權限並輸入密碼。
+- <img src="../imgs/svg/actions/repair.svg" alt="修復" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **修復圖示** - 點擊對應裝置的修復圖示並確認，即可嘗試修復該裝置的 NTFS 檔案系統。操作需要管理員權限並輸入密碼，可自動處理 Resource busy 錯誤。
+
+**注意：ntfsfix 修復能力有限，無法取代 Windows 的 `chkdsk /f`。**
 
 ## 使用步驟
 
@@ -255,7 +261,7 @@ brew install ntfs-3g-mac
 
 **原因說明**：此錯誤通常發生在掛載操作被強制中斷（如強制退出應用程式、系統崩潰等）時，設備仍處於被佔用狀態，需要先卸載並修復後才能重新掛載。
 
-**使用重置按鈕**：如果遇到 "Resource busy" 錯誤，也可以直接點擊設備列表中的「重置」按鈕。重置功能會自動執行以下操作：
+**使用重置按鈕**：遇到「Resource busy」錯誤，也可以直接點擊該按鈕。重置功能會自動執行以下操作：
 - 卸載設備
 - 修復檔案系統
 - 清理設備佔用狀態

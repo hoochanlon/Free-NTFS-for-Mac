@@ -75,13 +75,13 @@
     },
     "brew": {
       "name": "Homebrew",
-      "description": "macOS 的包管理器，用于安装和管理软件包",
+      "description": "macOS 的包管理器，以下所有依赖都需要通过 Homebrew 安装",
       "installGuide": "在终端运行上述命令，按照提示完成安装。如果网络较慢，可以使用国内镜像源。"
     },
     "macfuse": {
       "name": "MacFUSE",
-      "description": "文件系统用户空间框架，ntfs-3g 需要此依赖",
-      "installGuide": "需要先安装 Homebrew。在终端运行上述命令即可安装。"
+      "description": "文件系统用户空间框架，ntfs-3g 需要此依赖。",
+      "installGuide": "Apple Silicon 默认阻止第三方内核扩展：关机后长按电源键进入启动选项 → 选项 → 继续 → 实用工具 → 启动安全性实用工具，选中系统盘，打开安全策略，选择降低安全性，并勾选“允许用户管理来自被认可开发者的内核扩展”。"
     },
     "ntfs3g": {
       "name": "ntfs-3g",

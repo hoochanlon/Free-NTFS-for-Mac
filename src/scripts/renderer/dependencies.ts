@@ -83,7 +83,7 @@ export function renderDependencies(depsList: HTMLElement, dependencies: any, ins
             </button>
           </div>
         </div>
-        <p class="guide-instructions">${info.installGuide}</p>
+        <p class="guide-instructions${dep.key === 'macfuse' ? ' guide-tip' : ''}">${info.installGuide}</p>
       `;
       installGuideSection.appendChild(guideCard);
     });
