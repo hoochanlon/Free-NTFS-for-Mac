@@ -286,6 +286,37 @@ brew install ntfs-3g-mac
    - 运行 `brew update` 更新 Homebrew
    - 检查是否有权限问题
 
+### macOS 大版本更新后提示 MacFUSE 过旧
+
+如果出现以下提示，表示当前安装的 macFUSE 版本与正在运行的 macOS 不兼容：
+
+> The installed version of macFUSE is too old for the operating system. Please upgrade your macFUSE installation to one that is compatible with the currently running version of macOS.
+
+请按以下步骤处理：
+
+1. **允许来自所有来源的应用**
+
+   在终端执行：
+
+   ```bash
+   sudo spctl --master-disable
+   ```
+
+   如果终端提示 `Globally disabling the assessment system needs to be confirmed in System Settings.`，请重新打开“系统设置 → 隐私与安全性”，在“安全性”区域找到“允许以下来源的应用程序”，选择“所有来源”。不同 macOS 版本的选项名称可能略有不同。
+
+   > [!WARN]
+   > 此命令会全局关闭 Gatekeeper 的应用安全评估，降低系统安全性。仅在确有需要时使用；完成 macFUSE 升级和系统扩展批准后，可执行 `sudo spctl --master-enable` 恢复默认评估。
+
+2. **升级 macFUSE**
+
+   ```bash
+   brew upgrade --cask --greedy macfuse
+   ```
+
+3. **批准系统扩展并重启**
+
+   前往“系统设置 → 隐私与安全性”批准 macFUSE 系统扩展，然后按提示重启 Mac。
+
 如果仍然无法解决，请参考各依赖的官方文档或寻求技术支持。
 
 ### 卸载设备后无法访问？

@@ -286,6 +286,37 @@ If you encounter problems during installation, please check the following:
    - Run `brew update` to update Homebrew
    - Check for permission issues
 
+### MacFUSE Is Too Old After a Major macOS Upgrade
+
+If you see this message, the installed version of macFUSE is incompatible with the currently running version of macOS:
+
+> The installed version of macFUSE is too old for the operating system. Please upgrade your macFUSE installation to one that is compatible with the currently running version of macOS.
+
+Follow these steps:
+
+1. **Allow apps from all sources**
+
+   Run this command in Terminal:
+
+   ```bash
+   sudo spctl --master-disable
+   ```
+
+   If Terminal reports `Globally disabling the assessment system needs to be confirmed in System Settings.`, reopen System Settings and go to **Privacy & Security**. Under **Security**, find **Allow applications downloaded from** and select **Anywhere**. The wording may vary by macOS version.
+
+   > [!WARN]
+   > This command globally disables Gatekeeper assessment and reduces system security. Use it only when necessary. After upgrading macFUSE and approving its system extension, you can restore the default assessment with `sudo spctl --master-enable`.
+
+2. **Upgrade macFUSE**
+
+   ```bash
+   brew upgrade --cask --greedy macfuse
+   ```
+
+3. **Approve the system extension and restart**
+
+   Go to **System Settings → Privacy & Security**, approve the macFUSE system extension, and restart your Mac when prompted.
+
 If the problem persists, please refer to the official documentation of each dependency or seek technical support.
 
 ### Cannot access device after unmounting?

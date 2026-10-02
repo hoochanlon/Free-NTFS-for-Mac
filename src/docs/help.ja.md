@@ -286,6 +286,38 @@ NTFS形式の移動ストレージデバイスを挿入すると、「NTFSデバ
    - `brew update`を実行してHomebrewを更新
    - 権限の問題がないか確認
 
+### macOSのメジャーアップデート後にMacFUSEが古いと表示される
+
+次のメッセージが表示される場合、インストール済みのMacFUSEが現在のmacOSバージョンに対応していません：
+
+> The installed version of macFUSE is too old for the operating system. Please upgrade your macFUSE installation to one that is compatible with the currently running version of macOS.
+
+以下の手順を実行してください：
+
+1. **すべての配布元のアプリを許可する**
+
+   ターミナルで次のコマンドを実行します：
+
+   ```bash
+   sudo spctl --master-disable
+   ```
+
+   `Globally disabling the assessment system needs to be confirmed in System Settings.` と表示された場合は、「システム設定 → プライバシーとセキュリティ」を開き直し、「セキュリティ」欄で「ダウンロードしたアプリケーションの実行許可」を探して「すべての配布元」を選択します。項目名はmacOSのバージョンによって異なる場合があります。
+
+   > [!WARN]
+   > このコマンドはGatekeeperのアプリ評価をシステム全体で無効にし、安全性を低下させます。必要な場合のみ実行してください。MacFUSEの更新とシステム拡張の承認後、`sudo spctl --master-enable` を実行すると標準の評価を再び有効にできます。
+
+2. **MacFUSEをアップグレードする**
+
+   ```bash
+   brew upgrade --cask --greedy macfuse
+   ```
+
+3. **システム拡張を承認して再起動する**
+
+   「システム設定 → プライバシーとセキュリティ」でMacFUSEのシステム拡張を承認し、案内に従ってMacを再起動してください。
+
+問題が解決しない場合は、各依存関係の公式ドキュメントを参照するか、技術サポートに問い合わせてください。
 問題が解決しない場合は、各依存関係の公式ドキュメントを参照するか、技術サポートに問い合わせてください。
 
 ### アンマウント後にデバイスにアクセスできない場合はどうすればよいですか？

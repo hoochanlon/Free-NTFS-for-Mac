@@ -287,6 +287,38 @@ Wenn Sie während der Installation auf Probleme stoßen, prüfen Sie bitte Folge
    - Führen Sie `brew update` aus, um Homebrew zu aktualisieren
    - Prüfen Sie auf Berechtigungsprobleme
 
+### MacFUSE ist nach einem großen macOS-Upgrade zu alt
+
+Wenn diese Meldung erscheint, ist die installierte macFUSE-Version nicht mit der aktuell laufenden macOS-Version kompatibel:
+
+> The installed version of macFUSE is too old for the operating system. Please upgrade your macFUSE installation to one that is compatible with the currently running version of macOS.
+
+Gehen Sie wie folgt vor:
+
+1. **Apps aus allen Quellen erlauben**
+
+   Führen Sie im Terminal folgenden Befehl aus:
+
+   ```bash
+   sudo spctl --master-disable
+   ```
+
+   Wenn Terminal `Globally disabling the assessment system needs to be confirmed in System Settings.` meldet, öffnen Sie die Systemeinstellungen erneut und wählen Sie **Datenschutz & Sicherheit**. Suchen Sie unter **Sicherheit** nach **Apps aus folgenden Quellen erlauben** und wählen Sie **Überall**. Die Bezeichnungen können je nach macOS-Version abweichen.
+
+   > [!WARN]
+   > Dieser Befehl deaktiviert die Gatekeeper-Prüfung global und verringert die Systemsicherheit. Verwenden Sie ihn nur bei Bedarf. Nach dem Upgrade von macFUSE und der Freigabe der Systemerweiterung können Sie die Standardprüfung mit `sudo spctl --master-enable` wieder aktivieren.
+
+2. **macFUSE aktualisieren**
+
+   ```bash
+   brew upgrade --cask --greedy macfuse
+   ```
+
+3. **Systemerweiterung freigeben und neu starten**
+
+   Öffnen Sie **Systemeinstellungen → Datenschutz & Sicherheit**, geben Sie die macFUSE-Systemerweiterung frei und starten Sie den Mac wie aufgefordert neu.
+
+Wenn das Problem weiterhin besteht, konsultieren Sie bitte die offizielle Dokumentation der einzelnen Abhängigkeiten oder suchen Sie technischen Support.
 Wenn das Problem weiterhin besteht, konsultieren Sie bitte die offizielle Dokumentation der einzelnen Abhängigkeiten oder suchen Sie technischen Support.
 
 ### Kann nach dem Aushängen nicht auf das Gerät zugegriffen werden?
