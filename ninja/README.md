@@ -1,6 +1,6 @@
 # 🥷 忍者ツールセット
 
-![](https://i.ibb.co/d0JCbZ3Z/Martial-Arts-Fight-GIF-by-RETRO-FIEND.gif)
+![](https://upload.cc/i1/2026/10/02/SurGqj.gif)
 
 このフォルダには、プロジェクトの開発、ビルド、テストに必要な各種スクリプトとツールファイルが含まれています。
 
