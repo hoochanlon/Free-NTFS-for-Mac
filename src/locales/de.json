@@ -76,12 +76,19 @@
     "brew": {
       "name": "Homebrew",
       "description": "Paketmanager für macOS, zum Installieren und Verwalten von Softwarepaketen",
-      "installGuide": "Führen Sie den obigen Befehl im Terminal aus und folgen Sie den Anweisungen, um die Installation abzuschließen. Wenn das Netzwerk langsam ist, können Sie eine inländische Spiegelquelle verwenden."
+      "installGuide": "Führen Sie den obigen Befehl im Terminal aus und folgen Sie den Anweisungen. Bei langsamer Netzwerkverbindung können Sie den unten stehenden Installationsbefehl über den China-Mirror verwenden.",
+      "installGuideMirrorCommandLabel": "Installationsbefehl über den China-Mirror:"
     },
     "macfuse": {
       "name": "MacFUSE",
       "description": "Dateisystem-Benutzerraum-Framework, erforderlich für ntfs-3g.",
-      "installGuide": "Tipp für Apple Silicon: Kernel-Erweiterungen von Drittanbietern werden standardmäßig blockiert. Fahren Sie den Mac herunter und halten Sie die Ein-/Aus-Taste gedrückt, bis die Startoptionen erscheinen → Optionen → Fortfahren → Dienstprogramme → Startsicherheitsdienstprogramm. Wählen Sie das Systemvolume, öffnen Sie die Sicherheitsrichtlinie, wählen Sie „Reduzierte Sicherheit“ und aktivieren Sie „Verwaltung von Kernel-Erweiterungen von identifizierten Entwicklern durch Benutzer erlauben“."
+      "installGuide": "Tipp für Apple Silicon: Kernel-Erweiterungen von Drittanbietern werden standardmäßig blockiert. Fahren Sie den Mac herunter und halten Sie die Ein-/Aus-Taste gedrückt, bis die Startoptionen erscheinen → Optionen → Fortfahren → Dienstprogramme → Startsicherheitsdienstprogramm. Wählen Sie das Systemvolume, öffnen Sie die Sicherheitsrichtlinie, wählen Sie „Reduzierte Sicherheit“ und aktivieren Sie „Verwaltung von Kernel-Erweiterungen von identifizierten Entwicklern durch Benutzer erlauben“.",
+      "installGuide2": "Wenn nach einem macOS-Upgrade die Meldung „The installed version of macFUSE is too old for the operating system“ erscheint, folgen Sie diesen Schritten.",
+      "installGuide2Step1": "Führen Sie diesen Befehl im Terminal aus und aktivieren Sie danach unter Systemeinstellungen > Datenschutz & Sicherheit die Option „Von überall“:",
+      "installGuide2Command1": "sudo spctl --master-disable",
+      "installGuide2Step2": "Führen Sie diesen Befehl im Terminal aus, um MacFUSE zu aktualisieren:",
+      "installGuide2Command2": "brew upgrade --cask --greedy macfuse",
+      "installGuide2Step3": "Erlauben Sie die macFUSE-Erweiterung unter Datenschutz & Sicherheit und starten Sie den Mac neu."
     },
     "ntfs3g": {
       "name": "ntfs-3g",

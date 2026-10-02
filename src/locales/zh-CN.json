@@ -76,12 +76,19 @@
     "brew": {
       "name": "Homebrew",
       "description": "macOS 的包管理器，以下所有依赖都需要通过 Homebrew 安装",
-      "installGuide": "在终端运行上述命令，按照提示完成安装。如果网络较慢，可以使用国内镜像源。"
+      "installGuide": "在终端运行上述命令，按照提示完成安装。如果网络较慢，可尝试下方的中国大陆镜像源安装命令。",
+      "installGuideMirrorCommandLabel": "中国大陆镜像源安装命令："
     },
     "macfuse": {
       "name": "MacFUSE",
       "description": "文件系统用户空间框架，ntfs-3g 需要此依赖。",
-      "installGuide": "Apple Silicon 默认阻止第三方内核扩展：关机后长按电源键进入启动选项 → 选项 → 继续 → 实用工具 → 启动安全性实用工具，选中系统盘，打开安全策略，选择降低安全性，并勾选“允许用户管理来自被认可开发者的内核扩展”。"
+      "installGuide": "Apple Silicon 默认阻止第三方内核扩展：关机后长按电源键进入启动选项 → 选项 → 继续 → 实用工具 → 启动安全性实用工具，选中系统盘，打开安全策略，选择降低安全性，并勾选“允许用户管理来自被认可开发者的内核扩展”。",
+      "installGuide2": "macOS 升级后若提示“The installed version of macFUSE is too old for the operating system”，请按以下步骤处理。",
+      "installGuide2Step1": "在终端运行以下命令，然后在“系统设置 > 隐私与安全性”中开启“任何来源”：",
+      "installGuide2Command1": "sudo spctl --master-disable",
+      "installGuide2Step2": "在终端运行以下命令升级 MacFUSE：",
+      "installGuide2Command2": "brew upgrade --cask --greedy macfuse",
+      "installGuide2Step3": "在“隐私与安全性”中批准 macFUSE 扩展，然后重启 Mac。"
     },
     "ntfs3g": {
       "name": "ntfs-3g",

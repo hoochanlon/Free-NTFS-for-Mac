@@ -219,12 +219,18 @@
 .guide-command
   margin-bottom 12px
 
+  &.guide-mirror-command
+    margin-top 12px
+
   label
     display block
     font-size 11px
     font-weight 500
     color var(--text-secondary)
     margin-bottom 6px
+
+  &.guide-mirror-command label
+    margin-bottom 8px
 
   .command-box
     display flex
@@ -289,6 +295,39 @@
     color var(--text-primary)
     font-weight 600
 
+.macfuse-upgrade-guide
+  margin 12px 0 0
+  padding 10px
+  border-radius 6px
+  font-size 11px
+  line-height 1.5
+
+  p
+    font-size 11px
+    line-height 1.5
+
+  .macfuse-upgrade-step
+    margin-top 8px
+
+  .macfuse-upgrade-command
+    margin 6px 0 8px
+
+    .command-box
+      padding 6px 8px
+
+      .command-text
+        min-width 0
+        font-size 11px
+        word-break break-word
+
+      .btn-copy
+        width 28px
+        height 28px
+
+        svg
+          width 14px
+          height 14px
+
 @keyframes slideDown
   from
     opacity 0
@@ -331,3 +370,6 @@ body.light-theme
     &.guide-tip
       background rgba(26, 127, 55, 0.08)
       border-left-color #1a7f37
+
+  .macfuse-upgrade-guide .command-box
+    background var(--light-bg-tertiary)

@@ -41,7 +41,15 @@
                      key === 'macfuse' ? macfuseInstallCommand :
                      key === 'fswatch' ? t(`dependencies.${key}.installCommand`) :
                      'brew tap gromgit/homebrew-fuse && brew install ntfs-3g-mac',
-      installGuide: t(`dependencies.${key}.installGuide`)
+      installGuide: t(`dependencies.${key}.installGuide`),
+                installGuideMirrorCommand: key === 'brew' ? '/bin/zsh -c "$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)"' : '',
+                installGuideMirrorCommandLabel: key === 'brew' ? t(`dependencies.${key}.installGuideMirrorCommandLabel`) : '',
+      installGuide2: key === 'macfuse' ? t(`dependencies.${key}.installGuide2`) : '',
+      installGuide2Step1: key === 'macfuse' ? t(`dependencies.${key}.installGuide2Step1`) : '',
+      installGuide2Command1: key === 'macfuse' ? t(`dependencies.${key}.installGuide2Command1`) : '',
+      installGuide2Step2: key === 'macfuse' ? t(`dependencies.${key}.installGuide2Step2`) : '',
+      installGuide2Command2: key === 'macfuse' ? t(`dependencies.${key}.installGuide2Command2`) : '',
+      installGuide2Step3: key === 'macfuse' ? t(`dependencies.${key}.installGuide2Step3`) : ''
     };
   }
 
@@ -352,6 +360,47 @@
           </div>
           ` : ''}
           <p class="guide-instructions${dep.key === 'macfuse' ? ' guide-tip' : ''}">${info.installGuide}</p>
+          ${info.installGuideMirrorCommand ? `
+          <div class="guide-command guide-mirror-command">
+            <label>${info.installGuideMirrorCommandLabel}</label>
+            <div class="command-box">
+              <code class="command-text">${info.installGuideMirrorCommand}</code>
+              <button class="btn-copy" data-command="${info.installGuideMirrorCommand.replace(/"/g, '&quot;')}" title="${t('dependencies.copyCommand')}" aria-label="${t('dependencies.copyCommand')}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5.5 3.5H3.5C2.67 3.5 2 4.17 2 5V12.5C2 13.33 2.67 14 3.5 14H9.5C10.33 14 11 13.33 11 12.5V10.5M11 5.5H13.5C14.33 5.5 15 6.17 15 7V12.5C15 13.33 14.33 14 13.5 14H11M11 5.5V3.5C11 2.67 10.33 2 9.5 2H7M11 5.5H9.5C8.67 5.5 8 6.17 8 7V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          ` : ''}
+          ${info.installGuide2 ? `
+          <div class="help-important macfuse-upgrade-guide">
+            <p>${info.installGuide2}</p>
+            <p class="macfuse-upgrade-step">${info.installGuide2Step1}</p>
+            <div class="guide-command macfuse-upgrade-command">
+              <div class="command-box">
+                <code class="command-text">${info.installGuide2Command1}</code>
+                <button class="btn-copy" data-command="${info.installGuide2Command1}" title="${t('dependencies.copyCommand')}" aria-label="${t('dependencies.copyCommand')}">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5.5 3.5H3.5C2.67 3.5 2 4.17 2 5V12.5C2 13.33 2.67 14 3.5 14H9.5C10.33 14 11 13.33 11 12.5V10.5M11 5.5H13.5C14.33 5.5 15 6.17 15 7V12.5C15 13.33 14.33 14 13.5 14H11M11 5.5V3.5C11 2.67 10.33 2 9.5 2H7M11 5.5H9.5C8.67 5.5 8 6.17 8 7V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <p class="macfuse-upgrade-step">${info.installGuide2Step2}</p>
+            <div class="guide-command macfuse-upgrade-command">
+              <div class="command-box">
+                <code class="command-text">${info.installGuide2Command2}</code>
+                <button class="btn-copy" data-command="${info.installGuide2Command2}" title="${t('dependencies.copyCommand')}" aria-label="${t('dependencies.copyCommand')}">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5.5 3.5H3.5C2.67 3.5 2 4.17 2 5V12.5C2 13.33 2.67 14 3.5 14H9.5C10.33 14 11 13.33 11 12.5V10.5M11 5.5H13.5C14.33 5.5 15 6.17 15 7V12.5C15 13.33 14.33 14 13.5 14H11M11 5.5V3.5C11 2.67 10.33 2 9.5 2H7M11 5.5H9.5C8.67 5.5 8 6.17 8 7V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <p class="macfuse-upgrade-step">${info.installGuide2Step3}</p>
+          </div>
+          ` : ''}
         `;
         depsList.appendChild(guideCard);
       });

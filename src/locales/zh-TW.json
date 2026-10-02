@@ -76,12 +76,19 @@
     "brew": {
       "name": "Homebrew",
       "description": "macOS 的套件管理器，用於安裝和管理軟體套件",
-      "installGuide": "在終端執行上述命令，按照提示完成安裝。如果網路較慢，可以使用國內鏡像源。"
+      "installGuide": "在終端執行上述命令，按照提示完成安裝。若網路較慢，可嘗試下方的中國大陸鏡像安裝指令。",
+      "installGuideMirrorCommandLabel": "中國大陸鏡像安裝指令："
     },
     "macfuse": {
       "name": "MacFUSE",
       "description": "檔案系統使用者空間框架，ntfs-3g 需要此依賴。",
-      "installGuide": "Apple Silicon 提示：預設會阻止第三方核心擴充功能。關機後長按電源鍵進入啟動選項 → 選項 → 繼續 → 工具程式 → 啟動安全性工具程式，選取系統磁碟，開啟安全性政策，選擇降低安全性，並勾選「允許使用者管理來自已識別開發者的核心擴充功能」。"
+      "installGuide": "Apple Silicon 提示：預設會阻止第三方核心擴充功能。關機後長按電源鍵進入啟動選項 → 選項 → 繼續 → 工具程式 → 啟動安全性工具程式，選取系統磁碟，開啟安全性政策，選擇降低安全性，並勾選「允許使用者管理來自已識別開發者的核心擴充功能」。",
+      "installGuide2": "macOS 升級後若出現「The installed version of macFUSE is too old for the operating system」，請依照以下步驟處理。",
+      "installGuide2Step1": "請在終端機執行以下指令，並在「系統設定 > 隱私權與安全性」中啟用「任何來源」：",
+      "installGuide2Command1": "sudo spctl --master-disable",
+      "installGuide2Step2": "請在終端機執行以下指令以升級 MacFUSE：",
+      "installGuide2Command2": "brew upgrade --cask --greedy macfuse",
+      "installGuide2Step3": "在「隱私權與安全性」中核准 macFUSE 擴充功能，然後重新啟動 Mac。"
     },
     "ntfs3g": {
       "name": "ntfs-3g",

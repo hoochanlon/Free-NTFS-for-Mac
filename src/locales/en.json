@@ -76,12 +76,19 @@
     "brew": {
       "name": "Homebrew",
       "description": "Package manager for macOS, used to install and manage software packages",
-      "installGuide": "Run the above command in the terminal, follow the prompts to complete the installation. If the network is slow, you can use a domestic mirror source."
+      "installGuide": "Run the above command in the terminal and follow the prompts to complete the installation. If the network is slow, try the China mainland mirror command below.",
+      "installGuideMirrorCommandLabel": "China mainland mirror install command:"
     },
     "macfuse": {
       "name": "MacFUSE",
       "description": "File system user space framework, required by ntfs-3g.",
-      "installGuide": "Apple Silicon tip: Third-party kernel extensions are blocked by default. Shut down and press and hold the power button to enter startup options → Options → Continue → Utilities → Startup Security Utility. Select the system disk, open Security Policy, choose Reduced Security, and check “Allow user management of kernel extensions from identified developers.”"
+      "installGuide": "Apple Silicon tip: Third-party kernel extensions are blocked by default. Shut down and press and hold the power button to enter startup options → Options → Continue → Utilities → Startup Security Utility. Select the system disk, open Security Policy, choose Reduced Security, and check “Allow user management of kernel extensions from identified developers.”",
+      "installGuide2": "After a macOS upgrade, if you see “The installed version of macFUSE is too old for the operating system,” follow these steps.",
+      "installGuide2Step1": "Run this command in Terminal, then enable “Anywhere” under System Settings > Privacy & Security:",
+      "installGuide2Command1": "sudo spctl --master-disable",
+      "installGuide2Step2": "Run this command in Terminal to upgrade MacFUSE:",
+      "installGuide2Command2": "brew upgrade --cask --greedy macfuse",
+      "installGuide2Step3": "Approve the macFUSE extension under Privacy & Security, then restart your Mac."
     },
     "ntfs3g": {
       "name": "ntfs-3g",
