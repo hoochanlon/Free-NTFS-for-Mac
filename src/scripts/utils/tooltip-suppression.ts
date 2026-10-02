@@ -5,7 +5,8 @@
   const ipcRenderer = electronAPI ? null : (window as any).require?.('electron').ipcRenderer;
   const tooltipHoverDelay = 3000;
   let toggleButton: HTMLButtonElement | null = null;
-  let hideIconTooltips = false;
+  let hideIconTooltips = true;
+  let userChangedState = false;
   let holdTimer: number | null = null;
   let tooltip: HTMLDivElement | null = null;
   let activeControl: HTMLElement | null = null;
@@ -180,27 +181,16 @@
   window.addEventListener('scroll', hideTooltip, true);
 
   const applyState = (hidden: boolean): void => {
-    if (hideIconTooltips === hidden) {
-      toggleButton?.classList.toggle('is-active', hidden);
-      toggleButton?.setAttribute('aria-pressed', String(hidden));
-      return;
-    }
-
-    if (hidden) {
-      hideIconTooltips = true;
-      document.documentElement.classList.add('hide-icon-tooltips');
-      if (activeControl?.hasAttribute('data-icon-tooltip')) hideTooltip();
-    } else {
-      hideIconTooltips = false;
-      document.documentElement.classList.remove('hide-icon-tooltips');
-    }
-
+    hideIconTooltips = hidden;
+    document.documentElement.classList.toggle('hide-icon-tooltips', hidden);
+    if (hidden && activeControl?.hasAttribute('data-icon-tooltip')) hideTooltip();
     toggleButton?.classList.toggle('is-active', hidden);
     toggleButton?.setAttribute('aria-pressed', String(hidden));
   };
 
   const toggleState = async (): Promise<void> => {
     const nextState = !hideIconTooltips;
+    userChangedState = true;
     applyState(nextState);
     try {
       if (electronAPI) {
@@ -210,6 +200,7 @@
       }
     } catch (error) {
       console.error('保存图标提示设置失败:', error);
+      userChangedState = false;
       applyState(!nextState);
     }
   };
@@ -227,6 +218,7 @@
     scanTitles(document);
 
     if (!toggleButton) return;
+    applyState(hideIconTooltips);
 
     toggleButton.addEventListener('pointerdown', (event) => {
       if (event.button !== 0 || holdTimer !== null) return;
@@ -264,7 +256,9 @@
   if (settingsPromise) {
     settingsPromise
       .then((settings: { hideIconTooltips?: boolean }) => {
-        applyState(settings.hideIconTooltips === true);
+        if (!userChangedState) {
+          applyState(settings.hideIconTooltips === true);
+        }
       })
       .catch((error: unknown) => {
         console.error('读取图标提示设置失败:', error);

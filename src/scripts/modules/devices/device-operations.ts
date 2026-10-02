@@ -509,16 +509,26 @@
             }
           }, 1000);
         } else {
-          await addLog(`${t('messages.restoreError')}: ${result.error || t('messages.restoreError')}`, 'error');
-          if (result.error?.includes('密码错误') || result.error?.includes('password')) {
-            await addLog(t('messages.passwordError'), 'warning');
-          } else if (result.error?.includes('用户取消') || result.error?.includes('cancelled')) {
+          const errorMessage = result.error || t('messages.restoreError');
+          await addLog(`${t('messages.restoreError')}: ${errorMessage}`, 'error');
+          if (isPasswordError(errorMessage)) {
+            const passwordError = t('messages.passwordError');
+            await addLog(passwordError, 'warning');
+            await showOperationMessage(t('messages.restoreError'), passwordError, 'warning');
+          } else if (isOperationCancelled(errorMessage)) {
             await addLog(t('messages.cancelled'), 'info');
+          } else {
+            await showOperationMessage(t('messages.restoreError'), errorMessage);
           }
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         await addLog(`${t('messages.restoreError')}: ${errorMessage}`, 'error');
+        if (isPasswordError(error)) {
+          await showOperationMessage(t('messages.restoreError'), t('messages.passwordError'), 'warning');
+        } else if (!isOperationCancelled(error)) {
+          await showOperationMessage(t('messages.restoreError'), errorMessage);
+        }
       } finally {
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
           DeviceUtils.showLoading(false);
@@ -573,6 +583,9 @@
 
         let successCount = 0;
         let failCount = 0;
+        const failureMessages: string[] = [];
+        let wasCancelled = false;
+        let hadPasswordError = false;
 
         // 逐个还原设备
         for (const device of readWriteDevices) {
@@ -587,12 +600,21 @@
               }
             } else {
               failCount++;
-              await addLog(`还原 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
+              const errorMessage = result.error || '未知错误';
+              failureMessages.push(`${device.volumeName}: ${isPasswordError(errorMessage) ? t('messages.passwordError') : errorMessage}`);
+              await addLog(`还原 ${device.volumeName} 失败: ${errorMessage}`, 'error');
+              hadPasswordError = isPasswordError(errorMessage);
+              wasCancelled = isOperationCancelled(errorMessage);
+              if (hadPasswordError || wasCancelled) break;
             }
           } catch (error) {
             failCount++;
             const errorMessage = error instanceof Error ? error.message : String(error);
             await addLog(`还原 ${device.volumeName} 失败: ${errorMessage}`, 'error');
+            failureMessages.push(`${device.volumeName}: ${isPasswordError(error) ? t('messages.passwordError') : errorMessage}`);
+            hadPasswordError = isPasswordError(error);
+            wasCancelled = isOperationCancelled(error);
+            if (hadPasswordError || wasCancelled) break;
           }
         }
 
@@ -608,6 +630,11 @@
         }
         if (failCount > 0) {
           await addLog(t('messages.restoreAllError', { count: failCount }), 'warning');
+          if (hadPasswordError) {
+            await showOperationMessage(t('devices.restoreAllReadOnly'), failureMessages.join('\n'), 'warning');
+          } else if (!wasCancelled) {
+            await showOperationMessage(t('devices.restoreAllReadOnly'), failureMessages.join('\n'));
+          }
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
