@@ -1,7 +1,8 @@
 // 挂载操作模块
 import * as fs from 'fs/promises';
+import * as path from 'path';
 import type { NTFSDevice } from '../../types/electron';
-import { fileExists, execAsync } from './utils';
+import { fileExists, execAsync, findExecutablePath } from './utils';
 import { PasswordManager } from './password-manager';
 import { SudoExecutor } from './sudo-executor';
 
@@ -24,6 +25,23 @@ export class MountOperations {
     this.passwordManager = passwordManager;
     this.sudoExecutor = sudoExecutor;
     this.getNTFS3GPath = getNTFS3GPath;
+  }
+
+  private async getNTFSFixPath(): Promise<string> {
+    const pathFromEnvironment = await findExecutablePath('ntfsfix');
+    if (pathFromEnvironment) {
+      return pathFromEnvironment;
+    }
+
+    const ntfs3gPath = await this.getNTFS3GPath();
+    if (ntfs3gPath) {
+      const siblingPath = await findExecutablePath(path.join(path.dirname(ntfs3gPath), 'ntfsfix'));
+      if (siblingPath) {
+        return siblingPath;
+      }
+    }
+
+    throw new Error('ntfsfix not found. Install ntfs-3g-mac before repairing an NTFS volume.');
   }
 
   // 卸载设备
@@ -277,6 +295,7 @@ export class MountOperations {
   // 重置设备（卸载+修复）- 用于解决 Resource busy 错误
   async resetDevice(device: NTFSDevice): Promise<string> {
     try {
+      const ntfsfixPath = await this.getNTFSFixPath();
       let password = await this.passwordManager.getPassword('messages.passwordDialog.resetDevice', { name: device.volumeName });
 
       // 步骤1：卸载设备
@@ -305,12 +324,12 @@ export class MountOperations {
 
       // 步骤2：修复文件系统
       try {
-        await this.sudoExecutor.executeSudoWithPassword(['ntfsfix', device.devicePath], password);
+        await this.sudoExecutor.executeSudoWithPassword([ntfsfixPath, device.devicePath], password);
       } catch (error: any) {
         // 如果密码错误，重新获取密码
         if (error.message?.includes('密码错误') || error.message?.includes('password is incorrect') || error.message?.includes('Sorry, try again')) {
           password = await this.passwordManager.getPassword('messages.passwordDialog.resetDevice', { name: device.volumeName });
-          await this.sudoExecutor.executeSudoWithPassword(['ntfsfix', device.devicePath], password);
+          await this.sudoExecutor.executeSudoWithPassword([ntfsfixPath, device.devicePath], password);
         } else {
           const errorMessage = error instanceof Error ? error.message : String(error);
           throw new Error(`修复文件系统失败: ${errorMessage}`);
@@ -355,6 +374,7 @@ export class MountOperations {
       throw new Error('REPAIR_INVALID_PATH');
     }
 
+    const ntfsfixPath = await this.getNTFSFixPath();
     const wasReadOnly = device.isReadOnly;
     let password = await this.passwordManager.getPassword('messages.passwordDialog.repairDevice', { name: device.volumeName });
     const execute = async (args: string[]) => {
@@ -384,7 +404,7 @@ export class MountOperations {
 
     let repairError: unknown;
     try {
-      await execute(['ntfsfix', device.devicePath]);
+      await execute([ntfsfixPath, device.devicePath]);
     } catch (error) {
       repairError = error;
     }
