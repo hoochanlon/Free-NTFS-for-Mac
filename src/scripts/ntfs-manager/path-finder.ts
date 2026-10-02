@@ -1,6 +1,7 @@
 // NTFS-3G 路径查找模块
 /// <reference types="node" />
-import { execAsync, fileExists } from './utils';
+import * as path from 'path';
+import { execFileAsync, findExecutablePath, getCommandEnv } from './utils';
 
 export class PathFinder {
   private ntfs3gPath: string | null = null;
@@ -11,43 +12,38 @@ export class PathFinder {
       return this.ntfs3gPath;
     }
 
-    try {
-      // 确保 PATH 包含 Homebrew 路径（合并现有 PATH 和默认路径）
-      const defaultPaths = [
-        '/usr/local/bin',
-        '/opt/homebrew/bin',
-        '/usr/bin',
-        '/bin',
-        '/usr/sbin',
-        '/sbin'
-      ];
-      const existingPath = process.env.PATH || '';
-      const pathArray = existingPath ? existingPath.split(':') : [];
-      // 合并并去重
-      const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
+    const env = getCommandEnv();
+    const ntfs3gPath = await findExecutablePath('ntfs-3g', env.PATH);
+    if (ntfs3gPath) {
+      this.ntfs3gPath = ntfs3gPath;
+      return ntfs3gPath;
+    }
 
-      const env = {
-        ...process.env,
-        PATH: mergedPaths.join(':')
-      };
-      const result = await execAsync('which ntfs-3g', { env }) as { stdout: string };
-      const path = result.stdout.trim();
-      if (path && await fileExists(path)) {
-        this.ntfs3gPath = path;
-        return path;
-      }
-    } catch {}
+    const brewPath = await findExecutablePath('brew', env.PATH);
+    if (!brewPath) {
+      return null;
+    }
 
-    // 尝试常见路径
-    const commonPaths = [
-      '/opt/homebrew/bin/ntfs-3g',
-      '/usr/local/bin/ntfs-3g'
-    ];
+    for (const formula of ['ntfs-3g-mac', 'ntfs-3g']) {
+      try {
+        const { stdout } = await execFileAsync(brewPath, ['--prefix', formula], {
+          env,
+          timeout: 3000
+        });
+        const formulaPrefix = stdout.trim();
+        if (!formulaPrefix) {
+          continue;
+        }
 
-    for (const commonPath of commonPaths) {
-      if (await fileExists(commonPath)) {
-        this.ntfs3gPath = commonPath;
-        return commonPath;
+        for (const directory of ['bin', 'sbin']) {
+          const candidate = path.join(formulaPrefix, directory, 'ntfs-3g');
+          if (await findExecutablePath(candidate)) {
+            this.ntfs3gPath = candidate;
+            return candidate;
+          }
+        }
+      } catch {
+        // A formula can return a predicted prefix even when it is not installed.
       }
     }
 

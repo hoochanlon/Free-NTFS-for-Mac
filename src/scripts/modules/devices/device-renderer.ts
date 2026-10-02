@@ -42,6 +42,19 @@
     }
   }
 
+  function escapeHTML(value: string): string {
+    return value.replace(/[&<>"']/g, character => {
+      const entities: Record<string, string> = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      };
+      return entities[character];
+    });
+  }
+
   // 设备渲染功能
   AppModules.Devices.Renderer = {
     // 上次渲染的设备列表（用于比较）
@@ -228,11 +241,11 @@
         item.innerHTML = `
           <div class="device-card-tray">
             <div class="device-icon-large">
-              <img src="../imgs/svg/devices/drive.svg" alt="${device.volumeName}" class="device-icon-svg">
+              <img src="../imgs/svg/devices/drive.svg" alt="${escapeHTML(device.volumeName)}" class="device-icon-svg">
             </div>
             <div class="device-card-content">
               <div class="device-card-header-tray">
-              <div class="device-name-large">${device.volumeName}</div>
+              <div class="device-name-large" title="${escapeHTML(device.volumeName)}">${escapeHTML(device.volumeName)}</div>
                 <div class="device-status-actions">
                   <span class="device-status device-status-tray ${statusClass}">${statusText}</span>
                   ${!isUnmounted ? `
@@ -299,9 +312,9 @@
       } else {
         item.innerHTML = `
           <div class="device-header">
-            <div class="device-name">
+            <div class="device-name" title="${escapeHTML(device.volumeName)}">
               <span class="device-icon"></span>
-              ${device.volumeName}
+              <span class="device-name-text">${escapeHTML(device.volumeName)}</span>
             </div>
             <div class="device-status-actions">
               <span class="device-status ${statusClass}">${statusText}</span>

@@ -4,9 +4,11 @@
 import { spawn, ChildProcess } from 'child_process';
 import { DeviceDetector } from './device-detector';
 import type { NTFSDevice } from '../../types/electron';
+import { findExecutablePath, getCommandEnv } from './utils';
 
 export class EventDrivenDetector {
   private fswatchProcess: ChildProcess | null = null;
+  private fswatchPath: string | null = null;
   private deviceDetector: DeviceDetector;
   private onChangeCallback?: (devices: NTFSDevice[]) => void;
   private debounceTimer: NodeJS.Timeout | null = null;
@@ -31,43 +33,18 @@ export class EventDrivenDetector {
     this.deviceDetector = deviceDetector;
   }
 
-  /**
-   * 获取正确的 PATH 环境变量（包含 Homebrew 路径）
-   */
-  private getEnvWithPath(): NodeJS.ProcessEnv {
-    const defaultPaths = [
-      '/usr/local/bin',
-      '/opt/homebrew/bin',
-      '/usr/bin',
-      '/bin',
-      '/usr/sbin',
-      '/sbin'
-    ];
-    const existingPath = process.env.PATH || '';
-    const pathArray = existingPath ? existingPath.split(':') : [];
-    // 合并并去重
-    const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
-
-    return {
-      ...process.env,
-      PATH: mergedPaths.join(':')
-    };
+  private async getFswatchPath(): Promise<string | null> {
+    if (!this.fswatchPath) {
+      this.fswatchPath = await findExecutablePath('fswatch', getCommandEnv().PATH);
+    }
+    return this.fswatchPath;
   }
 
   /**
    * 检查 fswatch 是否可用
    */
   async checkFswatchAvailable(): Promise<boolean> {
-    return new Promise((resolve) => {
-      const env = this.getEnvWithPath();
-      const check = spawn('which', ['fswatch'], { env });
-      check.on('close', (code) => {
-        resolve(code === 0);
-      });
-      check.on('error', () => {
-        resolve(false);
-      });
-    });
+    return Boolean(await this.getFswatchPath());
   }
 
   /**
@@ -106,14 +83,19 @@ export class EventDrivenDetector {
    * 启动 fswatch 进程
    */
   private async startFswatch(): Promise<void> {
+    const fswatchPath = await this.getFswatchPath();
+    if (!fswatchPath) {
+      throw new Error('fswatch executable not found');
+    }
+
     return new Promise((resolve, reject) => {
       try {
         // 使用 fswatch 监控 /Volumes 目录
         // 使用持续监听模式，避免重启导致的延迟
         // -o: 只输出事件数量（更高效，避免大量文件路径输出）
         // -r: 递归监控
-        const env = this.getEnvWithPath();
-        this.fswatchProcess = spawn('fswatch', [
+        const env = getCommandEnv();
+        this.fswatchProcess = spawn(fswatchPath, [
           '-o',           // 只输出事件数量
           '-r',           // 递归监控
           '/Volumes'      // 监控挂载点目录

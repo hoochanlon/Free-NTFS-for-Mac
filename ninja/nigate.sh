@@ -132,6 +132,66 @@ t() {
 	esac
 }
 
+# 查找 Homebrew 可执行文件，兼容非交互环境中的常见自定义前缀
+find_brew() {
+	local candidate
+
+	candidate=$(command -v brew 2>/dev/null)
+	if [ -n "$candidate" ] && [ -f "$candidate" ] && [ -x "$candidate" ]; then
+		printf '%s\n' "$candidate"
+		return 0
+	fi
+
+	for candidate in "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/bin/brew}" "$HOME/.homebrew/bin/brew" "/opt/homebrew/bin/brew" "/usr/local/bin/brew"; do
+		if [ -n "$candidate" ] && [ -f "$candidate" ] && [ -x "$candidate" ]; then
+			printf '%s\n' "$candidate"
+			return 0
+		fi
+	done
+
+	return 1
+}
+
+# brew --prefix 可能为未安装的 formula 返回预测路径，因此只接受真实可执行文件
+find_ntfs3g() {
+	local candidate brew_prefix formula_prefix formula
+
+	candidate=$(command -v ntfs-3g 2>/dev/null)
+	if [ -n "$candidate" ] && [ -f "$candidate" ] && [ -x "$candidate" ]; then
+		printf '%s\n' "$candidate"
+		return 0
+	fi
+
+	for candidate in "/opt/homebrew/bin/ntfs-3g" "/usr/local/bin/ntfs-3g"; do
+		if [ -f "$candidate" ] && [ -x "$candidate" ]; then
+			printf '%s\n' "$candidate"
+			return 0
+		fi
+	done
+
+	if [ -n "$BREW_PATH" ]; then
+		for formula in ntfs-3g-mac ntfs-3g; do
+			formula_prefix=$("$BREW_PATH" --prefix "$formula" 2>/dev/null)
+			for candidate in "$formula_prefix/bin/ntfs-3g" "$formula_prefix/sbin/ntfs-3g"; do
+				if [ -f "$candidate" ] && [ -x "$candidate" ]; then
+					printf '%s\n' "$candidate"
+					return 0
+				fi
+			done
+		done
+
+		brew_prefix=$("$BREW_PATH" --prefix 2>/dev/null)
+		for candidate in "$brew_prefix/bin/ntfs-3g" "$brew_prefix/sbin/ntfs-3g"; do
+			if [ -f "$candidate" ] && [ -x "$candidate" ]; then
+				printf '%s\n' "$candidate"
+				return 0
+			fi
+		done
+	fi
+
+	return 1
+}
+
 # 定义配置函数：检查依赖并挂载 NTFS 设备为读写模式
 config_u_drive(){
 	# ============================================================
@@ -156,59 +216,42 @@ config_u_drive(){
 	# ============================================================
 	# Homebrew 类似于 Linux 的 apt 或 yum，用来安装各种软件
 	# 如果 Homebrew 不存在，就从国内镜像源（Gitee）安装
-	if [ ! -x $(command -v brew) ]; then
+	BREW_PATH=$(find_brew)
+	if [ -z "$BREW_PATH" ]; then
 		/bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
+		BREW_PATH=$(find_brew)
+	fi
+	if [ -z "$BREW_PATH" ]; then
+		echo "Error: Homebrew was not found after installation."
+		return 1
 	fi
 
 	# ============================================================
 	# 第四步：查找 ntfs-3g 程序的路径
 	# ============================================================
 	# ntfs-3g 是用来读写 NTFS 文件系统的核心工具
-	# which ntfs-3g: 查找 ntfs-3g 命令在系统中的位置
-	# 2>/dev/null: 隐藏错误信息
-	# tr -d '\n': 删除换行符，确保路径是单行
-	NTFS3G_PATH=$(which ntfs-3g 2>/dev/null | tr -d '\n')
-
-	# 如果 which 命令找不到，尝试常见的安装路径
-	# Apple Silicon Mac (M1/M2) 通常安装在 /opt/homebrew/bin/
-	# Intel Mac 通常安装在 /usr/local/bin/
-	if [ -z "$NTFS3G_PATH" ]; then
-		if [ -f "/opt/homebrew/bin/ntfs-3g" ]; then
-			NTFS3G_PATH="/opt/homebrew/bin/ntfs-3g"
-		elif [ -f "/usr/local/bin/ntfs-3g" ]; then
-			NTFS3G_PATH="/usr/local/bin/ntfs-3g"
-		fi
-	fi
+	NTFS3G_PATH=$(find_ntfs3g)
 
 	# ============================================================
 	# 第五步：如果 ntfs-3g 不存在，自动安装它
 	# ============================================================
 	# 检查条件：
-	#   -z "$NTFS3G_PATH": 路径为空（没找到）
-	#   -e "/System/Volumes/Data/$NTFS3G_PATH": 文件不存在
-	# 如果任一条件为真，就执行安装
-	if [ -z "$NTFS3G_PATH" ] || [ ! -e "/System/Volumes/Data/$NTFS3G_PATH" ]; then
+	# 只有找到真实可执行文件时才跳过安装
+	if [ -z "$NTFS3G_PATH" ] || [ ! -x "$NTFS3G_PATH" ]; then
 		# brew tap: 添加第三方软件源（仓库）
 		# brew install --cask macfuse: 安装 MacFUSE（文件系统框架，ntfs-3g 需要它）
 		# brew install ntfs-3g-mac: 安装 ntfs-3g（NTFS 读写工具）
-		brew tap gromgit/homebrew-fuse && brew install --cask macfuse && brew install ntfs-3g-mac
+		"$BREW_PATH" tap gromgit/homebrew-fuse && "$BREW_PATH" install --cask macfuse && "$BREW_PATH" install ntfs-3g-mac
 
 		# 安装后重新查找路径（因为刚安装完，路径可能变了）
-		NTFS3G_PATH=$(which ntfs-3g 2>/dev/null | tr -d '\n')
-		if [ -z "$NTFS3G_PATH" ]; then
-			if [ -f "/opt/homebrew/bin/ntfs-3g" ]; then
-				NTFS3G_PATH="/opt/homebrew/bin/ntfs-3g"
-			elif [ -f "/usr/local/bin/ntfs-3g" ]; then
-				NTFS3G_PATH="/usr/local/bin/ntfs-3g"
-			fi
-		fi
+		NTFS3G_PATH=$(find_ntfs3g)
 	fi
 
 	# ============================================================
 	# 第六步：最终检查 ntfs-3g 是否可用
 	# ============================================================
 	# 如果还是找不到，说明安装失败，退出函数并返回错误码 1
-	if [ -z "$NTFS3G_PATH" ] || [ ! -f "/System/Volumes/Data/$NTFS3G_PATH" ]; then
+	if [ -z "$NTFS3G_PATH" ] || [ ! -f "$NTFS3G_PATH" ] || [ ! -x "$NTFS3G_PATH" ]; then
 		t error_ntfs3g_not_found
 		return 1
 	fi
@@ -283,7 +326,7 @@ config_u_drive(){
 	    if command -v timeout >/dev/null 2>&1; then
 	        # timeout 10: 10 秒超时
 	        # sudo -S: 从标准输入读取密码（如果需要）
-	        # /System/Volumes/Data/$NTFS3G_PATH: ntfs-3g 的完整路径
+	        # "$NTFS3G_PATH": ntfs-3g 的完整可执行路径
 	        # /dev/$disk: 要挂载的设备
 	        # /Volumes/$volume: 挂载点（U盘在 Finder 中显示的位置）
 	        # 参数说明：
@@ -293,18 +336,18 @@ config_u_drive(){
 	        #   -ovolname=$volume: 设置卷名
 	        #   -oremove_hiberfile: 删除 Windows 休眠文件（解决快速启动问题）
 	        #   -onoatime: 不更新访问时间（提高性能）
-	        timeout 10 sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ouid=$MOUNT_UID -ogid=$MOUNT_GID -ovolname=$volume -oremove_hiberfile -onoatime 2>&1
+	        timeout 10 sudo -S "$NTFS3G_PATH" /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ouid=$MOUNT_UID -ogid=$MOUNT_GID -ovolname=$volume -oremove_hiberfile -onoatime 2>&1
 	        mount_result=$?  # 保存退出码
 
 	    # 方法 2: 如果系统没有 timeout，尝试使用 gtimeout（GNU 版本）
 	    elif command -v gtimeout >/dev/null 2>&1; then
-	        gtimeout 10 sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ouid=$MOUNT_UID -ogid=$MOUNT_GID -ovolname=$volume -oremove_hiberfile -onoatime 2>&1
+	        gtimeout 10 sudo -S "$NTFS3G_PATH" /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ouid=$MOUNT_UID -ogid=$MOUNT_GID -ovolname=$volume -oremove_hiberfile -onoatime 2>&1
 	        mount_result=$?
 
 	    # 方法 3: 如果都没有，使用后台进程 + 手动超时控制
 	    else
 	        # & 表示在后台运行
-	        sudo -S /System/Volumes/Data/$NTFS3G_PATH /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ouid=$MOUNT_UID -ogid=$MOUNT_GID -ovolname=$volume -oremove_hiberfile -onoatime 2>&1 &
+	        sudo -S "$NTFS3G_PATH" /dev/$disk /Volumes/$volume -olocal -oallow_other -oauto_xattr -ouid=$MOUNT_UID -ogid=$MOUNT_GID -ovolname=$volume -oremove_hiberfile -onoatime 2>&1 &
 	        mount_pid=$!  # $! 是最后一个后台进程的 PID（进程 ID）
 
 	        # 等待最多 10 秒，每秒检查一次进程是否还在运行

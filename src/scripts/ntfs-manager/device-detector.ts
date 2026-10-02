@@ -374,27 +374,31 @@ export class DeviceDetector {
         }
       }
       for (const line of lines) {
-        const parts = line.split(' on ');
-        if (parts.length !== 2) {
+        const separatorIndex = line.indexOf(' on ');
+        if (separatorIndex < 0) {
           console.warn('[设备检测] 跳过无效行（无法分割）:', line);
           continue;
         }
 
-        const devicePath = parts[0].trim();
-        const rest = parts[1].trim();
+        const devicePath = line.slice(0, separatorIndex).trim();
+        const rest = line.slice(separatorIndex + 4).trim();
 
-        const volumeMatch = rest.match(/^(\/Volumes\/[^\s(]+)/);
-        const optionsMatch = rest.match(/\(([^)]+)\)/);
+        const optionsMatch = rest.match(/\s+\(((?:ntfs|[^,\s]*fuse)\b[^()]*)\)\s*$/i);
 
-        if (!volumeMatch) {
+        if (!optionsMatch) {
           console.warn('[设备检测] 跳过无效行（无法匹配卷名）:', line);
           continue;
         }
 
-        const volume = volumeMatch[1].trim();
+        const volume = rest.slice(0, optionsMatch.index).trimEnd();
+        if (!volume.startsWith('/Volumes/')) {
+          console.warn('[设备检测] 跳过非卷宗挂载路径:', line);
+          continue;
+        }
+
         const volumeName = volume.replace('/Volumes/', '');
         const disk = devicePath.replace('/dev/', '');
-        const options = optionsMatch ? optionsMatch[1] : '';
+        const options = optionsMatch[1];
         const isReadOnly = options.includes('read-only');
 
         // 尝试获取稳定 UUID（diskutil info；带缓存与超时，避免拖慢刷新）

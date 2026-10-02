@@ -1,6 +1,6 @@
 // 依赖检查模块
 import type { Dependencies } from '../../types/electron';
-import { commandExists, execAsync, fileExists } from './utils';
+import { commandExists, execAsync, fileExists, getCommandEnv } from './utils';
 import { PathFinder } from './path-finder';
 
 // 检查 MacFUSE（使用多种方法，提高可靠性）
@@ -8,24 +8,7 @@ async function checkMacFUSE(brewExists: boolean): Promise<boolean> {
   // 方法1：优先使用 brew list --cask（最准确的方法，如果 Homebrew 可用）
   if (brewExists) {
     try {
-      // 确保 PATH 包含 Homebrew 路径（合并现有 PATH 和默认路径）
-      const defaultPaths = [
-        '/usr/local/bin',
-        '/opt/homebrew/bin',
-        '/usr/bin',
-        '/bin',
-        '/usr/sbin',
-        '/sbin'
-      ];
-      const existingPath = process.env.PATH || '';
-      const pathArray = existingPath ? existingPath.split(':') : [];
-      // 合并并去重
-      const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
-
-      const env = {
-        ...process.env,
-        PATH: mergedPaths.join(':')
-      };
+      const env = getCommandEnv();
 
       let installedByBrew = false;
       try {
@@ -112,24 +95,7 @@ async function checkMacFUSE(brewExists: boolean): Promise<boolean> {
   // 方法4：使用 brew info 作为备用（如果 Homebrew 可用但 brew list 失败）
   if (brewExists) {
     try {
-      // 确保 PATH 包含 Homebrew 路径（合并现有 PATH 和默认路径）
-      const defaultPaths = [
-        '/usr/local/bin',
-        '/opt/homebrew/bin',
-        '/usr/bin',
-        '/bin',
-        '/usr/sbin',
-        '/sbin'
-      ];
-      const existingPath = process.env.PATH || '';
-      const pathArray = existingPath ? existingPath.split(':') : [];
-      // 合并并去重
-      const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
-
-      const env = {
-        ...process.env,
-        PATH: mergedPaths.join(':')
-      };
+      const env = getCommandEnv();
 
       // 使用 brew info 检查（带超时保护）
       try {
@@ -284,37 +250,8 @@ export async function checkDependencies(): Promise<Dependencies> {
       result.ntfs3g = false;
     }
 
-    // 检查 fswatch（可选，用于事件驱动检测）
-    if (result.brew) {
-      try {
-        // 确保 PATH 包含 Homebrew 路径（合并现有 PATH 和默认路径）
-        const defaultPaths = [
-          '/usr/local/bin',
-          '/opt/homebrew/bin',
-          '/usr/bin',
-          '/bin',
-          '/usr/sbin',
-          '/sbin'
-        ];
-        const existingPath = process.env.PATH || '';
-        const pathArray = existingPath ? existingPath.split(':') : [];
-        // 合并并去重
-        const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
-
-        const env = {
-          ...process.env,
-          PATH: mergedPaths.join(':')
-        };
-
-        const fswatchResult = await Promise.race([
-          execAsync('which fswatch 2>/dev/null', { env }),
-          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
-        ]);
-        result.fswatch = (fswatchResult as { stdout: string }).stdout.trim().length > 0;
-      } catch {
-        result.fswatch = false;
-      }
-    }
+    // 检查 fswatch（可选；是否安装不依赖 brew 命令本身）
+    result.fswatch = await commandExists('fswatch');
   } catch (error) {
     console.error('检查依赖时出错:', error);
   }
@@ -356,24 +293,7 @@ export async function installDependencies(): Promise<string> {
   if (await commandExists('brew')) {
     logs.push('正在安装 MacFUSE 和 ntfs-3g...');
     try {
-      // 确保 PATH 包含 Homebrew 路径（合并现有 PATH 和默认路径）
-      const defaultPaths = [
-        '/usr/local/bin',
-        '/opt/homebrew/bin',
-        '/usr/bin',
-        '/bin',
-        '/usr/sbin',
-        '/sbin'
-      ];
-      const existingPath = process.env.PATH || '';
-      const pathArray = existingPath ? existingPath.split(':') : [];
-      // 合并并去重
-      const mergedPaths = [...new Set([...defaultPaths, ...pathArray])];
-
-      const env = {
-        ...process.env,
-        PATH: mergedPaths.join(':')
-      };
+      const env = getCommandEnv();
       await execAsync('brew tap gromgit/homebrew-fuse', { env });
       let macfuseInstalled = false;
       try {

@@ -349,6 +349,15 @@ body.tray-window
       font-size 10px
       padding 2px 8px
 
+    .repair-icon-btn
+      height 18px
+      padding 2px
+      box-sizing border-box
+
+      span
+        width 12px
+        height 12px
+
   .device-name-large
     font-size 14px
     font-weight 600
@@ -665,10 +674,19 @@ body.tray-window
   display flex
   align-items center
   gap 8px
+  flex 1
+  min-width 0
+  overflow hidden
   font-size 13px
   font-weight 500
   color var(--text-primary)
   letter-spacing -0.01em
+
+  .device-name-text
+    min-width 0
+    overflow hidden
+    text-overflow ellipsis
+    white-space nowrap
 
   .device-icon
     width 24px
@@ -796,6 +814,16 @@ body.tray-window
     background-color currentColor
     mask url('src/imgs/svg/actions/repair.svg') center / contain no-repeat
     -webkit-mask url('src/imgs/svg/actions/repair.svg') center / contain no-repeat
+
+.device-header .device-status-actions .repair-icon-btn
+  height auto
+  align-self stretch
+  padding 2px
+  box-sizing border-box
+
+  span
+    width 12px
+    height 12px
 
 // 设备操作按钮
 .device-actions

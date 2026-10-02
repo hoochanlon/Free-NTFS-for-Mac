@@ -158,9 +158,9 @@
       statusText: HTMLElement
     ): Promise<void> {
       try {
-        // 快速检查所有依赖（使用较短的超时时间）
+        // 后台检查包含 MacFUSE 状态查询，允许其完成后再刷新缓存
         const quickCheckPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('timeout')), 5000); // 5秒超时
+          setTimeout(() => reject(new Error('timeout')), 15000);
         });
 
         const freshDeps = await Promise.race([
@@ -174,7 +174,7 @@
         }
 
         // 比较关键依赖的状态
-        const keyDeps = ['swift', 'brew', 'macfuse', 'ntfs3g', 'macosVersion'];
+        const keyDeps = ['swift', 'brew', 'macfuse', 'ntfs3g', 'fswatch', 'macosVersion'];
         const hasChanged = keyDeps.some(key => {
           return cached[key] !== freshDeps[key];
         });
