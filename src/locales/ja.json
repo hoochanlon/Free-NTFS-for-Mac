@@ -117,7 +117,7 @@
     "repair": "修復",
     "repairTooltip": "NTFS ファイルシステムを修復",
     "repairConfirm": "{name} の NTFS ファイルシステムを修復しますか？",
-    "repairConfirmNote": "ボリュームをアンマウントし、ntfsfix で修復してから再度マウントします。\n重要なデータを先にバックアップしてください。ntfsfix の修復機能は限定的で、Windows の chkdsk /f の代わりにはなりません。",
+    "repairConfirmNote": "先にデータをバックアップしてください。ntfsfix の修復機能には限界があり、Windows の chkdsk の代わりにはなりません。",
     "unmount": "アンマウント",
     "eject": "イジェクト",
     "restoreReadOnly": "読み取り専用に戻す",

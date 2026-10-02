@@ -117,7 +117,7 @@
     "repair": "Repair",
     "repairTooltip": "Repair NTFS file system",
     "repairConfirm": "Repair the NTFS file system on {name}?",
-    "repairConfirmNote": "The volume will be unmounted, repaired with ntfsfix, and mounted again.\nBack up important data first. ntfsfix provides limited repairs and is not a substitute for Windows chkdsk /f.",
+    "repairConfirmNote": "Back up your data first. ntfsfix has limited repair capabilities and cannot replace Windows chkdsk.",
     "unmount": "Unmount",
     "eject": "Eject",
     "restoreReadOnly": "Restore to Read-Only",

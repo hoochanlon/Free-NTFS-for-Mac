@@ -117,7 +117,7 @@
     "repair": "Reparieren",
     "repairTooltip": "NTFS-Dateisystem reparieren",
     "repairConfirm": "Möchten Sie das NTFS-Dateisystem von {name} reparieren?",
-    "repairConfirmNote": "Das Volume wird ausgehängt, mit ntfsfix repariert und anschließend erneut eingehängt.\nSichern Sie wichtige Daten vorher. ntfsfix bietet nur begrenzte Reparaturen und ersetzt nicht Windows chkdsk /f.",
+    "repairConfirmNote": "Sichern Sie zuerst Ihre Daten. ntfsfix bietet nur begrenzte Reparaturmöglichkeiten und kann Windows chkdsk nicht ersetzen.",
     "unmount": "Aushängen",
     "eject": "Auswerfen",
     "restoreReadOnly": "Nur lesen",

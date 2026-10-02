@@ -117,7 +117,7 @@
     "repair": "修復",
     "repairTooltip": "修復 NTFS 檔案系統",
     "repairConfirm": "確定要修復 {name} 的 NTFS 檔案系統嗎？",
-    "repairConfirmNote": "將先卸載設備，執行 ntfsfix 後重新掛載。\n請先備份重要資料。ntfsfix 僅能進行有限修復，不能取代 Windows 的 chkdsk /f。",
+    "repairConfirmNote": "請先備份資料。ntfsfix 修復能力有限，無法取代 Windows 的 chkdsk。",
     "unmount": "卸載",
     "eject": "推出",
     "restoreReadOnly": "還原為只讀",

@@ -117,7 +117,7 @@
     "repair": "修复",
     "repairTooltip": "修复 NTFS 文件系统",
     "repairConfirm": "确定要修复 {name} 的 NTFS 文件系统吗？",
-    "repairConfirmNote": "将先卸载设备，运行 ntfsfix 后重新挂载。\n请先备份重要数据。ntfsfix 只能进行有限修复，不能替代 Windows 的 chkdsk /f。",
+    "repairConfirmNote": "请先备份数据。ntfsfix 修复能力有限，无法替代 Windows 的 chkdsk。",
     "unmount": "卸载",
     "eject": "推出",
     "restoreReadOnly": "还原为只读",
