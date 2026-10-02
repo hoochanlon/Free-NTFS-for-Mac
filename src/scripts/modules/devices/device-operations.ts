@@ -33,7 +33,7 @@
         return;
       }
       if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
-        await addLog(message, type);
+        await AppUtils.Logs.addLog(message, type);
         return;
       }
       // 降级到 console（托盘窗口场景）
@@ -41,6 +41,30 @@
     } catch (error) {
       // 如果所有方法都失败，至少输出到控制台
       console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+  }
+
+  function isPasswordError(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+    return /密码错误|password|authentication failure|authentication failed|sorry,\s*try again/i.test(message);
+  }
+
+  function isOperationCancelled(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+    return /用户取消|user cancelled|cancelled|canceled/i.test(message);
+  }
+
+  async function showOperationMessage(title: string, message: string, type: 'info' | 'warning' | 'error' = 'error'): Promise<void> {
+    try {
+      if (AppUtils?.UI?.showMessage) {
+        await AppUtils.UI.showMessage(title, message, type);
+      } else if (electronAPI?.showMessageDialog) {
+        await electronAPI.showMessageDialog(title, message, type);
+      } else {
+        console.error(`[设备操作] ${title}: ${message}`);
+      }
+    } catch (error) {
+      console.error('[设备操作] 显示操作结果失败:', error, message);
     }
   }
 
@@ -206,16 +230,26 @@
           // 强制刷新设备列表（确保状态立即更新，包含重试机制）
           await refreshDeviceList(devicesList, 0);
         } else {
-          await addLog(`${t('messages.mountError')}: ${result.error || t('messages.mountError')}`, 'error');
-          if (result.error?.includes('密码错误') || result.error?.includes('password')) {
-            await addLog(t('messages.passwordError'), 'warning');
-          } else if (result.error?.includes('用户取消') || result.error?.includes('cancelled')) {
+          const errorMessage = result.error || t('messages.mountError');
+          await addLog(`${t('messages.mountError')}: ${errorMessage}`, 'error');
+          if (isPasswordError(errorMessage)) {
+            const passwordError = t('messages.passwordError');
+            await addLog(passwordError, 'warning');
+            await showOperationMessage(t('messages.mountError'), passwordError, 'warning');
+          } else if (isOperationCancelled(errorMessage)) {
             await addLog(t('messages.cancelled'), 'info');
+          } else {
+            await showOperationMessage(t('messages.mountError'), errorMessage);
           }
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         await addLog(`${t('messages.mountError')}: ${errorMessage}`, 'error');
+        if (isPasswordError(error)) {
+          await showOperationMessage(t('messages.mountError'), t('messages.passwordError'), 'warning');
+        } else if (!isOperationCancelled(error)) {
+          await showOperationMessage(t('messages.mountError'), errorMessage);
+        }
       } finally {
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
           DeviceUtils.showLoading(false);
@@ -282,16 +316,26 @@
           // 强制刷新设备列表
           await refreshDeviceList(devicesList, 0);
         } else {
-          await addLog(`${t('messages.resetError') || '重置失败'}: ${result.error || t('messages.resetError') || '未知错误'}`, 'error');
-          if (result.error?.includes('密码错误') || result.error?.includes('password')) {
-            await addLog(t('messages.passwordError'), 'warning');
-          } else if (result.error?.includes('用户取消') || result.error?.includes('cancelled')) {
+          const errorMessage = result.error || t('messages.resetError') || '未知错误';
+          await addLog(`${t('messages.resetError') || '重置失败'}: ${errorMessage}`, 'error');
+          if (isPasswordError(errorMessage)) {
+            const passwordError = t('messages.passwordError');
+            await addLog(passwordError, 'warning');
+            await showOperationMessage(t('messages.resetError') || '重置失败', passwordError, 'warning');
+          } else if (isOperationCancelled(errorMessage)) {
             await addLog(t('messages.cancelled'), 'info');
+          } else {
+            await showOperationMessage(t('messages.resetError') || '重置失败', errorMessage);
           }
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         await addLog(`${t('messages.resetError') || '重置失败'}: ${errorMessage}`, 'error');
+        if (isPasswordError(error)) {
+          await showOperationMessage(t('messages.resetError') || '重置失败', t('messages.passwordError'), 'warning');
+        } else if (!isOperationCancelled(error)) {
+          await showOperationMessage(t('messages.resetError') || '重置失败', errorMessage);
+        }
       } finally {
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
           DeviceUtils.showLoading(false);
@@ -321,7 +365,7 @@
         : await AppUtils.UI.showConfirm(title, message);
       if (!confirmed) return;
 
-      const showRepairMessage = async (messageTitle: string, messageText: string, type: 'info' | 'error'): Promise<void> => {
+      const showRepairMessage = async (messageTitle: string, messageText: string, type: 'info' | 'warning' | 'error'): Promise<void> => {
         await AppUtils.UI.showMessage(messageTitle, messageText, type);
       };
 
@@ -366,8 +410,8 @@
           await addLog(errorMessage, errorType);
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refreshDeviceList(devicesList, 0);
-          if (errorType === 'error') {
-            await showRepairMessage(t('messages.repairFailedTitle'), errorMessage, 'error');
+          if (errorType === 'error' || errorType === 'warning') {
+            await showRepairMessage(t('messages.repairFailedTitle'), errorMessage, errorType);
           }
         }
       } catch (error) {
@@ -375,8 +419,8 @@
         const errorType = errorMessage === t('messages.cancelled') ? 'info' :
           errorMessage === t('messages.passwordError') ? 'warning' : 'error';
         await addLog(errorMessage, errorType);
-        if (errorType === 'error') {
-          await showRepairMessage(t('messages.repairFailedTitle'), errorMessage, 'error');
+        if (errorType === 'error' || errorType === 'warning') {
+          await showRepairMessage(t('messages.repairFailedTitle'), errorMessage, errorType);
         }
       } finally {
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {

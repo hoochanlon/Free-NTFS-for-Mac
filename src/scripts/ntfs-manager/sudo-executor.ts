@@ -122,14 +122,14 @@ export class SudoExecutor {
 
           if (isPasswordError) {
             // 如果密码错误，删除保存的密码
-            const settings = await SettingsManager.getSettings();
-            if (settings.savePassword) {
-              try {
+            try {
+              const settings = await SettingsManager.getSettings();
+              if (settings.savePassword) {
                 await KeychainManager.deletePassword();
                 console.log('[SudoExecutor] 密码错误，已删除保存的密码');
-              } catch (error) {
-                console.warn('[SudoExecutor] 删除保存的密码失败:', error);
               }
+            } catch (error) {
+              console.warn('[SudoExecutor] 清理保存的密码失败:', error);
             }
             reject(new Error('密码错误，请重试'));
           } else {

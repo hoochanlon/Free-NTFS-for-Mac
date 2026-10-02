@@ -26,6 +26,13 @@ export interface PasswordDialogOptions {
 
 export function createPasswordDialog(options: PasswordDialogOptions): Promise<string | null> {
   return new Promise((resolve) => {
+    let settled = false;
+    const settle = (password: string | null): void => {
+      if (settled) return;
+      settled = true;
+      resolve(password);
+    };
+
     // 如果已有对话框打开，先关闭
     if (passwordDialogWindow) {
       const previousWindow = passwordDialogWindow;
@@ -103,7 +110,7 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
     dialogWindow.loadFile(dialogPath).catch((error: any) => {
       console.error('[PasswordDialog] 加载密码对话框失败:', error);
       dismissPasswordDialog(dialogWindow);
-      resolve(null);
+      settle(null);
     });
 
     // 监听窗口显示事件，确保窗口能正确显示
@@ -209,8 +216,8 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
         }
       } catch (error) {
         console.error('[PasswordDialog] 初始化密码对话框失败:', error);
+        settle(null);
         dismissPasswordDialog(dialogWindow);
-        resolve(null);
       }
     });
 
@@ -220,15 +227,9 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
         // 移除监听器
         ipcMain.removeListener('password-dialog-response', responseHandler);
 
+        settle(data.canceled ? null : data.password || null);
         if (passwordDialogWindow === dialogWindow) passwordDialogWindow = null;
         dismissPasswordDialog(dialogWindow);
-
-        // 返回结果
-        if (data.canceled) {
-          resolve(null);
-        } else {
-          resolve(data.password || null);
-        }
       }
     };
 
@@ -238,7 +239,7 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
     dialogWindow.on('closed', () => {
       ipcMain.removeListener('password-dialog-response', responseHandler);
       if (passwordDialogWindow === dialogWindow) passwordDialogWindow = null;
-      resolve(null);
+      settle(null);
     });
   });
 }

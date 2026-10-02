@@ -3,6 +3,7 @@
 
   const electronAPI = (window as any).electronAPI;
   const ipcRenderer = electronAPI ? null : (window as any).require?.('electron').ipcRenderer;
+  const tooltipHoverDelay = 3000;
   let toggleButton: HTMLButtonElement | null = null;
   let hideIconTooltips = false;
   let holdTimer: number | null = null;
@@ -144,7 +145,7 @@
   document.addEventListener('pointerover', (event) => {
     if (event instanceof PointerEvent && event.pointerType === 'touch') return;
     const target = getTooltipTarget(event.target);
-    if (target) showTooltip(target, 350);
+    if (target) showTooltip(target, tooltipHoverDelay);
   });
 
   document.addEventListener('pointerout', (event) => {
