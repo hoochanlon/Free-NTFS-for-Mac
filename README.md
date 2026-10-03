@@ -2,7 +2,7 @@
 
 **Language / 言語 / 语言**: [English](README.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
-![Main Interface](src/imgs/example/2026-01-21-10.51.01.png)
+![](src/imgs/example/demo.gif)
 
 This is the Electron GUI version of Nigate, which provides a modern and intuitive interface for NTFS device management while retaining the original geek terminal version.[^1]
 
