@@ -57,9 +57,9 @@ t() {
 				unknown_param) echo "未知参数: $2" ;;
 				cleaning_dist) echo "清理 dist 目录..." ;;
 				checking_readme) echo "检查 DMG 使用说明文件..." ;;
-				readme_ready) echo "✓ 多语言使用说明文件 README.txt 已准备就绪" ;;
-				warning_readme_not_found) echo "⚠️  警告: 未找到 README.txt 使用说明文件" ;;
-				readme_ensure) echo "   请确保 docs/README.txt 文件存在" ;;
+				readme_ready) echo "✓ 中英双语使用说明 README.md 已准备就绪" ;;
+				warning_readme_not_found) echo "⚠️  警告: 未找到 README.md 使用说明文件" ;;
+				readme_ensure) echo "   请确保 docs/README.md 文件存在" ;;
 				warning_no_node_modules) echo "⚠️  警告: node_modules 不存在，正在安装依赖..." ;;
 				error_install_failed) echo "❌ 错误: 依赖安装失败" ;;
 				syncing_version) echo "同步版本号..." ;;
@@ -69,7 +69,7 @@ t() {
 				cleaning_mounted_dmg) echo "清理可能挂载的 DMG..." ;;
 				starting_package) echo "开始打包..." ;;
 				package_complete) echo "打包完成！文件位于 dist 目录" ;;
-				cleaned_temp) echo "✓ 已清理临时文件 README.txt" ;;
+				cleaned_temp) echo "✓ 已清理临时文件 README.md" ;;
 				*) echo "$key" ;;
 			esac
 			;;
@@ -80,9 +80,9 @@ t() {
 				unknown_param) echo "不明なパラメータ: $2" ;;
 				cleaning_dist) echo "dist ディレクトリをクリーンアップ中..." ;;
 				checking_readme) echo "DMG 使用説明ファイルを確認中..." ;;
-				readme_ready) echo "✓ 多言語使用説明ファイル README.txt の準備が完了しました" ;;
-				warning_readme_not_found) echo "⚠️  警告: README.txt 使用説明ファイルが見つかりません" ;;
-				readme_ensure) echo "   docs/README.txt ファイルが存在することを確認してください" ;;
+				readme_ready) echo "✓ 中英バイリンガル README.md の準備が完了しました" ;;
+				warning_readme_not_found) echo "⚠️  警告: README.md 使用説明ファイルが見つかりません" ;;
+				readme_ensure) echo "   docs/README.md ファイルが存在することを確認してください" ;;
 				warning_no_node_modules) echo "⚠️  警告: node_modules が存在しません。依存関係をインストール中..." ;;
 				error_install_failed) echo "❌ エラー: 依存関係のインストールに失敗しました" ;;
 				syncing_version) echo "バージョン番号を同期中..." ;;
@@ -92,7 +92,7 @@ t() {
 				cleaning_mounted_dmg) echo "マウントされている可能性のある DMG をクリーンアップ中..." ;;
 				starting_package) echo "パッケージングを開始中..." ;;
 				package_complete) echo "パッケージングが完了しました！ファイルは dist ディレクトリにあります" ;;
-				cleaned_temp) echo "✓ 一時ファイル README.txt をクリーンアップしました" ;;
+				cleaned_temp) echo "✓ 一時ファイル README.md をクリーンアップしました" ;;
 				*) echo "$key" ;;
 			esac
 			;;
@@ -103,9 +103,9 @@ t() {
 				unknown_param) echo "Unknown parameter: $2" ;;
 				cleaning_dist) echo "Cleaning dist directory..." ;;
 				checking_readme) echo "Checking DMG README file..." ;;
-				readme_ready) echo "✓ Multi-language README.txt file is ready" ;;
-				warning_readme_not_found) echo "⚠️  Warning: README.txt file not found" ;;
-				readme_ensure) echo "   Please ensure docs/README.txt file exists" ;;
+				readme_ready) echo "✓ Bilingual README.md file is ready" ;;
+				warning_readme_not_found) echo "⚠️  Warning: README.md file not found" ;;
+				readme_ensure) echo "   Please ensure docs/README.md file exists" ;;
 				warning_no_node_modules) echo "⚠️  Warning: node_modules does not exist, installing dependencies..." ;;
 				error_install_failed) echo "❌ Error: Dependency installation failed" ;;
 				syncing_version) echo "Syncing version number..." ;;
@@ -115,7 +115,7 @@ t() {
 				cleaning_mounted_dmg) echo "Cleaning up potentially mounted DMG..." ;;
 				starting_package) echo "Starting packaging..." ;;
 				package_complete) echo "Packaging complete! Files are in dist directory" ;;
-				cleaned_temp) echo "✓ Cleaned up temporary file README.txt" ;;
+				cleaned_temp) echo "✓ Cleaned up temporary file README.md" ;;
 				*) echo "$key" ;;
 			esac
 			;;

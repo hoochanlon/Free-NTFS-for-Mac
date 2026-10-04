@@ -38,7 +38,14 @@ cd "$PROJECT_ROOT" || {
 # ============================================================
 # 清理函数（在脚本退出时调用）
 # ============================================================
+DMG_STAGING_DIR="${PROJECT_ROOT}/.dmg-staging"
+DMG_STAGING_CREATED=false
+
 cleanup_on_exit() {
+  if [ "$DMG_STAGING_CREATED" = true ] && [ -d "$DMG_STAGING_DIR" ]; then
+    rm -rf "$DMG_STAGING_DIR" 2>/dev/null || true
+  fi
+
   # 清理临时 Python 目录
   if [ -d "${PROJECT_ROOT}/.temp_bin" ]; then
     rm -rf "${PROJECT_ROOT}/.temp_bin" 2>/dev/null || true
@@ -103,22 +110,35 @@ if [ "$CLEAN" = true ]; then
 fi
 
 # ============================================================
-# 检查 DMG 使用说明文件
+# 准备 DMG 附加文件（独立暂存目录，不触碰根目录 README）
 # ============================================================
-check_dmg_readme() {
+prepare_dmg_extras() {
   echo -e "${GREEN}$(t checking_readme)${NC}"
 
-  if [ -f "docs/README.txt" ]; then
-    echo -e "${GREEN}$(t readme_ready)${NC}"
-    cp "docs/README.txt" "README.txt"
-  else
-    echo -e "${YELLOW}$(t warning_readme_not_found)${NC}"
-    echo -e "${YELLOW}$(t readme_ensure)${NC}"
+  local readme_src="docs/README.md"
+  local fix_script_src="docs/提示损坏？点我.command"
+  if [ ! -f "$readme_src" ] || [ ! -f "$fix_script_src" ]; then
+    echo -e "${RED}DMG 附加文件缺失，无法继续打包：${readme_src} 或 ${fix_script_src}${NC}"
+    return 1
   fi
+
+  if [ -e "$DMG_STAGING_DIR" ] || [ -L "$DMG_STAGING_DIR" ]; then
+    echo -e "${RED}DMG 暂存目录已存在，为避免覆盖其内容而停止：${DMG_STAGING_DIR}${NC}"
+    return 1
+  fi
+
+  mkdir "$DMG_STAGING_DIR"
+  DMG_STAGING_CREATED=true
+  cp "$readme_src" "$DMG_STAGING_DIR/README.md"
+  cp "$fix_script_src" "$DMG_STAGING_DIR/提示损坏？点我.command"
+  chmod +x "$DMG_STAGING_DIR/提示损坏？点我.command"
+  echo -e "${GREEN}✓ DMG 附加文件已暂存至 ${DMG_STAGING_DIR}${NC}"
 }
 
-# 执行检查说明文件
-check_dmg_readme
+# ZIP 单独构建不需要 DMG 附加文件
+if [ "$TARGET" != "zip" ]; then
+  prepare_dmg_extras
+fi
 
 # ============================================================
 # 检查依赖是否已安装
@@ -252,11 +272,7 @@ fi
 # ============================================================
 echo -e "${GREEN}$(t package_complete)${NC}"
 
-# 清理临时生成的 README.txt 文件
-if [ -f "README.txt" ]; then
-  rm -f "README.txt"
-  echo -e "${GREEN}$(t cleaned_temp)${NC}"
-fi
+# DMG 附加文件由 EXIT 清理函数处理；不会改动仓库根目录 README.md。
 
 # 清理临时 Python 目录
 if [ -d "${PROJECT_ROOT}/.temp_bin" ]; then

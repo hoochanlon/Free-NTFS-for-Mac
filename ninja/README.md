@@ -1,6 +1,6 @@
 # 🥷 忍者ツールセット
 
-<img width="1080" src="https://upload.cc/i1/2026/10/02/SurGqj.gif" />
+<img width="1080" src="https://free.boltp.com/2026/10/04/6ac209c7e4784.webp" />
 
 このフォルダには、プロジェクトの開発、ビルド、テストに必要な各種スクリプトとツールファイルが含まれています。
 

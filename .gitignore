@@ -39,6 +39,7 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+.dmg-staging/
 
 # Compiled files (from TypeScript and Stylus)
 *.js
