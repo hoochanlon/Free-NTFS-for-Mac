@@ -15,6 +15,7 @@ export let logsWindow: BrowserWindow | null = null;
 export let aboutWindow: BrowserWindow | null = null;
 export let trayDevicesWindow: BrowserWindow | null = null;
 export const moduleWindows: Map<string, BrowserWindow> = new Map();
+let trayWindowManuallySized = false;
 
 // 创建主窗口
 export async function createMainWindow(): Promise<BrowserWindow> {
@@ -164,6 +165,11 @@ const THEME_BACKGROUND_COLORS = {
   dark: '#1d1d1f'
 } as const;
 
+const TRAY_THEME_BACKGROUND_COLORS = {
+  light: '#F5F4F5',
+  dark: '#1d1d1f'
+} as const;
+
 type AppTheme = keyof typeof THEME_BACKGROUND_COLORS;
 
 function normalizeTheme(theme: unknown): AppTheme {
@@ -172,6 +178,10 @@ function normalizeTheme(theme: unknown): AppTheme {
 
 function getThemeBackgroundColor(theme: AppTheme = 'light'): string {
   return THEME_BACKGROUND_COLORS[theme];
+}
+
+function getTrayThemeBackgroundColor(theme: AppTheme = 'light'): string {
+  return TRAY_THEME_BACKGROUND_COLORS[theme];
 }
 
 async function readPersistedTheme(window: BrowserWindow): Promise<AppTheme> {
@@ -213,7 +223,10 @@ async function applyWindowTheme(window: BrowserWindow, theme?: AppTheme): Promis
   if (!window || window.isDestroyed()) return;
 
   const resolvedTheme = theme || await resolveInitialWindowTheme();
-  window.setBackgroundColor(getThemeBackgroundColor(resolvedTheme));
+  const backgroundColor = window === trayDevicesWindow
+    ? getTrayThemeBackgroundColor(resolvedTheme)
+    : getThemeBackgroundColor(resolvedTheme);
+  window.setBackgroundColor(backgroundColor);
 
   await window.webContents.executeJavaScript(`
     (function() {
@@ -265,11 +278,11 @@ function trayWindowHeightFor(deviceCount: number): number {
   } else if (deviceCount === 2) {
     targetHeight = TRAY_DEVICES_WINDOW_CONFIG.heightFor2Devices;
   } else {
-    targetHeight = TRAY_DEVICES_WINDOW_CONFIG.maxHeight;
+    targetHeight = TRAY_DEVICES_WINDOW_CONFIG.defaultHeight;
   }
 
   const { height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
-  return Math.min(targetHeight, screenHeight - 80, TRAY_DEVICES_WINDOW_CONFIG.maxHeight);
+  return Math.min(targetHeight, Math.max(screenHeight - 80, TRAY_DEVICES_WINDOW_CONFIG.minHeight));
 }
 
 function positionTrayDevicesWindow(): void {
@@ -337,9 +350,9 @@ export async function syncHiddenTrayDevicesWindow(devices: unknown[]): Promise<v
 
   const visible = trayDevicesWindow.isVisible();
   const payload = JSON.stringify(devices).replace(/</g, '\\u003c');
-  if (!visible) {
+  if (!visible && !trayWindowManuallySized) {
     trayDevicesWindow.setSize(
-      TRAY_DEVICES_WINDOW_CONFIG.minWidth,
+      TRAY_DEVICES_WINDOW_CONFIG.defaultWidth,
       trayWindowHeightFor(devices.length),
       false
     );
@@ -363,7 +376,7 @@ export async function syncHiddenTrayDevicesWindow(devices: unknown[]): Promise<v
     `, true);
     if (!visible) {
       await paintTrayDevicesWindowOffscreen();
-    } else {
+    } else if (!trayWindowManuallySized) {
       adjustTrayWindowHeightByDeviceCount(devices.length);
     }
   } catch (error) {
@@ -478,9 +491,8 @@ export async function createTrayDevicesWindow(reveal: boolean = true): Promise<B
   const { x: screenX, y: screenY } = primaryDisplay.workArea;
 
   // 使用更小的窗口尺寸，适合托盘弹出
-  // 初始宽度使用最小宽度（因为窗口是固定大小的）
-  const windowWidth = TRAY_DEVICES_WINDOW_CONFIG.minWidth;
-  const windowHeight = Math.min(TRAY_DEVICES_WINDOW_CONFIG.maxHeight, screenHeight - 80);
+  const windowWidth = TRAY_DEVICES_WINDOW_CONFIG.defaultWidth;
+  const windowHeight = Math.min(TRAY_DEVICES_WINDOW_CONFIG.defaultHeight, Math.max(screenHeight - 80, TRAY_DEVICES_WINDOW_CONFIG.minHeight));
 
   // 计算窗口位置（在托盘下方）
   let windowX: number;
@@ -505,9 +517,7 @@ export async function createTrayDevicesWindow(reveal: boolean = true): Promise<B
     width: windowWidth,
     height: windowHeight,
     minWidth: TRAY_DEVICES_WINDOW_CONFIG.minWidth,
-    minHeight: TRAY_DEVICES_WINDOW_CONFIG.heightFor1Device, // 使用1个设备的高度作为最小高度，允许窗口更小
-    maxWidth: TRAY_DEVICES_WINDOW_CONFIG.maxWidth,
-    maxHeight: TRAY_DEVICES_WINDOW_CONFIG.maxHeight,
+    minHeight: TRAY_DEVICES_WINDOW_CONFIG.minHeight,
     x: windowX,
     y: windowY,
     webPreferences: {
@@ -519,8 +529,8 @@ export async function createTrayDevicesWindow(reveal: boolean = true): Promise<B
     },
     frame: false, // 无边框窗口
     transparent: false,
-    backgroundColor: getThemeBackgroundColor(trayTheme),
-    resizable: false, // 固定大小，像系统菜单
+    backgroundColor: getTrayThemeBackgroundColor(trayTheme),
+    resizable: true,
     movable: false, // 托盘弹窗固定位置，不允许用户拖动
     minimizable: false, // 托盘弹窗不需要最小化
     maximizable: false, // 托盘弹窗不需要最大化
@@ -579,8 +589,13 @@ export async function createTrayDevicesWindow(reveal: boolean = true): Promise<B
     await revealTrayDevicesWindow();
   }
 
+  trayDevicesWindow.on('resized', () => {
+    trayWindowManuallySized = true;
+  });
+
   trayDevicesWindow.on('closed', () => {
     trayDevicesWindow = null;
+    trayWindowManuallySized = false;
   });
 
   return trayDevicesWindow;
@@ -618,6 +633,10 @@ export async function toggleTrayDevicesWindow(): Promise<void> {
 export function adjustTrayWindowHeightByDeviceCount(deviceCount: number): void {
   if (!trayDevicesWindow || trayDevicesWindow.isDestroyed()) {
     console.log('[调整窗口高度] 窗口不存在或已销毁');
+    return;
+  }
+
+  if (trayWindowManuallySized) {
     return;
   }
 

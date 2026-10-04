@@ -244,14 +244,16 @@
         // 托盘窗口：显示磁盘名称、读写状态、容量条和操作按钮
         item.innerHTML = `
           <div class="device-card-tray">
-            <div class="device-icon-large">
-              <img src="../imgs/svg/devices/drive.svg" alt="${escapeHTML(device.volumeName)}" class="device-icon-svg">
-            </div>
             <div class="device-card-content">
               <div class="device-card-header-tray">
-              <div class="device-name-large" title="${escapeHTML(device.volumeName)}">${escapeHTML(device.volumeName)}</div>
-                <div class="device-status-actions">
-                  <span class="device-status device-status-tray ${statusClass}">${statusText}</span>
+                <div class="device-icon-large">
+                  <img src="../imgs/svg/devices/drive.svg" alt="" aria-hidden="true" class="device-icon-svg">
+                </div>
+                <div class="device-name-large" title="${escapeHTML(device.volumeName)}">${escapeHTML(device.volumeName)}</div>
+              </div>
+              <div class="device-status-actions">
+                <span class="device-status device-status-tray ${statusClass}">${statusText}</span>
+                <div class="device-utility-actions">
                   ${!isUnmounted ? `
                   <button class="repair-icon-btn repair-btn" type="button" data-disk="${device.disk}" title="${t('devices.repairTooltip')}" aria-label="${t('devices.repairTooltip')}">
                     <span aria-hidden="true"></span>

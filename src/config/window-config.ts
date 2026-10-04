@@ -31,11 +31,11 @@ export const LOGS_WINDOW_CONFIG = {
 
 // 托盘设备窗口配置
 export const TRAY_DEVICES_WINDOW_CONFIG = {
-  minWidth: 350,  // 初始宽度使用最小宽度（因为窗口是固定大小的）
-  minHeight: 460,
-  maxWidth: 350,
-  maxHeight: 460,
-  // 根据设备数量的硬编码高度
-  heightFor1Device: 230,  // 1个设备时的高度
-  heightFor2Devices: 350  // 2个设备时的高度
+  minWidth: 350,
+  minHeight: 256, // 1 个设备时的高度作为最小高度
+  defaultWidth: 350,
+  defaultHeight: 256,
+  // 根据设备数量的默认高度（用户手动拉伸后不再强制套用）
+  heightFor1Device: 256,
+  heightFor2Devices: 410
 };

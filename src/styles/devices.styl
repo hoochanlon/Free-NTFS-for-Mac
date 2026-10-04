@@ -13,6 +13,10 @@
   body.tray-window &
     transition background-color 0s
 
+  html.light-theme body.tray-window &,
+  body.tray-window.light-theme &
+    background light-tray-bg-primary
+
 .devices-header
   display flex
   align-items center
@@ -66,6 +70,13 @@ body.tray-window
     flex none
     // 托盘标题整体再往下放一点，避免贴着顶部
     padding 8px 10px 2px 10px
+
+// 浅色托盘用略灰的底色，避免纯白过亮
+html.light-theme:has(body.tray-window),
+html.light-theme body.tray-window,
+body.tray-window.light-theme
+  --bg-primary light-tray-bg-primary
+  background light-tray-bg-primary
 
 
 
@@ -257,7 +268,7 @@ body.tray-window
 
     // 托盘窗口中的列表更紧凑
     .tray-window &
-      gap 4px
+      gap 8px
       padding 8px
 
   .device-item
@@ -267,7 +278,7 @@ body.tray-window
 
     // 托盘窗口中的设备项更紧凑
     .tray-window &
-      margin-bottom 2px
+      margin-bottom 0
 
   .device-card
     display flex
@@ -284,10 +295,11 @@ body.tray-window
       border-color var(--accent)
       box-shadow 0 2px 8px rgba(0, 0, 0, 0.1)
 
-  // 托盘窗口专用样式（类似 Windows 磁盘显示）
+  // 托盘窗口专用样式：设备身份、状态、容量、操作纵向分组
   .device-card-tray
     display flex
-    align-items center
+    flex-direction column
+    align-items stretch
     padding 8px 10px
     background transparent
     border none
@@ -301,65 +313,45 @@ body.tray-window
       border-radius 4px
 
   .device-icon-large
-    margin-right 16px
+    margin-right 0
     flex-shrink 0
-    width 48px
-    height 48px
+    width 28px
+    height 28px
     display flex
     align-items center
     justify-content center
 
-    // 托盘窗口中的图标更小
-    .device-card-tray &
-      width 32px
-      height 32px
-      margin-right 12px
-
   .device-icon-svg
-    width 48px
-    height 48px
+    width 28px
+    height 28px
     object-fit contain
     flex-shrink 0
     display block
-    // 确保 SVG 颜色可以随主题变化
     filter none
-
-    // 托盘窗口中的图标更小
-    .device-card-tray &
-      width 32px
-      height 32px
 
   .device-card-content
     flex 1
     min-width 0
+    width 100%
 
-  // 托盘窗口中的标题区域：名称 + 状态标签
+  // 名称独占首行，不与状态或操作入口争抢空间
   .device-card-header-tray
     display flex
     align-items center
-    justify-content space-between
+    justify-content flex-start
     gap 8px
+    min-width 0
 
     .device-name-large
       flex 1
       min-width 0
-      overflow hidden
-      text-overflow ellipsis
-      white-space nowrap
-
-    .device-status-tray
-      flex-shrink 0
-      font-size 10px
-      padding 2px 8px
-
-    .repair-icon-btn
-      height 18px
-      padding 2px
-      box-sizing border-box
-
-      span
-        width 12px
-        height 12px
+      overflow-wrap anywhere
+      white-space normal
+      font-size 12px
+      font-weight 500
+      margin-bottom 0
+      line-height 1.35
+      color var(--text-primary)
 
   .device-name-large
     font-size 14px
@@ -368,13 +360,26 @@ body.tray-window
     margin-bottom 8px
     line-height 1.4
 
-    // 托盘窗口中的名称样式
-    .device-card-tray &
-      font-size 12px
-      font-weight 500
-      margin-bottom 3px
-      line-height 1.2
-      color var(--text-primary)
+  // 状态固定在左侧，辅助操作固定在右侧
+  .device-card-tray .device-status-actions
+    display flex
+    align-items center
+    justify-content space-between
+    gap 8px
+    width 100%
+    margin-top 6px
+
+  .device-utility-actions
+    display flex
+    align-items center
+    justify-content flex-end
+    gap 4px
+    margin-left auto
+
+  .device-card-tray .device-status-tray
+    flex-shrink 0
+    font-size 10px
+    padding 2px 8px
 
   .device-capacity-info
     font-size 12px
@@ -474,7 +479,7 @@ body.tray-window
     justify-content flex-end
     margin-top 6px
     gap 4px
-    flex-wrap wrap
+    flex-wrap nowrap
 
     .btn
       padding 5px 12px
@@ -482,6 +487,7 @@ body.tray-window
       min-height 24px
       line-height 1.3
       white-space nowrap
+      flex-shrink 0
 
   .empty-state
     display flex
