@@ -43,7 +43,7 @@
     }
 
     const checkDepsBtn = document.getElementById('checkDepsBtn');
-    if (checkDepsBtn) {
+    if (checkDepsBtn && !checkDepsBtn.classList.contains('is-checking')) {
       checkDepsBtn.textContent = t('dependencies.checkButton');
     }
 
@@ -437,17 +437,12 @@
         const dependencies = (window as any).AppModules.Dependencies.dependencies;
         if (!dependencies) {
           // 如果没有依赖数据，触发重新检查
-          const checkDepsBtn = document.getElementById('checkDepsBtn');
-          if (checkDepsBtn && (window as any).AppModules.Dependencies.checkDependencies) {
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            if (loadingOverlay) {
-              (window as any).AppModules.Dependencies.checkDependencies(
-                depsList,
-                loadingOverlay,
-                statusDot,
-                statusText
-              );
-            }
+          if ((window as any).AppModules.Dependencies.checkDependencies) {
+            (window as any).AppModules.Dependencies.checkDependencies(
+              depsList,
+              statusDot,
+              statusText
+            );
           }
         } else {
           // 重新渲染依赖列表

@@ -220,10 +220,18 @@
       }
     },
 
-    // 检查依赖
+    // 检查依赖。手动触发只在按钮上显示忙碌，不盖全页遮罩。
+    setCheckButtonBusy(busy: boolean): void {
+      const button = document.getElementById('checkDepsBtn') as HTMLButtonElement | null;
+      if (!button) return;
+
+      button.classList.toggle('is-checking', busy);
+      button.disabled = busy;
+      button.setAttribute('aria-busy', busy ? 'true' : 'false');
+    },
+
     async checkDependencies(
       depsList: HTMLElement,
-      loadingOverlay: HTMLElement,
       statusDot: HTMLElement,
       statusText: HTMLElement,
       forceRefresh: boolean = false
@@ -250,7 +258,7 @@
       }
 
       try {
-        AppUtils.UI.showLoading(loadingOverlay, true);
+        AppModules.Dependencies.setCheckButtonBusy(true);
         AppUtils.UI.updateStatus('active', t('status.checking'), statusDot, statusText);
 
         // 添加超时保护
@@ -287,7 +295,7 @@
         await AppUtils.Logs.addLog(t('dependencies.checkFailed', { error: errorMessage }), 'error');
         console.error('检查依赖错误:', error);
       } finally {
-        AppUtils.UI.showLoading(loadingOverlay, false);
+        AppModules.Dependencies.setCheckButtonBusy(false);
       }
     },
 

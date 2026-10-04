@@ -16,7 +16,6 @@
   const installSection = document.getElementById('installSection') as HTMLElement;
   const installDepsBtn = document.getElementById('installDepsBtn') as HTMLButtonElement;
   const installLog = document.getElementById('installLog') as HTMLElement;
-  const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
   const closeBtn = document.getElementById('closeBtn') as HTMLButtonElement;
 
   // 状态管理
@@ -36,13 +35,11 @@
     localStorage.setItem('appLogs', JSON.stringify(logs));
   }
 
-  // 显示/隐藏加载遮罩
+  // 检查进行中只锁按钮，不盖全页遮罩
   function showLoading(show: boolean = true): void {
-    if (show) {
-      loadingOverlay.classList.add('visible');
-    } else {
-      loadingOverlay.classList.remove('visible');
-    }
+    checkDepsBtn.classList.toggle('is-checking', show);
+    checkDepsBtn.disabled = show;
+    checkDepsBtn.setAttribute('aria-busy', show ? 'true' : 'false');
   }
 
   // 检查依赖

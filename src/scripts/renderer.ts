@@ -39,7 +39,6 @@
   const unmountAllBtn = document.getElementById('unmountAllBtn') as HTMLButtonElement;
   const restoreAllReadOnlyBtn = document.getElementById('restoreAllReadOnlyBtn') as HTMLButtonElement;
   const ejectAllBtn = document.getElementById('ejectAllBtn') as HTMLButtonElement;
-  const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
   const logContainer = document.getElementById('logContainer')!;
   const clearLogBtn = document.getElementById('clearLogBtn') as HTMLButtonElement;
   const themeToggleButton = document.getElementById('theme-toggle-btn') as HTMLButtonElement;
@@ -117,7 +116,6 @@
 
     AppModules.Dependencies.checkDependencies(
       depsList,
-      loadingOverlay,
       statusDot,
       statusText
     );
@@ -548,7 +546,6 @@
       // 手动点击时强制刷新，忽略缓存
       AppModules.Dependencies.checkDependencies(
         depsList,
-        loadingOverlay,
         statusDot,
         statusText,
         true // forceRefresh = true
