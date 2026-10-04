@@ -54,6 +54,7 @@
     }
 
     ipcRenderer.on('tray-repair-confirm-data', (_event, options) => {
+      document.documentElement.classList.toggle('light-theme', options.isLightTheme);
       document.body.classList.toggle('light-theme', options.isLightTheme);
       titleElement.textContent = options.title;
       cancelButton.textContent = options.cancelText;

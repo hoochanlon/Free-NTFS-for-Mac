@@ -11,7 +11,8 @@ import {
   mainWindow,
   showMainWindowAndCloseTray,
   adjustTrayWindowHeightByDeviceCount,
-  trayDevicesWindow
+  trayDevicesWindow,
+  prerenderTrayDevicesTheme
 } from './window-manager';
 import { openAboutWindow, getAboutWindow } from './about-window';
 import { SettingsManager, AppSettings } from './utils/settings';
@@ -870,23 +871,32 @@ export function setupSystemHandlers(): void {
     const backgroundColor = theme === 'light' ? '#ffffff' : '#1d1d1f';
     nativeTheme.themeSource = theme;
     const allWindows = BrowserWindow.getAllWindows();
-    allWindows.forEach((window: BrowserWindow) => {
-      if (window && !window.isDestroyed()) {
-        window.webContents.send('theme-changed', isLightMode);
-        // 更新所有模块窗口和托盘设备窗口的背景色
-        const aboutWindow = getAboutWindow();
-        if (window === aboutWindow) {
-          window.setBackgroundColor(isLightMode ? '#f5f5f7' : '#1d1d1f');
-        } else {
-          // 检查是否是模块窗口或托盘设备窗口
-          // 这些窗口使用devices.html或dependencies.html
-          const url = window.webContents.getURL();
-          if (url && (url.includes('devices.html') || url.includes('dependencies.html'))) {
-            window.setBackgroundColor(backgroundColor);
-          }
+    for (const window of allWindows) {
+      if (!window || window.isDestroyed()) continue;
+      window.webContents.send('theme-changed', isLightMode);
+      const aboutWindow = getAboutWindow();
+      if (window === aboutWindow) {
+        window.setBackgroundColor(isLightMode ? '#f5f5f7' : '#1d1d1f');
+      } else {
+        const url = window.webContents.getURL();
+        if (url && (url.includes('devices.html') || url.includes('dependencies.html'))) {
+          window.setBackgroundColor(backgroundColor);
         }
       }
-    });
+      if (window === trayDevicesWindow) {
+        await window.webContents.executeJavaScript(`
+          document.documentElement.classList.add('tray-theme-syncing');
+          document.documentElement.classList.toggle('light-theme', ${isLightMode});
+          if (document.body) document.body.classList.toggle('light-theme', ${isLightMode});
+          try { localStorage.setItem('app-theme', ${isLightMode} ? 'light' : 'dark'); } catch (e) {}
+          void document.documentElement.offsetHeight;
+          document.documentElement.classList.remove('tray-theme-syncing');
+        `).catch(() => {});
+        window.setBackgroundColor(backgroundColor);
+        // 隐藏窗口的合成层不会跟着 class 更新，必须现在画完新主题
+        await prerenderTrayDevicesTheme(theme);
+      }
+    }
   });
 
   // 退出应用

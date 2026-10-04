@@ -173,7 +173,7 @@ function getThemeBackgroundColor(theme: AppTheme = 'light'): string {
   return THEME_BACKGROUND_COLORS[theme];
 }
 
-async function readWindowTheme(window: BrowserWindow): Promise<AppTheme> {
+async function readPersistedTheme(window: BrowserWindow): Promise<AppTheme> {
   try {
     const theme = await window.webContents.executeJavaScript(`
       (function() {
@@ -190,9 +190,20 @@ async function readWindowTheme(window: BrowserWindow): Promise<AppTheme> {
   }
 }
 
+async function readAppliedTheme(window: BrowserWindow): Promise<AppTheme> {
+  try {
+    const theme = await window.webContents.executeJavaScript(`
+      document.documentElement.classList.contains('light-theme') ? 'light' : 'dark'
+    `);
+    return normalizeTheme(theme);
+  } catch {
+    return readPersistedTheme(window);
+  }
+}
+
 async function resolveInitialWindowTheme(): Promise<AppTheme> {
   if (mainWindow && !mainWindow.isDestroyed()) {
-    return readWindowTheme(mainWindow);
+    return readAppliedTheme(mainWindow);
   }
   return nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
 }
@@ -200,7 +211,7 @@ async function resolveInitialWindowTheme(): Promise<AppTheme> {
 async function applyWindowTheme(window: BrowserWindow, theme?: AppTheme): Promise<void> {
   if (!window || window.isDestroyed()) return;
 
-  const resolvedTheme = theme || await readWindowTheme(window);
+  const resolvedTheme = theme || await resolveInitialWindowTheme();
   window.setBackgroundColor(getThemeBackgroundColor(resolvedTheme));
 
   await window.webContents.executeJavaScript(`
@@ -215,6 +226,72 @@ async function applyWindowTheme(window: BrowserWindow, theme?: AppTheme): Promis
       } catch (e) {}
     })();
   `).catch(() => {});
+}
+
+/**
+ * 隐藏中的托盘窗口会被 Chromium 节流，主题变更要等再次显示才绘制。
+ * 切换主题时先在屏幕外以不透明度过完一帧，再恢复隐藏，避免打开时闪出旧主题。
+ */
+export async function prerenderTrayDevicesTheme(theme: AppTheme): Promise<void> {
+  if (!trayDevicesWindow || trayDevicesWindow.isDestroyed() || trayDevicesWindow.isVisible()) return;
+
+  const [width, height] = trayDevicesWindow.getSize();
+  const [x, y] = trayDevicesWindow.getPosition();
+
+  trayDevicesWindow.setOpacity(0);
+  trayDevicesWindow.setPosition(-10000, -10000, false);
+  trayDevicesWindow.showInactive();
+
+  try {
+    await trayDevicesWindow.webContents.executeJavaScript(`
+      document.documentElement.classList.add('tray-theme-syncing');
+    `);
+    await applyWindowTheme(trayDevicesWindow, theme);
+
+    await new Promise<void>(resolve => {
+      setTimeout(() => {
+        trayDevicesWindow?.webContents.invalidate();
+        resolve();
+      }, 50);
+    });
+    await new Promise(resolve => setTimeout(resolve, 80));
+
+    await trayDevicesWindow.webContents.executeJavaScript(`
+      document.documentElement.classList.remove('tray-theme-syncing');
+    `);
+  } finally {
+    if (!trayDevicesWindow.isDestroyed()) {
+      trayDevicesWindow.hide();
+      trayDevicesWindow.setPosition(x, y, false);
+      trayDevicesWindow.setSize(width, height, false);
+    }
+  }
+}
+
+async function revealTrayDevicesWindow(): Promise<void> {
+  if (!trayDevicesWindow || trayDevicesWindow.isDestroyed()) return;
+
+  const theme = await resolveInitialWindowTheme();
+  const appliedTheme = await readAppliedTheme(trayDevicesWindow);
+  if (appliedTheme !== theme) {
+    // 主题在隐藏期间没跟上时兜底，正常路径已在切换时预渲染完成
+    await prerenderTrayDevicesTheme(theme);
+  }
+
+  const trayBounds = getTrayBounds();
+  if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {
+    const [currentWidth] = trayDevicesWindow.getSize();
+    const trayCenterX = trayBounds.x + (trayBounds.width / 2);
+    trayDevicesWindow.setPosition(
+      Math.round(trayCenterX - (currentWidth / 2)),
+      Math.round(trayBounds.y + trayBounds.height),
+      false
+    );
+  }
+
+  trayDevicesWindow.setOpacity(1);
+  trayDevicesWindow.show();
+  trayDevicesWindow.focus();
 }
 
 // 创建模块窗口
@@ -291,21 +368,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     if (trayDevicesWindow.isVisible()) {
       trayDevicesWindow.hide();
     } else {
-      // 在显示窗口前，先强制刷新设备列表（确保显示最新状态）
-      try {
-        await trayDevicesWindow.webContents.executeJavaScript(`
-          if (typeof window !== 'undefined' && window.refreshDevices) {
-            window.refreshDevices(true);
-          }
-        `);
-      } catch (error) {
-        // 忽略错误，继续显示窗口
-      }
-
-      await applyWindowTheme(trayDevicesWindow);
-      trayDevicesWindow.setOpacity(1);
-      trayDevicesWindow.show();
-      trayDevicesWindow.focus();
+      await revealTrayDevicesWindow();
     }
     return trayDevicesWindow;
   }
@@ -353,7 +416,9 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      // 托盘窗口大部分时间隐藏，关闭节流才能在切换主题时把新样式画完
+      backgroundThrottling: false
     },
     frame: false, // 无边框窗口
     transparent: false,
@@ -468,24 +533,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
         trayDevicesWindow.webContents.openDevTools({ mode: 'detach' });
       }
 
-      await applyWindowTheme(trayDevicesWindow, trayTheme);
-
-      // 在显示前重新计算位置，确保贴合托盘（像系统菜单一样）
-      const trayBounds = getTrayBounds();
-      if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {
-        const [currentWidth] = trayDevicesWindow.getSize();
-        // 计算托盘中心点
-        const trayCenterX = trayBounds.x + (trayBounds.width / 2);
-        // 窗口水平居中对齐托盘图标
-        const newX = Math.round(trayCenterX - (currentWidth / 2));
-        // 窗口顶部紧贴托盘底部（0间距，像系统菜单）
-        const newY = Math.round(trayBounds.y + trayBounds.height);
-        trayDevicesWindow.setPosition(newX, newY, false);
-      }
-      // 先设置不透明，再显示，避免残影
-      trayDevicesWindow.setOpacity(1);
-      trayDevicesWindow.show();
-      trayDevicesWindow.focus();
+      await revealTrayDevicesWindow();
     }
   });
 
@@ -503,31 +551,7 @@ export async function toggleTrayDevicesWindow(): Promise<void> {
     if (trayDevicesWindow.isVisible()) {
       trayDevicesWindow.hide();
     } else {
-      // 在显示窗口前，先强制刷新设备列表（确保显示最新状态）
-      try {
-        await trayDevicesWindow.webContents.executeJavaScript(`
-          if (typeof window !== 'undefined' && window.refreshDevices) {
-            window.refreshDevices(true);
-          }
-        `);
-      } catch (error) {
-        // 忽略错误，继续显示窗口
-      }
-
-      // 每次显示时都重新计算位置，确保贴合托盘（像系统菜单一样）
-      const trayBounds = getTrayBounds();
-      if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {
-        const [currentWidth] = trayDevicesWindow.getSize();
-        const trayCenterX = trayBounds.x + (trayBounds.width / 2);
-        // 窗口水平居中对齐托盘图标，顶部紧贴托盘底部（像系统菜单）
-        const newX = Math.round(trayCenterX - (currentWidth / 2));
-        const newY = Math.round(trayBounds.y + trayBounds.height);
-        trayDevicesWindow.setPosition(newX, newY, false);
-      }
-      await applyWindowTheme(trayDevicesWindow);
-      trayDevicesWindow.setOpacity(1);
-      trayDevicesWindow.show();
-      trayDevicesWindow.focus();
+      await revealTrayDevicesWindow();
     }
   } else {
     await createTrayDevicesWindow();

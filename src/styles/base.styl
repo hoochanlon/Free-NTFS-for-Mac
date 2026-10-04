@@ -39,6 +39,13 @@
   --coffee coffee
   --coffee-hover coffee-hover
 
+html.tray-theme-syncing,
+html.tray-theme-syncing *,
+html.tray-theme-syncing *::before,
+html.tray-theme-syncing *::after
+  transition none !important
+  animation none !important
+
 // 深色模式：html 与 body 都没有 light-theme 时使用深色
 html:not(.light-theme),
 body:not(.light-theme)

@@ -8,7 +8,10 @@
   height 100vh
   overflow hidden
   background var(--bg-primary)
-  transition background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1)
+
+  // 托盘窗口隐藏时预渲染主题，打开时不能再播背景过渡，否则会闪出旧颜色
+  body.tray-window &
+    transition background-color 0s
 
 .devices-header
   display flex
