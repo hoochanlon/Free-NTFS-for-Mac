@@ -23,7 +23,6 @@
 | `filter-tsc-output.js` | JavaScript | TypeScript 出力のフィルタリング | 開発時（自動） |
 | `test-modules-cli.js` | JavaScript | モジュールテスト（コマンドライン） | テスト時 |
 | `test-modules-enhanced.html` | HTML | モジュールテストページ | テスト時 |
-| `makimono/` | ディレクトリ | ツールセットドキュメント（多言語） | 参照時 |
 
 ## 🚀 クイックスタート
 
