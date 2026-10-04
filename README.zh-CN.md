@@ -2,7 +2,7 @@
 
 **语言 / Language / 言語**: [简体中文](README.zh-CN.md) | [English](README.md) | [日本語](README.ja.md)
 
-![主界面](src/imgs/example/demo.gif)
+![](https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/src/imgs/example/demo.gif)
 
 这是 Nigate 的 Electron 图形界面版本，在保留原有命令行工具的基础上，为 NTFS 设备管理提供现代、直观的操作界面。[^1]
 
