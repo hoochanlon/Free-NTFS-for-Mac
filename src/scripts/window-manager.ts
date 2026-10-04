@@ -333,14 +333,17 @@ async function paintTrayDevicesWindowOffscreen(): Promise<void> {
 }
 
 export async function syncHiddenTrayDevicesWindow(devices: unknown[]): Promise<void> {
-  if (!trayDevicesWindow || trayDevicesWindow.isDestroyed() || trayDevicesWindow.isVisible()) return;
+  if (!trayDevicesWindow || trayDevicesWindow.isDestroyed()) return;
 
+  const visible = trayDevicesWindow.isVisible();
   const payload = JSON.stringify(devices).replace(/</g, '\\u003c');
-  trayDevicesWindow.setSize(
-    TRAY_DEVICES_WINDOW_CONFIG.minWidth,
-    trayWindowHeightFor(devices.length),
-    false
-  );
+  if (!visible) {
+    trayDevicesWindow.setSize(
+      TRAY_DEVICES_WINDOW_CONFIG.minWidth,
+      trayWindowHeightFor(devices.length),
+      false
+    );
+  }
 
   try {
     await trayDevicesWindow.webContents.executeJavaScript(`
@@ -358,9 +361,13 @@ export async function syncHiddenTrayDevicesWindow(devices: unknown[]): Promise<v
         return window.applyTrayDevicesSnapshot(${payload});
       })();
     `, true);
-    await paintTrayDevicesWindowOffscreen();
+    if (!visible) {
+      await paintTrayDevicesWindowOffscreen();
+    } else {
+      adjustTrayWindowHeightByDeviceCount(devices.length);
+    }
   } catch (error) {
-    console.warn('[托盘窗口] 隐藏态预渲染失败:', error);
+    console.warn('[托盘窗口] 设备状态同步失败:', error);
   }
 }
 
@@ -374,6 +381,10 @@ async function revealTrayDevicesWindow(): Promise<void> {
     await prerenderTrayDevicesTheme(theme);
   }
 
+  // 窗口仍不可见。先套用缓存并按设备数定高，再定位显示，避免打开后停在旧画面。
+  await syncHiddenTrayDevicesWindow(ntfsManager.getCachedDevices());
+
+  if (!trayDevicesWindow || trayDevicesWindow.isDestroyed()) return;
   positionTrayDevicesWindow();
   trayDevicesWindow.setOpacity(1);
   trayDevicesWindow.show();
@@ -448,7 +459,7 @@ export function closeModuleWindow(window: BrowserWindow): void {
 }
 
 // 创建托盘设备窗口（替代菜单，实现真正的实时更新）
-export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
+export async function createTrayDevicesWindow(reveal: boolean = true): Promise<BrowserWindow | null> {
   // 如果窗口已存在且未销毁，切换显示/隐藏
   if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
     if (trayDevicesWindow.isVisible()) {
@@ -564,7 +575,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     console.warn('[托盘窗口] 显示前预渲染失败:', error);
   }
 
-  if (!trayDevicesWindow.isDestroyed()) {
+  if (reveal && !trayDevicesWindow.isDestroyed()) {
     await revealTrayDevicesWindow();
   }
 
@@ -573,6 +584,21 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
   });
 
   return trayDevicesWindow;
+}
+
+/**
+ * 应用启动后即创建隐藏的托盘窗口。
+ * 设备变化只会预渲染已存在的窗口；若等第一次点击才创建，
+ * 期间插入的设备不会进入画面，打开后只能看到创建时的空缓存。
+ */
+export async function ensureTrayDevicesWindow(): Promise<void> {
+  if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) return;
+
+  try {
+    await createTrayDevicesWindow(false);
+  } catch (error) {
+    console.warn('[托盘窗口] 启动时预创建失败:', error);
+  }
 }
 
 // 切换托盘设备窗口显示/隐藏

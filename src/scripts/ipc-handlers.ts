@@ -13,7 +13,8 @@ import {
   adjustTrayWindowHeightByDeviceCount,
   trayDevicesWindow,
   prerenderTrayDevicesTheme,
-  syncHiddenTrayDevicesWindow
+  syncHiddenTrayDevicesWindow,
+  ensureTrayDevicesWindow
 } from './window-manager';
 import { openAboutWindow, getAboutWindow } from './about-window';
 import { SettingsManager, AppSettings } from './utils/settings';
@@ -205,6 +206,7 @@ async function broadcastDevicesToAllWindows(): Promise<void> {
         }
       }
     });
+    // 托盘窗口打开时也走这条同步，不再因为可见而跳过。
     await syncHiddenTrayDevicesWindow(devices);
   } catch (error) {
     console.error('[设备广播] 获取或广播设备列表失败:', error);
@@ -480,10 +482,13 @@ export function setupNTFSHandlers(): void {
               }
             }
           });
+          // 托盘窗口不走这条广播：隐藏时需要离屏预渲染，打开时直接套用同一份快照。
           void syncHiddenTrayDevicesWindow(devices);
         });
         hybridDetectionInitialized = true;
         console.log('✅ [混合检测] 全局检测已启动');
+        // 监听建立后再创建托盘窗口，避免窗口抢在首次扫描前拿到空缓存。
+        void ensureTrayDevicesWindow();
       } else {
         // 如果已经初始化，立即发送当前设备列表给新窗口
         const currentDevices = await ntfsManager.getNTFSDevices(true);
@@ -1138,7 +1143,10 @@ export function setupIpcHandlers(): void {
   setupCaffeinateHandlers();
 
   // 启动期即建立设备监听。自动读写不再等待窗口渲染器注册回调。
-  ntfsManager.startHybridDetection(() => {}).catch(error => {
+  // 监听就绪后再预创建托盘窗口，后续插拔才能在打开前完成预渲染。
+  ntfsManager.startHybridDetection(() => {}).then(() => {
+    void ensureTrayDevicesWindow();
+  }).catch(error => {
     console.error('[自动读写] 启动设备监听失败:', error);
   });
 }

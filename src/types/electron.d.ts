@@ -33,6 +33,7 @@ export interface ElectronAPI {
   onApplyAutoMount: (callback: () => void) => void;
   // 混合检测相关
   startHybridDetection: (callback: (devices: NTFSDevice[]) => void) => Promise<void>;
+  subscribeHybridDetection: (callback: (devices: NTFSDevice[]) => void) => Promise<void>;
   stopHybridDetection: () => Promise<void>;
   updateWindowVisibility: (isVisible: boolean) => Promise<void>;
   getDetectionMode: () => Promise<'event-driven' | 'polling' | 'not-started'>;

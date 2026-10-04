@@ -88,7 +88,11 @@
 
         hybridDetectionCallback = callback;
 
-        await electronAPI.startHybridDetection(callback);
+        const isTrayWindow = document.body && document.body.classList.contains('tray-window');
+        const subscribe = isTrayWindow && typeof electronAPI.subscribeHybridDetection === 'function'
+          ? electronAPI.subscribeHybridDetection.bind(electronAPI)
+          : electronAPI.startHybridDetection.bind(electronAPI);
+        await subscribe(callback);
         if (typeof electronAPI.onApplyAutoMount === 'function') {
           electronAPI.onApplyAutoMount(() => {
             electronAPI.applyAutoMount?.().catch((error: unknown) => {

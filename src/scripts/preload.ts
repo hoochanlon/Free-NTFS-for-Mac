@@ -2,6 +2,37 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron';
 import type { ElectronAPI } from '../types/electron';
 
+function registerHybridDetection(
+  callback: (devices: any[]) => void,
+  requestCurrentDevices: boolean
+): Promise<any> {
+  const listenerKey = 'hybrid-detection-listener';
+  const existingListener = (window as any)[listenerKey];
+
+  if (existingListener) {
+    ipcRenderer.removeListener('hybrid-detection-device-change', existingListener);
+  }
+
+  const listener = (_event: IpcRendererEvent, devices: any[]) => {
+    try {
+      if (Array.isArray(devices)) {
+        callback(devices);
+      }
+    } catch (error) {
+      console.error('[preload] 设备变化回调执行失败:', error);
+    }
+  };
+
+  (window as any)[listenerKey] = listener;
+  ipcRenderer.on('hybrid-detection-device-change', listener);
+
+  if (!requestCurrentDevices) {
+    return Promise.resolve({ success: true, subscribed: true });
+  }
+
+  return ipcRenderer.invoke('start-hybrid-detection');
+}
+
 const electronAPI: ElectronAPI = {
   checkDependencies: () => ipcRenderer.invoke('check-dependencies'),
   getNTFSDevices: (forceRefresh?: boolean) => ipcRenderer.invoke('get-ntfs-devices', forceRefresh),
@@ -72,44 +103,10 @@ const electronAPI: ElectronAPI = {
   },
   adjustTrayWindowHeightByDeviceCount: (deviceCount: number) => ipcRenderer.invoke('adjust-tray-window-height-by-device-count', deviceCount),
   // 混合检测相关
-  startHybridDetection: (callback: (devices: any[]) => void) => {
-    // 注意：每个窗口都需要注册自己的监听器
-    // 保存当前窗口的监听器引用，避免重复注册
-    const listenerKey = 'hybrid-detection-listener';
-    const existingListener = (window as any)[listenerKey];
-
-    // 如果已存在监听器，先移除它
-    if (existingListener) {
-      ipcRenderer.removeListener('hybrid-detection-device-change', existingListener);
-      console.log('[preload] 移除旧的设备变化事件监听器');
-    }
-
-    // 通过 IPC 启动混合检测，回调通过事件传递
-    const listener = (event: IpcRendererEvent, devices: any[]) => {
-      try {
-        console.log('[preload] 收到设备变化事件，设备数量:', devices.length, '设备列表:', devices.map((d: any) => d.volumeName || d.disk));
-        if (Array.isArray(devices)) {
-          callback(devices);
-        } else {
-          console.error('[preload] 设备列表不是数组:', devices);
-        }
-      } catch (error) {
-        console.error('[preload] 设备变化回调执行失败:', error);
-      }
-    };
-
-    // 保存监听器引用
-    (window as any)[listenerKey] = listener;
-
-    // 注册事件监听器（每个窗口都有自己的监听器）
-    ipcRenderer.on('hybrid-detection-device-change', listener);
-    console.log('[preload] 已注册设备变化事件监听器');
-
-    return ipcRenderer.invoke('start-hybrid-detection').then((result: any) => {
-      console.log('[preload] 混合检测启动结果:', result);
-      return result;
-    });
-  },
+  startHybridDetection: (callback: (devices: any[]) => void) =>
+    registerHybridDetection(callback, true),
+  subscribeHybridDetection: (callback: (devices: any[]) => void) =>
+    registerHybridDetection(callback, false),
   stopHybridDetection: () => ipcRenderer.invoke('stop-hybrid-detection'),
   updateWindowVisibility: (isVisible: boolean) => ipcRenderer.invoke('update-window-visibility', isVisible),
   getDetectionMode: () => ipcRenderer.invoke('get-detection-mode'),
