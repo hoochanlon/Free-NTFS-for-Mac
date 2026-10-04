@@ -483,12 +483,15 @@
   });
 
   // 初始化 i18n
+  (window as any).applyTranslations = applyTranslations;
+
   async function init() {
     await AppUtils.I18n.init();
     applyTranslations();
 
     const devicesList = document.getElementById('devicesList');
-    if (devicesList) {
+    const isTrayWindow = document.body && document.body.classList.contains('tray-window');
+    if (!isTrayWindow && devicesList) {
       delete (devicesList as any).__lastStateKey;
     }
     if ((window as any).AppModules?.Devices?.Renderer && devicesList) {

@@ -2,6 +2,7 @@ import { BrowserWindow, app, screen, nativeTheme } from 'electron';
 import * as path from 'path';
 import { SettingsManager, WINDOW_SIZE_CONFIG } from './utils/settings';
 import { isTrayInitialized, getTrayBounds } from './utils/tray-manager';
+import ntfsManager from './ntfs-manager';
 import {
   MODULE_WINDOW_CONFIG,
   LOGS_WINDOW_CONFIG,
@@ -236,8 +237,6 @@ export async function prerenderTrayDevicesTheme(theme: AppTheme): Promise<void> 
   if (!trayDevicesWindow || trayDevicesWindow.isDestroyed() || trayDevicesWindow.isVisible()) return;
 
   const [width, height] = trayDevicesWindow.getSize();
-  const [x, y] = trayDevicesWindow.getPosition();
-
   trayDevicesWindow.setOpacity(0);
   trayDevicesWindow.setPosition(-10000, -10000, false);
   trayDevicesWindow.showInactive();
@@ -247,24 +246,121 @@ export async function prerenderTrayDevicesTheme(theme: AppTheme): Promise<void> 
       document.documentElement.classList.add('tray-theme-syncing');
     `);
     await applyWindowTheme(trayDevicesWindow, theme);
-
-    await new Promise<void>(resolve => {
-      setTimeout(() => {
-        trayDevicesWindow?.webContents.invalidate();
-        resolve();
-      }, 50);
-    });
-    await new Promise(resolve => setTimeout(resolve, 80));
-
+    await commitTrayDevicesFrame();
     await trayDevicesWindow.webContents.executeJavaScript(`
       document.documentElement.classList.remove('tray-theme-syncing');
     `);
   } finally {
     if (!trayDevicesWindow.isDestroyed()) {
       trayDevicesWindow.hide();
-      trayDevicesWindow.setPosition(x, y, false);
       trayDevicesWindow.setSize(width, height, false);
     }
+  }
+}
+
+function trayWindowHeightFor(deviceCount: number): number {
+  let targetHeight: number;
+  if (deviceCount === 1) {
+    targetHeight = TRAY_DEVICES_WINDOW_CONFIG.heightFor1Device;
+  } else if (deviceCount === 2) {
+    targetHeight = TRAY_DEVICES_WINDOW_CONFIG.heightFor2Devices;
+  } else {
+    targetHeight = TRAY_DEVICES_WINDOW_CONFIG.maxHeight;
+  }
+
+  const { height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
+  return Math.min(targetHeight, screenHeight - 80, TRAY_DEVICES_WINDOW_CONFIG.maxHeight);
+}
+
+function positionTrayDevicesWindow(): void {
+  if (!trayDevicesWindow || trayDevicesWindow.isDestroyed()) return;
+
+  const trayBounds = getTrayBounds();
+  const [currentWidth] = trayDevicesWindow.getSize();
+  if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {
+    const trayCenterX = trayBounds.x + (trayBounds.width / 2);
+    trayDevicesWindow.setPosition(
+      Math.round(trayCenterX - (currentWidth / 2)),
+      Math.round(trayBounds.y + trayBounds.height),
+      false
+    );
+    return;
+  }
+
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width: screenWidth } = primaryDisplay.workAreaSize;
+  const { x: screenX, y: screenY } = primaryDisplay.workArea;
+  trayDevicesWindow.setPosition(
+    Math.round(screenX + (screenWidth - currentWidth) / 2),
+    screenY,
+    false
+  );
+}
+
+/** 窗口已在屏幕外可见时，强制提交当前帧。 */
+async function commitTrayDevicesFrame(): Promise<void> {
+  if (!trayDevicesWindow || trayDevicesWindow.isDestroyed()) return;
+
+  await new Promise<void>(resolve => {
+    setTimeout(() => {
+      trayDevicesWindow?.webContents.invalidate();
+      resolve();
+    }, 50);
+  });
+  await new Promise(resolve => setTimeout(resolve, 80));
+}
+
+/**
+ * 托盘窗口隐藏时 Chromium 不提交绘制。
+ * 在屏幕外以不透明度 0 走完一帧，返回时画面已经是最终内容。
+ */
+async function paintTrayDevicesWindowOffscreen(): Promise<void> {
+  if (!trayDevicesWindow || trayDevicesWindow.isDestroyed() || trayDevicesWindow.isVisible()) return;
+
+  const [width, height] = trayDevicesWindow.getSize();
+  trayDevicesWindow.setOpacity(0);
+  trayDevicesWindow.setPosition(-10000, -10000, false);
+  trayDevicesWindow.showInactive();
+
+  try {
+    await commitTrayDevicesFrame();
+  } finally {
+    if (!trayDevicesWindow.isDestroyed()) {
+      trayDevicesWindow.hide();
+      trayDevicesWindow.setSize(width, height, false);
+    }
+  }
+}
+
+export async function syncHiddenTrayDevicesWindow(devices: unknown[]): Promise<void> {
+  if (!trayDevicesWindow || trayDevicesWindow.isDestroyed() || trayDevicesWindow.isVisible()) return;
+
+  const payload = JSON.stringify(devices).replace(/</g, '\\u003c');
+  trayDevicesWindow.setSize(
+    TRAY_DEVICES_WINDOW_CONFIG.minWidth,
+    trayWindowHeightFor(devices.length),
+    false
+  );
+
+  try {
+    await trayDevicesWindow.webContents.executeJavaScript(`
+      (async () => {
+        const deadline = Date.now() + 1500;
+        const i18n = window.AppUtils && window.AppUtils.I18n;
+        while (Date.now() < deadline && (
+          typeof window.applyTrayDevicesSnapshot !== 'function' ||
+          (i18n && i18n.isReady && !i18n.isReady())
+        )) {
+          await new Promise(resolve => setTimeout(resolve, 16));
+        }
+        if (typeof window.applyTrayDevicesSnapshot !== 'function') return false;
+        if (typeof window.applyTranslations === 'function') window.applyTranslations();
+        return window.applyTrayDevicesSnapshot(${payload});
+      })();
+    `, true);
+    await paintTrayDevicesWindowOffscreen();
+  } catch (error) {
+    console.warn('[托盘窗口] 隐藏态预渲染失败:', error);
   }
 }
 
@@ -278,17 +374,7 @@ async function revealTrayDevicesWindow(): Promise<void> {
     await prerenderTrayDevicesTheme(theme);
   }
 
-  const trayBounds = getTrayBounds();
-  if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {
-    const [currentWidth] = trayDevicesWindow.getSize();
-    const trayCenterX = trayBounds.x + (trayBounds.width / 2);
-    trayDevicesWindow.setPosition(
-      Math.round(trayCenterX - (currentWidth / 2)),
-      Math.round(trayBounds.y + trayBounds.height),
-      false
-    );
-  }
-
+  positionTrayDevicesWindow();
   trayDevicesWindow.setOpacity(1);
   trayDevicesWindow.show();
   trayDevicesWindow.focus();
@@ -468,76 +554,20 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     console.error('HTML path:', trayDevicesPath);
   });
 
-  // 开发模式下为托盘窗口打开 DevTools（方便调试）
-  // 说明：托盘窗口初始是 show:false + opacity:0，放到 ready-to-show 更稳定
-  const shouldOpenTrayDevTools = process.argv.includes('--dev');
+  if (process.argv.includes('--dev') && !trayDevicesWindow.webContents.isDevToolsOpened()) {
+    trayDevicesWindow.webContents.openDevTools({ mode: 'detach' });
+  }
 
-  // 在页面加载完成后更新背景色和添加标识
-  trayDevicesWindow.webContents.once('did-finish-load', async () => {
-    if (trayDevicesWindow) {
-      // 确保类已添加
-      await trayDevicesWindow.webContents.executeJavaScript(`
-        if (document.body && !document.body.classList.contains('tray-window')) {
-          document.body.classList.add('tray-window');
-        }
-      `).catch(() => {});
+  try {
+    await syncHiddenTrayDevicesWindow(ntfsManager.getCachedDevices());
+  } catch (error) {
+    console.warn('[托盘窗口] 显示前预渲染失败:', error);
+  }
 
-      // 等待一小段时间确保类已添加，然后触发设备列表重新渲染
-      setTimeout(async () => {
-        if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
-          try {
-            await trayDevicesWindow.webContents.executeJavaScript(`
-              // 确保类已添加
-              if (document.body && !document.body.classList.contains('tray-window')) {
-                document.body.classList.add('tray-window');
-              }
-              // 触发设备列表重新渲染以应用新样式
-              if (typeof window !== 'undefined' && window.refreshDevices) {
-                window.refreshDevices();
-              } else if (typeof window !== 'undefined' && window.renderDevices) {
-                window.renderDevices();
-              }
-            `);
-          } catch (error) {
-            // 窗口可能已关闭，静默处理
-          }
-        }
-      }, 200);
+  if (!trayDevicesWindow.isDestroyed()) {
+    await revealTrayDevicesWindow();
+  }
 
-      void applyWindowTheme(trayDevicesWindow, trayTheme);
-
-      // 在窗口加载完成后，尝试重新获取托盘位置并调整窗口位置
-      // 因为在 macOS 上，托盘位置可能在窗口创建时还未完全初始化
-      setTimeout(() => {
-        if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
-          const trayBounds = getTrayBounds();
-          if (trayBounds && trayBounds.x >= 0 && trayBounds.y >= 0 && trayBounds.width > 0 && trayBounds.height > 0) {
-            const [currentWidth] = trayDevicesWindow.getSize();
-            const trayCenterX = trayBounds.x + (trayBounds.width / 2);
-            // 窗口水平居中对齐托盘图标，顶部紧贴托盘底部（像系统菜单）
-            const newX = Math.round(trayCenterX - (currentWidth / 2));
-            const newY = Math.round(trayBounds.y + trayBounds.height);
-
-            trayDevicesWindow.setPosition(newX, newY, false);
-          }
-        }
-      }, 100); // 延迟100ms，确保托盘位置已初始化
-    }
-  });
-
-  trayDevicesWindow.once('ready-to-show', async () => {
-    if (trayDevicesWindow) {
-      // DevTools：仅开发模式下打开（使用 detach，避免被主窗口 DevTools 混淆）
-      if (shouldOpenTrayDevTools && !trayDevicesWindow.webContents.isDevToolsOpened()) {
-        console.log('[TrayWindow] Opening DevTools (detach)...');
-        trayDevicesWindow.webContents.openDevTools({ mode: 'detach' });
-      }
-
-      await revealTrayDevicesWindow();
-    }
-  });
-
-  // 窗口关闭时清理引用
   trayDevicesWindow.on('closed', () => {
     trayDevicesWindow = null;
   });
@@ -565,47 +595,11 @@ export function adjustTrayWindowHeightByDeviceCount(deviceCount: number): void {
     return;
   }
 
-  let targetHeight: number;
-
-  if (deviceCount === 1) {
-    // 1个设备：使用硬编码的较小高度
-    targetHeight = TRAY_DEVICES_WINDOW_CONFIG.heightFor1Device;
-  } else if (deviceCount === 2) {
-    // 2个设备：使用硬编码的中等高度
-    targetHeight = TRAY_DEVICES_WINDOW_CONFIG.heightFor2Devices;
-  } else {
-    // 3个设备及以上：使用配置的最大高度
-    targetHeight = TRAY_DEVICES_WINDOW_CONFIG.maxHeight;
-  }
-
-  // 获取屏幕高度，确保窗口不会超出屏幕
-  const primaryDisplay = screen.getPrimaryDisplay();
-  const { height: screenHeight } = primaryDisplay.workAreaSize;
-  const maxAllowedHeight = screenHeight - 80; // 留出一些边距
-  targetHeight = Math.min(targetHeight, maxAllowedHeight);
-
-  // 注意：不强制使用 minHeight，允许窗口更小（1个或2个设备时）
-  // 但确保不超过 maxHeight
-  targetHeight = Math.min(targetHeight, TRAY_DEVICES_WINDOW_CONFIG.maxHeight);
-
-  // 调整窗口高度
   const [currentWidth, currentHeight] = trayDevicesWindow.getSize();
+  const targetHeight = trayWindowHeightFor(deviceCount);
 
-  console.log('[调整窗口高度]', {
-    deviceCount,
-    currentHeight,
-    targetHeight,
-    heightFor1Device: TRAY_DEVICES_WINDOW_CONFIG.heightFor1Device,
-    heightFor2Devices: TRAY_DEVICES_WINDOW_CONFIG.heightFor2Devices,
-    maxHeight: TRAY_DEVICES_WINDOW_CONFIG.maxHeight
-  });
-
-  // 只有当目标高度与当前高度不同时才调整
   if (Math.abs(targetHeight - currentHeight) > 5) {
     trayDevicesWindow.setSize(currentWidth, targetHeight, false);
-    console.log('[调整窗口高度] 已调整到:', targetHeight);
-  } else {
-    console.log('[调整窗口高度] 高度无需调整，当前高度:', currentHeight);
   }
 }
 

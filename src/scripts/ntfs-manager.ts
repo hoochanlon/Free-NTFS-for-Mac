@@ -101,14 +101,7 @@ class NTFSManager {
 
     this.hybridDetectionStarted = true;
     await this.hybridDetector.initialize((devices) => {
-      // 通知所有注册的回调
-      this.deviceChangeCallbacks.forEach(cb => {
-        try {
-          cb(devices);
-        } catch (error) {
-          console.error('设备变化回调执行失败:', error);
-        }
-      });
+      this.notifyDevicesChanged(devices);
     });
   }
 
@@ -129,6 +122,16 @@ class NTFSManager {
   // 获取检测器当前持有的设备列表，不触发新的系统扫描
   getCachedDevices(): NTFSDevice[] {
     return this.hybridDetector?.getCurrentDevices() || this.deviceDetector.getLastDeviceList();
+  }
+
+  private notifyDevicesChanged(devices: NTFSDevice[]): void {
+    this.deviceChangeCallbacks.forEach(cb => {
+      try {
+        cb(devices);
+      } catch (error) {
+        console.error('设备变化回调执行失败:', error);
+      }
+    });
   }
 
   // 更新窗口可见性（用于优化轮询频率）

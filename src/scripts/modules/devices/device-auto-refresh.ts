@@ -100,17 +100,11 @@
         hybridDetectionStarted = true;
         console.log(`✅ [混合检测] 事件监听器已注册 - ${windowType}`);
 
-        // 监听窗口可见性变化
+        // 监听窗口可见性变化。隐藏期间的设备变化由主进程直接预渲染，
+        // 这里不再在变为可见时重扫，避免打开后把已画好的内容再刷一次。
         document.addEventListener('visibilitychange', () => {
           if (electronAPI && typeof electronAPI.updateWindowVisibility === 'function') {
             electronAPI.updateWindowVisibility(!document.hidden);
-          }
-
-          // 窗口变为可见时，立即强制刷新设备列表
-          if (!document.hidden) {
-            setTimeout(() => {
-              refreshDevicesFn(true);
-            }, 100);
           }
         });
 

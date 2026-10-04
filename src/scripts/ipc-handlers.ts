@@ -12,7 +12,8 @@ import {
   showMainWindowAndCloseTray,
   adjustTrayWindowHeightByDeviceCount,
   trayDevicesWindow,
-  prerenderTrayDevicesTheme
+  prerenderTrayDevicesTheme,
+  syncHiddenTrayDevicesWindow
 } from './window-manager';
 import { openAboutWindow, getAboutWindow } from './about-window';
 import { SettingsManager, AppSettings } from './utils/settings';
@@ -195,7 +196,7 @@ async function broadcastDevicesToAllWindows(): Promise<void> {
     console.log(`[设备广播] 向 ${allWindows.length} 个窗口广播最新设备列表，设备数量:`, devices.length);
 
     allWindows.forEach((win, index) => {
-      if (!win.isDestroyed()) {
+      if (!win.isDestroyed() && win !== trayDevicesWindow) {
         try {
           win.webContents.send('hybrid-detection-device-change', devices);
           console.log(`[设备广播] 已发送设备列表到窗口 ${index + 1}`);
@@ -204,6 +205,7 @@ async function broadcastDevicesToAllWindows(): Promise<void> {
         }
       }
     });
+    await syncHiddenTrayDevicesWindow(devices);
   } catch (error) {
     console.error('[设备广播] 获取或广播设备列表失败:', error);
   }
@@ -468,7 +470,7 @@ export function setupNTFSHandlers(): void {
           console.log(`[混合检测] 设备变化，通知 ${allWindows.length} 个窗口，设备数量:`, devices.length);
 
           allWindows.forEach((win, index) => {
-            if (!win.isDestroyed()) {
+            if (!win.isDestroyed() && win !== trayDevicesWindow) {
               try {
                 win.webContents.send('hybrid-detection-device-change', devices);
                 console.log(`[混合检测] 已发送事件到窗口 ${index + 1}`);
@@ -478,6 +480,7 @@ export function setupNTFSHandlers(): void {
               }
             }
           });
+          void syncHiddenTrayDevicesWindow(devices);
         });
         hybridDetectionInitialized = true;
         console.log('✅ [混合检测] 全局检测已启动');

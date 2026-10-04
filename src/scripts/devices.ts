@@ -198,6 +198,20 @@
   // 暴露到 window 对象，供外部调用
   (window as any).refreshDevices = refreshDevices;
   (window as any).renderDevices = renderDevices;
+  (window as any).applyTrayDevicesSnapshot = async (snapshot: any[]): Promise<boolean> => {
+    if (!Array.isArray(snapshot) || !Refresh?.refreshDevices) return false;
+    await Refresh.refreshDevices(devicesList, true, state, snapshot);
+    devices.length = 0;
+    devices.push(...state.devices);
+    if ((window as any).AppModules?.Devices) {
+      (window as any).AppModules.Devices.devices = devices;
+    }
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const renderedCount = devicesList.querySelectorAll('.device-item').length;
+    return snapshot.length === 0
+      ? !!devicesList.querySelector('.empty-state')
+      : renderedCount === snapshot.length;
+  };
 
   // 监听 body 类变化，当添加 tray-window 类时重新渲染
   if (typeof MutationObserver !== 'undefined') {
