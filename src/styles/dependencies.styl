@@ -353,19 +353,17 @@
 
 // 检查进行中：按钮自带指示，不使用全页遮罩
 #checkDepsBtn.is-checking
-  position relative
-  padding-left 30px
+  display inline-flex
+  align-items center
+  gap 6px
   opacity 0.72
   cursor progress
 
   &::before
     content ''
-    position absolute
-    left 10px
-    top 50%
     width 12px
     height 12px
-    margin-top -6px
+    flex 0 0 12px
     border 2px solid var(--border)
     border-top-color var(--accent)
     border-radius 50%
