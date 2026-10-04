@@ -80,7 +80,7 @@ The application's main interface provides several functional icons to help you q
 
 ### Title Bar Icons
 
-- <img src="../imgs/svg/devices/flash-auto.svg" alt="Auto Read-Write" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Auto Read-Write Icon** - When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode. The icon appears blue when active.
+- <img src="../imgs/svg/devices/flash-auto.svg" alt="Auto Read-Write" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Auto Read-Write Icon** - When enabled, the background mounts newly inserted read-only NTFS volumes as read-write, whether or not a window is open. A volume you restore to read-only stays unchanged for the current connection. The icon appears blue when active.
 - <img src="../imgs/svg/devices/tray.svg" alt="Tray Mode" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Tray Mode Icon** - When enabled, closing the window will minimize the application to the system tray instead of quitting. The icon appears red when active.
 - <img src="../imgs/svg/system/caffe.svg" alt="Prevent Sleep" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Prevent Sleep Icon** - When enabled, the system will prevent entering sleep mode to ensure devices remain accessible. The icon appears coffee-colored when active.
 - <img src="../imgs/svg/system/protect.svg" alt="Status Protection" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Status Protection Icon** - Long press for 3s to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations. The icon appears green with a pulse animation when protected.
@@ -142,42 +142,32 @@ For devices in read-only status, you can click the "Read-Write" button to mount 
   - System permission issues
 - Please safely eject the device after mounting to avoid data loss
 
-### Auto Read-Write Feature
+### Auto Read-Write
 
-The auto read-write feature allows you to automatically mount newly inserted NTFS devices in read-write mode without manual operation.
+Auto read-write runs in the background. It does not depend on the main window or the tray window being open. While enabled, a device change mounts eligible read-only NTFS volumes as read-write.
 
-**How to Enable:**
+**How to enable:**
 
-- Click the auto read-write icon (<img src="../imgs/svg/devices/flash-auto.svg" alt="Auto Read-Write" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;">) in the title bar. The icon turns blue when enabled
-- Check the "Auto Read-Write" option in the tray menu
-- Toggle the auto read-write button in the main interface title bar
+- Click the auto read-write icon (<img src="../imgs/svg/devices/flash-auto.svg" alt="Auto Read-Write" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;">) in the title bar. It turns blue when enabled
+- Check "Auto Read-Write" in the tray menu
 
-**Features:**
+**When it mounts:**
 
-- **Auto-detect New Devices**: When you insert a new NTFS device, the app will automatically detect and mount it in read-write mode
-- **Smart Skip Manually Read-Only Devices**: If you manually set a device to read-only, the auto read-write feature will respect your choice and will not mount it as read-write again
-- **Auto-process Existing Devices When Enabled**: When you enable the auto read-write feature, the app will automatically check currently connected read-only devices (excluding those you manually set to read-only) and attempt to mount them in read-write mode
+- **When turned on**: it immediately checks connected volumes that are still read-only and mounted
+- **When a device is inserted later**: the next device change checks newly attached read-only volumes
+- Volumes that are already read-write, not mounted, or have no usable volume are skipped
 
-**Use Cases:**
+**When it does not mount:**
 
-- Frequently using multiple NTFS devices and want automatic mounting without manual operation each time
-- When batch processing multiple devices, you can enable the auto read-write feature once
-- When temporarily needing automatic mounting, you can turn it on or off at any time
+- **Manual read-only**: restoring a volume to read-only, or resetting it, remembers that choice. Auto read-write will not change it back while it stays connected
+- **A manual read-write mount clears that memory**
+- **Short pause after restoring read-only**: for about 8 seconds after a restore or reset, it will not immediately switch the volume back
+- **During repair**: auto read-write is paused for that volume for about 2 minutes
+- **One attempt per change**: the same volume is tried once for each device change. A failure is not retried in that round; the next insertion or the next time the switch is turned on starts a new attempt
 
-**Notes:**
+**After removal:**
 
-- The auto read-write feature requires administrator privileges. You will be prompted for a password on the first mount
-- If you manually set a device to read-only, that device will be added to the "manually read-only devices" list, and the auto read-write feature will not mount it again
-- If you manually mount a device as read-write, that device will be removed from the "manually read-only devices" list, and the auto read-write feature can work normally on it afterwards
-- The auto read-write feature does not affect your manual operations. You can manually mount or unmount devices at any time
-
-**State Reset Mechanism:**
-
-To ensure the intelligence and user experience of the auto read-write feature, the application implements the following state reset mechanisms:
-
-- **Cooldown Protection**: When you manually set a device to read-only or perform a reset operation, the system sets an 8-second cooldown period. During this time, the auto read-write feature will not trigger, preventing the newly set state from being immediately overwritten
-- **Device Removal Reset**: When a device is unplugged, if it is reinserted within 8-9 seconds, the manual read-only state will be preserved; if reinserted after more than 9 seconds, the device will automatically be removed from the "manually read-only devices" list, restoring default behavior and allowing normal use of the auto read-write feature
-- **Smart Cleanup**: The system automatically cleans up cooldown records and manual read-only states for unplugged devices, ensuring devices work properly when reinserted
+The remembered read-only choice lasts only for the current connection. After the volume is ejected or unplugged for more than about 9 seconds, the choice is cleared and the next insertion is eligible again. Reappearing within 9 seconds keeps the choice, so the brief unmount during a read-only restore is not treated as removal.
 
 ### Unmount Device
 

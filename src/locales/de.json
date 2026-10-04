@@ -191,7 +191,7 @@
         "title": "Titelleisten-Symbole",
         "autoMount": {
           "name": "Automatisches Lese-Schreib-Symbol",
-          "description": "Wenn aktiviert, werden neu eingefügte NTFS-Geräte automatisch im Lese-Schreib-Modus eingehängt. Das Symbol erscheint blau, wenn es aktiv ist."
+          "description": "Wenn aktiviert, hängt der Hintergrund neu angeschlossene schreibgeschützte NTFS-Volumes mit Schreibzugriff ein, auch ohne geöffnetes Fenster. Ein manuell auf Schreibschutz zurückgesetztes Volume bleibt für die aktuelle Verbindung unverändert. Aktiv erscheint das Symbol blau."
         },
         "trayMode": {
           "name": "Systemleisten-Modus-Symbol",
@@ -264,7 +264,7 @@
       "de": "Deutsch (DE)"
     },
     "autoMount": "Automatisches Lesen/Schreiben",
-    "autoMountDesc": "Wenn aktiviert, werden neu eingefügte NTFS-Geräte automatisch im Lese-/Schreibmodus eingehängt",
+    "autoMountDesc": "Wenn aktiviert, hängt der Hintergrund neu angeschlossene schreibgeschützte NTFS-Volumes mit Schreibzugriff ein, ohne ein Fenster zu öffnen. Ein auf Schreibschutz zurückgesetztes Volume bleibt für die aktuelle Verbindung unverändert",
     "trayMode": "Tray-Modus",
     "trayModeDesc": "Wenn aktiviert, wird beim Schließen des Fensters die App nicht beendet, sondern in die Systemleiste minimiert. Sie können NTFS-Geräte schnell über das Tray-Symbol verwalten.",
     "preventSleep": "Ruhezustand verhindern",

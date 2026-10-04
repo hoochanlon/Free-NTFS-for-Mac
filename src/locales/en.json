@@ -191,7 +191,7 @@
         "title": "Title Bar Icons",
         "autoMount": {
           "name": "Auto Read-Write Icon",
-          "description": "When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode. The icon appears blue when active."
+          "description": "When enabled, the background mounts newly inserted read-only NTFS volumes as read-write, whether or not a window is open. A volume you restore to read-only stays unchanged for the current connection. The icon appears blue when active."
         },
         "trayMode": {
           "name": "Tray Mode Icon",
@@ -264,7 +264,7 @@
       "de": "Deutsch (DE)"
     },
     "autoMount": "Auto Read-Write",
-    "autoMountDesc": "When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode",
+    "autoMountDesc": "When enabled, the background mounts newly inserted read-only NTFS volumes as read-write without opening a window. A volume restored to read-only stays unchanged for the current connection",
     "trayMode": "Tray Mode",
     "trayModeDesc": "When enabled, closing the window will minimize to the system tray instead of quitting the app. You can quickly manage NTFS devices through the tray icon.",
     "preventSleep": "Prevent Sleep",

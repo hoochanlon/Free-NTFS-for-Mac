@@ -80,7 +80,7 @@ Die Hauptoberfläche der Anwendung bietet mehrere Funktionssymbole, die Ihnen he
 
 ### Titelleisten-Symbole
 
-- <img src="../imgs/svg/devices/flash-auto.svg" alt="Automatisches Lese-Schreib" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Automatisches Lese-Schreib-Symbol** - Wenn aktiviert, werden neu eingefügte NTFS-Geräte automatisch im Lese-Schreib-Modus eingehängt. Das Symbol erscheint blau, wenn es aktiv ist.
+- <img src="../imgs/svg/devices/flash-auto.svg" alt="Automatisches Lesen/Schreiben" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Automatisches Lese-Schreib-Symbol** - Wenn aktiviert, hängt der Hintergrund neu angeschlossene schreibgeschützte NTFS-Volumes mit Schreibzugriff ein, auch ohne geöffnetes Fenster. Ein manuell auf Schreibschutz zurückgesetztes Volume bleibt für die aktuelle Verbindung unverändert. Aktiv erscheint das Symbol blau.
 - <img src="../imgs/svg/devices/tray.svg" alt="Systemleisten-Modus" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Systemleisten-Modus-Symbol** - Wenn aktiviert, wird die Anwendung beim Schließen des Fensters in die Systemleiste minimiert, anstatt beendet zu werden. Das Symbol erscheint rot, wenn es aktiv ist.
 - <img src="../imgs/svg/system/caffe.svg" alt="Ruhezustand verhindern" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Ruhezustand verhindern-Symbol** - Wenn aktiviert, verhindert das System, dass es in den Ruhezustand wechselt, um sicherzustellen, dass Geräte kontinuierlich verfügbar bleiben. Das Symbol erscheint kaffeefarben, wenn es aktiv ist.
 - <img src="../imgs/svg/system/protect.svg" alt="Status-Schutz" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Status-Schutz Symbol** - 3s lang drücken, um den Schutzstatus umzuschalten. Wenn geschützt, werden automatisches Lesen/Schreiben, Tray-Modus und Ruhezustand verhindern deaktiviert, um versehentliche Vorgänge zu verhindern. Das Symbol erscheint grün mit einer Pulsanimation, wenn es geschützt ist.
@@ -129,42 +129,32 @@ In der Hauptoberfläche und im Systemleisten-Menü wird für jedes Gerät ein Ka
 - **Gelb** (75-89%): Speicherplatz ist knapp, mit 11%-25% freiem Speicherplatz. Es wird empfohlen, Dateien zeitnah zu bereinigen
 - **Rot** (90-100%): Speicherplatz ist kritisch niedrig, mit weniger als 10% freiem Speicherplatz. Dateien sollten sofort bereinigt werden, um Speicherplatz freizugeben
 
-### Automatisches Lese-Schreib-Funktion
+### Automatisches Lesen/Schreiben
 
-Die automatische Lese-Schreib-Funktion ermöglicht es Ihnen, neu eingefügte NTFS-Geräte automatisch im Lese-Schreib-Modus einzuhängen, ohne manuelle Bedienung.
+Automatisches Lesen/Schreiben läuft im Hintergrund. Es hängt nicht davon ab, ob das Hauptfenster oder das Menüleistendienstprogramm geöffnet ist. Ist es aktiv, werden bei einer Geräteänderung geeignete schreibgeschützte NTFS-Volumes mit Lese- und Schreibzugriff eingehängt.
 
-**Aktivierungsmethoden：**
+**Aktivieren:**
 
-- Klicken Sie auf das automatische Lese-Schreib-Symbol (<img src="../imgs/svg/devices/flash-auto.svg" alt="Automatisches Lese-Schreib" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;">) in der Titelleiste. Das Symbol wird blau, wenn es aktiviert ist
-- Aktivieren Sie die Option "Automatisches Lese-Schreib" im Systemleisten-Menü
-- Schalten Sie die automatische Lese-Schreib-Schaltfläche in der Titelleiste der Hauptoberfläche um
+- Klicken Sie in der Titelleiste auf das Symbol für automatisches Lesen/Schreiben (<img src="../imgs/svg/devices/flash-auto.svg" alt="Automatisches Lesen/Schreiben" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;">). Aktiviert wird es blau
+- Aktivieren Sie „Automatisches Lesen/Schreiben“ im Menü der Menüleiste
 
-**Funktionsmerkmale：**
+**Wann eingehängt wird:**
 
-- **Automatische Erkennung neuer Geräte**：Wenn Sie ein neues NTFS-Gerät einstecken, erkennt die Anwendung es automatisch und hängt es im Lese-Schreib-Modus ein
-- **Intelligentes Überspringen manuell schreibgeschützter Geräte**：Wenn Sie ein Gerät manuell auf schreibgeschützt setzen, respektiert die automatische Lese-Schreib-Funktion Ihre Wahl und hängt es nicht erneut im Lese-Schreib-Modus ein
-- **Automatische Verarbeitung vorhandener Geräte bei Aktivierung**：Wenn Sie die automatische Lese-Schreib-Funktion aktivieren, prüft die Anwendung automatisch aktuell angeschlossene schreibgeschützte Geräte (außer denen, die Sie manuell auf schreibgeschützt gesetzt haben) und versucht, sie im Lese-Schreib-Modus einzuhängen
+- **Beim Einschalten**: verbundene Volumes, die noch schreibgeschützt und eingehängt sind, werden sofort geprüft
+- **Beim späteren Anschließen**: die nächste Geräteänderung prüft neu angeschlossene schreibgeschützte Volumes
+- Volumes mit bereits vorhandenem Schreibzugriff, nicht eingehängte Volumes und Volumes ohne nutzbares Volume werden übersprungen
 
-**Anwendungsfälle：**
+**Wann nicht eingehängt wird:**
 
-- Häufige Verwendung mehrerer NTFS-Geräte und automatisches Einhängen ohne manuelle Bedienung jedes Mal
-- Bei der Batch-Verarbeitung mehrerer Geräte können Sie die automatische Lese-Schreib-Funktion einmal aktivieren
-- Bei temporärem Bedarf an automatischem Einhängen können Sie es jederzeit ein- oder ausschalten
+- **Manuell schreibgeschützt**: Beim Zurücksetzen auf Schreibschutz oder vor einem Reset wird diese Wahl gespeichert. Solange das Volume verbunden bleibt, stellt automatisches Lesen/Schreiben den Schreibzugriff nicht wieder her
+- **Ein manuelles Einhängen mit Schreibzugriff löscht diese Wahl**
+- **Kurze Pause nach dem Schreibschutz**: Etwa 8 Sekunden nach Wiederherstellung oder Reset wird nicht sofort zurückgeschaltet
+- **Während einer Reparatur**: Automatisches Lesen/Schreiben pausiert für dieses Volume etwa 2 Minuten
+- **Ein Versuch je Änderung**: Dasselbe Volume wird je Geräteänderung nur einmal versucht. Ein Fehlschlag wird in diesem Durchgang nicht wiederholt; der nächste Anschluss oder das erneute Einschalten startet einen neuen Versuch
 
-**Hinweise：**
+**Nach dem Entfernen:**
 
-- Die automatische Lese-Schreib-Funktion erfordert Administratorrechte. Sie werden beim ersten Einhängen zur Eingabe eines Passworts aufgefordert
-- Wenn Sie ein Gerät manuell auf schreibgeschützt setzen, wird dieses Gerät zur Liste der "manuell schreibgeschützten Geräte" hinzugefügt, und die automatische Lese-Schreib-Funktion hängt es nicht erneut ein
-- Wenn Sie ein Gerät manuell im Lese-Schreib-Modus einhängen, wird dieses Gerät aus der Liste der "manuell schreibgeschützten Geräte" entfernt, und die automatische Lese-Schreib-Funktion kann danach normal darauf arbeiten
-- Die automatische Lese-Schreib-Funktion beeinflusst Ihre manuellen Operationen nicht. Sie können Geräte jederzeit manuell ein- oder aushängen
-
-**Status-Reset-Mechanismus：**
-
-Um die Intelligenz und Benutzerfreundlichkeit der automatischen Lese-Schreib-Funktion sicherzustellen, implementiert die Anwendung die folgenden Status-Reset-Mechanismen：
-
-- **Abkühlschutz**：Wenn Sie ein Gerät manuell auf schreibgeschützt setzen oder einen Reset-Vorgang ausführen, setzt das System eine 8-Sekunden-Abkühlphase. Während dieser Zeit wird die automatische Lese-Schreib-Funktion nicht ausgelöst, um zu verhindern, dass der gerade gesetzte Status sofort überschrieben wird
-- **Geräteentfernung-Reset**：Wenn ein Gerät entfernt wird und innerhalb von 8-9 Sekunden wieder eingesteckt wird, bleibt der manuelle schreibgeschützte Status erhalten. Wenn es nach mehr als 9 Sekunden wieder eingesteckt wird, wird das Gerät automatisch aus der Liste der "manuell schreibgeschützten Geräte" entfernt, stellt das Standardverhalten wieder her und ermöglicht die normale Verwendung der automatischen Lese-Schreib-Funktion
-- **Intelligente Bereinigung**：Das System bereinigt automatisch Abkühlungsaufzeichnungen und manuelle schreibgeschützte Status für entfernte Geräte, um sicherzustellen, dass Geräte nach dem Wiedereinstecken ordnungsgemäß funktionieren
+Die gespeicherte Schreibschutz-Wahl gilt nur für die aktuelle Verbindung. Nach dem Auswerfen oder Trennen für mehr als etwa 9 Sekunden wird sie gelöscht; beim nächsten Anschließen ist das Volume wieder geeignet. Erscheint es innerhalb von 9 Sekunden erneut, bleibt die Wahl erhalten, damit das kurze Aushängen beim Wiederherstellen des Schreibschutzes nicht als Entfernen gilt.
 
 ### Gerät als Lese-/Schreibzugriff einhängen
 
