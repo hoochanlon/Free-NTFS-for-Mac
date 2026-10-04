@@ -333,6 +333,7 @@
       "togglePassword": "Show/Hide Password",
       "showPassword": "Show Password",
       "hidePassword": "Hide Password",
+      "savePassword": "Save Password",
       "passwordEmpty": "Password cannot be empty",
       "passwordParseError": "Unable to parse password input: password is empty",
       "userCancelled": "User cancelled password input",

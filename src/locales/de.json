@@ -333,6 +333,7 @@
       "togglePassword": "Passwort anzeigen/ausblenden",
       "showPassword": "Passwort anzeigen",
       "hidePassword": "Passwort ausblenden",
+      "savePassword": "Passwort speichern",
       "passwordEmpty": "Passwort darf nicht leer sein",
       "passwordParseError": "Passworteingabe kann nicht analysiert werden: Passwort ist leer",
       "userCancelled": "Benutzer hat die Passworteingabe abgebrochen",

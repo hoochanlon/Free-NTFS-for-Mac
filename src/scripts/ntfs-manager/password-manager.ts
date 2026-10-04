@@ -126,17 +126,19 @@ export class PasswordManager {
       const confirmButton = t('messages.passwordDialog.confirm');
 
       // 使用自定义密码对话框（支持显示/隐藏密码）
-      const password = await createPasswordDialog({
+      const dialogOptions = {
         title: defaultPrompt,
-        message: passwordPrompt,
         label: passwordPrompt,
         cancelText: cancelButton,
         confirmText: confirmButton,
         emptyPasswordText: t('messages.passwordDialog.passwordEmpty'),
         togglePasswordText: t('messages.passwordDialog.togglePassword'),
         showPasswordText: t('messages.passwordDialog.showPassword'),
-        hidePasswordText: t('messages.passwordDialog.hidePassword')
-      });
+        hidePasswordText: t('messages.passwordDialog.hidePassword'),
+        savePasswordText: t('messages.passwordDialog.savePassword'),
+        savePassword: settings.savePassword
+      };
+      const password = await createPasswordDialog(dialogOptions);
 
       // 检查用户是否取消
       if (password === null) {
@@ -152,6 +154,8 @@ export class PasswordManager {
       const finalPassword = password;
 
       console.log('[PasswordManager] 成功获取密码，长度:', finalPassword.length);
+
+      settings.savePassword = dialogOptions.savePassword === true;
 
       // 验证密码是否正确（使用 sudo -v 验证）
       // 注意：为了确保每次都验证新密码，我们使用 sudo -K 先清除缓存（不需要密码）

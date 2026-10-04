@@ -2,6 +2,8 @@
 import { BrowserWindow, ipcMain, app, screen } from 'electron';
 import * as path from 'path';
 import { mainWindow, trayDevicesWindow } from '../window-manager';
+import { SettingsManager } from './settings';
+import { KeychainManager } from './keychain';
 
 let passwordDialogWindow: BrowserWindow | null = null;
 
@@ -14,7 +16,6 @@ function dismissPasswordDialog(window: BrowserWindow): void {
 
 export interface PasswordDialogOptions {
   title: string;
-  message: string;
   label?: string;
   cancelText?: string;
   confirmText?: string;
@@ -22,6 +23,8 @@ export interface PasswordDialogOptions {
   togglePasswordText?: string;
   showPasswordText?: string;
   hidePasswordText?: string;
+  savePasswordText?: string;
+  savePassword?: boolean;
 }
 
 export function createPasswordDialog(options: PasswordDialogOptions): Promise<string | null> {
@@ -98,6 +101,22 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
     });
     passwordDialogWindow = dialogWindow;
 
+    let hasShown = false;
+    const contentSizeHandler = (event: Electron.IpcMainEvent, contentHeight: number): void => {
+      if (event.sender !== dialogWindow.webContents || dialogWindow.isDestroyed() || !hasShown || !Number.isFinite(contentHeight)) return;
+
+      const minimumHeight = isTrayContext ? 220 : dialogHeight;
+      const finalHeight = Math.max(minimumHeight, Math.ceil(contentHeight));
+      const [, currentHeight] = dialogWindow.getContentSize();
+      if (currentHeight === finalHeight) return;
+
+      dialogWindow.setContentSize(dialogWidth, finalHeight);
+      if (!hasParent) {
+        dialogWindow.setPosition(x, Math.floor((screenHeight - finalHeight) / 2));
+      }
+    };
+    ipcMain.on('password-dialog-content-size', contentSizeHandler);
+
     // 加载对话框 HTML
     const appPath = app.getAppPath();
     const dialogPath = path.join(appPath, 'src/html/password-dialog.html');
@@ -162,7 +181,6 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
 
         dialogWindow.webContents.send('password-dialog-data', {
           title: options.title,
-          message: options.message,
           isLightMode,
           label: options.label || '密码:',
           cancelText: options.cancelText || '取消',
@@ -170,7 +188,9 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
           emptyPasswordText: options.emptyPasswordText || '密码不能为空',
           togglePasswordText: options.togglePasswordText || '显示/隐藏密码',
           showPasswordText: options.showPasswordText || '显示密码',
-          hidePasswordText: options.hidePasswordText || '隐藏密码'
+          hidePasswordText: options.hidePasswordText || '隐藏密码',
+          savePasswordText: options.savePasswordText || '保存密码',
+          savePassword: options.savePassword === true
         });
 
         await contentReady;
@@ -186,6 +206,7 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
           dialogWindow.setPosition(x, Math.floor((screenHeight - finalHeight) / 2));
         }
         dialogWindow.show();
+        hasShown = true;
         dialogWindow.focus();
         if (isTrayContext) dialogWindow.moveTop();
 
@@ -222,11 +243,24 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
     });
 
     // 处理对话框响应
-    const responseHandler = (event: any, data: { password?: string; canceled: boolean }) => {
+    const responseHandler = (event: any, data: { password?: string; canceled: boolean; savePassword?: boolean }) => {
       if (event.sender === dialogWindow.webContents) {
         // 移除监听器
         ipcMain.removeListener('password-dialog-response', responseHandler);
 
+        if (!data.canceled && typeof data.savePassword === 'boolean') {
+          options.savePassword = data.savePassword;
+          SettingsManager.saveSettings({ savePassword: data.savePassword })
+            .then(() => data.savePassword ? undefined : KeychainManager.deletePassword())
+            .then(() => {
+              BrowserWindow.getAllWindows().forEach(window => {
+                if (!window.isDestroyed()) {
+                  window.webContents.send('settings-changed', { savePassword: data.savePassword });
+                }
+              });
+            })
+            .catch(error => console.warn('[PasswordDialog] 同步保存密码设置失败:', error));
+        }
         settle(data.canceled ? null : data.password || null);
         if (passwordDialogWindow === dialogWindow) passwordDialogWindow = null;
         dismissPasswordDialog(dialogWindow);
@@ -237,6 +271,7 @@ export function createPasswordDialog(options: PasswordDialogOptions): Promise<st
 
     // 窗口关闭时清理
     dialogWindow.on('closed', () => {
+      ipcMain.removeListener('password-dialog-content-size', contentSizeHandler);
       ipcMain.removeListener('password-dialog-response', responseHandler);
       if (passwordDialogWindow === dialogWindow) passwordDialogWindow = null;
       settle(null);

@@ -333,6 +333,7 @@
       "togglePassword": "显示/隐藏密码",
       "showPassword": "显示密码",
       "hidePassword": "隐藏密码",
+      "savePassword": "保存密码",
       "passwordEmpty": "密码不能为空",
       "passwordParseError": "无法解析密码输入结果：密码为空",
       "userCancelled": "用户取消了密码输入",

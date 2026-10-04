@@ -72,6 +72,16 @@
         const hasPassword = await electronAPI.hasSavedPassword();
         deletePasswordBtn.style.display = hasPassword ? 'inline-block' : 'none';
 
+        electronAPI.onSettingsChange?.(async (updatedSettings: { savePassword?: boolean }) => {
+          if (typeof updatedSettings.savePassword !== 'boolean') return;
+          savePasswordCheckbox.checked = updatedSettings.savePassword;
+          if (!updatedSettings.savePassword) {
+            deletePasswordBtn.style.display = 'none';
+            return;
+          }
+          deletePasswordBtn.style.display = await electronAPI.hasSavedPassword() ? 'inline-block' : 'none';
+        });
+
         // 保存密码复选框变化
         savePasswordCheckbox.addEventListener('change', async () => {
           try {
