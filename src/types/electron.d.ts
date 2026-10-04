@@ -44,6 +44,7 @@ export interface ElectronAPI {
   getAppVersion: () => Promise<string>;
   checkForUpdates: () => Promise<{
     success: boolean;
+    reason?: 'network' | 'invalid';
     currentVersion: string;
     latestVersion?: string;
     updateAvailable?: boolean;

@@ -570,6 +570,13 @@ export function setupWindowHandlers(): void {
     const currentVersion = app.getVersion();
     const releaseUrl = 'https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/latest';
 
+    // 兼容 v1.5.0、v.1.5.0、V 1.5.0 等发布标签写法
+    const normalizeVersion = (version: string) => version.trim().replace(/^[vV][\s.]*/, '');
+    const parseVersion = (version: string) => {
+      const match = normalizeVersion(version).match(/^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/);
+      return match ? match.slice(1).map(Number) : null;
+    };
+
     try {
       const response = await fetch('https://api.github.com/repos/hoochanlon/Free-NTFS-for-Mac/releases/latest', {
         headers: {
@@ -579,19 +586,17 @@ export function setupWindowHandlers(): void {
         signal: AbortSignal.timeout(10000)
       });
       if (!response.ok) {
-        throw new Error(`GitHub API returned ${response.status}`);
+        const error = new Error(`GitHub API returned ${response.status}`);
+        error.name = 'NetworkError';
+        throw error;
       }
 
       const release = await response.json() as { tag_name?: string; draft?: boolean; prerelease?: boolean };
-      const latestVersion = release.tag_name?.replace(/^v/, '');
-      const parseVersion = (version: string) => {
-        const match = version.match(/^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/);
-        return match ? match.slice(1).map(Number) : null;
-      };
+      const latestVersion = release.tag_name ? normalizeVersion(release.tag_name) : undefined;
       const currentParts = parseVersion(currentVersion);
       const latestParts = latestVersion ? parseVersion(latestVersion) : null;
 
-      if (!latestParts || !currentParts || release.draft || release.prerelease) {
+      if (!latestVersion || !latestParts || !currentParts || release.draft || release.prerelease) {
         throw new Error('Invalid or unsupported release version');
       }
 
@@ -612,8 +617,11 @@ export function setupWindowHandlers(): void {
         releaseUrl
       };
     } catch (error) {
+      const reason = error instanceof TypeError || (
+        error instanceof Error && ['TimeoutError', 'AbortError', 'NetworkError'].includes(error.name)
+      ) ? 'network' : 'invalid';
       console.error('[Update] 检查更新失败:', error);
-      return { success: false, currentVersion, releaseUrl };
+      return { success: false, reason, currentVersion, releaseUrl };
     }
   });
 

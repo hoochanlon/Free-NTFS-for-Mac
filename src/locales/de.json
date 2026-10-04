@@ -385,6 +385,7 @@
     "updateAvailable": "Version {version} ist verfügbar.",
     "versionAhead": "Diese Version ({version}) ist neuer als die neueste öffentliche Version ({latestVersion}).",
     "checkFailed": "Updates konnten nicht gesucht werden. Überprüfe deine Netzwerkverbindung.",
+    "invalidRelease": "Die Release-Seite ist erreichbar, aber die Version konnte nicht erkannt werden.",
     "viewReleases": "Veröffentlichungen anzeigen"
   }
 }

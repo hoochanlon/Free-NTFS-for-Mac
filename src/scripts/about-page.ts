@@ -57,7 +57,8 @@
       try {
         const result = await electronAPI.checkForUpdates();
         if (!result.success) {
-          setUpdateStatus(translate('about.checkFailed'), 'error');
+          const messageKey = result.reason === 'invalid' ? 'about.invalidRelease' : 'about.checkFailed';
+          setUpdateStatus(translate(messageKey), 'error');
           openReleaseButton.hidden = false;
           return;
         }

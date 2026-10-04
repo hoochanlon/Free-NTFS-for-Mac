@@ -385,6 +385,7 @@
     "updateAvailable": "發現新版本 {version}。",
     "versionAhead": "目前版本（{version}）高於最新公開版本（{latestVersion}）。",
     "checkFailed": "檢查更新失敗，請檢查網路連線。",
+    "invalidRelease": "已連線到發布頁，但版本資訊無法識別。",
     "viewReleases": "查看發布頁"
   }
 }

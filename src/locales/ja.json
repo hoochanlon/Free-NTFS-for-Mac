@@ -385,6 +385,7 @@
     "updateAvailable": "新しいバージョン {version} が利用可能です。",
     "versionAhead": "現在のバージョン（{version}）は最新の公開版（{latestVersion}）より新しいです。",
     "checkFailed": "アップデートを確認できませんでした。ネットワーク接続を確認してください。",
+    "invalidRelease": "リリース情報には接続できましたが、バージョンを認識できませんでした。",
     "viewReleases": "リリースを表示"
   }
 }
