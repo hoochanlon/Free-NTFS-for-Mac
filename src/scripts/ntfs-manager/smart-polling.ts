@@ -22,7 +22,7 @@ export class SmartPollingManager {
     lastPollTime: 0
   };
 
-  private currentInterval: number | null = null;
+  private currentInterval: ReturnType<typeof setTimeout> | null = null;
   private pollingCallback: (() => Promise<void>) | null = null;
   private readonly intervals = {
     // 无设备时的间隔（5秒，减少等待时间）
@@ -159,7 +159,7 @@ export class SmartPollingManager {
    * 安排下一次轮询
    */
   private scheduleNextPoll(interval: number): void {
-    this.currentInterval = window.setTimeout(async () => {
+    this.currentInterval = setTimeout(async () => {
       if (this.pollingCallback) {
         try {
           await this.pollingCallback();

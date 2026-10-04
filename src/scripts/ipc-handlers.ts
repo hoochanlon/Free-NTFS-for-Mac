@@ -36,6 +36,82 @@ let currentDockHiddenState: boolean | null = null;
 const MANUAL_GRACE_MS = 9 * 1000; // 9 秒宽限
 const manualLastSeen = new Map<string, number>();
 let manualPruneTimer: NodeJS.Timeout | null = null;
+
+// 自动读写运行在主进程，不依赖任何窗口是否打开或是否完成刷新。
+const autoMountAttempted = new Map<string, number>();
+const autoMountCooldownUntil = new Map<string, number>();
+const autoMountInProgress = new Set<string>();
+const AUTO_MOUNT_ATTEMPT_TTL_MS = 20000;
+const AUTO_MOUNT_COOLDOWN_MS = 8000;
+
+function autoMountIdentity(device: { disk?: string; volumeUuid?: string }): string {
+  return device.volumeUuid || device.disk || '';
+}
+
+function pruneAutoMountState(devices: Array<{ disk?: string; volumeUuid?: string }>): void {
+  const online = new Set(
+    devices.flatMap(device => [device.disk, device.volumeUuid].filter((id): id is string => Boolean(id)))
+  );
+  const now = Date.now();
+  for (const [id, attemptedAt] of autoMountAttempted) {
+    if (!online.has(id) || now - attemptedAt > AUTO_MOUNT_ATTEMPT_TTL_MS) {
+      autoMountAttempted.delete(id);
+    }
+  }
+  for (const [id, until] of autoMountCooldownUntil) {
+    if (!online.has(id) || until <= now) {
+      autoMountCooldownUntil.delete(id);
+    }
+  }
+}
+
+function suppressAutoMount(device: { disk?: string; volumeUuid?: string }, durationMs: number): void {
+  const until = Date.now() + durationMs;
+  if (device.disk) autoMountCooldownUntil.set(device.disk, until);
+  if (device.volumeUuid) autoMountCooldownUntil.set(device.volumeUuid, until);
+}
+
+function clearAutoMountAttempt(device: { disk?: string; volumeUuid?: string }): void {
+  const identity = autoMountIdentity(device);
+  if (identity) autoMountAttempted.delete(identity);
+  if (device.disk) autoMountAttempted.delete(device.disk);
+  if (device.volumeUuid) autoMountAttempted.delete(device.volumeUuid);
+}
+
+async function autoMountEligibleDevices(devices: any[], explicit = false): Promise<void> {
+  pruneAutoMountState(devices);
+  const settings = await SettingsManager.getSettings();
+  if (!settings.autoMount) return;
+
+  const manuallyReadOnly = new Set(settings.manuallyReadOnlyDevices || []);
+  const now = Date.now();
+
+  for (const device of devices) {
+    const identity = autoMountIdentity(device);
+    if (!identity || !device?.isReadOnly || device?.isUnmounted || !device?.volume) continue;
+    if (manuallyReadOnly.has(identity) || (device.disk && manuallyReadOnly.has(device.disk))) continue;
+    if ((autoMountCooldownUntil.get(identity) || 0) > now) continue;
+    if (device.disk && (autoMountCooldownUntil.get(device.disk) || 0) > now) continue;
+    if (autoMountInProgress.has(identity)) continue;
+    if (!explicit && autoMountAttempted.has(identity)) continue;
+
+    autoMountAttempted.set(identity, now);
+    if (device.disk) autoMountAttempted.set(device.disk, now);
+    autoMountInProgress.add(identity);
+    console.log(`[自动读写] ${explicit ? '立即挂载当前设备' : '挂载新接入设备'}: ${device.volumeName} (${identity})`);
+
+    ntfsManager.mountDevice(device)
+      .then(result => {
+        console.log(`[自动读写] ${device.volumeName} 配置成功: ${result}`);
+        clearAutoMountAttempt(device);
+      })
+      .catch(error => {
+        console.error(`[自动读写] ${device.volumeName} 配置失败:`, error);
+        clearAutoMountAttempt(device);
+      })
+      .finally(() => autoMountInProgress.delete(identity));
+  }
+}
 async function pruneManuallyReadOnlyDevices(devices?: Array<{ disk: string; volumeUuid?: string }>): Promise<void> {
   try {
     const settings = await SettingsManager.getSettings();
@@ -224,6 +300,7 @@ export function setupNTFSHandlers(): void {
         if (manualId && !manuallyReadOnlyDevices.includes(manualId)) {
           manuallyReadOnlyDevices.push(manualId);
           await SettingsManager.saveSettings({ manuallyReadOnlyDevices });
+          suppressAutoMount(device, AUTO_MOUNT_COOLDOWN_MS);
           console.log(`[IPC] 已将设备 ${device.volumeName} (${manualId}) 添加到手动只读列表（重置操作前），当前列表:`, manuallyReadOnlyDevices);
         } else {
           console.log(`[IPC] 设备 ${device.volumeName} (${manualId}) 已在手动只读列表中`);
@@ -266,6 +343,7 @@ export function setupNTFSHandlers(): void {
       }
 
       const cooldownUntil = Date.now() + 120000;
+      suppressAutoMount(currentDevice, 120000);
       BrowserWindow.getAllWindows().forEach(win => {
         if (!win.isDestroyed()) {
           win.webContents.send('device-auto-mount-cooldown', {
@@ -312,6 +390,7 @@ export function setupNTFSHandlers(): void {
         if (manualId && !manuallyReadOnlyDevices.includes(manualId)) {
           manuallyReadOnlyDevices.push(manualId);
           await SettingsManager.saveSettings({ manuallyReadOnlyDevices });
+          suppressAutoMount(device, AUTO_MOUNT_COOLDOWN_MS);
           console.log(`[IPC] 已将设备 ${device.volumeName} (${manualId}) 添加到手动只读列表（操作前），当前列表:`, manuallyReadOnlyDevices);
         } else {
           console.log(`[IPC] 设备 ${device.volumeName} (${manualId}) 已在手动只读列表中`);
@@ -376,7 +455,13 @@ export function setupNTFSHandlers(): void {
       if (!hybridDetectionInitialized) {
         await ntfsManager.startHybridDetection((devices) => {
           // 设备变化时清理陈旧的“手动只读”列表，避免 disk 复用导致误判
-          pruneManuallyReadOnlyDevices(devices as any).catch(() => {});
+          pruneManuallyReadOnlyDevices(devices as any)
+            .catch(() => {})
+            .finally(() => {
+              autoMountEligibleDevices(devices as any[]).catch(error => {
+                console.error('[自动读写] 处理设备变化失败:', error);
+              });
+            });
           // 通过事件通知所有窗口（包括已打开的托盘窗口）
           const allWindows = BrowserWindow.getAllWindows();
           console.log(`[混合检测] 设备变化，通知 ${allWindows.length} 个窗口，设备数量:`, devices.length);
@@ -944,6 +1029,18 @@ export function setupSettingsHandlers(): void {
     return { success: true };
   });
 
+  ipcMain.handle('apply-auto-mount', async () => {
+    try {
+      const devices = await ntfsManager.getNTFSDevices(true);
+      await autoMountEligibleDevices(devices as any[], true);
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('[自动读写] 立即应用失败:', errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  });
+
   // 检查是否有保存的密码
   ipcMain.handle('has-saved-password', async () => {
     return await KeychainManager.hasPassword();
@@ -1026,4 +1123,9 @@ export function setupIpcHandlers(): void {
   setupSystemHandlers();
   setupSettingsHandlers();
   setupCaffeinateHandlers();
+
+  // 启动期即建立设备监听。自动读写不再等待窗口渲染器注册回调。
+  ntfsManager.startHybridDetection(() => {}).catch(error => {
+    console.error('[自动读写] 启动设备监听失败:', error);
+  });
 }

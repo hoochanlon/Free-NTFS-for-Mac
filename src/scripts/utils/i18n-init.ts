@@ -491,6 +491,15 @@
   async function init() {
     await AppUtils.I18n.init();
     applyTranslations();
+
+    const devicesList = document.getElementById('devicesList');
+    if (devicesList) {
+      delete (devicesList as any).__lastStateKey;
+    }
+    if ((window as any).AppModules?.Devices?.Renderer && devicesList) {
+      const readWriteDevicesList = document.getElementById('readWriteDevicesList');
+      (window as any).AppModules.Devices.Renderer.renderDevices(devicesList, readWriteDevicesList);
+    }
   }
 
   // 等待 DOM 加载完成

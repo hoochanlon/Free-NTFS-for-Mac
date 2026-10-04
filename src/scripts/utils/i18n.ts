@@ -38,6 +38,7 @@
 
   // 翻译数据
   let translations: Record<string, any> = {};
+  let translationsReady = false;
 
   // 加载语言文件
   async function loadLanguage(lang: SupportedLanguage): Promise<void> {
@@ -56,6 +57,7 @@
           const response = await fetch(path);
           if (response.ok) {
             translations = await response.json();
+            translationsReady = Object.keys(translations).length > 0;
             currentLanguage = lang;
             // 更新 HTML lang 属性
             document.documentElement.lang = lang;
@@ -77,6 +79,7 @@
         } else {
           // 如果连默认语言都加载失败，使用空对象避免错误
           translations = {};
+          translationsReady = false;
           console.warn('Using empty translations object');
         }
       }
@@ -88,6 +91,7 @@
       } else {
         // 如果连默认语言都加载失败，使用空对象避免错误
         translations = {};
+        translationsReady = false;
         console.warn('Using empty translations object');
       }
     }
@@ -199,13 +203,18 @@
     return currentLanguage;
   }
 
+  function isReady(): boolean {
+    return translationsReady;
+  }
+
   // 导出 i18n 工具
   AppUtils.I18n = {
     init,
     t,
     setLanguage,
     getLanguage,
-    getSystemLanguage
+    getSystemLanguage,
+    isReady
   };
 
 })();

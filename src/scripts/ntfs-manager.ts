@@ -86,6 +86,8 @@ class NTFSManager {
     return await this.mountOperations.ejectDevice(device);
   }
 
+  private hybridDetectionStarted = false;
+
   // 启动混合检测（事件驱动 + 智能轮询备用）
   async startHybridDetection(callback: (devices: NTFSDevice[]) => void): Promise<void> {
     if (!this.hybridDetector) {
@@ -93,7 +95,11 @@ class NTFSManager {
     }
 
     this.deviceChangeCallbacks.add(callback);
+    if (this.hybridDetectionStarted) {
+      return;
+    }
 
+    this.hybridDetectionStarted = true;
     await this.hybridDetector.initialize((devices) => {
       // 通知所有注册的回调
       this.deviceChangeCallbacks.forEach(cb => {
@@ -112,6 +118,7 @@ class NTFSManager {
       this.hybridDetector.stop();
     }
     this.deviceChangeCallbacks.clear();
+    this.hybridDetectionStarted = false;
   }
 
   // 移除设备变化回调

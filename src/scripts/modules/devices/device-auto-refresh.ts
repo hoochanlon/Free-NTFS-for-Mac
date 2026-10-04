@@ -89,6 +89,13 @@
         hybridDetectionCallback = callback;
 
         await electronAPI.startHybridDetection(callback);
+        if (typeof electronAPI.onApplyAutoMount === 'function') {
+          electronAPI.onApplyAutoMount(() => {
+            electronAPI.applyAutoMount?.().catch((error: unknown) => {
+              console.error('[自动读写] 应用失败:', error);
+            });
+          });
+        }
 
         hybridDetectionStarted = true;
         console.log(`✅ [混合检测] 事件监听器已注册 - ${windowType}`);

@@ -30,6 +30,7 @@ export interface ElectronAPI {
   requestSudoPassword: () => Promise<void>;
   onDeviceUpdate: (callback: (data: any) => void) => void;
   onDeviceAutoMountCooldown: (callback: (data: { disk: string; volumeUuid?: string; until: number }) => void) => void;
+  onApplyAutoMount: (callback: () => void) => void;
   // 混合检测相关
   startHybridDetection: (callback: (devices: NTFSDevice[]) => void) => Promise<void>;
   stopHybridDetection: () => Promise<void>;
@@ -58,6 +59,7 @@ export interface ElectronAPI {
   onThemeChange: (callback: (isLightMode: boolean) => void) => void;
   getSettings: () => Promise<AppSettings>;
   saveSettings: (settings: Partial<AppSettings>) => Promise<{ success: boolean }>;
+  applyAutoMount: () => Promise<{ success: boolean; error?: string }>;
   onSettingsChange: (callback: (settings: Partial<AppSettings>) => void) => void;
   getWindowSizeConfig: () => Promise<{
     defaultWidth: number;

@@ -21,6 +21,9 @@ const electronAPI: ElectronAPI = {
   onDeviceAutoMountCooldown: (callback: (data: { disk: string; volumeUuid?: string; until: number }) => void) => {
     ipcRenderer.on('device-auto-mount-cooldown', (_event: IpcRendererEvent, data: { disk: string; volumeUuid?: string; until: number }) => callback(data));
   },
+  onApplyAutoMount: (callback: () => void) => {
+    ipcRenderer.on('apply-auto-mount', () => callback());
+  },
   openLogsWindow: () => ipcRenderer.invoke('open-logs-window'),
   closeLogsWindow: () => ipcRenderer.invoke('close-logs-window'),
   openModuleWindow: (moduleName: string) => ipcRenderer.invoke('open-module-window', moduleName),
@@ -37,6 +40,7 @@ const electronAPI: ElectronAPI = {
   },
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings: Partial<import('../types/electron').AppSettings>) => ipcRenderer.invoke('save-settings', settings),
+  applyAutoMount: () => ipcRenderer.invoke('apply-auto-mount'),
   getWindowSizeConfig: () => ipcRenderer.invoke('get-window-size-config'),
   onSettingsChange: (callback: (settings: Partial<import('../types/electron').AppSettings>) => void) => {
     ipcRenderer.on('settings-changed', (_event: IpcRendererEvent, settings: Partial<import('../types/electron').AppSettings>) => callback(settings));

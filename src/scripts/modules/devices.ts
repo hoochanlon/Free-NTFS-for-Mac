@@ -122,57 +122,11 @@
           }
         }
 
-        // 自动挂载候选：任何“只读且未卸载”的设备（不依赖“新设备检测”，避免多处刷新导致漏触发）
         const candidates = AppModules.Devices.devices.filter((d: any) => d.isReadOnly && !d.isUnmounted);
-
-        if (candidates.length > 0) {
-          try {
-            const settings = await electronAPI.getSettings();
-            // 自动读写开启时，后台自动挂载新插入设备（状态保护仅用于防误触按钮，不应阻断后台自动挂载）
-            if (settings.autoMount) {
-              // 获取手动设置为只读的设备列表
-              const manuallyReadOnlyDevices = settings.manuallyReadOnlyDevices || [];
-
-              // 自动挂载候选只读设备（跳过用户手动设置为只读 & 已尝试过的设备 & 冷却期内的设备）
-              for (const device of candidates) {
-                const now = Date.now();
-                const inCooldown =
-                  (device.volumeUuid && (autoMountCooldown.get(device.volumeUuid) || 0) > now) ||
-                  (device.disk && (autoMountCooldown.get(device.disk) || 0) > now);
-                if (inCooldown) {
-                  continue;
-                }
-                // 如果设备在手动只读列表中，跳过自动挂载
-                const manualId = device.volumeUuid || device.disk;
-                if (manuallyReadOnlyDevices.includes(manualId) || manuallyReadOnlyDevices.includes(device.disk)) {
-                  console.log(`[主界面] 跳过自动挂载手动只读设备 ${device.volumeName} (${manualId})`);
-                  continue;
-                }
-                // 已尝试过则跳过，避免重复弹框/重复执行
-                if (autoMountAttemptedDisks.has(device.disk)) {
-                  continue;
-                }
-                try {
-                  autoMountAttemptedDisks.add(device.disk);
-                  await AppUtils.Logs.addLog(`检测到新设备 ${device.volumeName}，正在自动挂载为读写模式...`, 'info');
-                  const result = await electronAPI.mountDevice(device);
-                  if (result.success) {
-                    await AppUtils.Logs.addLog(`设备 ${device.volumeName} 自动配置成功`, 'success');
-                  } else {
-                    await AppUtils.Logs.addLog(`设备 ${device.volumeName} 自动配置失败: ${result.error || '未知错误'}`, 'error');
-                  }
-                } catch (error) {
-                  const errorMessage = error instanceof Error ? error.message : String(error);
-                  await AppUtils.Logs.addLog(`设备 ${device.volumeName} 自动配置失败: ${errorMessage}`, 'error');
-                }
-              }
-              // 重新刷新设备列表以更新状态
-              AppModules.Devices.devices = await electronAPI.getNTFSDevices();
-              Renderer.renderDevices(devicesList, readWriteDevicesList);
-            }
-          } catch (error) {
-            console.error('自动挂载失败:', error);
-          }
+        if (candidates.length > 0 && window.electronAPI.applyAutoMount) {
+          window.electronAPI.applyAutoMount().catch((error: unknown) => {
+            console.error('[自动读写] 应用失败:', error);
+          });
         }
 
         // 只在设备状态变化时添加日志
@@ -181,8 +135,9 @@
 
         // 获取翻译文本的辅助函数
         function t(key: string, params?: Record<string, string | number>): string {
-          if (AppUtils && AppUtils.I18n) {
-            return AppUtils.I18n.t(key, params);
+          const i18n = (window as any).AppUtils?.I18n;
+          if (i18n?.isReady?.() && i18n.t) {
+            return i18n.t(key, params);
           }
           return key;
         }
@@ -229,10 +184,10 @@
         AppModules.Devices.lastDeviceState = currentState;
         AppModules.Devices.lastDevicePaths = currentDevicePaths;
       } catch (error) {
-        // 获取翻译文本的辅助函数
         function t(key: string, params?: Record<string, string | number>): string {
-          if (AppUtils && AppUtils.I18n) {
-            return AppUtils.I18n.t(key, params);
+          const i18n = (window as any).AppUtils?.I18n;
+          if (i18n?.isReady?.() && i18n.t) {
+            return i18n.t(key, params);
           }
           return key;
         }

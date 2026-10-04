@@ -21,10 +21,11 @@
 
   // 获取翻译文本的辅助函数
   function t(key: string, params?: Record<string, string | number>): string {
-    if ((window as any).AppUtils && (window as any).AppUtils.I18n) {
-      return (window as any).AppUtils.I18n.t(key, params);
+    const i18n = (window as any).AppUtils?.I18n;
+    if (i18n?.isReady?.() && i18n.t) {
+      return i18n.t(key, params);
     }
-    return key; // 如果 i18n 未初始化，返回 key
+    return key;
   }
 
   // 格式化容量显示
@@ -86,9 +87,10 @@
       // 生成设备状态的唯一标识，用于判断是否需要更新
       // 包含容量信息，确保容量变化时能触发重新渲染
       // 同时包含当前语言，确保语言变更时能触发重新渲染
-      const currentLanguage = ((window as any).AppUtils && (window as any).AppUtils.I18n)
-        ? ((window as any).AppUtils.I18n.getLanguage ? (window as any).AppUtils.I18n.getLanguage() : 'en')
-        : 'en';
+      const i18n = (window as any).AppUtils?.I18n;
+      const currentLanguage = i18n?.isReady?.() && i18n.getLanguage
+        ? i18n.getLanguage()
+        : 'pending';
       const deviceStateKey = devices.map((d: any) => {
         const capacityInfo = d.capacity ? `${d.capacity.total}:${d.capacity.available || 0}:${d.capacity.used || 0}` : 'no-capacity';
         return `${d.disk}:${d.isReadOnly}:${d.isUnmounted || false}:${capacityInfo}`;

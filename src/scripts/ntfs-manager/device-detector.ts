@@ -176,9 +176,12 @@ export class DeviceDetector {
   // 获取 NTFS 设备列表（优化版：使用缓存和批量执行，并行优化）
   async getNTFSDevices(forceRefresh: boolean = false): Promise<NTFSDevice[]> {
     try {
-      // 如果强制刷新，先失效缓存
+      // 如果强制刷新，先失效缓存。
+      // DeviceCache 与 BatchExecutor 是两套缓存；只清前者时，
+      // 插盘后的空 mount 结果仍会在命令缓存里存活，自动读写因此看不到新设备。
       if (forceRefresh) {
         this.cache.invalidateAll();
+        this.batchExecutor.invalidate();
       }
 
       // 检查缓存（仅在非强制刷新时使用）
@@ -638,6 +641,7 @@ export class DeviceDetector {
    */
   invalidateCache(): void {
     this.cache.invalidateAll();
+    this.batchExecutor.invalidate();
     this.lastDeviceHash = '';
   }
 }

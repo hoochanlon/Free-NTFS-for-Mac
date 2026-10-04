@@ -587,59 +587,8 @@ export async function createTrayMenu(
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.webContents.send('settings-updated', { autoMount: newValue });
         }
-
-        // 如果开启了自动读写功能，检查并自动挂载当前已存在的只读设备
         if (newValue) {
-          try {
-            const devices = await ntfsManager.getNTFSDevices(true);
-            const currentSettings = await SettingsManager.getSettings();
-            const manuallyReadOnlyDevices = currentSettings.manuallyReadOnlyDevices || [];
-            // 过滤只读设备：排除手动设置为只读的设备（同时检查 volumeUuid 和 disk）
-            const readOnlyDevices = devices.filter((d: any) =>
-              d.isReadOnly &&
-              !d.isUnmounted &&
-              !manuallyReadOnlyDevices.includes(d.volumeUuid || d.disk) &&
-              !manuallyReadOnlyDevices.includes(d.disk)
-            );
-
-            if (readOnlyDevices.length > 0) {
-              // 通知主窗口显示日志（如果窗口存在）
-              if (mainWindow && !mainWindow.isDestroyed()) {
-                mainWindow.webContents.send('add-log', {
-                  message: `检测到 ${readOnlyDevices.length} 个只读设备，正在自动挂载为读写模式...`,
-                  type: 'info'
-                });
-              }
-
-              for (const device of readOnlyDevices) {
-                try {
-                  const result = await ntfsManager.mountDevice(device);
-                  // mountDevice 返回成功消息字符串
-                  if (mainWindow && !mainWindow.isDestroyed()) {
-                    mainWindow.webContents.send('add-log', {
-                      message: result || `设备 ${device.volumeName} 自动配置成功`,
-                      type: 'success'
-                    });
-                  }
-                } catch (error) {
-                  const errorMessage = error instanceof Error ? error.message : String(error);
-                  if (mainWindow && !mainWindow.isDestroyed()) {
-                    mainWindow.webContents.send('add-log', {
-                      message: `设备 ${device.volumeName} 自动配置失败: ${errorMessage}`,
-                      type: 'error'
-                    });
-                  }
-                }
-              }
-
-              // 通知主窗口刷新设备列表
-              if (mainWindow && !mainWindow.isDestroyed()) {
-                mainWindow.webContents.send('refresh-devices', { force: true });
-              }
-            }
-          } catch (error) {
-            console.error('检查并自动挂载现有设备失败:', error);
-          }
+          mainWindow?.webContents.send('apply-auto-mount');
         }
 
         // 立即更新托盘菜单，确保状态同步（不需要强制刷新，因为设置项本身已经更新）
