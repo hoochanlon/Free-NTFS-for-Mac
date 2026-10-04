@@ -224,6 +224,10 @@ export class HybridDetector {
     this.onChangeCallback = undefined;
   }
 
+  getCurrentDevices(): NTFSDevice[] {
+    return [...this.currentDevices];
+  }
+
   /**
    * 强制立即检测一次
    */

@@ -1,4 +1,4 @@
-import { ipcMain, dialog, shell, BrowserWindow, type IpcMainInvokeEvent } from 'electron';
+import { ipcMain, dialog, shell, BrowserWindow, nativeTheme, type IpcMainInvokeEvent } from 'electron';
 import ntfsManager from './ntfs-manager';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -144,6 +144,10 @@ export function setupNTFSHandlers(): void {
 
   ipcMain.handle('get-ntfs-devices', async (event: IpcMainInvokeEvent, forceRefresh: boolean = false) => {
     return await ntfsManager.getNTFSDevices(forceRefresh);
+  });
+
+  ipcMain.handle('get-cached-ntfs-devices', async () => {
+    return ntfsManager.getCachedDevices();
   });
 
   ipcMain.handle('mount-device', async (event: IpcMainInvokeEvent, device: any) => {
@@ -713,7 +717,7 @@ export function setupWindowHandlers(): void {
   });
 
   ipcMain.handle('show-main-window', async () => {
-    await showMainWindowAndCloseTray();
+    await showMainWindowAndCloseTray(ntfsManager.getCachedDevices());
   });
 
   // 根据设备数量调整托盘窗口高度
@@ -770,23 +774,24 @@ export function setupSystemHandlers(): void {
         return theme;
       } catch (error) {
         console.error('获取当前主题失败:', error);
-        return 'dark';
+        return 'light';
       }
     }
-    return 'dark';
+    return 'light';
   });
 
   ipcMain.handle('broadcast-theme-change', async (event: IpcMainInvokeEvent, isLightMode: boolean) => {
+    const theme = isLightMode ? 'light' : 'dark';
+    const backgroundColor = theme === 'light' ? '#ffffff' : '#1d1d1f';
+    nativeTheme.themeSource = theme;
     const allWindows = BrowserWindow.getAllWindows();
-    const backgroundColor = isLightMode ? '#ffffff' : '#1e1e1e';
     allWindows.forEach((window: BrowserWindow) => {
       if (window && !window.isDestroyed()) {
         window.webContents.send('theme-changed', isLightMode);
         // 更新所有模块窗口和托盘设备窗口的背景色
         const aboutWindow = getAboutWindow();
         if (window === aboutWindow) {
-          const aboutBgColor = isLightMode ? '#f5f5f7' : '#1d1d1f';
-          window.setBackgroundColor(aboutBgColor);
+          window.setBackgroundColor(isLightMode ? '#f5f5f7' : '#1d1d1f');
         } else {
           // 检查是否是模块窗口或托盘设备窗口
           // 这些窗口使用devices.html或dependencies.html

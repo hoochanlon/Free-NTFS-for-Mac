@@ -5,14 +5,14 @@
     // 默认使用浅色模式，只有明确设置为 'dark' 时才使用深色
     const isLight = savedTheme !== 'dark';
 
+    function applyThemeClass(element: HTMLElement | null): void {
+      if (!element) return;
+      element.classList.toggle('light-theme', isLight);
+    }
+
     function applyTheme() {
-      if (document.body) {
-        if (isLight) {
-          document.body.classList.add('light-theme');
-        } else {
-          document.body.classList.remove('light-theme');
-        }
-      }
+      applyThemeClass(document.documentElement);
+      applyThemeClass(document.body);
     }
 
     // 如果 body 已存在，直接应用

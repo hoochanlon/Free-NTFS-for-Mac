@@ -15,11 +15,8 @@
   AppUtils.Theme = {
     // 更新主题
     updateTheme(isLightMode: boolean, docBody: HTMLElement, themeToggleButton?: HTMLElement | null, shouldBroadcast: boolean = false): void {
-      if (isLightMode) {
-        docBody.classList.add('light-theme');
-      } else {
-        docBody.classList.remove('light-theme');
-      }
+      document.documentElement.classList.toggle('light-theme', isLightMode);
+      docBody.classList.toggle('light-theme', isLightMode);
       if (themeToggleButton) {
         themeToggleButton.setAttribute('aria-checked', isLightMode ? 'true' : 'false');
         const newLabel = isLightMode ? '切换到深色主题' : '切换到浅色主题';

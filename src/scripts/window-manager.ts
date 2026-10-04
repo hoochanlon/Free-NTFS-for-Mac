@@ -1,4 +1,4 @@
-import { BrowserWindow, app, screen } from 'electron';
+import { BrowserWindow, app, screen, nativeTheme } from 'electron';
 import * as path from 'path';
 import { SettingsManager, WINDOW_SIZE_CONFIG } from './utils/settings';
 import { isTrayInitialized, getTrayBounds } from './utils/tray-manager';
@@ -24,6 +24,8 @@ export async function createMainWindow(): Promise<BrowserWindow> {
   const windowWidth = settings.windowWidth || WINDOW_SIZE_CONFIG.defaultWidth;
   const windowHeight = settings.windowHeight || WINDOW_SIZE_CONFIG.defaultHeight;
 
+  const initialTheme = await resolveInitialWindowTheme();
+
   mainWindow = new BrowserWindow({
     width: windowWidth,
     height: windowHeight,
@@ -32,12 +34,13 @@ export async function createMainWindow(): Promise<BrowserWindow> {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      backgroundThrottling: false
     },
     // 主界面保留自定义标题栏（有系统红黄绿按钮）
     titleBarStyle: 'hidden',
     frame: false,
-    backgroundColor: '#ffffff', // 默认浅色背景，减少深色残影
+    backgroundColor: getThemeBackgroundColor(initialTheme),
     show: false
   });
 
@@ -46,7 +49,9 @@ export async function createMainWindow(): Promise<BrowserWindow> {
   // 在 DOM 准备好时立即更新背景色，避免残影
   // 使用 dom-ready 事件，在 DOM 准备好但页面还未完全渲染时更新
   mainWindow.webContents.once('dom-ready', () => {
-    updateWindowBackgroundColor(mainWindow!);
+    if (mainWindow) {
+      void applyWindowTheme(mainWindow, initialTheme);
+    }
   });
 
   mainWindow.loadFile(htmlPath).catch((error: Error) => {
@@ -63,7 +68,7 @@ export async function createMainWindow(): Promise<BrowserWindow> {
   mainWindow.once('ready-to-show', () => {
     if (mainWindow) {
       // 确保背景色已更新（双重保险）
-      updateWindowBackgroundColor(mainWindow);
+      void applyWindowTheme(mainWindow);
       // 首次创建窗口时总是显示
       // 只有在托盘模式下，用户关闭窗口后，再次通过 activate 事件创建时才隐藏
       mainWindow.show();
@@ -153,34 +158,63 @@ export function closeLogsWindow(): void {
   }
 }
 
-// 获取主题背景色（同步方式，用于窗口创建时）
-function getThemeBackgroundColor(): string {
-  // 默认返回深色背景，实际主题会在页面加载后通过JavaScript同步
-  // 为了减少残影，我们会在窗口创建后立即更新背景色
-  return '#1e1e1e';
+const THEME_BACKGROUND_COLORS = {
+  light: '#ffffff',
+  dark: '#1d1d1f'
+} as const;
+
+type AppTheme = keyof typeof THEME_BACKGROUND_COLORS;
+
+function normalizeTheme(theme: unknown): AppTheme {
+  return theme === 'dark' ? 'dark' : 'light';
 }
 
-// 更新窗口背景色以匹配主题
-function updateWindowBackgroundColor(window: BrowserWindow): void {
+function getThemeBackgroundColor(theme: AppTheme = 'light'): string {
+  return THEME_BACKGROUND_COLORS[theme];
+}
+
+async function readWindowTheme(window: BrowserWindow): Promise<AppTheme> {
+  try {
+    const theme = await window.webContents.executeJavaScript(`
+      (function() {
+        try {
+          return localStorage.getItem('app-theme') === 'dark' ? 'dark' : 'light';
+        } catch (e) {
+          return 'light';
+        }
+      })();
+    `);
+    return normalizeTheme(theme);
+  } catch {
+    return 'light';
+  }
+}
+
+async function resolveInitialWindowTheme(): Promise<AppTheme> {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    return readWindowTheme(mainWindow);
+  }
+  return nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
+}
+
+async function applyWindowTheme(window: BrowserWindow, theme?: AppTheme): Promise<void> {
   if (!window || window.isDestroyed()) return;
 
-  window.webContents.executeJavaScript(`
+  const resolvedTheme = theme || await readWindowTheme(window);
+  window.setBackgroundColor(getThemeBackgroundColor(resolvedTheme));
+
+  await window.webContents.executeJavaScript(`
     (function() {
-      try {
-        const savedTheme = localStorage.getItem('app-theme');
-        const isLight = savedTheme === 'light';
-        return isLight ? '#ffffff' : '#1e1e1e';
-      } catch (e) {
-        return '#1e1e1e';
+      const isLight = ${resolvedTheme === 'light'};
+      document.documentElement.classList.toggle('light-theme', isLight);
+      if (document.body) {
+        document.body.classList.toggle('light-theme', isLight);
       }
+      try {
+        localStorage.setItem('app-theme', isLight ? 'light' : 'dark');
+      } catch (e) {}
     })();
-  `).then((bgColor: string) => {
-    if (window && !window.isDestroyed()) {
-      window.setBackgroundColor(bgColor);
-    }
-  }).catch(() => {
-    // 静默处理错误
-  });
+  `).catch(() => {});
 }
 
 // 创建模块窗口
@@ -206,6 +240,7 @@ export async function createModuleWindow(moduleName: string): Promise<BrowserWin
     throw new Error(`未知的模块: ${moduleName}`);
   }
 
+  const moduleTheme = await resolveInitialWindowTheme();
   const moduleWindow = new BrowserWindow({
     ...MODULE_WINDOW_CONFIG,
     // 允许用户自由调整窗口大小，不设置最大尺寸限制
@@ -219,16 +254,15 @@ export async function createModuleWindow(moduleName: string): Promise<BrowserWin
     },
     titleBarStyle: 'hidden',
     frame: false,
-    backgroundColor: getThemeBackgroundColor(),
+    backgroundColor: getThemeBackgroundColor(moduleTheme),
     show: false
   });
 
   const modulePath = path.join(appPath, htmlFile);
   await moduleWindow.loadFile(modulePath);
 
-  // 在页面加载完成后更新背景色
-  moduleWindow.webContents.once('did-finish-load', () => {
-    updateWindowBackgroundColor(moduleWindow);
+  moduleWindow.webContents.on('dom-ready', () => {
+    void applyWindowTheme(moduleWindow, moduleTheme);
   });
 
   moduleWindow.once('ready-to-show', () => {
@@ -268,8 +302,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
         // 忽略错误，继续显示窗口
       }
 
-      // 确保背景色已更新，避免残影
-      updateWindowBackgroundColor(trayDevicesWindow);
+      await applyWindowTheme(trayDevicesWindow);
       trayDevicesWindow.setOpacity(1);
       trayDevicesWindow.show();
       trayDevicesWindow.focus();
@@ -307,6 +340,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     windowY = screenY;
   }
 
+  const trayTheme = await resolveInitialWindowTheme();
   trayDevicesWindow = new BrowserWindow({
     width: windowWidth,
     height: windowHeight,
@@ -323,7 +357,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     },
     frame: false, // 无边框窗口
     transparent: false,
-    backgroundColor: getThemeBackgroundColor(), // 动态主题背景
+    backgroundColor: getThemeBackgroundColor(trayTheme),
     resizable: false, // 固定大小，像系统菜单
     movable: false, // 托盘弹窗固定位置，不允许用户拖动
     minimizable: false, // 托盘弹窗不需要最小化
@@ -335,9 +369,6 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
     opacity: 0, // 初始透明度为0，避免残影
     // macOS 特定设置
     ...(process.platform === 'darwin' ? {
-      // 关键：不要使用 titleBarStyle（尤其是 hiddenInset），否则 macOS 会把红黄绿按钮“叠”在内容上
-      // 托盘窗口是无边框弹窗，不应出现系统按钮
-      vibrancy: 'sidebar', // 毛玻璃效果
       visualEffectState: 'active'
     } : {})
   });
@@ -357,22 +388,13 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
 
   // 在页面开始加载时就注入脚本，确保类在 DOM 准备好之前就添加
   trayDevicesWindow.webContents.on('dom-ready', () => {
-    if (trayDevicesWindow) {
-      trayDevicesWindow.webContents.executeJavaScript(`
-        if (document.body) {
-          document.body.classList.add('tray-window');
-        } else {
-          // 如果 body 还没准备好，等待一下
-          const observer = new MutationObserver(() => {
-            if (document.body) {
-              document.body.classList.add('tray-window');
-              observer.disconnect();
-            }
-          });
-          observer.observe(document.documentElement, { childList: true });
-        }
-      `).catch(() => {});
-    }
+    if (!trayDevicesWindow || trayDevicesWindow.isDestroyed()) return;
+    void applyWindowTheme(trayDevicesWindow, trayTheme);
+    trayDevicesWindow.webContents.executeJavaScript(`
+      if (document.body) {
+        document.body.classList.add('tray-window');
+      }
+    `).catch(() => {});
   });
 
   await trayDevicesWindow.loadFile(trayDevicesPath).catch((error: Error) => {
@@ -417,8 +439,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
         }
       }, 200);
 
-      // 立即更新背景色，避免残影
-      updateWindowBackgroundColor(trayDevicesWindow);
+      void applyWindowTheme(trayDevicesWindow, trayTheme);
 
       // 在窗口加载完成后，尝试重新获取托盘位置并调整窗口位置
       // 因为在 macOS 上，托盘位置可能在窗口创建时还未完全初始化
@@ -447,12 +468,7 @@ export async function createTrayDevicesWindow(): Promise<BrowserWindow | null> {
         trayDevicesWindow.webContents.openDevTools({ mode: 'detach' });
       }
 
-      // 在显示前确保背景色已更新，避免残影
-      await new Promise<void>((resolve) => {
-        updateWindowBackgroundColor(trayDevicesWindow!);
-        // 给一点时间让背景色更新完成
-        setTimeout(() => resolve(), 50);
-      });
+      await applyWindowTheme(trayDevicesWindow, trayTheme);
 
       // 在显示前重新计算位置，确保贴合托盘（像系统菜单一样）
       const trayBounds = getTrayBounds();
@@ -508,8 +524,7 @@ export async function toggleTrayDevicesWindow(): Promise<void> {
         const newY = Math.round(trayBounds.y + trayBounds.height);
         trayDevicesWindow.setPosition(newX, newY, false);
       }
-      // 确保背景色已更新，避免残影
-      updateWindowBackgroundColor(trayDevicesWindow);
+      await applyWindowTheme(trayDevicesWindow);
       trayDevicesWindow.setOpacity(1);
       trayDevicesWindow.show();
       trayDevicesWindow.focus();
@@ -571,18 +586,40 @@ export function adjustTrayWindowHeightByDeviceCount(deviceCount: number): void {
 }
 
 // 显示主窗口并关闭托盘窗口
-export async function showMainWindowAndCloseTray(): Promise<void> {
-  // 关闭托盘设备窗口
-  if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
-    trayDevicesWindow.hide();
+export async function showMainWindowAndCloseTray(devices: unknown[] = []): Promise<void> {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    await createMainWindow();
+  }
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+
+  const devicePayload = JSON.stringify(devices).replace(/</g, '\\u003c');
+  try {
+    const rendered = await mainWindow.webContents.executeJavaScript(`
+      (async () => {
+        const devices = ${devicePayload};
+        const deadline = Date.now() + 1500;
+        while (typeof window.applyDevicesBeforeShow !== 'function' && Date.now() < deadline) {
+          await new Promise(resolve => setTimeout(resolve, 16));
+        }
+        if (typeof window.applyDevicesBeforeShow !== 'function') return false;
+
+        await window.applyDevicesBeforeShow(devices);
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        return document.querySelectorAll('#devicesList .device-item').length === devices.length;
+      })();
+    `, true);
+    if (rendered !== true && devices.length > 0) {
+      console.warn('[主窗口] 显示前设备未完成渲染');
+    }
+  } catch (error) {
+    console.warn('[主窗口] 显示前同步设备失败:', error);
   }
 
-  // 显示或创建主窗口
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.show();
-    mainWindow.focus();
-  } else {
-    await createMainWindow();
+  mainWindow.show();
+  mainWindow.focus();
+
+  if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
+    trayDevicesWindow.hide();
   }
 }
 

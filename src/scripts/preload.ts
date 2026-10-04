@@ -5,6 +5,7 @@ import type { ElectronAPI } from '../types/electron';
 const electronAPI: ElectronAPI = {
   checkDependencies: () => ipcRenderer.invoke('check-dependencies'),
   getNTFSDevices: (forceRefresh?: boolean) => ipcRenderer.invoke('get-ntfs-devices', forceRefresh),
+  getCachedNTFSDevices: () => ipcRenderer.invoke('get-cached-ntfs-devices'),
   mountDevice: (device) => ipcRenderer.invoke('mount-device', device),
   unmountDevice: (device) => ipcRenderer.invoke('unmount-device', device),
   resetDevice: (device) => ipcRenderer.invoke('reset-device', device),
@@ -62,6 +63,9 @@ const electronAPI: ElectronAPI = {
   readLogsFile: () => ipcRenderer.invoke('read-logs-file'),
   writeLogsFile: (content: string) => ipcRenderer.invoke('write-logs-file', content),
   showMainWindow: () => ipcRenderer.invoke('show-main-window'),
+  onSyncDevicesFromTray: (callback: (devices: any[]) => void) => {
+    ipcRenderer.on('sync-devices-from-tray', (_event: IpcRendererEvent, devices: any[]) => callback(devices));
+  },
   adjustTrayWindowHeightByDeviceCount: (deviceCount: number) => ipcRenderer.invoke('adjust-tray-window-height-by-device-count', deviceCount),
   // 混合检测相关
   startHybridDetection: (callback: (devices: any[]) => void) => {

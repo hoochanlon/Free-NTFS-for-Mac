@@ -169,6 +169,10 @@ export class DeviceDetector {
     }
   }
 
+  getLastDeviceList(): NTFSDevice[] {
+    return [...this.lastDeviceList];
+  }
+
   // 获取 NTFS 设备列表（优化版：使用缓存和批量执行，并行优化）
   async getNTFSDevices(forceRefresh: boolean = false): Promise<NTFSDevice[]> {
     try {

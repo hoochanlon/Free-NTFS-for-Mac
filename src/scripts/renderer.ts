@@ -121,7 +121,10 @@
       statusDot,
       statusText
     );
-    AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+    const initialDevices = window.electronAPI.getCachedNTFSDevices
+      ? await window.electronAPI.getCachedNTFSDevices()
+      : await window.electronAPI.getNTFSDevices(false);
+    await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText, initialDevices);
     startAutoRefresh();
 
     // 初始化时加载指南手册的 markdown 内容（会自动根据当前语言加载对应文件）
@@ -784,19 +787,13 @@
             window.electronAPI.updateWindowVisibility(!document.hidden);
           }
 
-          // 窗口变为可见时，立即强制刷新设备列表（使用强制刷新，确保获取最新状态）
+          // 窗口重新可见后只后台确认，不在首帧前清空或重绘设备列表
           if (!document.hidden) {
-            setTimeout(async () => {
-              try {
-                // 强制刷新，确保窗口重新可见时显示最新状态
-                const latestDevices = await window.electronAPI.getNTFSDevices(true);
-                await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText, latestDevices);
-              } catch (error) {
-                console.error('[主界面] 窗口可见性变化时刷新失败:', error);
-                // 降级：不使用强制刷新
-                await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
-              }
-            }, 100);
+            window.electronAPI.getNTFSDevices(true).then((latestDevices: any[]) => {
+              return AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText, latestDevices);
+            }).catch((error: unknown) => {
+              console.error('[主界面] 窗口可见性变化时刷新失败:', error);
+            });
           }
         });
 
@@ -867,6 +864,24 @@
 
     poll();
   }
+
+  if (window.electronAPI && window.electronAPI.onSyncDevicesFromTray) {
+    window.electronAPI.onSyncDevicesFromTray((devices: any[]) => {
+      void applyDevicesBeforeShow(devices);
+    });
+  }
+
+  async function applyDevicesBeforeShow(devices: any[]): Promise<void> {
+    AppModules.Tabs.switchToTab('devices', logContainer, helpTab);
+    await AppModules.Devices.refreshDevices(
+      devicesList,
+      readWriteDevicesList,
+      statusDot,
+      statusText,
+      Array.isArray(devices) ? devices : []
+    );
+  }
+  (window as any).applyDevicesBeforeShow = applyDevicesBeforeShow;
 
   // 监听托盘操作
   if (window.electronAPI && window.electronAPI.onTrayAction) {

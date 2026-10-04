@@ -39,7 +39,8 @@
   --coffee coffee
   --coffee-hover coffee-hover
 
-// 深色模式：移除 light-theme 类时使用深色
+// 深色模式：html 与 body 都没有 light-theme 时使用深色
+html:not(.light-theme),
 body:not(.light-theme)
   --bg-primary var(--dark-bg-primary)
   --bg-secondary var(--dark-bg-secondary)
@@ -48,6 +49,16 @@ body:not(.light-theme)
   --text-secondary var(--dark-text-secondary)
   --border var(--dark-border)
   --shadow var(--dark-shadow)
+
+html
+  background var(--bg-primary)
+  color-scheme light
+
+html.light-theme
+  color-scheme light
+
+html:not(.light-theme)
+  color-scheme dark
 
 body
   font-family -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif

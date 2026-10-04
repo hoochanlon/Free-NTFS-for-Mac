@@ -726,10 +726,12 @@
     // 监听主题变化
     if (window.electronAPI && window.electronAPI.onThemeChange) {
       window.electronAPI.onThemeChange((isLightMode: boolean) => {
-        if (isLightMode) {
-          document.body.classList.add('light-theme');
-        } else {
-          document.body.classList.remove('light-theme');
+        document.documentElement.classList.toggle('light-theme', isLightMode);
+        document.body.classList.toggle('light-theme', isLightMode);
+        try {
+          localStorage.setItem('app-theme', isLightMode ? 'light' : 'dark');
+        } catch (e) {
+          // 静默处理
         }
       });
     }
@@ -737,9 +739,9 @@
     // 初始化主题
     try {
       const savedTheme = localStorage.getItem('app-theme');
-      if (savedTheme === 'light') {
-        document.body.classList.add('light-theme');
-      }
+      const isLight = savedTheme !== 'dark';
+      document.documentElement.classList.toggle('light-theme', isLight);
+      document.body.classList.toggle('light-theme', isLight);
     } catch (e) {
       // 静默处理
     }

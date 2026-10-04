@@ -18,6 +18,7 @@ export interface ElectronAPI {
   checkDependencies: () => Promise<Dependencies>;
   // 可选参数 forceRefresh: 是否强制刷新设备列表（跳过缓存）
   getNTFSDevices: (forceRefresh?: boolean) => Promise<NTFSDevice[]>;
+  getCachedNTFSDevices: () => Promise<NTFSDevice[]>;
   mountDevice: (device: NTFSDevice) => Promise<OperationResult>;
   unmountDevice: (device: NTFSDevice) => Promise<OperationResult>;
   resetDevice: (device: NTFSDevice) => Promise<OperationResult>;
@@ -88,6 +89,7 @@ export interface ElectronAPI {
   readLogsFile: () => Promise<{ success: boolean; content?: string; error?: string }>;
   writeLogsFile: (content: string) => Promise<{ success: boolean; error?: string }>;
   showMainWindow: () => Promise<void>;
+  onSyncDevicesFromTray: (callback: (devices: NTFSDevice[]) => void) => void;
   adjustTrayWindowHeightByDeviceCount: (deviceCount: number) => Promise<void>;
   quitApp: () => Promise<void>;
   openQuitWindow: () => Promise<void>;

@@ -119,6 +119,11 @@ class NTFSManager {
     this.deviceChangeCallbacks.delete(callback);
   }
 
+  // 获取检测器当前持有的设备列表，不触发新的系统扫描
+  getCachedDevices(): NTFSDevice[] {
+    return this.hybridDetector?.getCurrentDevices() || this.deviceDetector.getLastDeviceList();
+  }
+
   // 更新窗口可见性（用于优化轮询频率）
   updateWindowVisibility(isVisible: boolean): void {
     if (this.hybridDetector) {

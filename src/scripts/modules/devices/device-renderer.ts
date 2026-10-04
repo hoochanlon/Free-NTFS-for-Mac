@@ -65,6 +65,7 @@
       const devices = AppModules.Devices.devices || [];
 
       if (devices.length === 0) {
+        devicesList.hidden = false;
         devicesList.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon"></div>
@@ -75,7 +76,7 @@
         return;
       }
 
-      // 保存当前选中的设备（如果有）
+      devicesList.hidden = false;
       const selectedDisk = (document.querySelector('.device-item.selected') as HTMLElement)?.dataset?.disk;
 
       // 检查是否是托盘窗口（用于判断是否需要重新渲染）
@@ -116,6 +117,7 @@
       (devicesList as any).__lastIsTrayWindow = isTrayWindow;
       (devicesList as any).__lastStateKey = deviceStateKey;
 
+      devicesList.hidden = false;
       devicesList.innerHTML = '';
 
       // 渲染所有设备
