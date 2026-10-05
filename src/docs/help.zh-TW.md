@@ -105,6 +105,9 @@ brew install ntfs-3g-mac
 - <img src="../imgs/svg/actions/format.svg" alt="格式化" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **格式化圖示** - 將整塊外接磁碟重建為 GPT NTFS。操作會抹掉該磁碟上的全部分割區和資料，無法復原，請先備份。僅已掛載的外接碟顯示此圖示。
 - <img src="../imgs/svg/actions/repair.svg" alt="修復" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **修復圖示** - 點擊對應裝置的修復圖示並確認，即可嘗試修復該裝置的 NTFS 檔案系統。操作需要管理員權限並輸入密碼，可自動處理 Resource busy 錯誤。
 
+> [!tip]
+> <img src="../imgs/svg/actions/check-okey-done.svg" alt="完成" style="height: 20px; width: 20px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **完成圖示** - 格式化或修復成功後，對應的格式化／修復圖示會短暫換成此完成標記，約 3 秒後恢復。
+
 **注意：ntfsfix 修復能力有限，無法取代 Windows 的 `chkdsk /f`。**
 
 ## 使用步驟

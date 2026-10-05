@@ -254,6 +254,10 @@
         "refresh": {
           "name": "Aktualisieren-Symbol",
           "description": "Aktualisiert die Geräteliste und erkennt angeschlossene NTFS-Geräte neu."
+        },
+        "done": {
+          "name": "Fertig-Symbol",
+          "description": "Nach erfolgreichem Formatieren oder Reparieren wechselt das entsprechende Symbol kurz zu diesem Abschlusszeichen und kehrt nach etwa 3 Sekunden zurück."
         }
       }
     }

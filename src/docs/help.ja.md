@@ -104,6 +104,9 @@ brew install ntfs-3g-mac
 - <img src="../imgs/svg/actions/format.svg" alt="フォーマット" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **フォーマットアイコン** - 外付けディスク全体を GPT NTFS に再構築します。そのディスク上のすべてのパーティションとデータが消去され、元に戻せません。マウント済みの外付けディスクにのみ表示されます。
 - <img src="../imgs/svg/actions/repair.svg" alt="修復" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **修復アイコン** - 対象デバイスの修復アイコンをクリックして確認すると、NTFS ファイルシステムの修復を試みます。管理者権限とパスワードが必要です。Resource busy エラーには自動で対処できます。
 
+> [!tip]
+> <img src="../imgs/svg/actions/check-okey-done.svg" alt="完了" style="height: 20px; width: 20px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **完了アイコン** - フォーマットまたは修復が成功すると、対応するアイコンが一時的にこの完了マークに切り替わり、約 3 秒後に元に戻ります。
+
 **注意：`ntfsfix` の修復機能には限界があり、Windows の `chkdsk /f` の代わりにはなりません。**
 
 ## 使用手順

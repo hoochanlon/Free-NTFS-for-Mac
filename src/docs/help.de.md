@@ -104,6 +104,9 @@ Die Hauptoberfläche der Anwendung bietet mehrere Funktionssymbole, die Ihnen he
 - <img src="../imgs/svg/actions/format.svg" alt="Formatieren" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Formatieren-Symbol** - Baut die gesamte externe Festplatte als GPT-NTFS neu auf. Alle Partitionen und Daten auf dieser Festplatte werden gelöscht und können nicht wiederhergestellt werden. Das Symbol erscheint nur bei eingehängten externen Datenträgern.
 - <img src="../imgs/svg/actions/repair.svg" alt="Reparieren" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Reparatur-Symbol** - Klicken Sie beim gewünschten Gerät auf das Reparatur-Symbol und bestätigen Sie, um eine Reparatur des NTFS-Dateisystems zu versuchen. Dafür sind Administratorrechte und ein Passwort erforderlich. Fehler vom Typ "Resource busy" können automatisch behandelt werden.
 
+> [!tip]
+> <img src="../imgs/svg/actions/check-okey-done.svg" alt="Fertig" style="height: 20px; width: 20px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Fertig-Symbol** - Nach erfolgreichem Formatieren oder Reparieren wechselt das entsprechende Symbol kurz zu diesem Abschlusszeichen und kehrt nach etwa 3 Sekunden zurück.
+
 **Hinweis: `ntfsfix` bietet nur begrenzte Reparaturmöglichkeiten und kann Windows `chkdsk /f` nicht ersetzen.**
 
 ## Verwendungsschritte

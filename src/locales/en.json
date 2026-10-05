@@ -254,6 +254,10 @@
         "refresh": {
           "name": "Refresh Icon",
           "description": "Refreshes the device list and re-detects connected NTFS devices."
+        },
+        "done": {
+          "name": "Done Icon",
+          "description": "After format or repair succeeds, the corresponding format/repair icon briefly changes to this completion mark, then returns after about 3 seconds."
         }
       }
     }
