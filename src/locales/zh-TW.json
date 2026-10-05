@@ -100,7 +100,8 @@
     "ntfs3g": {
       "name": "ntfs-3g",
       "description": "NTFS 檔案系統驅動，提供 NTFS 讀寫支援",
-      "installGuide": "需要先安裝 Homebrew 和 MacFUSE。在終端執行上述命令即可安裝。"
+      "installGuide": "需要先安裝 Homebrew 和 MacFUSE。在終端執行上述命令即可安裝。",
+      "installGuideTip": "macFUSE、ntfs-3g 安裝完成後，在「一般」設定中，依序選擇「登入項目與延伸功能」>「延伸功能」>「依類別」>「檔案系統延伸功能」。隨後點擊該項目的資訊圖示，並啟用 ntfs-3g（如存在）及 macFUSE 等相關選項。"
     },
     "fswatch": {
       "name": "fswatch (可選)",

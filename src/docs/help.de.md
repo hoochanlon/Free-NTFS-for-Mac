@@ -72,6 +72,9 @@ brew tap gromgit/homebrew-fuse
 brew install ntfs-3g-mac
 ```
 
+> [!TIP]
+> Nach der Installation von macFUSE und ntfs-3g wählen Sie in den Systemeinstellungen unter „Allgemein“ nacheinander „Anmeldeobjekte & Erweiterungen“ > „Erweiterungen“ > „Nach Kategorie“ > „Dateisystemerweiterungen“. Klicken Sie anschließend auf das Infosymbol und aktivieren Sie ntfs-3g (falls vorhanden) sowie macFUSE.
+
 **Hinweis**: Die Installationsreihenfolge ist wichtig. Bitte installieren Sie in der Reihenfolge: 1 → 2 → 3 → 4.
 
 ## Benutzeroberflächen-Symbole

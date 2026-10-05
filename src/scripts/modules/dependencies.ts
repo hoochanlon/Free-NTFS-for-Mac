@@ -49,7 +49,8 @@
       installGuide2Command1: key === 'macfuse' ? t(`dependencies.${key}.installGuide2Command1`) : '',
       installGuide2Step2: key === 'macfuse' ? t(`dependencies.${key}.installGuide2Step2`) : '',
       installGuide2Command2: key === 'macfuse' ? t(`dependencies.${key}.installGuide2Command2`) : '',
-      installGuide2Step3: key === 'macfuse' ? t(`dependencies.${key}.installGuide2Step3`) : ''
+      installGuide2Step3: key === 'macfuse' ? t(`dependencies.${key}.installGuide2Step3`) : '',
+      installGuideTip: key === 'ntfs3g' ? t(`dependencies.${key}.installGuideTip`) : ''
     };
   }
 
@@ -368,6 +369,9 @@
           </div>
           ` : ''}
           <p class="guide-instructions${dep.key === 'macfuse' ? ' guide-tip' : ''}">${info.installGuide}</p>
+          ${info.installGuideTip ? `
+          <p class="guide-instructions guide-tip">${info.installGuideTip}</p>
+          ` : ''}
           ${info.installGuideMirrorCommand ? `
           <div class="guide-command guide-mirror-command">
             <label>${info.installGuideMirrorCommandLabel}</label>

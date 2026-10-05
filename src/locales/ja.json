@@ -100,7 +100,8 @@
     "ntfs3g": {
       "name": "ntfs-3g",
       "description": "NTFSファイルシステムドライバー、NTFS読み書きサポートを提供",
-      "installGuide": "まずHomebrewとMacFUSEをインストールする必要があります。ターミナルで上記のコマンドを実行してインストールします。"
+      "installGuide": "まずHomebrewとMacFUSEをインストールする必要があります。ターミナルで上記のコマンドを実行してインストールします。",
+      "installGuideTip": "macFUSE と ntfs-3g のインストール後、「一般」設定で「ログイン項目と機能拡張」>「機能拡張」>「カテゴリ別」>「ファイルシステム機能拡張」の順に選択します。続けて、その項目の情報アイコンをクリックし、ntfs-3g（表示されている場合）と macFUSE などの関連オプションを有効にしてください。"
     },
     "fswatch": {
       "name": "fswatch (オプション)",

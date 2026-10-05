@@ -100,7 +100,8 @@
     "ntfs3g": {
       "name": "ntfs-3g",
       "description": "NTFS-Dateisystemtreiber, der NTFS-Lese-/Schreibunterstützung bereitstellt",
-      "installGuide": "Homebrew und MacFUSE müssen zuerst installiert sein. Führen Sie den obigen Befehl im Terminal aus, um zu installieren."
+      "installGuide": "Homebrew und MacFUSE müssen zuerst installiert sein. Führen Sie den obigen Befehl im Terminal aus, um zu installieren.",
+      "installGuideTip": "Nach der Installation von macFUSE und ntfs-3g wählen Sie in den Systemeinstellungen unter „Allgemein“ nacheinander „Anmeldeobjekte & Erweiterungen“ > „Erweiterungen“ > „Nach Kategorie“ > „Dateisystemerweiterungen“. Klicken Sie anschließend auf das Infosymbol und aktivieren Sie ntfs-3g (falls vorhanden) sowie macFUSE."
     },
     "fswatch": {
       "name": "fswatch (Optional)",
