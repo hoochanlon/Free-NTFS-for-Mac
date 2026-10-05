@@ -219,13 +219,9 @@
       // 保存（内部会再次清理并限制数量）
       await AppUtils.Logs.saveLogs(cleanedLogs);
 
-      // 如果提供了日志容器且日志标签页是活动的，立即更新显示
-      if (logContainer) {
-        const logsTab = document.getElementById('logsTab');
-        if (logsTab && logsTab.classList.contains('active')) {
-          // 添加新日志时强制更新
-          await AppUtils.Logs.renderLogs(logContainer, true);
-        }
+      const container = logContainer || document.getElementById('logContainer') as HTMLElement | null;
+      if (container) {
+        await AppUtils.Logs.renderLogs(container, true);
       }
     },
 

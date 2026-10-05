@@ -326,7 +326,8 @@ Im Tab "Betriebsprotokolle" können Sie Aufzeichnungen aller Vorgänge anzeigen,
 
 - Abhängigkeitsprüfungsergebnisse
 - Geräteerkennungsstatus
-- Einhänge-/Aushängevorgangsergebnisse
+- Ein-, Aushänge- und Auswurfvorgänge
+- Reparatur-, Umbenennungs- und Formatierungsvorgänge
 - Fehlermeldungen und Warnungen
 
 **Betriebsprotokolle aktivieren:**

@@ -325,7 +325,8 @@ In the "Operation Logs" tab, you can view records of all operations, including:
 
 - Dependency check results
 - Device detection status
-- Mount/unmount operation results
+- Mount, unmount, and eject operation results
+- Repair, rename, and format operation results
 - Error messages and warnings
 
 **Enable Operation Logs:**

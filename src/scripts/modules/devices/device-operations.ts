@@ -514,6 +514,7 @@
 
       const trimmedName = String(newName).trim();
       if (!trimmedName) {
+        await addLog(t('messages.renameInvalidName'), 'warning');
         await showOperationMessage(t('messages.renameFailedTitle'), t('messages.renameInvalidName'), 'warning');
         return;
       }
@@ -521,6 +522,7 @@
         return;
       }
       if (trimmedName.length > 32 || /[\\/:*?"<>|]/.test(trimmedName)) {
+        await addLog(t('messages.renameInvalidName'), 'warning');
         await showOperationMessage(t('messages.renameFailedTitle'), t('messages.renameInvalidName'), 'warning');
         return;
       }
@@ -1095,10 +1097,7 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
-      const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
-
       try {
-        AppUtils.UI.showLoading(loadingOverlay, true);
         await addLog(`正在推出 ${device.volumeName}...`, 'info');
 
         // 推出：立即清理“已尝试自动挂载”记录
@@ -1119,8 +1118,6 @@
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         await addLog(`推出失败: ${errorMessage}`, 'error');
-      } finally {
-        AppUtils.UI.showLoading(loadingOverlay, false);
       }
     },
 
@@ -1157,10 +1154,7 @@
         return;
       }
 
-      const loadingOverlay = document.getElementById('loadingOverlay') as HTMLElement;
-
       try {
-        AppUtils.UI.showLoading(loadingOverlay, true);
         await addLog(t('messages.ejectAllStart', { count: mountedDevices.length }), 'info');
 
         let successCount = 0;
@@ -1194,7 +1188,7 @@
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         // 刷新设备列表（确保状态立即更新）
-        await refreshDeviceList(devicesList);
+        await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
 
         // 显示总结
         if (successCount > 0) {
@@ -1206,8 +1200,6 @@
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         await addLog(`${t('messages.ejectAllError', { count: 0 })}: ${errorMessage}`, 'error');
-      } finally {
-        AppUtils.UI.showLoading(loadingOverlay, false);
       }
     }
   };
