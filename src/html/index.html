@@ -197,8 +197,45 @@
 
       <!-- 指南手册标签页 -->
       <div class="tab-content" id="helpTab">
-        <div class="help-content">
-          <p data-i18n="help.loading">加载中...</p>
+        <div class="help-reader">
+          <div class="help-toolbar">
+            <button type="button" class="help-chrome-btn" id="helpTocToggle" aria-pressed="false" aria-label="目录">
+              <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+            <div class="help-toolbar-cluster">
+              <div class="help-search">
+                <input type="text" id="helpSearchInput" placeholder="搜索指南..." autocomplete="off" spellcheck="false">
+              </div>
+              <span class="help-search-meta" id="helpSearchMeta"></span>
+              <button type="button" class="help-search-nav" id="helpSearchPrev" aria-label="上一个">
+                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 7.5 6 4.5 9 7.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button type="button" class="help-search-nav" id="helpSearchNext" aria-label="下一个">
+                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <button type="button" class="help-chrome-btn" id="helpSearchToggle" aria-pressed="false" aria-label="搜索">
+              <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.5 10.5 3 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="help-layout">
+            <nav class="help-toc" id="helpToc" aria-label="目录">
+              <h3 class="help-toc-title">目录</h3>
+              <ul id="helpTocList"></ul>
+            </nav>
+            <div class="help-article-scroll" id="helpArticleScroll">
+              <div class="help-content" id="helpArticle">
+                <p data-i18n="help.loading">加载中...</p>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="help-back-top is-hidden" id="helpBackTop" aria-label="回到顶部">
+            <svg viewBox="0 0 36 36" aria-hidden="true">
+              <circle class="help-back-top-track" cx="18" cy="18" r="15" pathLength="100"></circle>
+              <circle class="help-back-top-bar" cx="18" cy="18" r="15" pathLength="100"></circle>
+            </svg>
+            <span class="help-back-top-value" id="helpBackTopValue">0</span>
+          </button>
         </div>
       </div>
 
@@ -359,6 +396,7 @@
   <script src="../../scripts/utils/logs.js"></script>
   <script src="../../scripts/utils/theme.js"></script>
   <script src="../../scripts/utils/markdown.js"></script>
+  <script src="../../scripts/utils/help-reader.js"></script>
   <script src="../../scripts/utils/ui.js"></script>
   <!-- 功能模块 -->
   <script src="../../scripts/modules/dependencies.js"></script>

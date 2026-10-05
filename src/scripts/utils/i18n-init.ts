@@ -142,9 +142,33 @@
     }
 
     // 指南手册标签页
-    const helpTitle = document.querySelector('#helpTab h2');
-    if (helpTitle) {
-      helpTitle.textContent = t('help.title');
+    const helpTocTitle = document.querySelector('#helpTab .help-toc-title');
+    if (helpTocTitle) {
+      helpTocTitle.textContent = t('help.toc');
+    }
+    const helpSearchInput = document.getElementById('helpSearchInput') as HTMLInputElement | null;
+    if (helpSearchInput) {
+      helpSearchInput.placeholder = t('help.searchPlaceholder');
+    }
+    const helpSearchPrev = document.getElementById('helpSearchPrev');
+    if (helpSearchPrev) {
+      helpSearchPrev.setAttribute('aria-label', t('help.searchPrev'));
+    }
+    const helpSearchNext = document.getElementById('helpSearchNext');
+    if (helpSearchNext) {
+      helpSearchNext.setAttribute('aria-label', t('help.searchNext'));
+    }
+    const helpToc = document.getElementById('helpToc');
+    if (helpToc) {
+      helpToc.setAttribute('aria-label', t('help.toc'));
+    }
+    const helpTocToggle = document.getElementById('helpTocToggle');
+    if (helpTocToggle) {
+      helpTocToggle.setAttribute('aria-label', t('help.toggleToc'));
+    }
+    const helpSearchToggle = document.getElementById('helpSearchToggle');
+    if (helpSearchToggle) {
+      helpSearchToggle.setAttribute('aria-label', t('help.toggleSearch'));
     }
 
     // 设置标签页

@@ -26,12 +26,13 @@
   scrollbar-width none
   -ms-overflow-style none
 
-  // 设备标签页激活时，主内容区域不滚动
-  &.devices-tab-active
+  // 设备 / 指南手册贴齐标签栏
+  &.devices-tab-active,
+  &.help-tab-active
     overflow hidden
 
-  // 设备标签页不需要 padding
-  #devicesTab
+  #devicesTab,
+  #helpTab
     margin -32px
     padding 0
     height 100%

@@ -41,11 +41,8 @@
 
       // 设备标签页激活时，禁用主内容区域滚动
       if (mainContent) {
-        if (targetTab === 'devices') {
-          mainContent.classList.add('devices-tab-active');
-        } else {
-          mainContent.classList.remove('devices-tab-active');
-        }
+        mainContent.classList.toggle('devices-tab-active', targetTab === 'devices');
+        mainContent.classList.toggle('help-tab-active', targetTab === 'help');
       }
 
       // 如果切换到日志标签页，刷新日志显示

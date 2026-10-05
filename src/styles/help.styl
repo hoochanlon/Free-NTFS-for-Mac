@@ -4,26 +4,83 @@
 
 @import 'variables'
 
-// 帮助页面特殊容器
-.help-page-container
-  max-width 800px
-  margin 0 auto
-  padding 32px
-
-// 帮助搜索框（如果将来需要）
-.help-search
-  margin-bottom 20px
+.help-reader
+  flex 1
+  min-height 0
+  display flex
+  flex-direction column
   position relative
+  height 100%
+
+.help-toolbar
+  flex-shrink 0
+  display flex
+  align-items center
+  justify-content space-between
+  gap 8px
+  padding 4px 10px
+  min-height 36px
+  border-bottom 1px solid var(--border)
+  background var(--bg-primary)
+  z-index 2
+  -webkit-app-region no-drag
+  position relative
+
+.help-chrome-btn
+  width 28px
+  height 28px
+  padding 0
+  flex-shrink 0
+  display inline-flex
+  align-items center
+  justify-content center
+  border 1px solid transparent
+  border-radius 6px
+  background transparent
+  color var(--text-secondary)
+  cursor pointer
+
+  &:hover
+    color var(--text-primary)
+    background var(--bg-secondary)
+
+  &[aria-pressed="true"]
+    color var(--accent)
+    background rgba(0, 122, 255, 0.12)
+
+.help-toolbar-cluster
+  display none
+  align-items center
+  gap 4px
+  position absolute
+  left 50%
+  transform translateX(-50%)
+  max-width calc(100% - 88px)
+
+.help-reader.is-search-open .help-toolbar-cluster
+  display flex
+
+.help-search
+  position relative
+  flex none
+  width 360px
+  max-width calc(100vw - 200px)
+  margin 0
 
   input
     width 100%
-    padding 10px 14px 10px 40px
+    padding 6px 12px
     background var(--bg-secondary)
     border 1px solid var(--border)
     border-radius 8px
     color var(--text-primary)
     font-size 13px
-    transition all 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+    appearance none
+    -webkit-appearance none
+    user-select text
+    -webkit-user-select text
+    -webkit-app-region no-drag
+    transition border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1)
 
     &:focus
       outline none
@@ -33,50 +90,183 @@
     &::placeholder
       color var(--text-secondary)
 
-  &::before
-    content ''
-    position absolute
-    left 12px
-    top 50%
-    transform translateY(-50%)
-    width 16px
-    height 16px
-    background-image url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>')
-    background-size contain
-    opacity 0.5
+.help-search-meta
+  min-width 0
+  font-size 12px
+  color var(--text-secondary)
+  user-select none
+  white-space nowrap
 
-// 帮助目录（如果将来需要）
-.help-toc
-  background var(--bg-secondary)
+  &:empty
+    display none
+
+.help-search-nav
+  width 28px
+  height 28px
+  padding 0
+  display inline-flex
+  align-items center
+  justify-content center
   border 1px solid var(--border)
-  border-radius 8px
-  padding 16px
-  margin-bottom 20px
+  border-radius 6px
+  background var(--bg-secondary)
+  color var(--text-primary)
+  cursor pointer
 
-  h3
-    font-size 15px
+  &:hover
+    border-color var(--accent)
+    color var(--accent)
+
+.help-layout
+  flex 1
+  min-height 0
+  display grid
+  grid-template-columns 0 minmax(0, 1fr)
+
+.help-reader.is-toc-open .help-layout
+  grid-template-columns 200px minmax(0, 1fr)
+
+.help-toc
+  min-width 0
+  overflow hidden
+  opacity 0
+  pointer-events none
+  padding 0
+  border-right 0
+  background var(--bg-secondary)
+  user-select none
+  scrollbar-width thin
+  scrollbar-color transparent transparent
+
+.help-reader.is-toc-open .help-toc
+  overflow-y auto
+  opacity 1
+  pointer-events auto
+  padding 12px 10px 24px 14px
+  border-right 1px solid var(--border)
+
+  &:hover
+    scrollbar-color var(--border) transparent
+
+  &::-webkit-scrollbar
+    width 6px
+
+  &::-webkit-scrollbar-thumb
+    background transparent
+    border-radius 3px
+
+  &:hover::-webkit-scrollbar-thumb
+    background var(--border)
+
+  .help-toc-title
+    font-size 12px
     font-weight 600
-    color var(--text-primary)
-    margin-bottom 10px
-    letter-spacing -0.01em
+    color var(--text-secondary)
+    margin 0 8px 10px
+    letter-spacing 0.04em
+    text-transform uppercase
 
   ul
     list-style none
     margin 0
     padding 0
 
-  li
-    margin-bottom 6px
+.help-toc-item
+  margin 0
 
-    a
+  a
+    display block
+    padding 6px 8px
+    border-radius 6px
+    color var(--text-secondary)
+    text-decoration none
+    font-size 13px
+    line-height 1.4
+    transition background-color 0.15s ease, color 0.15s ease
+
+    &:hover
+      color var(--text-primary)
+      background var(--bg-tertiary)
+
+    &.is-active
       color var(--accent)
-      text-decoration none
-      font-size 13px
-      transition color 0.15s cubic-bezier(0.4, 0, 0.2, 1)
+      background rgba(0, 122, 255, 0.12)
 
-      &:hover
-        color var(--accent-hover)
-        text-decoration underline
+.help-toc-h3 a
+  padding-left 18px
+  font-size 12px
+
+.help-article-scroll
+  overflow-y auto
+  overflow-x hidden
+  min-width 0
+
+.help-content
+  button
+    user-select none
+    -webkit-user-select none
+    cursor pointer
+
+.help-search-hit
+  background rgba(255, 214, 10, 0.55)
+  color inherit
+  border-radius 2px
+  padding 0 1px
+
+  &.is-current
+    background var(--accent)
+    color #fff
+
+.help-back-top
+  position absolute
+  right 16px
+  bottom 16px
+  width 36px
+  height 36px
+  padding 0
+  border none
+  border-radius 50%
+  background var(--bg-primary)
+  box-shadow 0 4px 16px var(--shadow)
+  cursor pointer
+  z-index 3
+  display flex
+  align-items center
+  justify-content center
+  color var(--text-primary)
+  transition opacity 0.2s ease, transform 0.2s ease
+
+  &.is-hidden
+    opacity 0
+    pointer-events none
+    transform scale(0.92)
+
+  svg
+    position absolute
+    inset 0
+    width 100%
+    height 100%
+    transform rotate(-90deg)
+
+.help-back-top-track
+  fill none
+  stroke var(--border)
+  stroke-width 2.5
+
+.help-back-top-bar
+  fill none
+  stroke var(--accent)
+  stroke-width 2.5
+  stroke-linecap round
+  stroke-dasharray 100
+  stroke-dashoffset 100
+
+.help-back-top-value
+  position relative
+  font-size 10px
+  font-weight 600
+  letter-spacing -0.02em
+  user-select none
 
 // GitHub alert callout 基础样式
 .help-warning,
@@ -154,6 +344,16 @@ body.light-theme
 
   .help-toc
     background var(--light-bg-secondary)
+
+  .help-back-top
+    background #fff
+
+  .help-search-hit
+    background rgba(255, 204, 0, 0.45)
+
+    &.is-current
+      background var(--accent)
+      color #fff
 
   .help-warning
     background rgba(255, 149, 0, 0.08)

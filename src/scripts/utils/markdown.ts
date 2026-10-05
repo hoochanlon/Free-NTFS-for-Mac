@@ -209,22 +209,50 @@
               );
             }
 
-            container.innerHTML = `<div class="help-content">${html}</div>`;
+            const article = (container.querySelector('#helpArticle') as HTMLElement)
+              || (container.querySelector('.help-content') as HTMLElement);
+            if (article && article !== container) {
+              article.innerHTML = html;
+            } else {
+              container.innerHTML = `<div class="help-content" id="helpArticle">${html}</div>`;
+            }
 
-            // 绑定代码复制按钮事件
-            AppUtils.Markdown.setupCopyButtons(container);
+            const bindRoot = container.id === 'helpTab' ? container : (container.closest('#helpTab') as HTMLElement) || container;
+            AppUtils.Markdown.setupCopyButtons(bindRoot);
+            if (AppUtils.HelpReader && typeof AppUtils.HelpReader.bind === 'function') {
+              AppUtils.HelpReader.bind(bindRoot);
+            }
           } else {
-            // 如果没有 marked，使用简单的文本显示
-            container.innerHTML = `<div class="help-content"><pre>${result.content}</pre></div>`;
+            const article = (container.querySelector('#helpArticle') as HTMLElement)
+              || (container.querySelector('.help-content') as HTMLElement);
+            if (article && article !== container) {
+              article.innerHTML = `<pre>${result.content}</pre>`;
+            } else {
+              container.innerHTML = `<div class="help-content"><pre>${result.content}</pre></div>`;
+            }
             console.warn('marked 库未加载，使用纯文本显示');
           }
         } else {
           const errorMsg = t('help.loadError', { error: result.error || t('help.unknownError') });
-          container.innerHTML = `<div class="help-content"><p class="error">${errorMsg}</p></div>`;
+          const article = (container.querySelector('#helpArticle') as HTMLElement)
+            || (container.querySelector('.help-content') as HTMLElement);
+          const errorHtml = `<p class="error">${errorMsg}</p>`;
+          if (article && article !== container) {
+            article.innerHTML = errorHtml;
+          } else {
+            container.innerHTML = `<div class="help-content">${errorHtml}</div>`;
+          }
         }
       } catch (error) {
         const errorMsg = t('help.loadError', { error: error instanceof Error ? error.message : String(error) });
-        container.innerHTML = `<div class="help-content"><p class="error">${errorMsg}</p></div>`;
+        const article = (container.querySelector('#helpArticle') as HTMLElement)
+          || (container.querySelector('.help-content') as HTMLElement);
+        const errorHtml = `<p class="error">${errorMsg}</p>`;
+        if (article && article !== container) {
+          article.innerHTML = errorHtml;
+        } else {
+          container.innerHTML = `<div class="help-content">${errorHtml}</div>`;
+        }
       }
     },
 
