@@ -648,8 +648,16 @@ export function adjustTrayWindowHeightByDeviceCount(deviceCount: number): void {
   }
 }
 
+export interface PendingMainWindowAction {
+  action: string;
+  device?: unknown;
+}
+
 // 显示主窗口并关闭托盘窗口
-export async function showMainWindowAndCloseTray(devices: unknown[] = []): Promise<void> {
+export async function showMainWindowAndCloseTray(
+  devices: unknown[] = [],
+  pendingAction?: PendingMainWindowAction
+): Promise<void> {
   if (!mainWindow || mainWindow.isDestroyed()) {
     await createMainWindow();
   }
@@ -683,6 +691,24 @@ export async function showMainWindowAndCloseTray(devices: unknown[] = []): Promi
 
   if (trayDevicesWindow && !trayDevicesWindow.isDestroyed()) {
     trayDevicesWindow.hide();
+  }
+
+  // 弹窗类操作交给主界面执行，不阻塞托盘侧 IPC
+  if (pendingAction) {
+    const actionPayload = JSON.stringify(pendingAction).replace(/</g, '\\u003c');
+    mainWindow.webContents.executeJavaScript(`
+      (async () => {
+        const deadline = Date.now() + 1500;
+        while (typeof window.runPendingDeviceAction !== 'function' && Date.now() < deadline) {
+          await new Promise(resolve => setTimeout(resolve, 16));
+        }
+        if (typeof window.runPendingDeviceAction === 'function') {
+          window.runPendingDeviceAction(${actionPayload});
+        }
+      })();
+    `).catch((error: unknown) => {
+      console.warn('[主窗口] 转发托盘操作失败:', error);
+    });
   }
 }
 

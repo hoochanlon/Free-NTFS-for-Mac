@@ -14,7 +14,8 @@ import {
   trayDevicesWindow,
   prerenderTrayDevicesTheme,
   syncHiddenTrayDevicesWindow,
-  ensureTrayDevicesWindow
+  ensureTrayDevicesWindow,
+  type PendingMainWindowAction
 } from './window-manager';
 import { openAboutWindow, getAboutWindow } from './about-window';
 import { SettingsManager, AppSettings } from './utils/settings';
@@ -23,7 +24,6 @@ import { KeychainManager } from './utils/keychain';
 import { rebuildApplicationMenu } from './app-config';
 import { initTray, destroyTray, updateTrayMenu, updateTrayTooltip, isTrayInitialized } from './utils/tray-manager';
 import { caffeinateManager } from './utils/caffeinate-manager';
-import { createTrayRepairConfirmDialog, type TrayRepairConfirmDialogOptions } from './utils/confirm-dialog-window';
 
 let quitWindow: BrowserWindow | null = null;
 
@@ -215,8 +215,8 @@ async function broadcastDevicesToAllWindows(): Promise<void> {
 
 // NTFS 相关 IPC handlers
 export function setupNTFSHandlers(): void {
-  ipcMain.handle('show-tray-repair-confirm-dialog', (_event: IpcMainInvokeEvent, options: TrayRepairConfirmDialogOptions) => {
-    return createTrayRepairConfirmDialog(options);
+  ipcMain.handle('run-device-action-in-main-window', async (_event: IpcMainInvokeEvent, pendingAction: PendingMainWindowAction) => {
+    await showMainWindowAndCloseTray(ntfsManager.getCachedDevices(), pendingAction);
   });
 
   ipcMain.handle('check-dependencies', async () => {

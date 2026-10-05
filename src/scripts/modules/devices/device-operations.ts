@@ -385,18 +385,14 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
+      if (document.body?.classList.contains('tray-window') && electronAPI?.runDeviceActionInMainWindow) {
+        await electronAPI.runDeviceActionInMainWindow({ action: 'repair', device });
+        return;
+      }
+
       const title = t('devices.repairConfirm', { name: device.volumeName });
       const message = t('devices.repairConfirmNote', { name: device.volumeName });
-      const isTrayWindow = document.body?.classList.contains('tray-window');
-      const confirmed = isTrayWindow
-        ? await electronAPI.showTrayRepairConfirmDialog({
-          title,
-          message,
-          cancelText: t('dialog.cancel') || '取消',
-          confirmText: t('dialog.confirm') || '确定',
-          isLightTheme: document.body.classList.contains('light-theme')
-        })
-        : await AppUtils.UI.showConfirm(title, message);
+      const confirmed = await AppUtils.UI.showConfirm(title, message);
       if (!confirmed) return;
 
       const showRepairMessage = async (messageTitle: string, messageText: string, type: 'info' | 'warning' | 'error'): Promise<void> => {
@@ -470,22 +466,15 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
+      if (document.body?.classList.contains('tray-window') && electronAPI?.runDeviceActionInMainWindow) {
+        await electronAPI.runDeviceActionInMainWindow({ action: 'rename', device });
+        return;
+      }
+
       const title = t('devices.renameTitle', { name: device.volumeName });
       const message = t('devices.renameNote');
       const placeholder = t('devices.renamePlaceholder');
-      const isTrayWindow = document.body?.classList.contains('tray-window');
-      const newName = isTrayWindow
-        ? await electronAPI.showTrayRepairConfirmDialog({
-          title,
-          message,
-          cancelText: t('dialog.cancel') || '取消',
-          confirmText: t('dialog.confirm') || '确定',
-          isLightTheme: document.body.classList.contains('light-theme'),
-          prompt: true,
-          defaultValue: device.volumeName,
-          placeholder
-        })
-        : await AppUtils.UI.showPrompt(title, message, device.volumeName, placeholder);
+      const newName = await AppUtils.UI.showPrompt(title, message, device.volumeName, placeholder);
       if (newName === null || newName === false) return;
 
       const trimmedName = String(newName).trim();
@@ -675,6 +664,11 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
+      if (document.body?.classList.contains('tray-window') && electronAPI?.runDeviceActionInMainWindow) {
+        await electronAPI.runDeviceActionInMainWindow({ action: 'restore-all' });
+        return;
+      }
+
       // 获取所有已挂载为读写模式的设备
       const devices = AppModules.Devices.devices || [];
       const readWriteDevices = devices.filter((d: any) => !d.isReadOnly && !d.isUnmounted);
@@ -830,6 +824,11 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
+      if (document.body?.classList.contains('tray-window') && electronAPI?.runDeviceActionInMainWindow) {
+        await electronAPI.runDeviceActionInMainWindow({ action: 'mount-all' });
+        return;
+      }
+
       // 获取所有只读设备和未挂载的设备
       const devices = AppModules.Devices.devices || [];
       const readOnlyDevices = devices.filter((d: any) => d.isReadOnly || d.isUnmounted);
@@ -1021,6 +1020,11 @@
       statusDot: HTMLElement,
       statusText: HTMLElement
     ): Promise<void> {
+      if (document.body?.classList.contains('tray-window') && electronAPI?.runDeviceActionInMainWindow) {
+        await electronAPI.runDeviceActionInMainWindow({ action: 'eject-all' });
+        return;
+      }
+
       // 获取所有已挂载的设备
       const devices = AppModules.Devices.devices || [];
       const mountedDevices = devices.filter((d: any) => !d.isUnmounted);

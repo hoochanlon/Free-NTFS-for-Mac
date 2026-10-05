@@ -81,16 +81,7 @@ export interface ElectronAPI {
   onShowAboutDialog: (callback: () => void) => void;
   onTrayAction: (callback: (action: string) => void) => void;
   onTrayDeviceAction: (callback: (data: { action: string; device: any }) => void) => void;
-  showTrayRepairConfirmDialog: (options: {
-    title: string;
-    message: string;
-    cancelText: string;
-    confirmText: string;
-    isLightTheme: boolean;
-    prompt?: boolean;
-    defaultValue?: string;
-    placeholder?: string;
-  }) => Promise<boolean | string | null>;
+  runDeviceActionInMainWindow: (data: { action: string; device?: any }) => Promise<void>;
   showConfirmDialog: (title: string, message: string) => Promise<boolean>;
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => Promise<void>;
   readLogsFile: () => Promise<{ success: boolean; content?: string; error?: string }>;

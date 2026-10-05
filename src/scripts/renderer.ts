@@ -833,6 +833,56 @@
   }
   (window as any).applyDevicesBeforeShow = applyDevicesBeforeShow;
 
+  function runPendingDeviceAction(data: { action: string; device?: any }): void {
+    const { action, device } = data;
+    if (!action) return;
+
+    AppModules.Tabs.switchToTab('devices', logContainer, helpTab);
+    const run = () => {
+      const currentDevice = device
+        ? (AppModules.Devices.devices || []).find((item: any) => item.disk === device.disk) || device
+        : null;
+      switch (action) {
+        case 'rename':
+          if (currentDevice) AppModules.Devices.renameDevice(currentDevice, devicesList, readWriteDevicesList, statusDot, statusText);
+          break;
+        case 'repair':
+          if (currentDevice) AppModules.Devices.repairDevice(currentDevice, devicesList, readWriteDevicesList, statusDot, statusText);
+          break;
+        case 'mount':
+          if (currentDevice) AppModules.Devices.mountDevice(currentDevice, devicesList, readWriteDevicesList, statusDot, statusText);
+          break;
+        case 'unmount':
+          if (currentDevice) AppModules.Devices.unmountDevice(currentDevice, devicesList, readWriteDevicesList, statusDot, statusText);
+          break;
+        case 'eject':
+          if (currentDevice) AppModules.Devices.ejectDevice(currentDevice, devicesList, readWriteDevicesList, statusDot, statusText);
+          break;
+        case 'restore':
+          if (currentDevice) AppModules.Devices.restoreToReadOnly(currentDevice, devicesList, readWriteDevicesList, statusDot, statusText);
+          break;
+        case 'reset':
+          if (currentDevice) AppModules.Devices.resetDevice(currentDevice, devicesList, readWriteDevicesList, statusDot, statusText);
+          break;
+        case 'mount-all':
+          AppModules.Devices.mountAllDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+          break;
+        case 'restore-all':
+          AppModules.Devices.restoreAllToReadOnly(devicesList, readWriteDevicesList, statusDot, statusText);
+          break;
+        case 'eject-all':
+          AppModules.Devices.ejectAllDevices(devicesList, readWriteDevicesList, statusDot, statusText);
+          break;
+        case 'quit':
+          if (quitBtn) quitBtn.click();
+          break;
+      }
+    };
+
+    AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText).then(run).catch(run);
+  }
+  (window as any).runPendingDeviceAction = runPendingDeviceAction;
+
   // 监听托盘操作
   if (window.electronAPI && window.electronAPI.onTrayAction) {
     window.electronAPI.onTrayAction((action: string) => {
@@ -862,31 +912,7 @@
   // 监听托盘设备操作
   if (window.electronAPI && window.electronAPI.onTrayDeviceAction) {
     window.electronAPI.onTrayDeviceAction((data: { action: string; device: any }) => {
-      const { action, device } = data;
-      // 切换到设备标签页
-      AppModules.Tabs.switchToTab('devices', logContainer, helpTab);
-      // 刷新设备列表
-      AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText).then(() => {
-        // 根据操作类型执行相应的操作
-        switch (action) {
-          case 'mount':
-            // 找到对应的设备并执行挂载操作
-            AppModules.Devices.mountDevice(device, devicesList, readWriteDevicesList, statusDot, statusText);
-            break;
-          case 'unmount':
-            AppModules.Devices.unmountDevice(device, devicesList, readWriteDevicesList, statusDot, statusText);
-            break;
-          case 'eject':
-            AppModules.Devices.ejectDevice(device, devicesList, readWriteDevicesList, statusDot, statusText);
-            break;
-          case 'restore':
-            AppModules.Devices.restoreToReadOnly(device, devicesList, readWriteDevicesList, statusDot, statusText);
-            break;
-          case 'reset':
-            AppModules.Devices.resetDevice(device, devicesList, readWriteDevicesList, statusDot, statusText);
-            break;
-        }
-      });
+      runPendingDeviceAction(data);
     });
   }
 

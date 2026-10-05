@@ -93,7 +93,7 @@ const electronAPI: ElectronAPI = {
   onTrayDeviceAction: (callback: (data: { action: string; device: any }) => void) => {
     ipcRenderer.on('tray-device-action', (_event: IpcRendererEvent, data: { action: string; device: any }) => callback(data));
   },
-  showTrayRepairConfirmDialog: (options) => ipcRenderer.invoke('show-tray-repair-confirm-dialog', options),
+  runDeviceActionInMainWindow: (data: { action: string; device?: any }) => ipcRenderer.invoke('run-device-action-in-main-window', data),
   showConfirmDialog: (title: string, message: string) => ipcRenderer.invoke('show-confirm-dialog', { title, message }),
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => ipcRenderer.invoke('show-message-dialog', { title, message, type }),
   readLogsFile: () => ipcRenderer.invoke('read-logs-file'),

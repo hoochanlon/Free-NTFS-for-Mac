@@ -203,6 +203,8 @@
     mountDevice: Operations.mountDevice,
     unmountDevice: Operations.unmountDevice,
     resetDevice: Operations.resetDevice,
+    repairDevice: Operations.repairDevice,
+    renameDevice: Operations.renameDevice,
     restoreToReadOnly: Operations.restoreToReadOnly,
     mountAllDevices: Operations.mountAllDevices,
     restoreAllToReadOnly: Operations.restoreAllToReadOnly,

@@ -693,13 +693,12 @@
     if (quitBtn) {
       quitBtn.addEventListener('click', async () => {
         try {
-          const confirmTitle = t('tray.quitConfirmTitle') || '确认退出';
-          const confirmMessage = t('tray.quitConfirmMessage') || '确定要退出应用吗？';
-
-          const confirmed = await electronAPI.showConfirmDialog(confirmTitle, confirmMessage);
-
-          if (confirmed && electronAPI.quitApp) {
-            await electronAPI.quitApp();
+          if (electronAPI.runDeviceActionInMainWindow) {
+            await electronAPI.runDeviceActionInMainWindow({ action: 'quit' });
+            return;
+          }
+          if (electronAPI.showMainWindow) {
+            await electronAPI.showMainWindow();
           }
         } catch (error) {
           console.error('退出应用失败:', error);
