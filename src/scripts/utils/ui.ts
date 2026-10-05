@@ -55,7 +55,7 @@
     },
 
     // 确认对话框（自定义 HTML 对话框，文字不可选中）
-    async showConfirm(title: string, message: string, options?: { icon?: string }): Promise<boolean> {
+    async showConfirm(title: string, message: string, options?: { icon?: string; confirmText?: string }): Promise<boolean> {
       return new Promise((resolve) => {
         // 获取翻译函数
         const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
@@ -172,7 +172,7 @@
         // 确定按钮
         const confirmBtn = document.createElement('button');
         confirmBtn.className = 'btn btn-primary';
-        confirmBtn.textContent = t('dialog.confirm') || '确定';
+        confirmBtn.textContent = options?.confirmText || t('dialog.confirm') || '确定';
         confirmBtn.addEventListener('click', () => {
           document.body.removeChild(overlay);
           resolve(true);
@@ -214,7 +214,7 @@
       });
     },
 
-    async showPrompt(title: string, message: string, defaultValue: string = '', placeholder: string = ''): Promise<string | null> {
+    async showPrompt(title: string, message: string, defaultValue: string = '', placeholder: string = '', options?: { icon?: string }): Promise<string | null> {
       return new Promise((resolve) => {
         const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
         const overlay = document.createElement('div');
@@ -224,8 +224,21 @@
         dialog.className = 'confirm-dialog prompt-dialog';
 
         const titleEl = document.createElement('div');
-        titleEl.className = 'confirm-dialog-title';
-        titleEl.textContent = title;
+        if (options?.icon) {
+          titleEl.className = 'confirm-dialog-title confirm-dialog-title-with-icon';
+          const iconEl = document.createElement('img');
+          iconEl.className = 'confirm-dialog-title-icon';
+          iconEl.src = options.icon;
+          iconEl.alt = '';
+          iconEl.setAttribute('aria-hidden', 'true');
+          const titleTextEl = document.createElement('span');
+          titleTextEl.textContent = title;
+          titleEl.appendChild(iconEl);
+          titleEl.appendChild(titleTextEl);
+        } else {
+          titleEl.className = 'confirm-dialog-title';
+          titleEl.textContent = title;
+        }
 
         const contentEl = document.createElement('div');
         contentEl.className = 'confirm-dialog-content';
@@ -509,7 +522,7 @@
         const ul = document.createElement('ul');
         const items = [
           { label: t('about.author') || '作者：', value: 'Hoochanlon' },
-          { label: t('about.version') || '软件版本：', value: 'Nigate v1.5.3' },
+          { label: t('about.version') || '软件版本：', value: 'Nigate v1.5.4' },
           { label: t('about.technology') || '基于技术：', value: 'Electron + Shell + TypeScript + Stylus' }
         ];
         items.forEach(item => {

@@ -425,9 +425,15 @@
         return;
       }
 
-      const title = t('devices.repairConfirm', { name: device.volumeName });
-      const message = t('devices.repairConfirmNote', { name: device.volumeName });
-      const confirmed = await AppUtils.UI.showConfirm(title, message);
+      const title = t('devices.repairConfirm');
+      const message = [
+        t('devices.repairConfirmNote'),
+        t('devices.targetDevice', { name: device.volumeName })
+      ].join('\n');
+      const confirmed = await AppUtils.UI.showConfirm(title, message, {
+        icon: '../imgs/svg/prompt/warning.svg',
+        confirmText: t('dialog.continue')
+      });
       if (!confirmed) return;
 
       const showRepairMessage = async (messageTitle: string, messageText: string, type: 'info' | 'warning' | 'error'): Promise<void> => {
@@ -506,10 +512,15 @@
         return;
       }
 
-      const title = t('devices.renameTitle', { name: device.volumeName });
-      const message = t('devices.renameNote');
+      const title = t('devices.renameTitle');
+      const message = [
+        t('devices.targetDevice', { name: device.volumeName }),
+        t('devices.renameNote')
+      ].join('\n');
       const placeholder = t('devices.renamePlaceholder');
-      const newName = await AppUtils.UI.showPrompt(title, message, device.volumeName, placeholder);
+      const newName = await AppUtils.UI.showPrompt(title, message, device.volumeName, placeholder, {
+        icon: '../imgs/svg/prompt/important.svg'
+      });
       if (newName === null || newName === false) return;
 
       const trimmedName = String(newName).trim();
@@ -599,8 +610,11 @@
         return;
       }
 
-      const title = t('devices.formatConfirm', { name: device.volumeName });
-      const message = t('devices.formatConfirmNote', { name: device.volumeName });
+      const title = t('devices.formatConfirm');
+      const message = [
+        t('devices.targetDevice', { name: device.volumeName }),
+        t('devices.formatConfirmNote')
+      ].join('\n');
       const confirmed = await AppUtils.UI.showConfirm(title, message, {
         icon: '../imgs/svg/prompt/danger.svg'
       });

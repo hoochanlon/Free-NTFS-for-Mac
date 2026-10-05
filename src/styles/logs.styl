@@ -43,6 +43,8 @@
   position relative
   min-height 0
   box-shadow 0 1px 2px var(--shadow)
+  display flex
+  flex-direction column
 
   // 隐藏滚动条
   &::-webkit-scrollbar
@@ -51,16 +53,25 @@
   scrollbar-width none
   -ms-overflow-style none
 
+  // 空状态占满容器并居中
+  &:has(.log-empty)
+    justify-content center
+    align-items center
+
 // 空状态
 .log-empty
   color var(--text-secondary)
   text-align center
-  padding 60px 20px
+  padding 20px
   font-size 14px
   display flex
   flex-direction column
   align-items center
+  justify-content center
   gap 12px
+  flex 1
+  width 100%
+  min-height 0
 
   &::before
     content ''
@@ -184,6 +195,12 @@
   line-height 1.7
   transition background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1)
   box-shadow 0 1px 2px var(--shadow)
+  display flex
+  flex-direction column
+
+  &:has(.log-empty)
+    justify-content center
+    align-items center
 
   // 滚动条样式
   &::-webkit-scrollbar
