@@ -393,7 +393,8 @@ export class DeviceDetector {
         const devicePath = line.slice(0, separatorIndex).trim();
         const rest = line.slice(separatorIndex + 4).trim();
 
-        const optionsMatch = rest.match(/\s+\(((?:ntfs|[^,\s]*fuse)\b[^()]*)\)\s*$/i);
+        // 系统只读挂载：ntfs；较新 macOS FSKit：xntfs；ntfs-3g 读写：*fuse
+        const optionsMatch = rest.match(/\s+\(((?:[\w-]*ntfs|[^,\s]*fuse)\b[^()]*)\)\s*$/i);
 
         if (!optionsMatch) {
           console.warn('[设备检测] 跳过无效行（无法匹配卷名）:', line);
