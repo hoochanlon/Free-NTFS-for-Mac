@@ -846,6 +846,9 @@
         case 'rename':
           if (currentDevice) AppModules.Devices.renameDevice(currentDevice, devicesList, readWriteDevicesList, statusDot, statusText);
           break;
+        case 'format':
+          if (currentDevice) AppModules.Devices.formatDevice(currentDevice, devicesList, readWriteDevicesList, statusDot, statusText);
+          break;
         case 'repair':
           if (currentDevice) AppModules.Devices.repairDevice(currentDevice, devicesList, readWriteDevicesList, statusDot, statusText);
           break;

@@ -55,7 +55,7 @@
     },
 
     // 确认对话框（自定义 HTML 对话框，文字不可选中）
-    async showConfirm(title: string, message: string): Promise<boolean> {
+    async showConfirm(title: string, message: string, options?: { icon?: string }): Promise<boolean> {
       return new Promise((resolve) => {
         // 获取翻译函数
         const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
@@ -70,8 +70,16 @@
 
         // 创建标题
         const titleEl = document.createElement('div');
-        titleEl.className = 'confirm-dialog-title';
-        titleEl.textContent = title;
+        titleEl.className = 'confirm-dialog-title confirm-dialog-title-with-icon';
+        const iconEl = document.createElement('img');
+        iconEl.className = 'confirm-dialog-title-icon';
+        iconEl.src = options?.icon || '../imgs/svg/prompt/question.svg';
+        iconEl.alt = '';
+        iconEl.setAttribute('aria-hidden', 'true');
+        const titleTextEl = document.createElement('span');
+        titleTextEl.textContent = title;
+        titleEl.appendChild(iconEl);
+        titleEl.appendChild(titleTextEl);
 
         // 创建内容区域
         const contentEl = document.createElement('div');

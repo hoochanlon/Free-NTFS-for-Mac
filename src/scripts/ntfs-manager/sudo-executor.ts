@@ -6,7 +6,7 @@ import { SettingsManager } from '../utils/settings';
 
 export class SudoExecutor {
   // 使用密码执行 sudo 命令
-  async executeSudoWithPassword(args: string[], password: string): Promise<ExecResult> {
+  async executeSudoWithPassword(args: string[], password: string, timeoutMs: number = 30000): Promise<ExecResult> {
     return new Promise<ExecResult>((resolve, reject) => {
       // 验证密码不为空
       if (password.length === 0) {
@@ -75,7 +75,7 @@ export class SudoExecutor {
           childProcess.kill('SIGKILL');
         } catch {}
         reject(new Error('操作超时'));
-      }, 30000);
+      }, timeoutMs);
 
       childProcess.on('close', async (code: number | null) => {
         clearTimeout(timeout);

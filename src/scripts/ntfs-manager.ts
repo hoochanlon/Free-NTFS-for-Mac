@@ -82,6 +82,12 @@ class NTFSManager {
     return result;
   }
 
+  async formatDevice(device: NTFSDevice): Promise<string> {
+    const result = await this.mountOperations.formatDevice(device);
+    this.deviceDetector.invalidateCache();
+    return result;
+  }
+
   // 清理旧的挂载标记
   async cleanupOldMounts(): Promise<void> {
     return await this.mountOperations.cleanupOldMounts();

@@ -24,6 +24,7 @@ export interface ElectronAPI {
   resetDevice: (device: NTFSDevice) => Promise<OperationResult>;
   repairDevice: (device: NTFSDevice) => Promise<OperationResult>;
   renameDevice: (device: NTFSDevice, newName: string) => Promise<OperationResult>;
+  formatDevice: (device: NTFSDevice) => Promise<OperationResult>;
   restoreToReadOnly: (device: NTFSDevice) => Promise<OperationResult>;
   ejectDevice: (device: NTFSDevice) => Promise<OperationResult>;
   // 已移除自动安装功能
@@ -123,6 +124,7 @@ export interface NTFSDevice {
   options: string;
   isMounted: boolean;
   isUnmounted?: boolean; // 标记设备是否已卸载但仍在系统中
+  canFormat?: boolean; // 外接整盘才允许格式化；内置/虚拟盘为 false
   capacity?: {
     total: number; // 总容量（字节）
     used: number; // 已使用容量（字节）

@@ -98,6 +98,7 @@ The application's main interface provides several functional icons to help you q
 ### Device Management Icons
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="Refresh" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Refresh Icon** - Refreshes the device list and re-detects connected NTFS devices.
+- <img src="../imgs/svg/actions/format.svg" alt="Format" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Format Icon** - Rebuilds the entire external disk as GPT NTFS. This erases all partitions and data on that disk and cannot be undone. The icon appears only for mounted external disks.
 - <img src="../imgs/svg/actions/repair.svg" alt="Repair" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Repair Icon** - Click the repair icon for a device and confirm to attempt to repair its NTFS file system. Administrator privileges and a password are required. Resource busy errors can be handled automatically.
 
 **Note: `ntfsfix` has limited repair capabilities and cannot replace Windows `chkdsk /f`.**

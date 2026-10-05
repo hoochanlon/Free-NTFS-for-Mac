@@ -3,6 +3,7 @@ import { execAsync, fileExists } from './utils';
 import type { NTFSDevice } from '../../types/electron';
 import { DeviceCacheManager } from './device-cache';
 import { BatchExecutor } from './batch-executor';
+import { canFormatFromListTags, getParentDiskId, parseParentDiskTags } from './disk-safety';
 
 export class DeviceDetector {
   private mountedDevices: Set<string>;
@@ -266,6 +267,7 @@ export class DeviceDetector {
       // 从 diskutil list 中提取所有NTFS设备（补充检测，确保不遗漏）
       const allNTFSDevices = new Set<string>(); // 用于跟踪已检测到的设备路径
       const devices: NTFSDevice[] = [];
+      const parentDiskTags = parseParentDiskTags(diskutilListOutput);
 
       // 解析 diskutil list 输出，找出所有NTFS设备
       if (diskutilListOutput) {
@@ -359,6 +361,7 @@ export class DeviceDetector {
                         options: '',
                         isMounted: false,
                         isUnmounted: !volume, // 如果没有挂载点，标记为已卸载
+                        canFormat: canFormatFromListTags(parentDiskTags.get(getParentDiskId(partitionId))),
                         capacity
                       });
 
@@ -519,6 +522,7 @@ export class DeviceDetector {
           isReadOnly: finalIsReadOnly,
           options,
           isMounted: deviceIsMounted,
+          canFormat: canFormatFromListTags(parentDiskTags.get(getParentDiskId(disk))),
           capacity
         });
 
@@ -584,6 +588,7 @@ export class DeviceDetector {
               isUnmounted: true,
               isReadOnly: true, // 已卸载的设备默认显示为只读
               isMounted: false,
+              canFormat: canFormatFromListTags(parentDiskTags.get(getParentDiskId(disk))),
               capacity
             });
           } else {

@@ -862,8 +862,43 @@ body.tray-window.light-theme
     mask url('src/imgs/svg/actions/rename.svg') center / contain no-repeat
     -webkit-mask url('src/imgs/svg/actions/rename.svg') center / contain no-repeat
 
+.format-icon-btn
+  display inline-flex
+  align-items center
+  justify-content center
+  width 26px
+  height 26px
+  padding 4px
+  border 1px solid var(--border)
+  border-radius 5px
+  background var(--bg-secondary)
+  color var(--error)
+  cursor pointer
+  flex-shrink 0
+
+  &:hover
+    background rgba(255, 59, 48, 0.12)
+    border-color var(--error)
+
+  &:focus-visible
+    outline 2px solid var(--error)
+    outline-offset 2px
+
+  &:disabled
+    pointer-events none
+    cursor default
+
+  span
+    display block
+    width 16px
+    height 16px
+    background-color currentColor
+    mask url('src/imgs/svg/actions/format.svg') center / contain no-repeat
+    -webkit-mask url('src/imgs/svg/actions/format.svg') center / contain no-repeat
+
 .device-header .device-status-actions .repair-icon-btn,
-.device-header .device-status-actions .rename-icon-btn
+.device-header .device-status-actions .rename-icon-btn,
+.device-header .device-status-actions .format-icon-btn
   height auto
   align-self stretch
   padding 2px

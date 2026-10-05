@@ -17,7 +17,8 @@
   animation fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1)
 
 .repair-icon-btn.action-success-feedback,
-.rename-icon-btn.action-success-feedback
+.rename-icon-btn.action-success-feedback,
+.format-icon-btn.action-success-feedback
   pointer-events none
 
   img
@@ -52,6 +53,18 @@
   user-select none
   -webkit-user-select none
   background linear-gradient(to bottom, var(--bg-secondary), var(--bg-primary))
+
+.confirm-dialog-title-with-icon
+  display flex
+  align-items flex-start
+  gap 8px
+
+.confirm-dialog-title-icon
+  width 18px
+  height 18px
+  flex-shrink 0
+  margin-top 1px
+  object-fit contain
 
 .confirm-dialog-content
   padding 16px 20px

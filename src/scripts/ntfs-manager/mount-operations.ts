@@ -5,6 +5,15 @@ import type { NTFSDevice } from '../../types/electron';
 import { fileExists, execAsync, findExecutablePath } from './utils';
 import { PasswordManager } from './password-manager';
 import { SudoExecutor } from './sudo-executor';
+import {
+  getParentDiskId,
+  getParentDiskPath as parentDiskOf,
+  isExternalFormattableFromInfo,
+  isValidPartitionPath,
+  isValidWholeDiskPath,
+  parseDiskutilField,
+  sanitizeNtfsVolumeName
+} from './disk-safety';
 
 export class MountOperations {
   private mountedDevices: Set<string>;
@@ -61,12 +70,29 @@ export class MountOperations {
     throw new Error('RENAME_TOOL_MISSING');
   }
 
+  private async getMkntfsPath(): Promise<string> {
+    const pathFromEnvironment = await findExecutablePath('mkntfs');
+    if (pathFromEnvironment) {
+      return pathFromEnvironment;
+    }
+
+    const ntfs3gPath = await this.getNTFS3GPath();
+    if (ntfs3gPath) {
+      const siblingPath = await findExecutablePath(path.join(path.dirname(ntfs3gPath), 'mkntfs'));
+      if (siblingPath) {
+        return siblingPath;
+      }
+    }
+
+    throw new Error('FORMAT_TOOL_MISSING');
+  }
+
   private isValidDevicePath(devicePath: string): boolean {
-    return /^\/dev\/disk\d+s\d+$/.test(devicePath);
+    return isValidPartitionPath(devicePath);
   }
 
   private getParentDiskPath(devicePath: string): string {
-    return devicePath.replace(/s\d+$/, '');
+    return parentDiskOf(devicePath);
   }
 
   private getPartitionIndex(disk: string): string | null {
@@ -600,6 +626,116 @@ export class MountOperations {
     }
 
     return `设备卷标已从 ${device.volumeName} 更新为 ${trimmedName}`;
+  }
+
+  // 整盘抹成 GPT，再把数据分区写成 NTFS。
+  // 中间那步 ExFAT 只是让 macOS 先摆好分区表；真正的文件系统由 mkntfs 写。
+  async formatDevice(device: NTFSDevice): Promise<string> {
+    if (!this.isValidDevicePath(device.devicePath)) {
+      throw new Error('FORMAT_INVALID_PATH');
+    }
+
+    const parentDiskPath = this.getParentDiskPath(device.devicePath);
+    if (!isValidWholeDiskPath(parentDiskPath) || parentDiskPath === device.devicePath) {
+      throw new Error('FORMAT_INVALID_PATH');
+    }
+
+    const volumeName = sanitizeNtfsVolumeName(device.volumeName);
+    const mkntfsPath = await this.getMkntfsPath();
+    await this.assertFormattableParentDisk(parentDiskPath);
+
+    let password = await this.passwordManager.getPassword('messages.passwordDialog.formatDevice', { name: volumeName });
+    const execute = async (args: string[], timeoutMs?: number) => {
+      try {
+        return await this.sudoExecutor.executeSudoWithPassword(args, password, timeoutMs);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (!/密码错误|password is incorrect|sorry, try again/i.test(errorMessage)) {
+          throw error;
+        }
+
+        password = await this.passwordManager.getPassword('messages.passwordDialog.formatDevice', { name: volumeName });
+        return await this.sudoExecutor.executeSudoWithPassword(args, password, timeoutMs);
+      }
+    };
+
+    try {
+      await execute(['diskutil', 'eraseDisk', 'ExFAT', volumeName, 'GPT', parentDiskPath], 120000);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`FORMAT_ERASE_FAILED:${errorMessage}`);
+    }
+
+    this.mountedDevices.delete(device.disk);
+    fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    try {
+      await execute(['diskutil', 'unmountDisk', 'force', parentDiskPath]);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`FORMAT_UNMOUNT_FAILED:${errorMessage}`);
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const dataPartitionPath = await this.resolveGptDataPartitionPath(parentDiskPath);
+    try {
+      await execute([mkntfsPath, '-Q', '-L', volumeName, dataPartitionPath], 120000);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`FORMAT_MKNTFS_FAILED:${errorMessage}`);
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      await execAsync(`diskutil mountDisk ${parentDiskPath}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`FORMAT_REMOUNT_FAILED:${errorMessage}`);
+    }
+
+    return `设备 ${volumeName} 已格式化为 GPT NTFS`;
+  }
+
+  private async assertFormattableParentDisk(parentDiskPath: string): Promise<void> {
+    const parentDiskId = getParentDiskId(parentDiskPath);
+    let parentInfo: string;
+    let bootInfo: string;
+    try {
+      const [parentResult, bootResult] = await Promise.all([
+        execAsync(`diskutil info ${parentDiskPath}`),
+        execAsync('diskutil info /')
+      ]) as Array<{ stdout: string }>;
+      parentInfo = parentResult.stdout || '';
+      bootInfo = bootResult.stdout || '';
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`FORMAT_NOT_ALLOWED:${errorMessage}`);
+    }
+
+    const bootDevice = parseDiskutilField(bootInfo, 'Device Identifier') || '';
+    const bootWholeDiskId = getParentDiskId(bootDevice);
+    if (!isExternalFormattableFromInfo(parentInfo, bootWholeDiskId, parentDiskId)) {
+      throw new Error('FORMAT_NOT_ALLOWED');
+    }
+  }
+
+  private async resolveGptDataPartitionPath(parentDiskPath: string): Promise<string> {
+    try {
+      const result = await execAsync(`diskutil list ${parentDiskPath}`) as { stdout: string };
+      const lines = (result.stdout || '').split('\n');
+      const dataLine = [...lines].reverse().find(line =>
+        /\b(Microsoft Basic Data|ExFAT|Windows_NTFS|NTFS)\b/i.test(line)
+      );
+      const partitionMatch = dataLine?.match(/(disk\d+s\d+)/i);
+      if (partitionMatch) {
+        return `/dev/${partitionMatch[1]}`;
+      }
+    } catch (error) {
+      console.warn('[MountOperations] 解析 GPT 数据分区失败，回退 diskXs2:', error);
+    }
+
+    return `${parentDiskPath}s2`;
   }
 
   // 清理旧的挂载标记

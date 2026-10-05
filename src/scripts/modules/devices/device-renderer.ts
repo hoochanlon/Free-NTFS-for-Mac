@@ -93,7 +93,7 @@
         : 'pending';
       const deviceStateKey = devices.map((d: any) => {
         const capacityInfo = d.capacity ? `${d.capacity.total}:${d.capacity.available || 0}:${d.capacity.used || 0}` : 'no-capacity';
-        return `${d.disk}:${d.volumeName}:${d.isReadOnly}:${d.isUnmounted || false}:${capacityInfo}`;
+        return `${d.disk}:${d.volumeName}:${d.isReadOnly}:${d.isUnmounted || false}:${d.canFormat ? '1' : '0'}:${capacityInfo}`;
       }).join('|') + `|lang:${currentLanguage}`;
       const lastStateKey = (devicesList as any).__lastStateKey || '';
 
@@ -258,6 +258,11 @@
                   <button class="rename-icon-btn rename-btn" type="button" data-disk="${device.disk}" title="${t('devices.renameTooltip')}" aria-label="${t('devices.renameTooltip')}">
                     <span aria-hidden="true"></span>
                   </button>
+                  ${device.canFormat ? `
+                  <button class="format-icon-btn format-btn" type="button" data-disk="${device.disk}" title="${t('devices.formatTooltip')}" aria-label="${t('devices.formatTooltip')}">
+                    <span aria-hidden="true"></span>
+                  </button>
+                  ` : ''}
                   <button class="repair-icon-btn repair-btn" type="button" data-disk="${device.disk}" title="${t('devices.repairTooltip')}" aria-label="${t('devices.repairTooltip')}">
                     <span aria-hidden="true"></span>
                   </button>
@@ -331,6 +336,11 @@
               <button class="rename-icon-btn rename-btn" type="button" data-disk="${device.disk}" title="${t('devices.renameTooltip')}" aria-label="${t('devices.renameTooltip')}">
                 <span aria-hidden="true"></span>
               </button>
+              ${device.canFormat ? `
+              <button class="format-icon-btn format-btn" type="button" data-disk="${device.disk}" title="${t('devices.formatTooltip')}" aria-label="${t('devices.formatTooltip')}">
+                <span aria-hidden="true"></span>
+              </button>
+              ` : ''}
               <button class="repair-icon-btn repair-btn" type="button" data-disk="${device.disk}" title="${t('devices.repairTooltip')}" aria-label="${t('devices.repairTooltip')}">
                 <span aria-hidden="true"></span>
               </button>

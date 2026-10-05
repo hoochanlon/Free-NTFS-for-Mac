@@ -146,6 +146,25 @@
         });
       });
 
+      devicesList.querySelectorAll('.format-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const disk = (btn as HTMLElement).dataset.disk;
+          const devices = AppModules.Devices.devices || [];
+          const device = devices.find((d: any) => d.disk === disk);
+          if (device) {
+            const statusDot = document.querySelector('.status-dot') as HTMLElement;
+            const statusText = document.querySelector('.status-text') as HTMLElement;
+            AppModules.Devices.Operations.formatDevice(
+              device,
+              devicesList,
+              readWriteDevicesList,
+              statusDot,
+              statusText
+            );
+          }
+        });
+      });
+
       devicesList.querySelectorAll('.repair-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const disk = (btn as HTMLElement).dataset.disk;

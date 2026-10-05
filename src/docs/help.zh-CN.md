@@ -98,6 +98,7 @@ brew install ntfs-3g-mac
 ### 设备管理图标
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="刷新" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **刷新图标** - 刷新设备列表，重新检测已连接的 NTFS 设备。
+- <img src="../imgs/svg/actions/format.svg" alt="格式化" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **格式化图标** - 将整块外接磁盘重建为 GPT NTFS。操作会抹掉该磁盘上的全部分区和数据，不可恢复，请先备份。仅已挂载的外接盘显示此图标。
 - <img src="../imgs/svg/actions/repair.svg" alt="修复" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **修复图标** - 点击对应设备的修复图标并确认，即可尝试修复该设备的 NTFS 文件系统。操作需要管理员权限并输入密码，可自动处理 Resource busy 错误。
 
 **注意：ntfsfix 修复能力有限，无法替代 Windows 的 `chkdsk /f`。**

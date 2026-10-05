@@ -157,6 +157,41 @@
     }
   }
 
+  function getFormatErrorMessage(error: unknown): string {
+    const message = error instanceof Error ? error.message : String(error);
+    if (/密码错误|password is incorrect|sorry, try again/i.test(message)) {
+      return t('messages.passwordError');
+    }
+    if (/用户取消|user cancelled|cancelled/i.test(message)) {
+      return t('messages.cancelled');
+    }
+
+    const separator = message.indexOf(':');
+    const code = separator === -1 ? message : message.slice(0, separator);
+    const detail = separator === -1 ? '' : message.slice(separator + 1);
+    switch (code) {
+      case 'FORMAT_INVALID_PATH':
+      case 'FORMAT_DEVICE_UNAVAILABLE':
+        return t('messages.formatDeviceUnavailable');
+      case 'FORMAT_NOT_MOUNTED':
+        return t('messages.formatNotMounted');
+      case 'FORMAT_NOT_ALLOWED':
+        return t('messages.formatNotAllowed');
+      case 'FORMAT_TOOL_MISSING':
+        return t('messages.formatToolMissing');
+      case 'FORMAT_ERASE_FAILED':
+        return t('messages.formatEraseFailed', { error: detail });
+      case 'FORMAT_UNMOUNT_FAILED':
+        return t('messages.formatUnmountFailed', { error: detail });
+      case 'FORMAT_MKNTFS_FAILED':
+        return t('messages.formatMkntfsFailed', { error: detail });
+      case 'FORMAT_REMOUNT_FAILED':
+        return t('messages.formatRemountFailed', { error: detail });
+      default:
+        return `${t('messages.formatError')}: ${message}`;
+    }
+  }
+
   // 记录手动只读设备最后一次出现时间（用于宽限期，避免还原只读的临时卸载被误清）
   const manualLastSeen = (AppModules.Devices as any).manualLastSeen as Map<string, number> || new Map<string, number>();
   (AppModules.Devices as any).manualLastSeen = manualLastSeen;
@@ -542,6 +577,82 @@
         await addLog(errorMessage, errorType);
         if (errorType === 'error' || errorType === 'warning') {
           await showOperationMessage(t('messages.renameFailedTitle'), errorMessage, errorType);
+        }
+      } finally {
+        if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
+          DeviceUtils.showLoading(false);
+        }
+      }
+    },
+
+    async formatDevice(
+      device: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      devicesList: HTMLElement,
+      readWriteDevicesList: HTMLElement,
+      statusDot: HTMLElement,
+      statusText: HTMLElement
+    ): Promise<void> {
+      if (document.body?.classList.contains('tray-window') && electronAPI?.runDeviceActionInMainWindow) {
+        await electronAPI.runDeviceActionInMainWindow({ action: 'format', device });
+        return;
+      }
+
+      const title = t('devices.formatConfirm', { name: device.volumeName });
+      const message = t('devices.formatConfirmNote', { name: device.volumeName });
+      const confirmed = await AppUtils.UI.showConfirm(title, message, {
+        icon: '../imgs/svg/prompt/danger.svg'
+      });
+      if (!confirmed) return;
+
+      try {
+        if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
+          DeviceUtils.showLoading(true);
+        }
+
+        await addLog(t('messages.formatting', { name: device.volumeName }), 'info');
+        await addLog(t('messages.enterPassword'), 'info');
+
+        const autoMountCooldown: Map<string, number> =
+          (AppModules.Devices as any).autoMountCooldown || new Map<string, number>();
+        (AppModules.Devices as any).autoMountCooldown = autoMountCooldown;
+        const cooldownUntil = Date.now() + 120000;
+        const manualId = getManualReadOnlyId(device);
+        if (manualId) autoMountCooldown.set(manualId, cooldownUntil);
+        if (device.disk) autoMountCooldown.set(device.disk, cooldownUntil);
+        clearAutoMountAttemptedDisk(device.disk);
+
+        const result = await electronAPI.formatDevice(device);
+        if (result.success) {
+          const successMessage = t('messages.formatSuccess', { name: device.volumeName });
+          await addLog(successMessage, 'success');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await refreshDeviceList(devicesList, 0);
+          if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
+            DeviceUtils.showLoading(false);
+          }
+          const formatButton = Array.from(devicesList.querySelectorAll<HTMLElement>('.format-btn'))
+            .find(button => button.dataset.disk === device.disk);
+          if (formatButton) {
+            await AppUtils.UI.showSuccessAnimation(successMessage, formatButton);
+          }
+        } else {
+          const errorMessage = getFormatErrorMessage(result.error || t('messages.unknownError'));
+          const errorType = errorMessage === t('messages.cancelled') ? 'info' :
+            errorMessage === t('messages.passwordError') ? 'warning' : 'error';
+          await addLog(errorMessage, errorType);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await refreshDeviceList(devicesList, 0);
+          if (errorType === 'error' || errorType === 'warning') {
+            await showOperationMessage(t('messages.formatFailedTitle'), errorMessage, errorType);
+          }
+        }
+      } catch (error) {
+        const errorMessage = getFormatErrorMessage(error);
+        const errorType = errorMessage === t('messages.cancelled') ? 'info' :
+          errorMessage === t('messages.passwordError') ? 'warning' : 'error';
+        await addLog(errorMessage, errorType);
+        if (errorType === 'error' || errorType === 'warning') {
+          await showOperationMessage(t('messages.formatFailedTitle'), errorMessage, errorType);
         }
       } finally {
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {

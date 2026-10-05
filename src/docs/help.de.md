@@ -98,6 +98,7 @@ Die Hauptoberfläche der Anwendung bietet mehrere Funktionssymbole, die Ihnen he
 ### Geräteverwaltungs-Symbole
 
 - <img src="../imgs/svg/actions/refresh.svg" alt="Aktualisieren" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Aktualisieren-Symbol** - Aktualisiert die Geräteliste und erkennt angeschlossene NTFS-Geräte neu.
+- <img src="../imgs/svg/actions/format.svg" alt="Formatieren" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Formatieren-Symbol** - Baut die gesamte externe Festplatte als GPT-NTFS neu auf. Alle Partitionen und Daten auf dieser Festplatte werden gelöscht und können nicht wiederhergestellt werden. Das Symbol erscheint nur bei eingehängten externen Datenträgern.
 - <img src="../imgs/svg/actions/repair.svg" alt="Reparieren" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Reparatur-Symbol** - Klicken Sie beim gewünschten Gerät auf das Reparatur-Symbol und bestätigen Sie, um eine Reparatur des NTFS-Dateisystems zu versuchen. Dafür sind Administratorrechte und ein Passwort erforderlich. Fehler vom Typ "Resource busy" können automatisch behandelt werden.
 
 **Hinweis: `ntfsfix` bietet nur begrenzte Reparaturmöglichkeiten und kann Windows `chkdsk /f` nicht ersetzen.**
