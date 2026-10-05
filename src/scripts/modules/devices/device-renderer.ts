@@ -56,6 +56,23 @@
     });
   }
 
+  // 格式化/修复成功后的短暂完成态：按 disk + 动作记录，刷新列表时仍画完成图标
+  function getDoneHint(disk: string): { action: string; until: number } | null {
+    const hint = (AppModules.Devices.doneHints || {})[disk];
+    if (!hint || typeof hint.until !== 'number' || hint.until <= Date.now()) return null;
+    return hint;
+  }
+
+  function renderUtilityButton(kind: 'format' | 'repair' | 'rename', disk: string, title: string): string {
+    const done = kind !== 'rename' && getDoneHint(disk)?.action === kind;
+    const classes = `${kind}-icon-btn ${kind}-btn${done ? ' action-success-feedback' : ''}`;
+    const icon = done
+      ? '<img src="../imgs/svg/actions/check-okey-done.svg" alt="" aria-hidden="true">'
+      : '<span aria-hidden="true"></span>';
+    const disabled = done ? ' disabled' : '';
+    return `<button class="${classes}" type="button" data-disk="${disk}" title="${title}" aria-label="${title}"${disabled}>${icon}</button>`;
+  }
+
   // 设备渲染功能
   AppModules.Devices.Renderer = {
     // 上次渲染的设备列表（用于比较）
@@ -93,7 +110,8 @@
         : 'pending';
       const deviceStateKey = devices.map((d: any) => {
         const capacityInfo = d.capacity ? `${d.capacity.total}:${d.capacity.available || 0}:${d.capacity.used || 0}` : 'no-capacity';
-        return `${d.disk}:${d.volumeName}:${d.isReadOnly}:${d.isUnmounted || false}:${d.canFormat ? '1' : '0'}:${capacityInfo}`;
+        const doneFlag = getDoneHint(d.disk)?.action || '0';
+        return `${d.disk}:${d.volumeName}:${d.isReadOnly}:${d.isUnmounted || false}:${d.canFormat ? '1' : '0'}:${capacityInfo}:${doneFlag}`;
       }).join('|') + `|lang:${currentLanguage}`;
       const lastStateKey = (devicesList as any).__lastStateKey || '';
 
@@ -255,17 +273,9 @@
                 <span class="device-status device-status-tray ${statusClass}">${statusText}</span>
                 <div class="device-utility-actions">
                   ${!isUnmounted ? `
-                  <button class="rename-icon-btn rename-btn" type="button" data-disk="${device.disk}" title="${t('devices.renameTooltip')}" aria-label="${t('devices.renameTooltip')}">
-                    <span aria-hidden="true"></span>
-                  </button>
-                  ${device.canFormat ? `
-                  <button class="format-icon-btn format-btn" type="button" data-disk="${device.disk}" title="${t('devices.formatTooltip')}" aria-label="${t('devices.formatTooltip')}">
-                    <span aria-hidden="true"></span>
-                  </button>
-                  ` : ''}
-                  <button class="repair-icon-btn repair-btn" type="button" data-disk="${device.disk}" title="${t('devices.repairTooltip')}" aria-label="${t('devices.repairTooltip')}">
-                    <span aria-hidden="true"></span>
-                  </button>
+                  ${renderUtilityButton('rename', device.disk, t('devices.renameTooltip'))}
+                  ${device.canFormat ? renderUtilityButton('format', device.disk, t('devices.formatTooltip')) : ''}
+                  ${renderUtilityButton('repair', device.disk, t('devices.repairTooltip'))}
                   ` : ''}
                 </div>
               </div>
@@ -333,17 +343,9 @@
             <div class="device-status-actions">
               <span class="device-status ${statusClass}">${statusText}</span>
               ${!isUnmounted ? `
-              <button class="rename-icon-btn rename-btn" type="button" data-disk="${device.disk}" title="${t('devices.renameTooltip')}" aria-label="${t('devices.renameTooltip')}">
-                <span aria-hidden="true"></span>
-              </button>
-              ${device.canFormat ? `
-              <button class="format-icon-btn format-btn" type="button" data-disk="${device.disk}" title="${t('devices.formatTooltip')}" aria-label="${t('devices.formatTooltip')}">
-                <span aria-hidden="true"></span>
-              </button>
-              ` : ''}
-              <button class="repair-icon-btn repair-btn" type="button" data-disk="${device.disk}" title="${t('devices.repairTooltip')}" aria-label="${t('devices.repairTooltip')}">
-                <span aria-hidden="true"></span>
-              </button>
+              ${renderUtilityButton('rename', device.disk, t('devices.renameTooltip'))}
+              ${device.canFormat ? renderUtilityButton('format', device.disk, t('devices.formatTooltip')) : ''}
+              ${renderUtilityButton('repair', device.disk, t('devices.repairTooltip'))}
               ` : ''}
             </div>
           </div>

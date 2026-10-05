@@ -142,7 +142,7 @@
     "format": "Formatieren",
     "formatTooltip": "Formatieren",
     "formatConfirm": "Dieser Vorgang löscht alle Partitionen und Daten der gesamten Festplatte!",
-    "formatConfirmNote": "Der Vorgang kann nicht rückgängig gemacht werden. Sichern Sie wichtige Daten zuerst.\nFortfahren?",
+    "formatConfirmNote": "1. Der Vorgang kann nicht rückgängig gemacht werden. Sichern Sie wichtige Daten zuerst.\n2. Das Formatieren kann länger dauern und hängt das Volume dabei mehrfach aus und wieder ein.\n3. Trennen Sie das Gerät nicht und unterbrechen Sie den Vorgang nicht. Bitte warten Sie, bis er abgeschlossen ist.\nFortfahren?",
     "unmount": "Aushängen",
     "eject": "Auswerfen",
     "restoreReadOnly": "Nur lesen",

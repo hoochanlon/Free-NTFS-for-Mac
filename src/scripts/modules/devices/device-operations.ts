@@ -76,6 +76,32 @@
     AppModules.Devices.Operations = {};
   }
 
+  // 格式化/修复成功：完成态挂在对应动作按钮上，刷新列表也不会冲掉
+  const DEVICE_ACTION_DONE_MS = 3100;
+
+  function markDeviceActionDone(
+    disk: string | undefined,
+    action: 'format' | 'repair',
+    devicesList: HTMLElement,
+    readWriteDevicesList: HTMLElement
+  ): void {
+    if (!disk) return;
+    const doneHints: Record<string, { action: 'format' | 'repair'; until: number }> = AppModules.Devices.doneHints || {};
+    AppModules.Devices.doneHints = doneHints;
+    const until = Date.now() + DEVICE_ACTION_DONE_MS;
+    doneHints[disk] = { action, until };
+
+    window.setTimeout(() => {
+      if (doneHints[disk]?.until !== until) return;
+      delete doneHints[disk];
+      (devicesList as any).__lastStateKey = '';
+      const Renderer = AppModules.Devices?.Renderer;
+      if (Renderer && typeof Renderer.renderDevices === 'function' && devicesList.isConnected) {
+        Renderer.renderDevices(devicesList, readWriteDevicesList);
+      }
+    }, DEVICE_ACTION_DONE_MS);
+  }
+
   // 自动读写：清理“已尝试”记录（卸载/推出/拔出等生命周期结束时应立即清理）
   function clearAutoMountAttemptedDisk(disk: string | undefined): void {
     try {
@@ -463,16 +489,12 @@
             name: device.volumeName,
             mode: t(device.isReadOnly ? 'devices.readOnly' : 'devices.readWrite')
           });
+          markDeviceActionDone(device.disk, 'repair', devicesList, readWriteDevicesList);
           await addLog(successMessage, 'success');
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refreshDeviceList(devicesList, 0);
           if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
             DeviceUtils.showLoading(false);
-          }
-          const repairButton = Array.from(devicesList.querySelectorAll<HTMLElement>('.repair-btn'))
-            .find(button => button.dataset.disk === device.disk);
-          if (repairButton) {
-            await AppUtils.UI.showSuccessAnimation(successMessage, repairButton);
           }
         } else {
           const errorMessage = getRepairErrorMessage(result.error || t('messages.unknownError'));
@@ -640,16 +662,12 @@
         const result = await electronAPI.formatDevice(device);
         if (result.success) {
           const successMessage = t('messages.formatSuccess', { name: device.volumeName });
+          markDeviceActionDone(device.disk, 'format', devicesList, readWriteDevicesList);
           await addLog(successMessage, 'success');
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refreshDeviceList(devicesList, 0);
           if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
             DeviceUtils.showLoading(false);
-          }
-          const formatButton = Array.from(devicesList.querySelectorAll<HTMLElement>('.format-btn'))
-            .find(button => button.dataset.disk === device.disk);
-          if (formatButton) {
-            await AppUtils.UI.showSuccessAnimation(successMessage, formatButton);
           }
         } else {
           const errorMessage = getFormatErrorMessage(result.error || t('messages.unknownError'));

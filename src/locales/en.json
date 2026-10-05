@@ -142,7 +142,7 @@
     "format": "Format",
     "formatTooltip": "Format",
     "formatConfirm": "This will erase all partitions and data on the entire disk!",
-    "formatConfirmNote": "This cannot be undone. Back up anything important first.\nContinue?",
+    "formatConfirmNote": "1. This cannot be undone. Back up important data first.\n2. Formatting may take a while and will unmount and remount the volume several times.\n3. Do not disconnect the device or interrupt the process. Please wait until it finishes.\nContinue?",
     "unmount": "Unmount",
     "eject": "Eject",
     "restoreReadOnly": "Restore to Read-Only",

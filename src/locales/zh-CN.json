@@ -142,7 +142,7 @@
     "format": "格式化",
     "formatTooltip": "格式化",
     "formatConfirm": "此操作将抹掉整块硬盘全部分区及数据！",
-    "formatConfirmNote": "操作不可撤销，请务必先备份重要数据。\n是否继续？",
+    "formatConfirmNote": "1. 操作不可撤销，请务必先备份重要数据。\n2. 格式化过程可能需要较长时间，期间将多次卸载并重新挂载。\n3. 请勿关闭设备或中断操作，耐心等待完成。\n是否继续？",
     "unmount": "卸载",
     "eject": "推出",
     "restoreReadOnly": "还原为只读",
