@@ -76,6 +76,12 @@ class NTFSManager {
     return await this.mountOperations.repairDevice(device);
   }
 
+  async renameDevice(device: NTFSDevice, newName: string): Promise<string> {
+    const result = await this.mountOperations.renameDevice(device, newName);
+    this.deviceDetector.invalidateCache();
+    return result;
+  }
+
   // 清理旧的挂载标记
   async cleanupOldMounts(): Promise<void> {
     return await this.mountOperations.cleanupOldMounts();

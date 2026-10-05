@@ -23,6 +23,7 @@ export interface ElectronAPI {
   unmountDevice: (device: NTFSDevice) => Promise<OperationResult>;
   resetDevice: (device: NTFSDevice) => Promise<OperationResult>;
   repairDevice: (device: NTFSDevice) => Promise<OperationResult>;
+  renameDevice: (device: NTFSDevice, newName: string) => Promise<OperationResult>;
   restoreToReadOnly: (device: NTFSDevice) => Promise<OperationResult>;
   ejectDevice: (device: NTFSDevice) => Promise<OperationResult>;
   // 已移除自动安装功能
@@ -86,7 +87,10 @@ export interface ElectronAPI {
     cancelText: string;
     confirmText: string;
     isLightTheme: boolean;
-  }) => Promise<boolean>;
+    prompt?: boolean;
+    defaultValue?: string;
+    placeholder?: string;
+  }) => Promise<boolean | string | null>;
   showConfirmDialog: (title: string, message: string) => Promise<boolean>;
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => Promise<void>;
   readLogsFile: () => Promise<{ success: boolean; content?: string; error?: string }>;

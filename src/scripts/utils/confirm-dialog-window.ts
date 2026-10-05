@@ -9,9 +9,12 @@ export interface TrayRepairConfirmDialogOptions {
   cancelText: string;
   confirmText: string;
   isLightTheme: boolean;
+  prompt?: boolean;
+  defaultValue?: string;
+  placeholder?: string;
 }
 
-export function createTrayRepairConfirmDialog(options: TrayRepairConfirmDialogOptions): Promise<boolean> {
+export function createTrayRepairConfirmDialog(options: TrayRepairConfirmDialogOptions): Promise<boolean | string | null> {
   if (trayRepairConfirmWindow && !trayRepairConfirmWindow.isDestroyed()) {
     trayRepairConfirmWindow.close();
   }
@@ -55,17 +58,21 @@ export function createTrayRepairConfirmDialog(options: TrayRepairConfirmDialogOp
         trayRepairConfirmWindow = null;
       }
     };
-    const finish = (confirmed: boolean) => {
+    const finish = (result: boolean | string | null) => {
       if (settled) return;
       settled = true;
       cleanup();
       if (!dialogWindow.isDestroyed()) {
         dialogWindow.close();
       }
-      resolve(confirmed);
+      resolve(result);
     };
-    const responseHandler = (event: Electron.IpcMainEvent, data: { confirmed: boolean }) => {
+    const responseHandler = (event: Electron.IpcMainEvent, data: { confirmed: boolean; value?: string }) => {
       if (event.sender === dialogWindow.webContents) {
+        if (options.prompt) {
+          finish(data.confirmed === true ? (data.value ?? '') : null);
+          return;
+        }
         finish(data.confirmed === true);
       }
     };
@@ -109,7 +116,7 @@ export function createTrayRepairConfirmDialog(options: TrayRepairConfirmDialogOp
       cleanup();
       if (!settled) {
         settled = true;
-        resolve(false);
+        resolve(options.prompt ? null : false);
       }
     });
 

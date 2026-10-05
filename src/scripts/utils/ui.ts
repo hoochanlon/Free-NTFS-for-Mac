@@ -206,6 +206,136 @@
       });
     },
 
+    async showPrompt(title: string, message: string, defaultValue: string = '', placeholder: string = ''): Promise<string | null> {
+      return new Promise((resolve) => {
+        const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
+        const overlay = document.createElement('div');
+        overlay.className = 'confirm-dialog-overlay';
+
+        const dialog = document.createElement('div');
+        dialog.className = 'confirm-dialog prompt-dialog';
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'confirm-dialog-title';
+        titleEl.textContent = title;
+
+        const contentEl = document.createElement('div');
+        contentEl.className = 'confirm-dialog-content';
+
+        const lines = message.split('\n');
+        let inList = false;
+        let ul: HTMLUListElement | null = null;
+        lines.forEach((line, index) => {
+          const trimmedLine = line.trim();
+          if (trimmedLine === '') {
+            if (inList && ul) {
+              contentEl.appendChild(ul);
+              ul = null;
+              inList = false;
+            }
+            if (index < lines.length - 1) {
+              contentEl.appendChild(document.createElement('br'));
+            }
+            return;
+          }
+          if (trimmedLine.startsWith('* ') && !trimmedLine.match(/^\*[^*]+\*$/)) {
+            if (!inList) {
+              ul = document.createElement('ul');
+              inList = true;
+            }
+            const li = document.createElement('li');
+            trimmedLine.slice(2).split(/(\*[^*]+\*)/).forEach((part) => {
+              if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+                const strong = document.createElement('strong');
+                strong.textContent = part.slice(1, -1);
+                li.appendChild(strong);
+              } else if (part.trim() !== '') {
+                li.appendChild(document.createTextNode(part));
+              }
+            });
+            ul!.appendChild(li);
+            return;
+          }
+          if (inList && ul) {
+            contentEl.appendChild(ul);
+            ul = null;
+            inList = false;
+          }
+          const p = document.createElement('p');
+          trimmedLine.split(/(\*[^*]+\*)/).forEach((part) => {
+            if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+              const strong = document.createElement('strong');
+              strong.textContent = part.slice(1, -1);
+              p.appendChild(strong);
+            } else if (part.trim() !== '') {
+              p.appendChild(document.createTextNode(part));
+            }
+          });
+          contentEl.appendChild(p);
+        });
+        if (inList && ul) {
+          contentEl.appendChild(ul);
+        }
+
+        const inputEl = document.createElement('input');
+        inputEl.className = 'prompt-dialog-input';
+        inputEl.type = 'text';
+        inputEl.value = defaultValue;
+        inputEl.maxLength = 32;
+        if (placeholder) inputEl.placeholder = placeholder;
+        inputEl.setAttribute('aria-label', title);
+        contentEl.appendChild(inputEl);
+
+        const buttonsEl = document.createElement('div');
+        buttonsEl.className = 'confirm-dialog-buttons';
+
+        const finish = (value: string | null) => {
+          if (!overlay.isConnected) return;
+          document.body.removeChild(overlay);
+          document.removeEventListener('keydown', handleKeyDown);
+          resolve(value);
+        };
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn btn-secondary';
+        cancelBtn.textContent = t('dialog.cancel') || '取消';
+        cancelBtn.addEventListener('click', () => finish(null));
+
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'btn btn-primary';
+        confirmBtn.textContent = t('dialog.confirm') || '确定';
+        confirmBtn.addEventListener('click', () => finish(inputEl.value));
+
+        buttonsEl.appendChild(cancelBtn);
+        buttonsEl.appendChild(confirmBtn);
+        dialog.appendChild(titleEl);
+        dialog.appendChild(contentEl);
+        dialog.appendChild(buttonsEl);
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) finish(null);
+        });
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            finish(null);
+          } else if (e.key === 'Enter' && document.activeElement === inputEl) {
+            e.preventDefault();
+            finish(inputEl.value);
+          }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+
+        setTimeout(() => {
+          inputEl.focus();
+          inputEl.select();
+        }, 100);
+      });
+    },
+
     // 消息对话框（自定义 HTML 对话框，文字不可选中）
     async showMessage(title: string, message: string, type: 'info' | 'warning' | 'error' = 'info'): Promise<void> {
       return new Promise((resolve) => {
@@ -228,7 +358,22 @@
         // 创建内容区域
         const contentEl = document.createElement('div');
         contentEl.className = 'confirm-dialog-content';
-        contentEl.textContent = message;
+        message.split('\n').forEach((line, index, lines) => {
+          const trimmedLine = line.trim();
+          const p = document.createElement('p');
+          if (/^chkdsk\s/i.test(trimmedLine)) {
+            p.className = 'dialog-command';
+            const code = document.createElement('code');
+            code.textContent = trimmedLine;
+            p.appendChild(code);
+          } else {
+            p.textContent = line;
+          }
+          if (index === lines.length - 1) {
+            p.style.marginBottom = '0';
+          }
+          contentEl.appendChild(p);
+        });
 
         // 创建按钮容器
         const buttonsEl = document.createElement('div');
@@ -276,23 +421,34 @@
       });
     },
 
-    async showSuccessAnimation(message: string, repairButton: HTMLElement): Promise<void> {
-      const feedback = document.createElement('div');
-      feedback.className = 'repair-success-feedback';
-      feedback.setAttribute('role', 'status');
-      feedback.setAttribute('aria-live', 'polite');
-      feedback.setAttribute('aria-label', message);
+    async showSuccessAnimation(message: string, actionButton: HTMLElement): Promise<void> {
+      const originalHTML = actionButton.innerHTML;
+      const originalAriaLabel = actionButton.getAttribute('aria-label');
+      const button = actionButton as HTMLButtonElement;
+      const wasDisabled = button.disabled;
+
+      actionButton.classList.add('action-success-feedback');
+      actionButton.setAttribute('aria-label', message);
+      button.disabled = true;
 
       const icon = document.createElement('img');
       icon.src = '../imgs/svg/actions/check-okey-done.svg';
       icon.alt = '';
       icon.setAttribute('aria-hidden', 'true');
-      feedback.appendChild(icon);
-      repairButton.replaceWith(feedback);
+      actionButton.replaceChildren(icon);
 
       await new Promise<void>((resolve) => {
         window.setTimeout(() => {
-          if (feedback.isConnected) feedback.replaceWith(repairButton);
+          if (actionButton.isConnected) {
+            actionButton.classList.remove('action-success-feedback');
+            if (originalAriaLabel) {
+              actionButton.setAttribute('aria-label', originalAriaLabel);
+            } else {
+              actionButton.removeAttribute('aria-label');
+            }
+            actionButton.innerHTML = originalHTML;
+            button.disabled = wasDisabled;
+          }
           resolve();
         }, 3100);
       });

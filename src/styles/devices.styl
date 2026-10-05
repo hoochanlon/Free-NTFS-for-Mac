@@ -816,6 +816,10 @@ body.tray-window.light-theme
     outline 2px solid var(--warning)
     outline-offset 2px
 
+  &:disabled
+    pointer-events none
+    cursor default
+
   span
     display block
     width 16px
@@ -824,13 +828,49 @@ body.tray-window.light-theme
     mask url('src/imgs/svg/actions/repair.svg') center / contain no-repeat
     -webkit-mask url('src/imgs/svg/actions/repair.svg') center / contain no-repeat
 
-.device-header .device-status-actions .repair-icon-btn
+.rename-icon-btn
+  display inline-flex
+  align-items center
+  justify-content center
+  width 26px
+  height 26px
+  padding 4px
+  border 1px solid var(--border)
+  border-radius 5px
+  background var(--bg-secondary)
+  color var(--accent)
+  cursor pointer
+  flex-shrink 0
+
+  &:hover
+    background rgba(0, 122, 255, 0.12)
+    border-color var(--accent)
+
+  &:focus-visible
+    outline 2px solid var(--accent)
+    outline-offset 2px
+
+  &:disabled
+    pointer-events none
+    cursor default
+
+  span
+    display block
+    width 16px
+    height 16px
+    background-color currentColor
+    mask url('src/imgs/svg/actions/rename.svg') center / contain no-repeat
+    -webkit-mask url('src/imgs/svg/actions/rename.svg') center / contain no-repeat
+
+.device-header .device-status-actions .repair-icon-btn,
+.device-header .device-status-actions .rename-icon-btn
   height auto
   align-self stretch
   padding 2px
   box-sizing border-box
 
-  span
+  span,
+  img
     width 12px
     height 12px
 

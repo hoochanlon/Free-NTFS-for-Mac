@@ -93,7 +93,7 @@
         : 'pending';
       const deviceStateKey = devices.map((d: any) => {
         const capacityInfo = d.capacity ? `${d.capacity.total}:${d.capacity.available || 0}:${d.capacity.used || 0}` : 'no-capacity';
-        return `${d.disk}:${d.isReadOnly}:${d.isUnmounted || false}:${capacityInfo}`;
+        return `${d.disk}:${d.volumeName}:${d.isReadOnly}:${d.isUnmounted || false}:${capacityInfo}`;
       }).join('|') + `|lang:${currentLanguage}`;
       const lastStateKey = (devicesList as any).__lastStateKey || '';
 
@@ -255,6 +255,9 @@
                 <span class="device-status device-status-tray ${statusClass}">${statusText}</span>
                 <div class="device-utility-actions">
                   ${!isUnmounted ? `
+                  <button class="rename-icon-btn rename-btn" type="button" data-disk="${device.disk}" title="${t('devices.renameTooltip')}" aria-label="${t('devices.renameTooltip')}">
+                    <span aria-hidden="true"></span>
+                  </button>
                   <button class="repair-icon-btn repair-btn" type="button" data-disk="${device.disk}" title="${t('devices.repairTooltip')}" aria-label="${t('devices.repairTooltip')}">
                     <span aria-hidden="true"></span>
                   </button>
@@ -325,6 +328,9 @@
             <div class="device-status-actions">
               <span class="device-status ${statusClass}">${statusText}</span>
               ${!isUnmounted ? `
+              <button class="rename-icon-btn rename-btn" type="button" data-disk="${device.disk}" title="${t('devices.renameTooltip')}" aria-label="${t('devices.renameTooltip')}">
+                <span aria-hidden="true"></span>
+              </button>
               <button class="repair-icon-btn repair-btn" type="button" data-disk="${device.disk}" title="${t('devices.repairTooltip')}" aria-label="${t('devices.repairTooltip')}">
                 <span aria-hidden="true"></span>
               </button>

@@ -46,11 +46,16 @@
     const cancelButton = document.getElementById('cancelButton');
     const confirmButton = document.getElementById('confirmButton');
     let settled = false;
+    let isPrompt = false;
+    let inputElement = null;
 
     function respond(confirmed) {
       if (settled) return;
       settled = true;
-      ipcRenderer.send('tray-repair-confirm-response', { confirmed });
+      ipcRenderer.send('tray-repair-confirm-response', {
+        confirmed,
+        value: isPrompt && inputElement ? inputElement.value : undefined
+      });
     }
 
     ipcRenderer.on('tray-repair-confirm-data', (_event, options) => {
@@ -92,21 +97,45 @@
           list = null;
         }
         const paragraph = document.createElement('p');
-        trimmedLine.split(/(\*[^*]+\*)/).forEach((part) => {
-          if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
-            const strong = document.createElement('strong');
-            strong.textContent = part.slice(1, -1);
-            paragraph.appendChild(strong);
-          } else if (part.trim()) {
-            paragraph.appendChild(document.createTextNode(part));
-          }
-        });
+        if (/^chkdsk\s/i.test(trimmedLine)) {
+          paragraph.className = 'dialog-command';
+          const code = document.createElement('code');
+          code.textContent = trimmedLine;
+          paragraph.appendChild(code);
+        } else {
+          trimmedLine.split(/(\*[^*]+\*)/).forEach((part) => {
+            if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+              const strong = document.createElement('strong');
+              strong.textContent = part.slice(1, -1);
+              paragraph.appendChild(strong);
+            } else if (part.trim()) {
+              paragraph.appendChild(document.createTextNode(part));
+            }
+          });
+        }
         messageElement.appendChild(paragraph);
       });
       if (list) messageElement.appendChild(list);
+      isPrompt = options.prompt === true;
+      if (isPrompt) {
+        dialogElement.classList.add('prompt-dialog');
+        inputElement = document.createElement('input');
+        inputElement.className = 'prompt-dialog-input';
+        inputElement.type = 'text';
+        inputElement.maxLength = 32;
+        inputElement.value = options.defaultValue || '';
+        if (options.placeholder) inputElement.placeholder = options.placeholder;
+        inputElement.setAttribute('aria-label', options.title);
+        messageElement.appendChild(inputElement);
+      }
       cancelButton.addEventListener('click', () => respond(false));
       confirmButton.addEventListener('click', () => respond(true));
-      confirmButton.focus();
+      if (isPrompt && inputElement) {
+        inputElement.focus();
+        inputElement.select();
+      } else {
+        confirmButton.focus();
+      }
       requestAnimationFrame(() => {
         const bounds = dialogElement.getBoundingClientRect();
         ipcRenderer.send('tray-repair-confirm-layout', {
@@ -118,7 +147,10 @@
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') respond(false);
-      if (event.key === 'Enter') respond(true);
+      if (event.key === 'Enter') {
+        if (isPrompt && event.target !== inputElement && event.target !== confirmButton) return;
+        respond(true);
+      }
     });
   </script>
 </body>

@@ -41,6 +41,7 @@ const electronAPI: ElectronAPI = {
   unmountDevice: (device) => ipcRenderer.invoke('unmount-device', device),
   resetDevice: (device) => ipcRenderer.invoke('reset-device', device),
   repairDevice: (device) => ipcRenderer.invoke('repair-device', device),
+  renameDevice: (device, newName) => ipcRenderer.invoke('rename-device', device, newName),
   restoreToReadOnly: (device) => ipcRenderer.invoke('restore-to-readonly', device),
   ejectDevice: (device) => ipcRenderer.invoke('eject-device', device),
   // 已移除自动安装功能

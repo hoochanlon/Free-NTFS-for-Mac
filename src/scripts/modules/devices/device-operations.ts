@@ -123,6 +123,40 @@
     }
   }
 
+  function getRenameErrorMessage(error: unknown): string {
+    const message = error instanceof Error ? error.message : String(error);
+    if (/密码错误|password is incorrect|sorry, try again/i.test(message)) {
+      return t('messages.passwordError');
+    }
+    if (/用户取消|user cancelled|cancelled/i.test(message)) {
+      return t('messages.cancelled');
+    }
+
+    const separator = message.indexOf(':');
+    const code = separator === -1 ? message : message.slice(0, separator);
+    const detail = separator === -1 ? '' : message.slice(separator + 1);
+    switch (code) {
+      case 'RENAME_INVALID_PATH':
+      case 'RENAME_DEVICE_UNAVAILABLE':
+        return t('messages.renameDeviceUnavailable');
+      case 'RENAME_INVALID_NAME':
+        return t('messages.renameInvalidName');
+      case 'RENAME_TOOL_MISSING':
+        return t('messages.renameToolMissing');
+      case 'RENAME_UNMOUNT_FAILED':
+        return t('messages.renameUnmountFailed', { error: detail });
+      case 'RENAME_LABEL_FAILED':
+        return t('messages.renameFailedNeedChkdsk');
+      case 'RENAME_REMOUNT_FAILED':
+        return t('messages.renameRemountFailed', { error: detail });
+      case 'RENAME_AND_REMOUNT_FAILED': {
+        return t('messages.renameFailedNeedChkdsk');
+      }
+      default:
+        return t('messages.renameFailedNeedChkdsk');
+    }
+  }
+
   // 记录手动只读设备最后一次出现时间（用于宽限期，避免还原只读的临时卸载被误清）
   const manualLastSeen = (AppModules.Devices as any).manualLastSeen as Map<string, number> || new Map<string, number>();
   (AppModules.Devices as any).manualLastSeen = manualLastSeen;
@@ -421,6 +455,104 @@
         await addLog(errorMessage, errorType);
         if (errorType === 'error' || errorType === 'warning') {
           await showRepairMessage(t('messages.repairFailedTitle'), errorMessage, errorType);
+        }
+      } finally {
+        if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
+          DeviceUtils.showLoading(false);
+        }
+      }
+    },
+
+    async renameDevice(
+      device: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      devicesList: HTMLElement,
+      readWriteDevicesList: HTMLElement,
+      statusDot: HTMLElement,
+      statusText: HTMLElement
+    ): Promise<void> {
+      const title = t('devices.renameTitle', { name: device.volumeName });
+      const message = t('devices.renameNote');
+      const placeholder = t('devices.renamePlaceholder');
+      const isTrayWindow = document.body?.classList.contains('tray-window');
+      const newName = isTrayWindow
+        ? await electronAPI.showTrayRepairConfirmDialog({
+          title,
+          message,
+          cancelText: t('dialog.cancel') || '取消',
+          confirmText: t('dialog.confirm') || '确定',
+          isLightTheme: document.body.classList.contains('light-theme'),
+          prompt: true,
+          defaultValue: device.volumeName,
+          placeholder
+        })
+        : await AppUtils.UI.showPrompt(title, message, device.volumeName, placeholder);
+      if (newName === null || newName === false) return;
+
+      const trimmedName = String(newName).trim();
+      if (!trimmedName) {
+        await showOperationMessage(t('messages.renameFailedTitle'), t('messages.renameInvalidName'), 'warning');
+        return;
+      }
+      if (trimmedName === device.volumeName) {
+        return;
+      }
+      if (trimmedName.length > 32 || /[\\/:*?"<>|]/.test(trimmedName)) {
+        await showOperationMessage(t('messages.renameFailedTitle'), t('messages.renameInvalidName'), 'warning');
+        return;
+      }
+
+      try {
+        if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
+          DeviceUtils.showLoading(true);
+        }
+
+        await addLog(t('messages.renaming', { name: device.volumeName, newName: trimmedName }), 'info');
+        await addLog(t('messages.enterPassword'), 'info');
+
+        const autoMountCooldown: Map<string, number> =
+          (AppModules.Devices as any).autoMountCooldown || new Map<string, number>();
+        (AppModules.Devices as any).autoMountCooldown = autoMountCooldown;
+        const cooldownUntil = Date.now() + 120000;
+        const manualId = getManualReadOnlyId(device);
+        if (manualId) autoMountCooldown.set(manualId, cooldownUntil);
+        if (device.disk) autoMountCooldown.set(device.disk, cooldownUntil);
+        clearAutoMountAttemptedDisk(device.disk);
+
+        const result = await electronAPI.renameDevice(device, trimmedName);
+        if (result.success) {
+          const successMessage = t('messages.renameSuccess', {
+            name: device.volumeName,
+            newName: trimmedName
+          });
+          await addLog(successMessage, 'success');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await refreshDeviceList(devicesList, 0);
+          if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
+            DeviceUtils.showLoading(false);
+          }
+          const renameButton = Array.from(devicesList.querySelectorAll<HTMLElement>('.rename-btn'))
+            .find(button => button.dataset.disk === device.disk);
+          if (renameButton) {
+            await AppUtils.UI.showSuccessAnimation(successMessage, renameButton);
+          }
+        } else {
+          const errorMessage = getRenameErrorMessage(result.error || t('messages.unknownError'));
+          const errorType = errorMessage === t('messages.cancelled') ? 'info' :
+            errorMessage === t('messages.passwordError') ? 'warning' : 'error';
+          await addLog(errorMessage, errorType);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await refreshDeviceList(devicesList, 0);
+          if (errorType === 'error' || errorType === 'warning') {
+            await showOperationMessage(t('messages.renameFailedTitle'), errorMessage, errorType);
+          }
+        }
+      } catch (error) {
+        const errorMessage = getRenameErrorMessage(error);
+        const errorType = errorMessage === t('messages.cancelled') ? 'info' :
+          errorMessage === t('messages.passwordError') ? 'warning' : 'error';
+        await addLog(errorMessage, errorType);
+        if (errorType === 'error' || errorType === 'warning') {
+          await showOperationMessage(t('messages.renameFailedTitle'), errorMessage, errorType);
         }
       } finally {
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {

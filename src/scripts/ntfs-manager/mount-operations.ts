@@ -44,6 +44,84 @@ export class MountOperations {
     throw new Error('ntfsfix not found. Install ntfs-3g-mac before repairing an NTFS volume.');
   }
 
+  private async getNTFSLabelPath(): Promise<string> {
+    const pathFromEnvironment = await findExecutablePath('ntfslabel');
+    if (pathFromEnvironment) {
+      return pathFromEnvironment;
+    }
+
+    const ntfs3gPath = await this.getNTFS3GPath();
+    if (ntfs3gPath) {
+      const siblingPath = await findExecutablePath(path.join(path.dirname(ntfs3gPath), 'ntfslabel'));
+      if (siblingPath) {
+        return siblingPath;
+      }
+    }
+
+    throw new Error('RENAME_TOOL_MISSING');
+  }
+
+  private isValidDevicePath(devicePath: string): boolean {
+    return /^\/dev\/disk\d+s\d+$/.test(devicePath);
+  }
+
+  private getParentDiskPath(devicePath: string): string {
+    return devicePath.replace(/s\d+$/, '');
+  }
+
+  private getPartitionIndex(disk: string): string | null {
+    const match = disk.match(/s(\d+)$/);
+    return match ? match[1] : null;
+  }
+
+  // diskutil list 在 GPT 盘上读的是分区名，不是 NTFS 卷标。
+  // 整盘卸载后再写 GPT 名，DiskArbitration 才会丢掉旧名，不必真的推出重插。
+  private async tryRefreshDiskName(
+    execute: (args: string[]) => Promise<unknown>,
+    devicePath: string,
+    disk: string,
+    newName: string
+  ): Promise<void> {
+    const parentDiskPath = this.getParentDiskPath(devicePath);
+    if (parentDiskPath === devicePath) {
+      return;
+    }
+
+    try {
+      await execute(['diskutil', 'unmountDisk', 'force', parentDiskPath]);
+    } catch {
+      // 卷可能已经卸掉，继续尝试写 GPT 名
+    }
+
+    const partitionIndex = this.getPartitionIndex(disk);
+    if (!partitionIndex) {
+      return;
+    }
+
+    const rawParentDiskPath = parentDiskPath.replace('/dev/disk', '/dev/rdisk');
+    try {
+      await execute(['gpt', 'label', '-f', '-i', partitionIndex, '-l', newName, rawParentDiskPath]);
+    } catch (error) {
+      console.warn('[MountOperations] 更新 GPT 分区名失败（可忽略）:', error);
+    }
+  }
+
+  private async removeStaleMountPoint(
+    execute: (args: string[]) => Promise<unknown>,
+    mountPoint: string | undefined,
+    nextMountPoint: string
+  ): Promise<void> {
+    if (!mountPoint || mountPoint === nextMountPoint || !mountPoint.startsWith('/Volumes/')) {
+      return;
+    }
+
+    try {
+      await execute(['rmdir', mountPoint]);
+    } catch {
+      // 目录非空或不存在时忽略，避免误删用户数据
+    }
+  }
+
   // 卸载设备
   async unmountDevice(device: NTFSDevice): Promise<string> {
     try {
@@ -226,6 +304,12 @@ export class MountOperations {
         throw new Error('无法读取当前用户 UID/GID，已取消挂载');
       }
 
+      try {
+        await this.sudoExecutor.executeSudoWithPassword(['mkdir', '-p', device.volume], password);
+      } catch {
+        // ntfs-3g 仍可能自行创建挂载点
+      }
+
       const mountArgs = [
         fullPath,
         '-olocal',
@@ -370,7 +454,7 @@ export class MountOperations {
 
   // Repair an NTFS volume without applying resetDevice's persistent read-only behavior.
   async repairDevice(device: NTFSDevice): Promise<string> {
-    if (!/^\/dev\/disk\d+s\d+$/.test(device.devicePath)) {
+    if (!this.isValidDevicePath(device.devicePath)) {
       throw new Error('REPAIR_INVALID_PATH');
     }
 
@@ -431,6 +515,91 @@ export class MountOperations {
     }
 
     return `设备 ${device.volumeName} 的 NTFS 文件系统已修复并恢复原挂载模式`;
+  }
+
+  // 写入 NTFS 卷标后，必须挂到新路径，并尽量刷新 GPT/DiskArbitration，
+  // 否则 Finder 已是新名，软件和 diskutil 仍会停在旧名，直到整盘推出。
+  async renameDevice(device: NTFSDevice, newName: string): Promise<string> {
+    if (!this.isValidDevicePath(device.devicePath)) {
+      throw new Error('RENAME_INVALID_PATH');
+    }
+
+    const trimmedName = newName.trim();
+    if (!trimmedName || trimmedName.length > 32 || /[\\/:*?"<>|]/.test(trimmedName)) {
+      throw new Error('RENAME_INVALID_NAME');
+    }
+
+    const ntfslabelPath = await this.getNTFSLabelPath();
+    const wasReadOnly = device.isReadOnly;
+    const parentDiskPath = this.getParentDiskPath(device.devicePath);
+    const newVolumePath = `/Volumes/${trimmedName}`;
+    let password = await this.passwordManager.getPassword('messages.passwordDialog.renameDevice', { name: device.volumeName });
+    const execute = async (args: string[]) => {
+      try {
+        return await this.sudoExecutor.executeSudoWithPassword(args, password);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (!/密码错误|password is incorrect|sorry, try again/i.test(errorMessage)) {
+          throw error;
+        }
+
+        password = await this.passwordManager.getPassword('messages.passwordDialog.renameDevice', { name: device.volumeName });
+        return await this.sudoExecutor.executeSudoWithPassword(args, password);
+      }
+    };
+
+    try {
+      await execute(['diskutil', 'unmount', device.devicePath]);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`RENAME_UNMOUNT_FAILED:${errorMessage}`);
+    }
+
+    this.mountedDevices.delete(device.disk);
+    fs.unlink(`/tmp/ntfs_mounted_${device.disk}`).catch(() => {});
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    let labelError: unknown;
+    try {
+      await execute([ntfslabelPath, device.devicePath, trimmedName]);
+    } catch (error) {
+      labelError = error;
+    }
+
+    if (!labelError) {
+      await this.tryRefreshDiskName(execute, device.devicePath, device.disk, trimmedName);
+    }
+    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      if (wasReadOnly) {
+        try {
+          await execute(['diskutil', 'mountDisk', parentDiskPath]);
+        } catch {
+          await execute(['diskutil', 'mount', device.devicePath]);
+        }
+      } else {
+        await this.mountDevice({
+          ...device,
+          volumeName: trimmedName,
+          volume: newVolumePath
+        }, password);
+      }
+      await this.removeStaleMountPoint(execute, device.volume, newVolumePath);
+    } catch (mountError) {
+      const mountMessage = mountError instanceof Error ? mountError.message : String(mountError);
+      if (labelError) {
+        const labelMessage = labelError instanceof Error ? labelError.message : String(labelError);
+        throw new Error(`RENAME_AND_REMOUNT_FAILED:${labelMessage}|${mountMessage}`);
+      }
+      throw new Error(`RENAME_REMOUNT_FAILED:${mountMessage}`);
+    }
+
+    if (labelError) {
+      const errorMessage = labelError instanceof Error ? labelError.message : String(labelError);
+      throw new Error(`RENAME_LABEL_FAILED:${errorMessage}`);
+    }
+
+    return `设备卷标已从 ${device.volumeName} 更新为 ${trimmedName}`;
   }
 
   // 清理旧的挂载标记
