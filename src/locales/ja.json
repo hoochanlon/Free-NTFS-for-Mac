@@ -60,6 +60,10 @@
   "dependencies": {
     "title": "システム依存",
     "checkButton": "依存関係を確認",
+    "autoInstall": "ワンクリックインストール",
+    "autoInstallTitle": "ターミナルで不足している依存関係を順に自動インストール",
+    "autoInstallOpened": "ターミナルを開きました。現在の手順が終わると次の手順へ自動で進み、完了時に “All steps completed” と表示されます。",
+    "autoInstallFailed": "ターミナルを開けませんでした: {error}",
     "checking": "チェック中...",
     "installed": "インストール済み",
     "installedOptional": "インストール済み（オプション）",

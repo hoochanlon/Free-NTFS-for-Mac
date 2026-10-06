@@ -47,6 +47,11 @@
       checkDepsBtn.textContent = t('dependencies.checkButton');
     }
 
+    const autoInstallDepsLabel = document.querySelector('#autoInstallDepsBtn span[data-i18n]');
+    if (autoInstallDepsLabel) {
+      autoInstallDepsLabel.textContent = t('dependencies.autoInstall');
+    }
+
     // NTFS 设备标签页
     const devicesTitle = document.querySelector('#devicesTab h2');
     if (devicesTitle) {

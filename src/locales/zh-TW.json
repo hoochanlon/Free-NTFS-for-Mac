@@ -60,6 +60,10 @@
   "dependencies": {
     "title": "系統依賴",
     "checkButton": "檢查依賴",
+    "autoInstall": "一鍵安裝",
+    "autoInstallTitle": "在終端中依序自動安裝缺失依賴",
+    "autoInstallOpened": "已開啟終端。完成目前安裝後會自動進入下一步，全部完成後會提示「所有步驟已完成」。",
+    "autoInstallFailed": "開啟終端失敗: {error}",
     "checking": "正在檢查...",
     "installed": "已安裝",
     "installedOptional": "已安裝（可選）",

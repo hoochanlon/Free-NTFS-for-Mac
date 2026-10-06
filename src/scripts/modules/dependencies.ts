@@ -231,6 +231,37 @@
       button.setAttribute('aria-busy', busy ? 'true' : 'false');
     },
 
+    setAutoInstallButtonBusy(busy: boolean): void {
+      const button = document.getElementById('autoInstallDepsBtn') as HTMLButtonElement | null;
+      if (!button) return;
+
+      button.disabled = busy;
+      button.setAttribute('aria-busy', busy ? 'true' : 'false');
+    },
+
+    async openAutoInstaller(): Promise<void> {
+      if (!electronAPI || typeof electronAPI.openDependencyInstaller !== 'function') {
+        await AppUtils.Logs.addLog(t('dependencies.autoInstallFailed', { error: 'unavailable' }), 'error');
+        return;
+      }
+
+      try {
+        AppModules.Dependencies.setAutoInstallButtonBusy(true);
+        const result = await electronAPI.openDependencyInstaller();
+        if (result && result.success) {
+          await AppUtils.Logs.addLog(t('dependencies.autoInstallOpened'), 'info');
+        } else {
+          const errorMessage = result?.error || 'unknown';
+          await AppUtils.Logs.addLog(t('dependencies.autoInstallFailed', { error: errorMessage }), 'error');
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        await AppUtils.Logs.addLog(t('dependencies.autoInstallFailed', { error: errorMessage }), 'error');
+      } finally {
+        AppModules.Dependencies.setAutoInstallButtonBusy(false);
+      }
+    },
+
     async checkDependencies(
       depsList: HTMLElement,
       statusDot: HTMLElement,

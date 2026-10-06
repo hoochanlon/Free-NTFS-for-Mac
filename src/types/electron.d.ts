@@ -16,6 +16,7 @@ export interface AppSettings {
 
 export interface ElectronAPI {
   checkDependencies: () => Promise<Dependencies>;
+  openDependencyInstaller: () => Promise<OperationResult>;
   // 可选参数 forceRefresh: 是否强制刷新设备列表（跳过缓存）
   getNTFSDevices: (forceRefresh?: boolean) => Promise<NTFSDevice[]>;
   getCachedNTFSDevices: () => Promise<NTFSDevice[]>;

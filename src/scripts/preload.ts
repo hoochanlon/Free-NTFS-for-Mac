@@ -35,6 +35,7 @@ function registerHybridDetection(
 
 const electronAPI: ElectronAPI = {
   checkDependencies: () => ipcRenderer.invoke('check-dependencies'),
+  openDependencyInstaller: () => ipcRenderer.invoke('open-dependency-installer'),
   getNTFSDevices: (forceRefresh?: boolean) => ipcRenderer.invoke('get-ntfs-devices', forceRefresh),
   getCachedNTFSDevices: () => ipcRenderer.invoke('get-cached-ntfs-devices'),
   mountDevice: (device) => ipcRenderer.invoke('mount-device', device),

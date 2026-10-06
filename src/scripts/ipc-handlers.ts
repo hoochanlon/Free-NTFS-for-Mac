@@ -24,6 +24,7 @@ import { KeychainManager } from './utils/keychain';
 import { rebuildApplicationMenu } from './app-config';
 import { initTray, destroyTray, updateTrayMenu, updateTrayTooltip, isTrayInitialized } from './utils/tray-manager';
 import { caffeinateManager } from './utils/caffeinate-manager';
+import { openDependencyInstaller } from './ntfs-manager/dep-auto-installer';
 
 let quitWindow: BrowserWindow | null = null;
 
@@ -221,6 +222,10 @@ export function setupNTFSHandlers(): void {
 
   ipcMain.handle('check-dependencies', async () => {
     return await ntfsManager.checkDependencies();
+  });
+
+  ipcMain.handle('open-dependency-installer', async () => {
+    return await openDependencyInstaller();
   });
 
   ipcMain.handle('get-ntfs-devices', async (event: IpcMainInvokeEvent, forceRefresh: boolean = false) => {

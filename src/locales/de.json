@@ -60,6 +60,10 @@
   "dependencies": {
     "title": "Systemabhängigkeiten",
     "checkButton": "Abhängigkeiten prüfen",
+    "autoInstall": "Ein-Klick-Installation",
+    "autoInstallTitle": "Fehlende Abhängigkeiten nacheinander im Terminal installieren",
+    "autoInstallOpened": "Terminal geöffnet. Nach dem aktuellen Schritt folgt automatisch der nächste. Am Ende erscheint „All steps completed“.",
+    "autoInstallFailed": "Terminal konnte nicht geöffnet werden: {error}",
     "checking": "Wird geprüft...",
     "installed": "Installiert",
     "installedOptional": "Installiert (Optional)",

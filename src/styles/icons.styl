@@ -191,6 +191,10 @@ body:not(.light-theme)
     img[src*="refresh.svg"]
       dark-mode-icon-white()
 
+  // 系统依赖：终端一键安装（磷光绿，区别于纯白和其他成功绿）
+  #autoInstallDepsBtn .btn-icon
+    filter brightness(0) saturate(100%) invert(64%) sepia(72%) saturate(520%) hue-rotate(72deg) brightness(1.08) contrast(1.18)
+
   // 设备相关图标
   .devices-container
     #refreshDevicesBtn .btn-icon

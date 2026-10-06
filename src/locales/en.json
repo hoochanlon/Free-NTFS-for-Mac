@@ -60,6 +60,10 @@
   "dependencies": {
     "title": "System Dependencies",
     "checkButton": "Check Dependencies",
+    "autoInstall": "One-click Install",
+    "autoInstallTitle": "Install missing dependencies in Terminal, step by step",
+    "autoInstallOpened": "Terminal opened. After you finish the current step, the next one starts automatically. You will see “All steps completed” when done.",
+    "autoInstallFailed": "Failed to open Terminal: {error}",
     "checking": "Checking...",
     "installed": "Installed",
     "installedOptional": "Installed (Optional)",

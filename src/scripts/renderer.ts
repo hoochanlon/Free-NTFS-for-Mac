@@ -31,6 +31,7 @@
   const statusDot = statusIndicator.querySelector('.status-dot') as HTMLElement;
   const depsList = document.getElementById('depsList')!;
   const checkDepsBtn = document.getElementById('checkDepsBtn') as HTMLButtonElement;
+  const autoInstallDepsBtn = document.getElementById('autoInstallDepsBtn') as HTMLButtonElement | null;
   const devicesList = document.getElementById('devicesList')!;
   // readWriteDevicesList 已整合到 devicesList 中，保留变量以兼容现有代码
   const readWriteDevicesList = devicesList;
@@ -551,6 +552,12 @@
         true // forceRefresh = true
       );
     });
+
+    if (autoInstallDepsBtn) {
+      autoInstallDepsBtn.addEventListener('click', () => {
+        AppModules.Dependencies.openAutoInstaller();
+      });
+    }
 
     if (refreshDevicesBtn) {
       refreshDevicesBtn.addEventListener('click', async () => {

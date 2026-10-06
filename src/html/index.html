@@ -143,7 +143,13 @@
         <div class="section">
           <div class="section-header">
             <h2>系统依赖</h2>
-            <button class="btn btn-secondary" id="checkDepsBtn">检查依赖</button>
+            <div class="header-actions">
+              <button class="btn btn-secondary" id="autoInstallDepsBtn" data-i18n-title="dependencies.autoInstallTitle" data-i18n-aria-label="dependencies.autoInstall" title="在终端中依次自动安装缺失依赖" aria-label="一键安装">
+                <img src="../imgs/svg/system/terminal.svg" alt="" class="btn-icon">
+                <span data-i18n="dependencies.autoInstall">一键安装</span>
+              </button>
+              <button class="btn btn-secondary" id="checkDepsBtn">检查依赖</button>
+            </div>
           </div>
           <div class="deps-list" id="depsList">
             <div class="dep-item">
