@@ -1,5 +1,5 @@
 // 设备检测模块（性能优化版）
-import { execAsync, fileExists } from './utils';
+import { execAsync, execFileAsync, fileExists } from './utils';
 import type { NTFSDevice } from '../../types/electron';
 import { DeviceCacheManager } from './device-cache';
 import { BatchExecutor } from './batch-executor';
@@ -32,10 +32,7 @@ export class DeviceDetector {
     try {
       // 方法1：尝试从挂载点获取（如果设备已挂载）
       try {
-        const dfResult = await Promise.race([
-          execAsync(`df -k "${volume}" 2>/dev/null`) as Promise<{ stdout: string }>,
-          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 1500))
-        ]);
+        const dfResult = await execFileAsync('df', ['-k', volume], { timeout: 1500 });
         const dfLines = dfResult.stdout.trim().split('\n').filter(line => line.length > 0);
 
         if (dfLines.length >= 2) {
@@ -479,11 +476,10 @@ export class DeviceDetector {
         // 1. 标记文件存在（说明之前通过本应用挂载过）
         // 2. 当前通过 FUSE 挂载（说明确实是 ntfs-3g 挂载）
         const isInMountedSet = this.mountedDevices.has(disk);
-        const deviceIsMounted = (isInMountedSet || markerExists) && isFuseMounted;
+        const deviceIsMounted = (isInMountedSet || markerExists) && isFuseMounted && !isReadOnly;
 
-        // 如果设备已通过 ntfs-3g 挂载为读写模式，强制设置 isReadOnly 为 false
-        // 否则，使用 mount 命令检测到的实际状态
-        const finalIsReadOnly = deviceIsMounted ? false : isReadOnly;
+        // 历史挂载标记不能覆盖实际只读状态（例如驱动对休眠卷退回只读）。
+        const finalIsReadOnly = isReadOnly;
 
         // 获取磁盘容量信息（无论是否挂载都尝试获取）
         // 优先从挂载点获取，如果失败则从设备本身获取

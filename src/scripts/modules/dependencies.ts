@@ -40,7 +40,7 @@
                      key === 'brew' ? '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"' :
                      key === 'macfuse' ? macfuseInstallCommand :
                      key === 'fswatch' ? t(`dependencies.${key}.installCommand`) :
-                     'brew tap gromgit/homebrew-fuse && brew install ntfs-3g-mac',
+                     'brew tap gromgit/homebrew-fuse && brew install gromgit/fuse/ntfs-3g-mac',
       installGuide: t(`dependencies.${key}.installGuide`),
                 installGuideMirrorCommand: key === 'brew' ? '/bin/zsh -c "$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)"' : '',
                 installGuideMirrorCommandLabel: key === 'brew' ? t(`dependencies.${key}.installGuideMirrorCommandLabel`) : '',
@@ -77,7 +77,7 @@
     ntfs3g: {
       name: 'ntfs-3g',
       description: 'NTFS 文件系统驱动，提供 NTFS 读写支持',
-      installCommand: 'brew tap gromgit/homebrew-fuse && brew install ntfs-3g-mac',
+      installCommand: 'brew tap gromgit/homebrew-fuse && brew install gromgit/fuse/ntfs-3g-mac',
       installGuide: '需要先安装 Homebrew 和 MacFUSE。在终端运行上述命令即可安装。'
     }
   };

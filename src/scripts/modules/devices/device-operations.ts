@@ -635,6 +635,7 @@
       const title = t('devices.formatConfirm');
       const message = [
         t('devices.targetDevice', { name: device.volumeName }),
+        t('devices.formatTargetDisk', { disk: device.devicePath.replace(/s\d+$/, '') }),
         t('devices.formatConfirmNote')
       ].join('\n');
       const confirmed = await AppUtils.UI.showConfirm(title, message, {

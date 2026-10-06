@@ -22,7 +22,7 @@ const DEPENDENCY_INFO = {
   ntfs3g: {
     name: 'ntfs-3g',
     description: 'NTFS 文件系统驱动，提供 NTFS 读写支持',
-    installCommand: 'brew tap gromgit/homebrew-fuse && brew install ntfs-3g-mac',
+    installCommand: 'brew tap gromgit/homebrew-fuse && brew install gromgit/fuse/ntfs-3g-mac',
     installGuide: '需要先安装 Homebrew 和 MacFUSE。在终端运行上述命令即可安装。'
   }
 };
