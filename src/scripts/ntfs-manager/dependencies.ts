@@ -307,7 +307,7 @@ export async function installDependencies(): Promise<string> {
       } else {
         await execAsync('brew install --cask macfuse', { env });
       }
-      await execAsync('brew install ntfs-3g-mac', { env });
+      await execAsync('brew install gromgit/fuse/ntfs-3g-mac', { env });
       logs.push('MacFUSE 和 ntfs-3g 安装完成');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

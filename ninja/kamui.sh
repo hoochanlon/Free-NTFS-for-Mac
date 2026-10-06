@@ -169,9 +169,9 @@ check_and_install_ntfs3g() {
 	echo "正在安装 ntfs-3g-mac..."
 	# brew tap: 添加第三方软件源（仓库）
 	# brew install --cask macfuse: 安装 MacFUSE（文件系统框架，ntfs-3g 需要它）
-	# brew install ntfs-3g-mac: 安装 ntfs-3g（NTFS 读写工具）
+	# brew install gromgit/fuse/ntfs-3g-mac: 安装 ntfs-3g（NTFS 读写工具）
 	brew tap gromgit/homebrew-fuse &>/dev/null 2>&1 || true
-	brew install ntfs-3g-mac || {
+	brew install gromgit/fuse/ntfs-3g-mac || {
 		echo -e "${RED}❌ 错误: ntfs-3g-mac 安装失败${NC}"
 		exit 1
 	}

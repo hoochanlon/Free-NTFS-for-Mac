@@ -384,7 +384,7 @@ if brew list ntfs-3g-mac &>/dev/null; then
 	echo "$(t installed "ntfs-3g-mac")"
 else
 	echo "$(t installing "ntfs-3g-mac")"
-	brew install ntfs-3g-mac
+	brew install gromgit/fuse/ntfs-3g-mac
 	echo "$(t success "ntfs-3g-mac")"
 fi
 echo ""

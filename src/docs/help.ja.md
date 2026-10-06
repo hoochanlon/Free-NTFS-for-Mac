@@ -69,7 +69,7 @@ brew install --cask macfuse
 
 ```bash
 brew tap gromgit/homebrew-fuse
-brew install ntfs-3g-mac
+brew install gromgit/fuse/ntfs-3g-mac
 ```
 
 > [!TIP]
