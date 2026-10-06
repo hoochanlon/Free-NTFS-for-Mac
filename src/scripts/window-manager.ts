@@ -282,7 +282,11 @@ function trayWindowHeightFor(deviceCount: number): number {
   }
 
   const { height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
-  return Math.min(targetHeight, Math.max(screenHeight - 80, TRAY_DEVICES_WINDOW_CONFIG.minHeight));
+  return Math.min(
+    targetHeight,
+    TRAY_DEVICES_WINDOW_CONFIG.maxHeight,
+    Math.max(screenHeight - 80, TRAY_DEVICES_WINDOW_CONFIG.minHeight)
+  );
 }
 
 function positionTrayDevicesWindow(): void {
@@ -492,7 +496,11 @@ export async function createTrayDevicesWindow(reveal: boolean = true): Promise<B
 
   // 使用更小的窗口尺寸，适合托盘弹出
   const windowWidth = TRAY_DEVICES_WINDOW_CONFIG.defaultWidth;
-  const windowHeight = Math.min(TRAY_DEVICES_WINDOW_CONFIG.defaultHeight, Math.max(screenHeight - 80, TRAY_DEVICES_WINDOW_CONFIG.minHeight));
+  const windowHeight = Math.min(
+    TRAY_DEVICES_WINDOW_CONFIG.defaultHeight,
+    TRAY_DEVICES_WINDOW_CONFIG.maxHeight,
+    Math.max(screenHeight - 80, TRAY_DEVICES_WINDOW_CONFIG.minHeight)
+  );
 
   // 计算窗口位置（在托盘下方）
   let windowX: number;
@@ -518,6 +526,8 @@ export async function createTrayDevicesWindow(reveal: boolean = true): Promise<B
     height: windowHeight,
     minWidth: TRAY_DEVICES_WINDOW_CONFIG.minWidth,
     minHeight: TRAY_DEVICES_WINDOW_CONFIG.minHeight,
+    maxWidth: TRAY_DEVICES_WINDOW_CONFIG.maxWidth,
+    maxHeight: TRAY_DEVICES_WINDOW_CONFIG.maxHeight,
     x: windowX,
     y: windowY,
     webPreferences: {

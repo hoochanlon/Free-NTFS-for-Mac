@@ -33,6 +33,8 @@ export const LOGS_WINDOW_CONFIG = {
 export const TRAY_DEVICES_WINDOW_CONFIG = {
   minWidth: 350,
   minHeight: 256, // 1 个设备时的高度作为最小高度
+  maxWidth: 430,
+  maxHeight: 745,
   defaultWidth: 350,
   defaultHeight: 256,
   // 根据设备数量的默认高度（用户手动拉伸后不再强制套用）
