@@ -30,7 +30,7 @@
     // 标签页
     const tabs = document.querySelectorAll('.tab span');
     tabs.forEach((tab, index) => {
-      const tabNames = ['dependencies', 'devices', 'logs', 'help', 'settings'];
+      const tabNames = ['dependencies', 'devices', 'help', 'settings'];
       if (tabNames[index]) {
         (tab as HTMLElement).textContent = t(`tabs.${tabNames[index]}`);
       }
@@ -89,7 +89,7 @@
 
     const caffeinateBtn = document.getElementById('caffeinateBtn');
     if (caffeinateBtn) {
-      caffeinateBtn.title = t('tray.preventSleep') || '禁止休眠';
+      caffeinateBtn.title = t('titleBar.preventSleep') || '防止休眠';
     }
 
     const refreshDevicesBtn = document.getElementById('refreshDevicesBtn');
@@ -128,22 +128,6 @@
         // 主界面：确保 title 属性已通过 data-i18n-title 处理
         // title 属性会在上面的 data-i18n-title 处理逻辑中自动更新
       }
-    }
-
-    // 操作日志标签页
-    const logsTitle = document.querySelector('#logsTab h2');
-    if (logsTitle) {
-      logsTitle.textContent = t('logs.title');
-    }
-
-    const clearLogBtn = document.getElementById('clearLogBtn');
-    if (clearLogBtn) {
-      clearLogBtn.textContent = t('logs.clear');
-    }
-
-    const exportLogBtn = document.getElementById('exportLogBtn');
-    if (exportLogBtn) {
-      exportLogBtn.textContent = t('logs.export');
     }
 
     // 指南手册标签页
@@ -220,10 +204,10 @@
             span.textContent = t('tabs.dependencies');
           } else if (value === 'devices') {
             span.textContent = t('tabs.devices');
-          } else if (value === 'logs') {
-            span.textContent = t('tabs.logs');
           } else if (value === 'help') {
             span.textContent = t('tabs.help');
+          } else if (value === 'settings') {
+            span.textContent = t('tabs.settings');
           }
         }
       });
@@ -235,26 +219,26 @@
       }
     }
 
-    // 启用操作日志复选框（在操作日志标签页）
-    const enableLogsCheckbox = document.getElementById('enableLogsCheckbox');
-    if (enableLogsCheckbox) {
-      const label = enableLogsCheckbox.parentElement?.querySelector('span');
-      if (label) {
-        label.textContent = t('logs.enable') || '启用操作日志';
-      }
-    }
-
     // 系统自启
     const autoStartLabel = document.querySelector('label[for="autoStartCheckbox"]');
     if (autoStartLabel) {
       autoStartLabel.textContent = t('settings.autoStart');
     }
 
-    // 注意：自动读写、托盘模式、禁止休眠的选项已从设置页面移除
+    // 注意：自动读写、托盘模式的选项已从设置页面移除
     // 这些功能现在只能通过标题栏按钮控制
     const autoStartDesc = document.querySelector('#autoStartCheckbox')?.closest('.setting-item')?.querySelector('.setting-description');
     if (autoStartDesc) {
       autoStartDesc.textContent = t('settings.autoStartDesc');
+    }
+
+    const preventSleepLabel = document.querySelector('label[for="preventSleepCheckbox"]');
+    if (preventSleepLabel) {
+      preventSleepLabel.textContent = t('settings.preventSleep');
+    }
+    const preventSleepDesc = document.querySelector('#preventSleepCheckbox')?.closest('.setting-item')?.querySelector('.setting-description');
+    if (preventSleepDesc) {
+      preventSleepDesc.textContent = t('settings.preventSleepDesc');
     }
 
     // 语言
@@ -267,34 +251,6 @@
       languageDesc.textContent = t('settings.languageDesc');
     }
 
-    // 窗口尺寸
-    const windowSizeLabel = document.querySelector('.setting-item:has(#windowWidthInput) label');
-    if (windowSizeLabel) {
-      windowSizeLabel.textContent = t('settings.windowSize');
-    }
-    const windowSizeDesc = document.querySelector('.setting-item:has(#windowWidthInput) .setting-description');
-    if (windowSizeDesc) {
-      windowSizeDesc.textContent = t('settings.windowSizeDesc');
-    }
-    const widthLabel = document.querySelector('label[for="windowWidthInput"]');
-    if (widthLabel) {
-      widthLabel.textContent = t('settings.width');
-    }
-    const heightLabel = document.querySelector('label[for="windowHeightInput"]');
-    if (heightLabel) {
-      heightLabel.textContent = t('settings.height');
-    }
-    // 更新单位文字
-    const sizeUnits = document.querySelectorAll('.size-unit[data-i18n="settings.pixel"]');
-    sizeUnits.forEach((unit) => {
-      unit.textContent = t('settings.pixel');
-    });
-    // 重置按钮
-    const resetSizeBtn = document.getElementById('resetWindowSizeBtn');
-    if (resetSizeBtn) {
-      resetSizeBtn.textContent = t('settings.resetToDefault');
-    }
-    // 更新语言选择器的选项文本（自定义下拉菜单）
     const languageSelectCustom = document.getElementById('languageSelectCustom');
     if (languageSelectCustom) {
       const langMap: Record<string, string> = {
@@ -495,12 +451,6 @@
             }
           }
         }
-      }
-
-      // 重新渲染日志
-      const logContainer = document.getElementById('logContainer');
-      if (logContainer && (window as any).AppUtils && (window as any).AppUtils.Logs) {
-        (window as any).AppUtils.Logs.renderLogs(logContainer, true).catch((err: any) => console.error('渲染日志失败:', err));
       }
 
       // 如果当前在指南手册标签页，重新加载 markdown（会根据新语言加载对应文件）

@@ -5,7 +5,6 @@ import { createDeviceIcon } from './tray-icons';
 import { waitForDeviceStatusUpdate } from './tray-device-status';
 import { mainWindow, createMainWindow, trayDevicesWindow } from '../window-manager';
 import ntfsManager from '../ntfs-manager';
-import { caffeinateManager } from './caffeinate-manager';
 import type { NTFSDevice } from '../../types/electron';
 
 /**
@@ -599,38 +598,6 @@ export async function createTrayMenu(
         const currentSettings = await SettingsManager.getSettings();
         menuItem.checked = currentSettings.autoMount;
         settings.autoMount = currentSettings.autoMount;
-      }
-    }
-  });
-
-  // 防止休眠开关
-  const caffeinateStatus = caffeinateManager.getStatus();
-  template.push({
-    label: t('tray.preventSleep') || '防止休眠',
-    type: 'checkbox',
-    checked: caffeinateStatus,
-    click: async (menuItem: MenuItem) => {
-      try {
-        const result = await caffeinateManager.toggle();
-        // 更新菜单项状态
-        menuItem.checked = result.isActive;
-        // 保存状态到设置
-        const { SettingsManager } = await import('../utils/settings');
-        await SettingsManager.saveSettings({ preventSleep: result.isActive });
-        // 广播状态变化到所有窗口
-        const allWindows = BrowserWindow.getAllWindows();
-        allWindows.forEach((window: BrowserWindow) => {
-          if (!window.isDestroyed()) {
-            window.webContents.send('caffeinate-status-changed', result.isActive);
-          }
-        });
-        // 立即更新托盘菜单，确保状态同步
-        await updateMenuCallback(false);
-      } catch (error) {
-        console.error('切换防止休眠状态失败:', error);
-        // 如果失败，恢复原状态
-        const currentStatus = caffeinateManager.getStatus();
-        menuItem.checked = currentStatus;
       }
     }
   });

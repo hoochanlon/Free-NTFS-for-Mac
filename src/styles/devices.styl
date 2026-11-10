@@ -218,7 +218,7 @@ body.tray-window.light-theme
       .btn-icon
         filter brightness(0) invert(1)
 
-    // 托盘窗口中的防止休眠按钮激活时使用咖啡色
+    // 托盘窗口中的防止休眠按钮：active=一直不休眠（咖啡） smart=智能（青色）
     #caffeinateBtn.active
       background var(--coffee)
       color #ffffff
@@ -230,6 +230,18 @@ body.tray-window.light-theme
       &:hover
         background var(--coffee-hover)
         border-color var(--coffee-hover)
+
+    #caffeinateBtn.smart
+      background var(--smart)
+      color #ffffff
+      border-color var(--smart)
+
+      .btn-icon
+        filter brightness(0) invert(1)
+
+      &:hover
+        background var(--smart)
+        filter brightness(1.08)
 
     // 托盘窗口中的状态锁定按钮
     #protectBtn

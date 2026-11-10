@@ -40,17 +40,15 @@
   const unmountAllBtn = document.getElementById('unmountAllBtn') as HTMLButtonElement;
   const restoreAllReadOnlyBtn = document.getElementById('restoreAllReadOnlyBtn') as HTMLButtonElement;
   const ejectAllBtn = document.getElementById('ejectAllBtn') as HTMLButtonElement;
-  const logContainer = document.getElementById('logContainer')!;
-  const clearLogBtn = document.getElementById('clearLogBtn') as HTMLButtonElement;
   const themeToggleButton = document.getElementById('theme-toggle-btn') as HTMLButtonElement;
   const docBody = document.body;
   const helpTab = document.getElementById('helpTab') as HTMLElement;
   const protectBtn = document.getElementById('protectBtn') as HTMLButtonElement;
   const quitBtn = document.getElementById('quitBtn') as HTMLButtonElement;
   const aboutTitlebarBtn = document.getElementById('aboutTitlebarBtn') as HTMLButtonElement | null;
-  const caffeinateBtn = document.getElementById('caffeinateBtn') as HTMLButtonElement | null;
   const autoMountTitlebarBtn = document.getElementById('autoMountTitlebarBtn') as HTMLButtonElement | null;
   const trayModeTitlebarBtn = document.getElementById('trayModeTitlebarBtn') as HTMLButtonElement | null;
+  const caffeinateBtn = document.getElementById('caffeinateBtn') as HTMLButtonElement | null;
 
   // 自动刷新间隔
   let autoRefreshInterval: NodeJS.Timeout | null = null;
@@ -69,50 +67,27 @@
     AppUtils.Theme.initializeTheme(docBody, themeToggleButton);
 
     // 初始化标签页
-    AppModules.Tabs.initTabs(logContainer, helpTab);
+    AppModules.Tabs.initTabs(helpTab);
 
     // 初始化设置
     await AppModules.Settings.initSettings();
-
-    // 初始化功能模块
-    // 检查并执行每天重置日志，并清理过期日志
-    AppUtils.Logs.checkAndResetDaily();
-    // 清理超过一个月的日志（getLogs 内部会自动清理）
-    AppUtils.Logs.getLogs().catch((err: any) => console.error('加载日志失败:', err));
 
     // 根据设置打开启动标签页
     try {
       const settings = await window.electronAPI.getSettings();
       if (settings.startupTab) {
-        AppModules.Tabs.switchToTab(settings.startupTab, logContainer, helpTab);
+        AppModules.Tabs.switchToTab(settings.startupTab, helpTab);
       } else {
-        // 如果没有设置启动标签页，默认显示第一个标签页，并确保日志已渲染
         const firstTab = document.querySelector('.tab') as HTMLElement;
         if (firstTab) {
           const tabName = firstTab.getAttribute('data-tab');
           if (tabName) {
-            AppModules.Tabs.switchToTab(tabName, logContainer, helpTab);
+            AppModules.Tabs.switchToTab(tabName, helpTab);
           }
         }
       }
-
-      // 确保如果当前在日志标签页，日志已正确渲染
-      const logsTab = document.getElementById('logsTab');
-      if (logsTab && logsTab.classList.contains('active')) {
-        // 延迟一点渲染，确保 DOM 已完全加载
-        setTimeout(() => {
-          AppUtils.Logs.renderLogs(logContainer, true).catch((err: any) => console.error('渲染日志失败:', err));
-        }, 100);
-      }
     } catch (error) {
       console.error('加载启动标签页设置失败:', error);
-      // 即使出错也尝试渲染日志（如果当前在日志标签页）
-      const logsTab = document.getElementById('logsTab');
-      if (logsTab && logsTab.classList.contains('active')) {
-        setTimeout(() => {
-          AppUtils.Logs.renderLogs(logContainer, true).catch((err: any) => console.error('渲染日志失败:', err));
-        }, 100);
-      }
     }
 
     AppModules.Dependencies.checkDependencies(
@@ -215,7 +190,6 @@
           const message = isLocked
             ? (t('app.protectLocked') || '状态已锁定')
             : (t('app.protectUnlocked') || '状态已解锁');
-          AppUtils.Logs.addLog(message, 'info').catch(console.error);
           longPressTimer = null;
         }, LONG_PRESS_DURATION);
       });
@@ -247,7 +221,6 @@
           const message = isLocked
             ? (t('app.protectLocked') || '状态已锁定')
             : (t('app.protectUnlocked') || '状态已解锁');
-          AppUtils.Logs.addLog(message, 'info').catch(console.error);
           longPressTimer = null;
         }, LONG_PRESS_DURATION);
       });
@@ -378,8 +351,6 @@
     if (autoMountTitlebarBtn) {
       autoMountTitlebarBtn.addEventListener('click', async () => {
         if (isLocked) {
-          const t = getT();
-          await AppUtils.Logs.addLog(t('app.protectLockedMessage') || '状态已锁定，无法修改', 'warning');
           return;
         }
         try {
@@ -396,96 +367,6 @@
         } catch (error) {
           console.error('切换自动挂载设置失败:', error);
         }
-      });
-    }
-
-    // 防止休眠按钮（标题栏 + 主界面按钮）
-    // 移除updateMainCaffeinateButtonState，不再需要更新设置页面的复选框
-
-    const updateCaffeinateButtonState = async () => {
-      if (!caffeinateBtn) return;
-      try {
-        const t = getT();
-        const isActive = await window.electronAPI.caffeinateStatus();
-        if (isActive) {
-          caffeinateBtn.classList.add('active');
-        } else {
-          caffeinateBtn.classList.remove('active');
-        }
-        updateTitlebarButtonTitle(caffeinateBtn, 'tray.preventSleep', isActive);
-      } catch (error) {
-        console.error('获取防止休眠状态失败:', error);
-      }
-    };
-
-    const syncCaffeinateButtons = async () => {
-      await updateCaffeinateButtonState();
-    };
-
-    const handleCaffeinateToggle = async () => {
-      if (isLocked) {
-        const t = getT();
-        await AppUtils.Logs.addLog(t('app.protectLockedMessage') || '状态已锁定，无法修改', 'warning');
-        return;
-      }
-      try {
-        const result = await window.electronAPI.caffeinateToggle();
-        if (result.success) {
-          // 保存状态到设置
-          await window.electronAPI.saveSettings({ preventSleep: result.isActive });
-          await syncCaffeinateButtons();
-          const t = getT();
-          const message = result.isActive
-            ? t('tray.preventSleepEnabled')
-            : t('tray.preventSleepDisabled');
-          await AppUtils.Logs.addLog(message, result.isActive ? 'success' : 'info');
-        } else {
-          console.error('切换防止休眠状态失败:', result.error);
-          const t = getT();
-          await AppUtils.Logs.addLog(`${t('tray.preventSleep')}操作失败: ${result.error || t('devices.unknownError') || '未知错误'}`, 'error');
-        }
-      } catch (error) {
-        console.error('防止休眠操作失败:', error);
-        const t = getT();
-        await AppUtils.Logs.addLog(`${t('tray.preventSleep')}操作失败: ${error instanceof Error ? error.message : String(error)}`, 'error');
-      }
-    };
-
-    // 初始化时检查设置并恢复禁止休眠状态
-    const initPreventSleep = async () => {
-      try {
-        const settings = await window.electronAPI.getSettings();
-        const shouldBeActive = settings.preventSleep || false;
-        const currentStatus = await window.electronAPI.caffeinateStatus();
-
-        // 如果设置中启用了，但当前未激活，则启动
-        if (shouldBeActive && !currentStatus) {
-          const result = await window.electronAPI.caffeinateStart();
-          if (result.success) {
-            console.log('[Renderer] 已恢复禁止休眠状态');
-          }
-        }
-        // 如果设置中未启用，但当前已激活，则停止
-        else if (!shouldBeActive && currentStatus) {
-          await window.electronAPI.caffeinateStop();
-        }
-
-        // 更新按钮状态
-        await updateCaffeinateButtonState();
-      } catch (error) {
-        console.error('初始化禁止休眠状态失败:', error);
-        await updateCaffeinateButtonState();
-      }
-    };
-
-    if (caffeinateBtn) {
-      await initPreventSleep();
-      caffeinateBtn.addEventListener('click', handleCaffeinateToggle);
-    }
-
-    if (window.electronAPI.onCaffeinateStatusChange) {
-      window.electronAPI.onCaffeinateStatusChange(async () => {
-        await syncCaffeinateButtons();
       });
     }
 
@@ -513,8 +394,6 @@
     if (trayModeTitlebarBtn) {
       trayModeTitlebarBtn.addEventListener('click', async () => {
         if (isLocked) {
-          const t = getT();
-          await AppUtils.Logs.addLog(t('app.protectLockedMessage') || '状态已锁定，无法修改', 'warning');
           return;
         }
         try {
@@ -528,17 +407,72 @@
       });
     }
 
+    const preventSleepModeOf = (settings: { keepAwake?: boolean; preventSleep?: boolean }) => {
+      if (settings.keepAwake) return 'always' as const;
+      if (settings.preventSleep) return 'smart' as const;
+      return 'off' as const;
+    };
+
+    const nextPreventSleepMode = (mode: 'off' | 'always' | 'smart') => {
+      if (mode === 'off') return 'always' as const;
+      if (mode === 'always') return 'smart' as const;
+      return 'off' as const;
+    };
+
+    const updateCaffeinateTitlebarButton = async () => {
+      if (!caffeinateBtn) return;
+      try {
+        const settings = await window.electronAPI.getSettings();
+        const mode = preventSleepModeOf(settings);
+        caffeinateBtn.classList.toggle('active', mode === 'always');
+        caffeinateBtn.classList.toggle('smart', mode === 'smart');
+        const titleKey = mode === 'smart' ? 'titleBar.preventSleepSmart' : 'titleBar.preventSleep';
+        updateTitlebarButtonTitle(caffeinateBtn, titleKey, mode !== 'off');
+      } catch (error) {
+        console.error('获取防止休眠设置失败:', error);
+      }
+    };
+
+    await updateCaffeinateTitlebarButton();
+
+    if (window.electronAPI.onSettingsChange) {
+      window.electronAPI.onSettingsChange((updatedSettings: any) => {
+        if (typeof updatedSettings.keepAwake === 'boolean' || typeof updatedSettings.preventSleep === 'boolean') {
+          void updateCaffeinateTitlebarButton();
+        }
+      });
+    }
+
+    if (caffeinateBtn) {
+      caffeinateBtn.addEventListener('click', async () => {
+        if (isLocked) {
+          return;
+        }
+        try {
+          const settings = await window.electronAPI.getSettings();
+          const next = nextPreventSleepMode(preventSleepModeOf(settings));
+          await window.electronAPI.saveSettings({
+            keepAwake: next === 'always',
+            preventSleep: next === 'smart'
+          });
+          await updateCaffeinateTitlebarButton();
+        } catch (error) {
+          console.error('切换防止休眠设置失败:', error);
+        }
+      });
+    }
+
     window.addEventListener('languageChanged', async () => {
       await new Promise(resolve => setTimeout(resolve, 100));
-      await syncCaffeinateButtons();
       await updateAutoMountTitlebarButton();
       await updateTrayModeTitlebarButton();
+      await updateCaffeinateTitlebarButton();
     });
 
     // 监听从菜单切换标签页的事件
     if (window.electronAPI && window.electronAPI.onSwitchTab) {
       window.electronAPI.onSwitchTab((tabName: string) => {
-        AppModules.Tabs.switchToTab(tabName, logContainer, helpTab);
+        AppModules.Tabs.switchToTab(tabName, helpTab);
       });
     }
 
@@ -573,7 +507,6 @@
           await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText, devices);
         } catch (error) {
           console.error('刷新设备列表失败:', error);
-          await AppUtils.Logs.addLog('刷新设备列表失败: ' + (error instanceof Error ? error.message : String(error)), 'error');
         } finally {
           // 恢复按钮状态
           if (refreshDevicesBtn) {
@@ -617,69 +550,12 @@
       // 这里可以添加额外的逻辑来确保内容高度一致（如果需要）
     }
 
-    clearLogBtn.addEventListener('click', async () => {
-      await AppUtils.Logs.clearLog(logContainer);
-    });
-
-    const exportLogBtn = document.getElementById('exportLogBtn') as HTMLButtonElement;
-    if (exportLogBtn) {
-      exportLogBtn.addEventListener('click', () => {
-        AppUtils.Logs.exportLogs();
-      });
-    }
-
-    // 初始化启用操作日志复选框
-    const enableLogsCheckbox = document.getElementById('enableLogsCheckbox') as HTMLInputElement;
-    if (enableLogsCheckbox) {
-      // 检查日志是否已启用
-      const checkLogsStatus = async () => {
-        const isEnabled = await AppUtils.Logs.isEnabled();
-        enableLogsCheckbox.checked = isEnabled;
-      };
-
-      checkLogsStatus();
-
-      enableLogsCheckbox.addEventListener('change', async () => {
-        try {
-          await window.electronAPI.saveSettings({ enableLogs: enableLogsCheckbox.checked });
-          if (enableLogsCheckbox.checked) {
-            const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string) => key);
-            const logsEnabledText = t('logs.logsEnabled') || '操作日志已启用';
-            await AppUtils.Logs.addLog(logsEnabledText, 'success');
-          }
-        } catch (error) {
-          console.error('保存操作日志设置失败:', error);
-          enableLogsCheckbox.checked = !enableLogsCheckbox.checked;
-        }
-      });
-
-      // 定期检查日志状态（当切换到日志标签页时）
-      const logsTab = document.getElementById('logsTab');
-      if (logsTab) {
-        const observer = new MutationObserver(() => {
-          if (logsTab.classList.contains('active')) {
-            checkLogsStatus();
-          }
-        });
-        observer.observe(logsTab, { attributes: true, attributeFilter: ['class'] });
-      }
-    }
-
     if (themeToggleButton) {
       themeToggleButton.addEventListener('click', () => {
         AppUtils.Theme.handleThemeToggleClick(docBody, themeToggleButton);
       });
     }
 
-    // 定期刷新日志显示（如果日志标签页是活动的）
-    // 降低刷新频率，避免闪烁
-    setInterval(() => {
-      const logsTab = document.getElementById('logsTab');
-      if (logsTab && logsTab.classList.contains('active')) {
-        // 只在日志标签页可见时才更新，且不强制更新
-        AppUtils.Logs.renderLogs(logContainer, false).catch((err: any) => console.error('渲染日志失败:', err));
-      }
-    }, 2000);
   });
 
   // 自动刷新（优化版：混合检测 - 事件驱动 + 智能轮询备用）
@@ -829,7 +705,7 @@
     if (i18n?.init && !i18n.isReady?.()) {
       await i18n.init();
     }
-    AppModules.Tabs.switchToTab('devices', logContainer, helpTab);
+    AppModules.Tabs.switchToTab('devices', helpTab);
     await AppModules.Devices.refreshDevices(
       devicesList,
       readWriteDevicesList,
@@ -844,7 +720,7 @@
     const { action, device } = data;
     if (!action) return;
 
-    AppModules.Tabs.switchToTab('devices', logContainer, helpTab);
+    AppModules.Tabs.switchToTab('devices', helpTab);
     const run = () => {
       const currentDevice = device
         ? (AppModules.Devices.devices || []).find((item: any) => item.disk === device.disk) || device

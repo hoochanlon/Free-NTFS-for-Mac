@@ -9,6 +9,10 @@
     "protectTooltip": "狀態保護（長按3s保護）",
     "protectTooltipLocked": "狀態已保護（長按3s解除保護）"
   },
+  "titleBar": {
+    "preventSleep": "防止休眠",
+    "preventSleepSmart": "智慧防止休眠"
+  },
   "menu": {
     "about": "關於",
     "services": "服務",
@@ -42,7 +46,6 @@
   "tabs": {
     "dependencies": "系統依賴",
     "devices": "NTFS 設備",
-    "logs": "操作日誌",
     "help": "指南手冊",
     "settings": "設定"
   },
@@ -61,9 +64,43 @@
     "title": "系統依賴",
     "checkButton": "檢查依賴",
     "autoInstall": "一鍵安裝",
-    "autoInstallTitle": "在終端中依序自動安裝缺失依賴",
-    "autoInstallOpened": "已開啟終端。完成目前安裝後會自動進入下一步，全部完成後會提示「所有步驟已完成」。",
+    "autoInstallTitle": "在終端中自動完成系統依賴分頁的全部可安裝步驟",
+    "autoInstallOpened": "已開啟終端，將自動安裝 Gatekeeper、CLT、Homebrew、MacFUSE、ntfs-3g、fswatch。只需處理密碼和系統彈窗。",
     "autoInstallFailed": "開啟終端失敗: {error}",
+    "installer": {
+      "title": "Nigate 依賴自動安裝",
+      "intro": "將依系統依賴分頁的順序，自動安裝全部可執行步驟。裝置讀寫請回到 Nigate。",
+      "wait": "如出現系統彈窗或密碼提示，完成後會自動繼續，不必再點一次「一鍵安裝」。",
+      "skip": "已安裝，跳過。",
+      "installing": "正在安裝...",
+      "done": "此步驟已完成。",
+      "fail": "此步驟失敗，已停止後續安裝。",
+      "allDone": "所有可自動完成的步驟已結束",
+      "closeHint": "按 Return 鍵關閉此視窗...",
+      "next": "下一步",
+      "stepMacos": "macOS 版本",
+      "stepGatekeeper": "允許任何來源（Gatekeeper）",
+      "stepClt": "Xcode Command Line Tools",
+      "stepBrew": "Homebrew",
+      "stepMacfuse": "MacFUSE",
+      "stepNtfs": "ntfs-3g",
+      "stepFswatch": "fswatch（可選）",
+      "stepVerify": "核對安裝結果",
+      "sudoHint": "後續安裝需要管理者權限，請輸入登入密碼（通常只需一次）。",
+      "sudoFail": "未取得管理者權限，無法繼續自動安裝。",
+      "macosOk": "版本符合要求。",
+      "macosLow": "目前系統版本可能低於 macOS 14，仍繼續安裝。",
+      "gatekeeperHint": "正在執行 sudo spctl --master-disable。若系統要求確認，請到「系統設定 > 隱私權與安全性」開啟「任何來源」。",
+      "gatekeeperDone": "Gatekeeper 已處理。",
+      "macfuseHint": "若跳出核心擴充功能提示，請到「系統設定 > 隱私權與安全性」核准 macFUSE。",
+      "kextHint": "Apple Silicon 若無法載入核心擴充功能：關機後長按電源鍵進入啟動選項 → 選項 → 繼續 → 工具程式 → 啟動安全性工具程式，降低安全性並允許已識別開發者的核心擴充功能。",
+      "fsExtHint": "請到「系統設定 > 一般 > 登入項目與延伸功能 > 檔案系統延伸功能」，啟用 macFUSE 和 ntfs-3g。",
+      "brewMissing": "未偵測到 Homebrew，無法繼續安裝後續依賴。",
+      "cltHint": "將跳出系統安裝視窗，請依提示完成。完成後會自動進入下一步。",
+      "manualRemain": "以下步驟必須在系統設定中由你確認，指令碼無法代替：",
+      "present": "已就緒",
+      "missing": "未就緒"
+    },
     "checking": "正在檢查...",
     "installed": "已安裝",
     "installedOptional": "已安裝（可選）",
@@ -178,29 +215,9 @@
     "cancel": "取消",
     "confirm": "確認",
     "continue": "繼續",
-    "ok": "確定"
-  },
-  "logs": {
-    "title": "操作日誌",
-    "empty": "暫無日誌",
-    "clear": "清空",
-    "export": "匯出",
-    "enable": "啟用操作日誌",
-    "exportSuccess": "日誌已匯出",
-    "exportError": "匯出失敗",
-    "noLogsToExport": "沒有日誌可匯出",
-    "clearConfirm": "確定要清空所有日誌嗎？",
-    "exportPath": "日誌已匯出到: {path}",
-    "exportHeader": "Nigate - 操作日誌",
-    "exportTime": "匯出時間: {time}",
-    "exportCount": "共 {count} 條日誌",
-    "logTypes": {
-      "info": "資訊",
-      "success": "成功",
-      "error": "錯誤",
-      "warning": "警告"
-    },
-    "logsEnabled": "操作日誌已啟用"
+    "ok": "確定",
+    "success": "成功",
+    "error": "錯誤"
   },
   "help": {
     "title": "指南手冊",
@@ -231,11 +248,11 @@
         },
         "preventSleep": {
           "name": "防止休眠圖示",
-          "description": "啟用後，系統將禁止進入休眠狀態，確保裝置持續可用。圖示啟用時顯示為咖啡色。"
+          "description": "預設關閉。點擊循環：關閉 → 防止休眠（咖啡色，一直阻止）→ 智慧防止休眠（青色）→ 關閉。狀態保護開啟時此按鈕會鎖定。"
         },
         "protect": {
           "name": "狀態保護圖示",
-          "description": "長按3秒可切換保護狀態。保護後，自動讀寫、託盤模式和防止休眠功能將被禁用，防止誤操作。圖示保護後顯示為綠色並帶有脈衝動畫。"
+          "description": "長按3秒可切換保護狀態。保護後，自動讀寫、托盤模式和防止休眠圖示將被鎖定，防止誤操作。圖示保護後顯示為綠色並帶有脈衝動畫。"
         },
         "about": {
           "name": "關於圖示",
@@ -246,12 +263,13 @@
           "description": "退出應用程式。"
         }
       },
-      "tabs": {
-        "title": "標籤頁圖示",
-        "logs": {
-          "name": "日誌圖示",
-          "description": "切換到「操作日誌」標籤頁，查看所有操作的記錄。"
-        }
+      "preventSleepModes": {
+        "title": "防止休眠工作模式",
+        "intro": "標題列咖啡因圖示預設關閉。點擊按關閉 → 防止休眠 → 智慧防止休眠 → 關閉循環。狀態保護開啟時該按鈕會鎖定。",
+        "off": "關閉：不阻止系統休眠。圖示無著色。",
+        "always": "防止休眠（咖啡色）：持續阻止休眠，即使閒置也不會退出。只能透過標題列圖示切入，設定頁開關不控制此模式。",
+        "smart": "智慧防止休眠（青色）：只監視目前已掛載的 NTFS 裝置。偵測到讀寫傳輸時阻止休眠；傳輸停止約 20 秒後自動允許休眠。沒有已掛載的 NTFS 裝置、或裝置閒置時，不會一直佔著系統不休眠。設定頁「智慧防止休眠」勾選只對應此模式。",
+        "quit": "退出應用程式時會停止阻止休眠。"
       },
       "devices": {
         "title": "裝置管理圖示",
@@ -277,20 +295,8 @@
     "deletePasswordError": "刪除密碼失敗，請重試",
     "startupTab": "啟動時開啟的標籤頁",
     "startupTabDesc": "選擇應用啟動時預設顯示的標籤頁",
-    "enableLogs": "啟用操作日誌",
-    "enableLogsDesc": "預設關閉，需要手動開啟。啟用後，應用會記錄所有操作日誌。關閉後，將不再記錄新的日誌，但已記錄的日誌仍會保留。預設最長儲存30天",
-    "resetLogsDaily": "每天自動重置日誌",
-    "resetLogsDailyDesc": "啟用後，應用會在每天首次啟動時自動清空前一天的日誌",
-    "exportLogs": "匯出操作日誌",
-    "exportLogsDesc": "將所有操作日誌匯出為文字檔案",
     "language": "語言",
     "languageDesc": "選擇應用介面語言",
-    "windowSize": "視窗尺寸",
-    "windowSizeDesc": "自訂應用視窗的寬度和高度（單位：像素）。修改後需要重啟應用生效",
-    "width": "寬度",
-    "height": "高度",
-    "pixel": "像素",
-    "resetToDefault": "重置為預設值",
     "languages": {
       "system": "跟隨系統",
       "zh-CN": "簡中 (CN)",
@@ -303,8 +309,8 @@
     "autoMountDesc": "啟用後，背景會把新插入的唯讀 NTFS 裝置掛載為讀寫，無需開啟視窗。手動還原為唯讀的裝置在本次連接期間不會被改回",
     "trayMode": "托盤模式",
     "trayModeDesc": "啟用後，關閉視窗時不會退出應用，而是最小化到系統托盤。可以通過托盤圖標快速管理 NTFS 設備。",
-    "preventSleep": "禁止休眠",
-    "preventSleepDesc": "啟用後，系統將防止進入休眠模式，確保設備保持可訪問狀態",
+    "preventSleep": "智慧防止休眠",
+    "preventSleepDesc": "只監視已掛載的 NTFS 裝置：有讀寫傳輸時阻止休眠，停止約 20 秒後自動允許休眠。此開關只打開智慧模式，與標題列青色狀態同步；咖啡色的一直阻止需點標題列圖示。",
     "enabled": "（已啟用）",
     "autoStart": "系統自啟",
     "autoStartDesc": "啟用後，應用將在系統啟動時自動運行"
@@ -313,9 +319,9 @@
     "showWindow": "顯示視窗",
     "ntfsDevices": "NTFS 設備",
     "autoMount": "自動讀寫",
-    "preventSleep": "禁止休眠",
-    "preventSleepEnabled": "禁止休眠（已啟用）",
-    "preventSleepDisabled": "禁止休眠（未啟用）",
+    "preventSleep": "智慧防止休眠",
+    "preventSleepEnabled": "智慧防止休眠已啟用",
+    "preventSleepDisabled": "智慧防止休眠已關閉",
     "showMainWindow": "主介面",
     "refreshDevices": "重新整理設備列表",
     "refreshing": "重新整理中...",
@@ -324,7 +330,6 @@
     "ejectAll": "全推出",
     "quickActions": "一鍵操作",
     "settings": "設定",
-    "logs": "操作日誌",
     "about": "關於",
     "quit": "退出",
     "quitConfirmTitle": "確認退出",

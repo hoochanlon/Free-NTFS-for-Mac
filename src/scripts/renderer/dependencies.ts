@@ -22,7 +22,7 @@ const DEPENDENCY_INFO = {
   ntfs3g: {
     name: 'ntfs-3g',
     description: 'NTFS 文件系统驱动，提供 NTFS 读写支持',
-    installCommand: 'brew tap gromgit/homebrew-fuse && brew install ntfs-3g-mac',
+    installCommand: 'brew tap gromgit/homebrew-fuse && brew install gromgit/fuse/ntfs-3g-mac',
     installGuide: '需要先安装 Homebrew 和 MacFUSE。在终端运行上述命令即可安装。'
   }
 };
@@ -97,7 +97,6 @@ export async function checkDependencies(
   depsList: HTMLElement,
   installGuideSection: HTMLElement,
   updateStatusFn: (status: 'active' | 'error', text: string) => void,
-  addLogFn: (message: string, type?: 'info' | 'success' | 'error' | 'warning') => void,
   showLoadingFn: (show: boolean) => void
 ): Promise<any> {
   try {
@@ -120,17 +119,13 @@ export async function checkDependencies(
 
     if (allInstalled) {
       updateStatusFn('active', '系统就绪');
-      addLogFn('所有依赖已安装', 'success');
     } else {
       updateStatusFn('error', '缺少依赖');
-      addLogFn('检测到缺失的依赖，请查看下方安装指引', 'warning');
     }
 
     return dependencies;
   } catch (error) {
     updateStatusFn('error', '检查失败');
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    addLogFn(`检查依赖失败: ${errorMessage}`, 'error');
     console.error('检查依赖错误:', error);
     return null;
   } finally {

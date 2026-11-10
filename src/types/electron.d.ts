@@ -2,14 +2,12 @@
 export interface AppSettings {
   savePassword: boolean;
   autoMount: boolean;
-  startupTab: 'dependencies' | 'devices' | 'logs' | 'help';
-  enableLogs: boolean;
+  startupTab: 'dependencies' | 'devices' | 'help' | 'settings';
   language: 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'system';
-  windowWidth: number;
-  windowHeight: number;
   trayMode: boolean;
   autoStart: boolean;
   preventSleep: boolean;
+  keepAwake: boolean;
   hideIconTooltips: boolean;
   manuallyReadOnlyDevices?: string[]; // 用户手动设置为只读的设备列表（存储设备 disk 标识符）
 }
@@ -41,8 +39,6 @@ export interface ElectronAPI {
   updateWindowVisibility: (isVisible: boolean) => Promise<void>;
   getDetectionMode: () => Promise<'event-driven' | 'polling' | 'not-started'>;
   checkEventDrivenAvailable: () => Promise<boolean>;
-  openLogsWindow: () => Promise<void>;
-  closeLogsWindow: () => Promise<void>;
   openModuleWindow: (moduleName: string) => Promise<void>;
   closeModuleWindow: () => Promise<void>;
   readMarkdown: (filename: string) => Promise<{ success: boolean; content?: string; error?: string }>;
@@ -65,19 +61,8 @@ export interface ElectronAPI {
   saveSettings: (settings: Partial<AppSettings>) => Promise<{ success: boolean }>;
   applyAutoMount: () => Promise<{ success: boolean; error?: string }>;
   onSettingsChange: (callback: (settings: Partial<AppSettings>) => void) => void;
-  getWindowSizeConfig: () => Promise<{
-    defaultWidth: number;
-    defaultHeight: number;
-    minWidth: number;
-    minHeight: number;
-    minWidthLimit: number;
-    maxWidthLimit: number;
-    minHeightLimit: number;
-    maxHeightLimit: number;
-  }>;
   hasSavedPassword: () => Promise<boolean>;
   deleteSavedPassword: () => Promise<{ success: boolean }>;
-  exportLogs: (content: string) => Promise<{ success: boolean; path?: string; error?: string }>;
   switchToTab: (tabName: string) => Promise<void>;
   onSwitchTab: (callback: (tabName: string) => void) => void;
   onShowAboutDialog: (callback: () => void) => void;
@@ -86,8 +71,6 @@ export interface ElectronAPI {
   runDeviceActionInMainWindow: (data: { action: string; device?: any }) => Promise<void>;
   showConfirmDialog: (title: string, message: string) => Promise<boolean>;
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => Promise<void>;
-  readLogsFile: () => Promise<{ success: boolean; content?: string; error?: string }>;
-  writeLogsFile: (content: string) => Promise<{ success: boolean; error?: string }>;
   showMainWindow: () => Promise<void>;
   onSyncDevicesFromTray: (callback: (devices: NTFSDevice[]) => void) => void;
   adjustTrayWindowHeightByDeviceCount: (deviceCount: number) => Promise<void>;

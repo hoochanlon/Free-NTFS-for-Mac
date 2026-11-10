@@ -9,6 +9,10 @@
     "protectTooltip": "Status-Schutz (3s lang drücken zum Schutz)",
     "protectTooltipLocked": "Status geschützt (3s lang drücken zum Schutz entfernen)"
   },
+  "titleBar": {
+    "preventSleep": "Ruhezustand verhindern",
+    "preventSleepSmart": "Intelligenter Ruhezustandsschutz"
+  },
   "menu": {
     "about": "Über",
     "services": "Dienste",
@@ -42,7 +46,6 @@
   "tabs": {
     "dependencies": "Systemabhängigkeiten",
     "devices": "NTFS-Geräte",
-    "logs": "Betriebsprotokolle",
     "help": "Anleitung",
     "settings": "Einstellungen"
   },
@@ -61,9 +64,43 @@
     "title": "Systemabhängigkeiten",
     "checkButton": "Abhängigkeiten prüfen",
     "autoInstall": "Ein-Klick-Installation",
-    "autoInstallTitle": "Fehlende Abhängigkeiten nacheinander im Terminal installieren",
-    "autoInstallOpened": "Terminal geöffnet. Nach dem aktuellen Schritt folgt automatisch der nächste. Am Ende erscheint „All steps completed“.",
+    "autoInstallTitle": "Alle automatisierbaren Schritte des Abhängigkeiten-Tabs im Terminal ausführen",
+    "autoInstallOpened": "Terminal geöffnet. Gatekeeper, CLT, Homebrew, MacFUSE, ntfs-3g und fswatch werden automatisch installiert. Nur Passwort und Systemdialoge sind nötig.",
     "autoInstallFailed": "Terminal konnte nicht geöffnet werden: {error}",
+    "installer": {
+      "title": "Nigate-Abhängigkeitsinstallation",
+      "intro": "Dieses Fenster installiert alle automatisierbaren Schritte des Abhängigkeiten-Tabs. Lese-/Schreibzugriff erfolgt in der Nigate-App.",
+      "wait": "Wenn macOS einen Dialog oder eine Passwortabfrage zeigt, schließen Sie diese ab. Der nächste Schritt startet automatisch.",
+      "skip": "Bereits installiert, wird übersprungen.",
+      "installing": "Installation läuft...",
+      "done": "Dieser Schritt ist abgeschlossen.",
+      "fail": "Dieser Schritt ist fehlgeschlagen. Weitere Schritte wurden gestoppt.",
+      "allDone": "Alle automatisierbaren Schritte sind abgeschlossen",
+      "closeHint": "Eingabetaste drücken, um dieses Fenster zu schließen...",
+      "next": "Weiter",
+      "stepMacos": "macOS-Version",
+      "stepGatekeeper": "Apps von überall erlauben (Gatekeeper)",
+      "stepClt": "Xcode Command Line Tools",
+      "stepBrew": "Homebrew",
+      "stepMacfuse": "MacFUSE",
+      "stepNtfs": "ntfs-3g",
+      "stepFswatch": "fswatch (optional)",
+      "stepVerify": "Installation prüfen",
+      "sudoHint": "Für die weiteren Schritte sind Administratorrechte nötig. Bitte einmal das Anmeldepasswort eingeben.",
+      "sudoFail": "Keine Administratorrechte erhalten. Die automatische Installation kann nicht fortgesetzt werden.",
+      "macosOk": "Die Version erfüllt die Anforderung.",
+      "macosLow": "Diese macOS-Version liegt möglicherweise unter 14. Die Installation wird trotzdem fortgesetzt.",
+      "gatekeeperHint": "Führt sudo spctl --master-disable aus. Falls macOS eine Bestätigung verlangt, aktivieren Sie unter Systemeinstellungen > Datenschutz & Sicherheit die Option „Von überall“.",
+      "gatekeeperDone": "Gatekeeper-Schritt abgeschlossen.",
+      "macfuseHint": "Wenn macOS eine Kernel-Erweiterung anfragt, genehmigen Sie macFUSE unter Systemeinstellungen > Datenschutz & Sicherheit.",
+      "kextHint": "Lässt sich die Kernel-Erweiterung auf Apple Silicon nicht laden: Herunterfahren, Ein-/Aus-Taste gedrückt halten, Startoptionen > Optionen > Fortfahren > Dienstprogramme > Startsicherheitsdienstprogramm öffnen, Sicherheit reduzieren und Kernel-Erweiterungen identifizierter Entwickler erlauben.",
+      "fsExtHint": "Aktivieren Sie unter Systemeinstellungen > Allgemein > Anmeldeobjekte & Erweiterungen > Dateisystemerweiterungen macFUSE und ntfs-3g.",
+      "brewMissing": "Homebrew wurde nicht gefunden. Die restlichen Abhängigkeiten können nicht installiert werden.",
+      "cltHint": "Es erscheint ein Systeminstaller. Danach startet der nächste Schritt automatisch.",
+      "manualRemain": "Diese Schritte müssen in den Systemeinstellungen bestätigt werden und können nicht vom Skript übernommen werden:",
+      "present": "Bereit",
+      "missing": "Nicht bereit"
+    },
     "checking": "Wird geprüft...",
     "installed": "Installiert",
     "installedOptional": "Installiert (Optional)",
@@ -178,29 +215,9 @@
     "cancel": "Abbrechen",
     "confirm": "Bestätigen",
     "continue": "Fortfahren",
-    "ok": "OK"
-  },
-  "logs": {
-    "title": "Betriebsprotokolle",
-    "empty": "Keine Protokolle",
-    "clear": "Löschen",
-    "export": "Exportieren",
-    "enable": "Betriebsprotokolle aktivieren",
-    "exportSuccess": "Protokolle erfolgreich exportiert",
-    "exportError": "Export fehlgeschlagen",
-    "noLogsToExport": "Keine Protokolle zum Exportieren",
-    "clearConfirm": "Sind Sie sicher, dass Sie alle Protokolle löschen möchten?",
-    "exportPath": "Protokolle exportiert nach: {path}",
-    "exportHeader": "Nigate - Betriebsprotokolle",
-    "exportTime": "Exportzeit: {time}",
-    "exportCount": "Gesamt {count} Protokolle",
-    "logTypes": {
-      "info": "Info",
-      "success": "Erfolg",
-      "error": "Fehler",
-      "warning": "Warnung"
-    },
-    "logsEnabled": "Betriebsprotokolle aktiviert"
+    "ok": "OK",
+    "success": "Erfolg",
+    "error": "Fehler"
   },
   "help": {
     "title": "Anleitung",
@@ -230,12 +247,12 @@
           "description": "Wenn aktiviert, wird die Anwendung beim Schließen des Fensters in die Systemleiste minimiert, anstatt beendet zu werden. Das Symbol erscheint lila, wenn es aktiv ist."
         },
         "preventSleep": {
-          "name": "Ruhezustand verhindern-Symbol",
-          "description": "Wenn aktiviert, verhindert das System, dass es in den Ruhezustand wechselt, um sicherzustellen, dass Geräte kontinuierlich verfügbar bleiben. Das Symbol erscheint kaffeefarben, wenn es aktiv ist."
+          "name": "Ruhezustand verhindern",
+          "description": "Standardmäßig aus. Klickzyklus: Aus → Ruhezustand verhindern (kaffeebraun, dauerhaft) → intelligenter Schutz (teal) → aus. Bei aktivem Statusschutz ist die Schaltfläche gesperrt."
         },
         "protect": {
           "name": "Status-Schutz Symbol",
-          "description": "3 Sekunden lang drücken, um den Schutzstatus umzuschalten. Wenn geschützt, werden automatisches Lesen/Schreiben, Tray-Modus und Ruhezustand verhindern deaktiviert, um versehentliche Vorgänge zu verhindern. Das Symbol erscheint grün mit einer Pulsanimation, wenn es geschützt ist."
+          "description": "3 Sekunden lang drücken, um den Schutzstatus umzuschalten. Wenn geschützt, werden automatisches Lesen/Schreiben, Tray-Modus und das Ruhezustandsschutz-Symbol gesperrt, um versehentliche Vorgänge zu verhindern. Das Symbol erscheint grün mit einer Pulsanimation, wenn es geschützt ist."
         },
         "about": {
           "name": "Info-Symbol",
@@ -246,12 +263,13 @@
           "description": "Beendet die Anwendung."
         }
       },
-      "tabs": {
-        "title": "Registerkarten-Symbole",
-        "logs": {
-          "name": "Protokoll-Symbol",
-          "description": "Wechselt zur Registerkarte \"Betriebsprotokolle\", um Aufzeichnungen aller Vorgänge anzuzeigen."
-        }
+      "preventSleepModes": {
+        "title": "Arbeitsweisen des Ruhezustandsschutzes",
+        "intro": "Das Kaffee-Symbol in der Titelleiste ist standardmäßig aus. Klickzyklus: Aus → Ruhezustand verhindern → Intelligenter Schutz → Aus. Bei aktivem Statusschutz ist die Schaltfläche gesperrt.",
+        "off": "Aus: Der Ruhezustand wird nicht verhindert. Das Symbol bleibt ungefärbt.",
+        "always": "Ruhezustand verhindern (kaffeebraun): Der Ruhezustand bleibt auch im Leerlauf blockiert. Nur über das Titelleisten-Symbol erreichbar; das Kontrollkästchen in den Einstellungen steuert diesen Modus nicht.",
+        "smart": "Intelligenter Ruhezustandsschutz (teal): Überwacht nur derzeit eingehängte NTFS-Volumes. Bei Lese-/Schreibverkehr wird der Ruhezustand verhindert; etwa 20 Sekunden nach dem Ende der Übertragung wieder zugelassen. Ohne eingehängtes NTFS-Volume oder im Leerlauf bleibt der Mac nicht dauerhaft wach. Das Kontrollkästchen in den Einstellungen synchronisiert nur mit diesem Modus.",
+        "quit": "Beim Beenden der App wird der Ruhezustandsschutz gestoppt."
       },
       "devices": {
         "title": "Geräteverwaltungs-Symbole",
@@ -277,20 +295,8 @@
     "deletePasswordError": "Löschen des Passworts fehlgeschlagen, bitte erneut versuchen",
     "startupTab": "Beim Start zu öffnender Tab",
     "startupTabDesc": "Wählen Sie den Standard-Tab, der beim Start der App angezeigt werden soll",
-    "enableLogs": "Betriebsprotokolle aktivieren",
-    "enableLogsDesc": "Standardmäßig deaktiviert, erfordert manuelle Aktivierung. Wenn aktiviert, zeichnet die App alle Betriebsprotokolle auf. Wenn deaktiviert, werden keine neuen Protokolle aufgezeichnet, aber zuvor aufgezeichnete Protokolle bleiben erhalten. Protokolle werden standardmäßig maximal 30 Tage gespeichert",
-    "resetLogsDaily": "Protokolle täglich automatisch zurücksetzen",
-    "resetLogsDailyDesc": "Wenn aktiviert, löscht die App beim ersten Start jeden Tag automatisch die Protokolle des vorherigen Tages",
-    "exportLogs": "Betriebsprotokolle exportieren",
-    "exportLogsDesc": "Alle Betriebsprotokolle als Textdatei exportieren",
     "language": "Sprache",
     "languageDesc": "Wählen Sie die Anwendungssprache der Benutzeroberfläche",
-    "windowSize": "Fenstergröße",
-    "windowSizeDesc": "Passen Sie die Breite und Höhe des Anwendungsfensters an (in Pixeln). Änderungen werden nach dem Neustart der Anwendung wirksam",
-    "width": "Breite",
-    "height": "Höhe",
-    "pixel": "px",
-    "resetToDefault": "Auf Standard zurücksetzen",
     "languages": {
       "system": "System folgen",
       "zh-CN": "简中 (CN)",
@@ -303,8 +309,8 @@
     "autoMountDesc": "Wenn aktiviert, hängt der Hintergrund neu angeschlossene schreibgeschützte NTFS-Volumes mit Schreibzugriff ein, ohne ein Fenster zu öffnen. Ein auf Schreibschutz zurückgesetztes Volume bleibt für die aktuelle Verbindung unverändert",
     "trayMode": "Tray-Modus",
     "trayModeDesc": "Wenn aktiviert, wird beim Schließen des Fensters die App nicht beendet, sondern in die Systemleiste minimiert. Sie können NTFS-Geräte schnell über das Tray-Symbol verwalten.",
-    "preventSleep": "Ruhezustand verhindern",
-    "preventSleepDesc": "Wenn aktiviert, verhindert das System den Ruhezustand, um sicherzustellen, dass Geräte zugänglich bleiben",
+    "preventSleep": "Intelligenter Ruhezustandsschutz",
+    "preventSleepDesc": "Überwacht nur eingehängte NTFS-Volumes: Bei Übertragung wird der Ruhezustand verhindert, etwa 20 Sekunden nach dem Leerlauf wieder zugelassen. Dieses Kontrollkästchen schaltet nur den intelligenten Modus ein und entspricht dem teal-Zustand in der Titelleiste; Dauerhaft an (kaffeebraun) nur über das Titelleisten-Symbol.",
     "enabled": "（Aktiviert）",
     "autoStart": "Beim Anmelden starten",
     "autoStartDesc": "Wenn aktiviert, startet die App automatisch beim Systemstart"
@@ -313,9 +319,9 @@
     "showWindow": "Fenster anzeigen",
     "ntfsDevices": "NTFS-Geräte",
     "autoMount": "Automatisch Lese-/Schreibzugriff",
-    "preventSleep": "Kein Ruhezustand",
-    "preventSleepEnabled": "Kein Ruhezustand (Aktiviert)",
-    "preventSleepDisabled": "Kein Ruhezustand (Deaktiviert)",
+    "preventSleep": "Intelligenter Ruhezustandsschutz",
+    "preventSleepEnabled": "Intelligenter Ruhezustandsschutz aktiviert",
+    "preventSleepDisabled": "Intelligenter Ruhezustandsschutz deaktiviert",
     "showMainWindow": "Hauptoberfläche",
     "refreshDevices": "Geräteliste aktualisieren",
     "refreshing": "Wird aktualisiert...",
@@ -324,7 +330,6 @@
     "ejectAll": "Alle auswerfen",
     "quickActions": "Schnellaktionen",
     "settings": "Einstellungen",
-    "logs": "Betriebsprotokolle",
     "about": "Über",
     "quit": "Beenden",
     "quitConfirmTitle": "Beenden bestätigen",

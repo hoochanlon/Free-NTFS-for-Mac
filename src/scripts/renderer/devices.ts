@@ -127,7 +127,6 @@ export async function refreshDevices(
   lastDeviceCountRef: { current: number },
   lastDeviceStateRef: { current: string },
   updateStatusFn: (status: 'active' | 'error', text: string) => void,
-  addLogFn: (message: string, type?: 'info' | 'success' | 'error' | 'warning') => void,
   renderDevicesFn: () => void
 ): Promise<void> {
   try {
@@ -138,74 +137,38 @@ export async function refreshDevices(
     const readOnlyCount = devicesRef.current.filter(d => d.isReadOnly).length;
     const currentState = `${currentDeviceCount}-${readOnlyCount}`;
 
-    const stateChanged = currentDeviceCount !== lastDeviceCountRef.current || currentState !== lastDeviceStateRef.current;
-
     if (devicesRef.current.length === 0) {
       updateStatusFn('active', '等待设备');
-      if (stateChanged) {
-        addLogFn('未检测到 NTFS 设备', 'info');
-      }
+    } else if (readOnlyCount > 0) {
+      updateStatusFn('error', `${readOnlyCount} 个设备只读`);
     } else {
-      const readWriteCount = devicesRef.current.length - readOnlyCount;
-
-      if (readOnlyCount > 0) {
-        updateStatusFn('error', `${readOnlyCount} 个设备只读`);
-        if (stateChanged) {
-          if (readWriteCount > 0) {
-            addLogFn(`检测到 ${devicesRef.current.length} 个设备（${readOnlyCount} 个只读，${readWriteCount} 个读写）`, 'info');
-          } else {
-            addLogFn(`检测到 ${devicesRef.current.length} 个 NTFS 设备（全部只读）`, 'warning');
-          }
-        }
-      } else {
-        updateStatusFn('active', `${devicesRef.current.length} 个设备就绪`);
-        if (stateChanged) {
-          addLogFn(`检测到 ${devicesRef.current.length} 个 NTFS 设备（全部可读写）`, 'success');
-        }
-      }
+      updateStatusFn('active', `${devicesRef.current.length} 个设备就绪`);
     }
 
     lastDeviceCountRef.current = currentDeviceCount;
     lastDeviceStateRef.current = currentState;
   } catch (error) {
     updateStatusFn('error', '检测失败');
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    addLogFn(`刷新设备列表失败: ${errorMessage}`, 'error');
+    console.error('刷新设备列表失败:', error);
   }
 }
 
 export async function mountDevice(
   electronAPI: any,
   device: any,
-  addLogFn: (message: string, type?: 'info' | 'success' | 'error' | 'warning') => void,
   showLoadingFn: (show: boolean) => void,
   refreshDevicesFn: () => void
 ): Promise<void> {
-  // 单个设备操作不需要确认弹窗（根据用户要求）
-
   try {
     showLoadingFn(true);
-    addLogFn(`正在挂载 ${device.volumeName}...`, 'info');
-    addLogFn('提示：请在弹出的对话框中输入管理员密码', 'info');
-
     const result = await electronAPI.mountDevice(device);
-
     if (result.success) {
-      if (result.result) {
-        addLogFn(result.result, 'success');
-      }
       await refreshDevicesFn();
     } else {
-      addLogFn(`挂载失败: ${result.error || '未知错误'}`, 'error');
-      if (result.error?.includes('密码错误')) {
-        addLogFn('提示：密码错误，请重试', 'warning');
-      } else if (result.error?.includes('用户取消')) {
-        addLogFn('提示：已取消操作', 'info');
-      }
+      console.error('挂载失败:', result.error || '未知错误');
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    addLogFn(`挂载失败: ${errorMessage}`, 'error');
+    console.error('挂载失败:', error);
   } finally {
     showLoadingFn(false);
   }
@@ -214,33 +177,19 @@ export async function mountDevice(
 export async function resetDevice(
   electronAPI: any,
   device: any,
-  addLogFn: (message: string, type?: 'info' | 'success' | 'error' | 'warning') => void,
   showLoadingFn: (show: boolean) => void,
   refreshDevicesFn: () => void
 ): Promise<void> {
   try {
     showLoadingFn(true);
-    addLogFn(`正在重置 ${device.volumeName}（卸载并修复）...`, 'info');
-    addLogFn('提示：请在弹出的对话框中输入管理员密码', 'info');
-
     const result = await electronAPI.resetDevice(device);
-
     if (result.success) {
-      if (result.result) {
-        addLogFn(result.result, 'success');
-      }
       await refreshDevicesFn();
     } else {
-      addLogFn(`重置失败: ${result.error || '未知错误'}`, 'error');
-      if (result.error?.includes('密码错误')) {
-        addLogFn('提示：密码错误，请重试', 'warning');
-      } else if (result.error?.includes('用户取消')) {
-        addLogFn('提示：已取消操作', 'info');
-      }
+      console.error('重置失败:', result.error || '未知错误');
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    addLogFn(`重置失败: ${errorMessage}`, 'error');
+    console.error('重置失败:', error);
   } finally {
     showLoadingFn(false);
   }
@@ -249,35 +198,19 @@ export async function resetDevice(
 export async function unmountDevice(
   electronAPI: any,
   device: any,
-  addLogFn: (message: string, type?: 'info' | 'success' | 'error' | 'warning') => void,
   showLoadingFn: (show: boolean) => void,
   refreshDevicesFn: () => void
 ): Promise<void> {
-  // 单个设备操作不需要确认弹窗（根据用户要求）
-
   try {
     showLoadingFn(true);
-    addLogFn(`正在卸载 ${device.volumeName}...`, 'info');
-    addLogFn('提示：请在弹出的对话框中输入管理员密码', 'info');
-
     const result = await electronAPI.unmountDevice(device);
-
     if (result.success) {
-      if (result.result) {
-        addLogFn(result.result, 'success');
-      }
       await refreshDevicesFn();
     } else {
-      addLogFn(`卸载失败: ${result.error || '未知错误'}`, 'error');
-      if (result.error?.includes('密码错误')) {
-        addLogFn('提示：密码错误，请重试', 'warning');
-      } else if (result.error?.includes('用户取消')) {
-        addLogFn('提示：已取消操作', 'info');
-      }
+      console.error('卸载失败:', result.error || '未知错误');
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    addLogFn(`卸载失败: ${errorMessage}`, 'error');
+    console.error('卸载失败:', error);
   } finally {
     showLoadingFn(false);
   }

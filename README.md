@@ -13,10 +13,10 @@ This is the Electron GUI version of Nigate, which provides a modern and intuitiv
 - ✅ **Dependency Check** - Automatically checks and installs required system dependencies
 - 🔄 **One-Click Mount** - Easily mount read-only NTFS devices in read-write mode
 - ⚡ **Auto Read-Write** - When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode without manual operation. Intelligently skips devices you manually set to read-only, respecting your choices
-- 📊 **Status Display** - Clearly displays device status and operation logs
+- 📊 **Status Display** - Clearly displays device status
 - 🛡️ **Secure & Reliable** - Uses Electron security best practices and provides a non-destructive disk repair **Reset** button
-- ☕ **Prevent Sleep** - One-click toggle to prevent system sleep, ensuring the system stays awake during long operations
-- 🍃 **Status Protection** - Long press for 3s to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations
+- ☕ **Prevent Sleep** - Title bar coffee icon cycles: prevent sleep → smart mode → off. Smart mode blocks sleep only during NTFS transfers
+- 🍃 **Status Protection** - Long press for 3s to toggle protection status. When protected, auto read-write and tray mode will be disabled to prevent accidental operations
 - 🥷 **Ninja Tools** - Provide cross-filesystem mounting and end-to-end scripts from development to release, with one-click permission fixes and multi-language output to simplify complex operations and lower the usage barrier
 - 💻 **Apple Silicon Support** - Built for Apple Silicon Macs (arm64)
 

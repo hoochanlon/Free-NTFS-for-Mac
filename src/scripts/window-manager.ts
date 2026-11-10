@@ -1,17 +1,16 @@
 import { BrowserWindow, app, screen, nativeTheme } from 'electron';
 import * as path from 'path';
-import { SettingsManager, WINDOW_SIZE_CONFIG } from './utils/settings';
+import { SettingsManager } from './utils/settings';
 import { isTrayInitialized, getTrayBounds } from './utils/tray-manager';
 import ntfsManager from './ntfs-manager';
 import {
+  WINDOW_SIZE_CONFIG,
   MODULE_WINDOW_CONFIG,
-  LOGS_WINDOW_CONFIG,
   TRAY_DEVICES_WINDOW_CONFIG
 } from '../config/window-config';
 
 // 窗口引用
 export let mainWindow: BrowserWindow | null = null;
-export let logsWindow: BrowserWindow | null = null;
 export let aboutWindow: BrowserWindow | null = null;
 export let trayDevicesWindow: BrowserWindow | null = null;
 export const moduleWindows: Map<string, BrowserWindow> = new Map();
@@ -21,16 +20,11 @@ let trayWindowManuallySized = false;
 export async function createMainWindow(): Promise<BrowserWindow> {
   const appPath = app.getAppPath();
 
-  // 从设置中读取窗口尺寸
-  const settings = await SettingsManager.getSettings();
-  const windowWidth = settings.windowWidth || WINDOW_SIZE_CONFIG.defaultWidth;
-  const windowHeight = settings.windowHeight || WINDOW_SIZE_CONFIG.defaultHeight;
-
   const initialTheme = await resolveInitialWindowTheme();
 
   mainWindow = new BrowserWindow({
-    width: windowWidth,
-    height: windowHeight,
+    width: WINDOW_SIZE_CONFIG.defaultWidth,
+    height: WINDOW_SIZE_CONFIG.defaultHeight,
     minWidth: WINDOW_SIZE_CONFIG.minWidth,
     minHeight: WINDOW_SIZE_CONFIG.minHeight,
     webPreferences: {
@@ -82,24 +76,6 @@ export async function createMainWindow(): Promise<BrowserWindow> {
     mainWindow.webContents.openDevTools();
   }
 
-  // 监听窗口大小改变，自动保存设置
-  let resizeTimeout: NodeJS.Timeout | null = null;
-  mainWindow.on('resize', () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      // 防抖：延迟保存，避免频繁写入
-      if (resizeTimeout) {
-        clearTimeout(resizeTimeout);
-      }
-      resizeTimeout = setTimeout(async () => {
-        const [width, height] = mainWindow!.getSize();
-        await SettingsManager.saveSettings({
-          windowWidth: width,
-          windowHeight: height
-        });
-      }, 500); // 500ms 后保存
-    }
-  });
-
   // 监听窗口关闭事件，如果启用托盘模式则最小化到托盘
   mainWindow.on('close', async (event: any) => {
     const settings = await SettingsManager.getSettings();
@@ -112,52 +88,6 @@ export async function createMainWindow(): Promise<BrowserWindow> {
   });
 
   return mainWindow;
-}
-
-// 创建日志窗口
-export async function createLogsWindow(): Promise<BrowserWindow | null> {
-  if (logsWindow && !logsWindow.isDestroyed()) {
-    logsWindow.focus();
-    return logsWindow;
-  }
-
-  const appPath = app.getAppPath();
-  logsWindow = new BrowserWindow({
-    ...LOGS_WINDOW_CONFIG,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true
-    },
-    titleBarStyle: 'hidden',
-    frame: false,
-    backgroundColor: '#1e1e1e',
-    parent: mainWindow || undefined,
-    show: false
-  });
-
-  const logsPath = path.join(appPath, 'src', 'html', 'logs.html');
-  await logsWindow.loadFile(logsPath);
-
-  logsWindow.once('ready-to-show', () => {
-    if (logsWindow) {
-      logsWindow.show();
-    }
-  });
-
-  logsWindow.on('closed', () => {
-    logsWindow = null;
-  });
-
-  return logsWindow;
-}
-
-// 关闭日志窗口
-export function closeLogsWindow(): void {
-  if (logsWindow) {
-    logsWindow.close();
-    logsWindow = null;
-  }
 }
 
 const THEME_BACKGROUND_COLORS = {

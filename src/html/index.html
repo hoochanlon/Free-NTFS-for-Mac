@@ -57,7 +57,7 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="../../styles.css?v=13">
+  <link rel="stylesheet" href="../../styles.css?v=16">
   <script src="../../scripts/theme-init.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
 </head>
@@ -75,8 +75,8 @@
           <button class="btn-about" id="trayModeTitlebarBtn" data-i18n-title="settings.trayMode" title="托盘模式">
             <img src="../imgs/svg/devices/tray.svg" alt="托盘模式" class="btn-about-icon" data-i18n-alt="settings.trayMode">
           </button>
-          <button class="btn-about" id="caffeinateBtn" data-i18n-title="tray.preventSleep">
-            <img src="../imgs/svg/system/caffe.svg" alt="" class="btn-about-icon" data-i18n-alt="tray.preventSleep">
+          <button class="btn-about" id="caffeinateBtn" data-i18n-title="titleBar.preventSleep" title="防止休眠">
+            <img src="../imgs/svg/system/caffe.svg" alt="防止休眠" class="btn-about-icon" data-i18n-alt="titleBar.preventSleep">
           </button>
           <button class="btn-about" id="protectBtn" data-i18n-title="app.protectTooltip" title="状态保护（长按3s）">
             <img src="../imgs/svg/system/protect.svg" alt="状态保护" class="btn-about-icon" data-i18n-alt="app.protect">
@@ -122,10 +122,6 @@
         <img src="../imgs/svg/devices/drive.svg" alt="NTFS 设备" class="tab-icon" data-i18n-alt="tabs.devices">
         <span data-i18n="tabs.devices">NTFS 设备</span>
       </button>
-      <button class="tab" data-tab="logs">
-        <img src="../imgs/svg/ui/log.svg" alt="操作日志" class="tab-icon" data-i18n-alt="tabs.logs">
-        <span data-i18n="tabs.logs">操作日志</span>
-      </button>
       <button class="tab" data-tab="help">
         <img src="../imgs/svg/ui/help.svg" alt="指南手册" class="tab-icon" data-i18n-alt="tabs.help">
         <span data-i18n="tabs.help">指南手册</span>
@@ -144,7 +140,7 @@
           <div class="section-header">
             <h2>系统依赖</h2>
             <div class="header-actions">
-              <button class="btn btn-secondary" id="autoInstallDepsBtn" data-i18n-title="dependencies.autoInstallTitle" data-i18n-aria-label="dependencies.autoInstall" title="在终端中依次自动安装缺失依赖" aria-label="一键安装">
+              <button class="btn btn-secondary" id="autoInstallDepsBtn" data-i18n-title="dependencies.autoInstallTitle" data-i18n-aria-label="dependencies.autoInstall" title="在终端中自动完成系统依赖标签页的全部可安装步骤" aria-label="一键安装">
                 <img src="../imgs/svg/system/terminal.svg" alt="" class="btn-icon">
                 <span data-i18n="dependencies.autoInstall">一键安装</span>
               </button>
@@ -178,26 +174,6 @@
             </div>
           </div>
           <div class="devices-list" id="devicesList" hidden></div>
-        </div>
-      </div>
-
-      <!-- 操作日志标签页 -->
-      <div class="tab-content" id="logsTab">
-        <div class="section">
-          <div class="section-header">
-            <h2>操作日志</h2>
-            <div class="header-actions">
-              <label class="enable-logs-checkbox">
-                <input type="checkbox" id="enableLogsCheckbox">
-                <span data-i18n="logs.enable">启用操作日志</span>
-              </label>
-              <button class="btn btn-secondary" id="exportLogBtn" data-i18n="logs.export">导出</button>
-              <button class="btn btn-danger" id="clearLogBtn" data-i18n="logs.clear">清空</button>
-            </div>
-          </div>
-          <div class="log-container" id="logContainer">
-            <div class="log-empty" data-i18n="logs.empty">暂无日志</div>
-          </div>
         </div>
       </div>
 
@@ -297,10 +273,6 @@
                         <img class="custom-select-option-icon" src="../imgs/svg/devices/drive.svg" alt="">
                         <span>NTFS 设备</span>
                       </div>
-                      <div class="custom-select-option" data-value="logs">
-                        <img class="custom-select-option-icon" src="../imgs/svg/ui/log.svg" alt="">
-                        <span>操作日志</span>
-                      </div>
                       <div class="custom-select-option" data-value="help">
                         <img class="custom-select-option-icon" src="../imgs/svg/ui/help.svg" alt="">
                         <span>指南手册</span>
@@ -357,30 +329,20 @@
             </div>
             <div class="setting-item">
               <div class="setting-label">
+                <label for="preventSleepCheckbox" data-i18n="settings.preventSleep">智能防止休眠</label>
+                <p class="setting-description" data-i18n="settings.preventSleepDesc">只监视已挂载的 NTFS 设备：有读写传输时阻止休眠，停止约 20 秒后自动允许休眠。此开关只打开智能模式，与标题栏青色状态同步；咖啡棕的一直阻止需点标题栏图标。</p>
+              </div>
+              <div class="setting-control">
+                <input type="checkbox" id="preventSleepCheckbox" class="setting-checkbox">
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-label">
                 <label for="autoStartCheckbox" data-i18n="settings.autoStart">系统自启</label>
                 <p class="setting-description" data-i18n="settings.autoStartDesc">启用后，应用将在系统启动时自动运行</p>
               </div>
               <div class="setting-control">
                 <input type="checkbox" id="autoStartCheckbox" class="setting-checkbox">
-              </div>
-            </div>
-            <div class="setting-item">
-              <div class="setting-label">
-                <label data-i18n="settings.windowSize">窗口尺寸</label>
-                <p class="setting-description" data-i18n="settings.windowSizeDesc">自定义应用窗口的宽度和高度（单位：像素）。修改后需要重启应用生效</p>
-                <button class="btn btn-text btn-reset-size" id="resetWindowSizeBtn" data-i18n="settings.resetToDefault">重置为默认值</button>
-              </div>
-              <div class="setting-control setting-size-control">
-                <div class="size-input-group">
-                  <label for="windowWidthInput" class="size-label" data-i18n="settings.width">宽度</label>
-                  <input type="text" id="windowWidthInput" class="setting-size-input" inputmode="numeric" pattern="[0-9]*">
-                  <span class="size-unit" data-i18n="settings.pixel">像素</span>
-                </div>
-                <div class="size-input-group">
-                  <label for="windowHeightInput" class="size-label" data-i18n="settings.height">高度</label>
-                  <input type="text" id="windowHeightInput" class="setting-size-input" inputmode="numeric" pattern="[0-9]*">
-                  <span class="size-unit" data-i18n="settings.pixel">像素</span>
-                </div>
               </div>
             </div>
           </div>
@@ -399,7 +361,6 @@
   <script src="../../scripts/utils/i18n.js"></script>
   <script src="../../scripts/utils/tooltip-suppression.js"></script>
   <script src="../../scripts/utils/i18n-init.js"></script>
-  <script src="../../scripts/utils/logs.js"></script>
   <script src="../../scripts/utils/theme.js"></script>
   <script src="../../scripts/utils/markdown.js"></script>
   <script src="../../scripts/utils/help-reader.js"></script>

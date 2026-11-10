@@ -85,18 +85,25 @@ The application's main interface provides several functional icons to help you q
 
 - <img src="../imgs/svg/devices/flash-auto.svg" alt="Auto Read-Write" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Auto Read-Write Icon** - When enabled, the background mounts newly inserted read-only NTFS volumes as read-write, whether or not a window is open. A volume you restore to read-only stays unchanged for the current connection. The icon appears blue when active.
 - <img src="../imgs/svg/devices/tray.svg" alt="Tray Mode" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Tray Mode Icon** - When enabled, closing the window will minimize the application to the system tray instead of quitting. The icon appears red when active.
-- <img src="../imgs/svg/system/caffe.svg" alt="Prevent Sleep" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Prevent Sleep Icon** - When enabled, the system will prevent entering sleep mode to ensure devices remain accessible. The icon appears coffee-colored when active.
-- <img src="../imgs/svg/system/protect.svg" alt="Status Protection" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Status Protection Icon** - Long press for 3s to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations. The icon appears green with a pulse animation when protected.
+- <img src="../imgs/svg/system/caffe.svg" alt="Prevent Sleep" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Prevent Sleep Icon** - Off by default. Click to cycle: Off → Prevent Sleep (coffee brown, always on) → Smart Prevent Sleep (teal) → Off. Status protection locks this button. See **Prevent Sleep Modes** below.
+- <img src="../imgs/svg/system/protect.svg" alt="Status Protection" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Status Protection Icon** - Long press for 3s to toggle protection status. When protected, auto read-write, tray mode, and the prevent-sleep icon are locked to prevent accidental operations. The icon appears green with a pulse animation when protected.
 - <img src="../imgs/svg/ui/info.svg" alt="About" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **About Icon** - Opens the about window to view application information and project links.
 - <img src="../imgs/svg/actions/exit.svg" alt="Quit" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Quit Icon** - Quits the application.
 
 ### Settings Header Icon
 
 - 🤫 **Easter Egg Icon** - Beside the "Application Settings" heading. Press and hold for 3 seconds to toggle hover tooltips for icon buttons throughout the app; the choice is saved.
+- **Smart Prevent Sleep** - In Application Settings. Checking it enters smart mode (teal) and stays in sync with that title-bar state; it does not control always-on (coffee brown).
 
-### Tab Icons
+### Prevent Sleep Modes
 
-- <img src="../imgs/svg/ui/log.svg" alt="Logs" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Logs Icon** - Switches to the "Operation Logs" tab to view records of all operations.
+The title bar coffee icon is off by default. Click to cycle **Off → Prevent Sleep → Smart Prevent Sleep → Off**. Status protection locks this button.
+
+- **Off**: Sleep is not blocked. The icon is uncolored.
+- **Prevent Sleep** (coffee brown): Sleep stays blocked even when idle. Enter this mode only from the title bar icon; the Settings checkbox does not control it.
+- **Smart Prevent Sleep** (teal): Watches currently mounted NTFS volumes only. Sleep is blocked while those volumes have read/write traffic, then allowed again about 20 seconds after traffic stops. With no mounted NTFS volume, or while idle, the Mac is not kept awake. The Settings checkbox syncs only with this mode.
+
+Sleep prevention stops when you quit the app.
 
 ### Device Management Icons
 
@@ -325,43 +332,6 @@ If the problem persists, please refer to the official documentation of each depe
 
 After unmounting, the device will be removed from the system. If you need to access it again, please reinsert the device or use the system's built-in mounting function.
 
-## Operation Logs
-
-In the "Operation Logs" tab, you can view records of all operations, including:
-
-- Dependency check results
-- Device detection status
-- Mount, unmount, and eject operation results
-- Repair, rename, and format operation results
-- Error messages and warnings
-
-**Enable Operation Logs:**
-
-Operation logs are disabled by default and need to be manually enabled. Check the "Enable Operation Logs" checkbox in the "Operation Logs" tab to enable logging. When enabled, the app will record all operation logs. When disabled, new logs will not be recorded, but previously recorded logs will still be retained.
-
-**Log Storage:**
-
-Logs are saved in JSON format to the file system at the following location:
-
-```
-~/Library/Application Support/Nigate/logs.json
-```
-
-The log file uses formatted JSON format and can be opened directly with a text editor for viewing. When you uninstall the app, the log file will not be automatically deleted, making it easy to view or backup later.
-
-**Log Limits:**
-
-To ensure application performance and stability, the logging system has the following limits:
-
-- **Retention Period**: Logs are saved for a maximum of 30 days by default. Logs older than 30 days will be automatically cleaned up
-- **Record Count Limit**: A maximum of 500 log entries are retained. When the limit is exceeded, the oldest entries are automatically deleted, keeping only the latest 500 entries
-- **File Size Limit**: The log file has a maximum size of 500KB. When the limit is exceeded, old entries are automatically deleted to keep the file size within the limit
-- **Display Limit**: The interface displays a maximum of 300 log entries (the latest 300) to improve rendering performance
-
-**Log Management:**
-
-- **Clear Logs**: Click the "Clear" button to clear all log records
-- **Export Logs**: Click the "Export" button to export logs as a text file for backup or sharing
 
 ## More Troubleshooting
 

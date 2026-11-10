@@ -40,7 +40,7 @@
                      key === 'brew' ? '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"' :
                      key === 'macfuse' ? macfuseInstallCommand :
                      key === 'fswatch' ? t(`dependencies.${key}.installCommand`) :
-                     'brew tap gromgit/homebrew-fuse && brew install ntfs-3g-mac',
+                     'brew tap gromgit/homebrew-fuse && brew install gromgit/fuse/ntfs-3g-mac',
       installGuide: t(`dependencies.${key}.installGuide`),
                 installGuideMirrorCommand: key === 'brew' ? '/bin/zsh -c "$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)"' : '',
                 installGuideMirrorCommandLabel: key === 'brew' ? t(`dependencies.${key}.installGuideMirrorCommandLabel`) : '',
@@ -77,7 +77,7 @@
     ntfs3g: {
       name: 'ntfs-3g',
       description: 'NTFS 文件系统驱动，提供 NTFS 读写支持',
-      installCommand: 'brew tap gromgit/homebrew-fuse && brew install ntfs-3g-mac',
+      installCommand: 'brew tap gromgit/homebrew-fuse && brew install gromgit/fuse/ntfs-3g-mac',
       installGuide: '需要先安装 Homebrew 和 MacFUSE。在终端运行上述命令即可安装。'
     }
   };
@@ -209,10 +209,8 @@
 
           if (allInstalled) {
             AppUtils.UI.updateStatus('active', t('status.systemReady'), statusDot, statusText);
-            await AppUtils.Logs.addLog(t('dependencies.allInstalled'), 'success');
           } else {
             AppUtils.UI.updateStatus('error', t('status.missingDeps'), statusDot, statusText);
-            await AppUtils.Logs.addLog(t('dependencies.missingDepsDetected'), 'warning');
           }
         }
       } catch (error) {
@@ -241,22 +239,20 @@
 
     async openAutoInstaller(): Promise<void> {
       if (!electronAPI || typeof electronAPI.openDependencyInstaller !== 'function') {
-        await AppUtils.Logs.addLog(t('dependencies.autoInstallFailed', { error: 'unavailable' }), 'error');
+        await AppUtils.UI.showMessage(t('dialog.error'), t('dependencies.autoInstallFailed', { error: 'unavailable' }), 'error');
         return;
       }
 
       try {
         AppModules.Dependencies.setAutoInstallButtonBusy(true);
         const result = await electronAPI.openDependencyInstaller();
-        if (result && result.success) {
-          await AppUtils.Logs.addLog(t('dependencies.autoInstallOpened'), 'info');
-        } else {
+        if (!result || !result.success) {
           const errorMessage = result?.error || 'unknown';
-          await AppUtils.Logs.addLog(t('dependencies.autoInstallFailed', { error: errorMessage }), 'error');
+          await AppUtils.UI.showMessage(t('dialog.error'), t('dependencies.autoInstallFailed', { error: errorMessage }), 'error');
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await AppUtils.Logs.addLog(t('dependencies.autoInstallFailed', { error: errorMessage }), 'error');
+        await AppUtils.UI.showMessage(t('dialog.error'), t('dependencies.autoInstallFailed', { error: errorMessage }), 'error');
       } finally {
         AppModules.Dependencies.setAutoInstallButtonBusy(false);
       }
@@ -316,15 +312,11 @@
 
         if (allInstalled) {
           AppUtils.UI.updateStatus('active', t('status.systemReady'), statusDot, statusText);
-          await AppUtils.Logs.addLog(t('dependencies.allInstalled'), 'success');
         } else {
           AppUtils.UI.updateStatus('error', t('status.missingDeps'), statusDot, statusText);
-          await AppUtils.Logs.addLog(t('dependencies.missingDepsDetected'), 'warning');
         }
       } catch (error) {
         AppUtils.UI.updateStatus('error', t('status.checkFailed'), statusDot, statusText);
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        await AppUtils.Logs.addLog(t('dependencies.checkFailed', { error: errorMessage }), 'error');
         console.error('检查依赖错误:', error);
       } finally {
         AppModules.Dependencies.setCheckButtonBusy(false);

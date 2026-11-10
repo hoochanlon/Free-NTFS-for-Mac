@@ -13,8 +13,6 @@
   // DOM 元素
   const dependenciesModule = document.getElementById('dependenciesModule')!;
   const devicesModule = document.getElementById('devicesModule')!;
-  const logsModule = document.getElementById('logsModule')!;
-  const viewLogsBtn = document.getElementById('viewLogsBtn') as HTMLButtonElement;
   const depsBadge = document.getElementById('depsBadge')!;
   const devicesBadge = document.getElementById('devicesBadge')!;
 
@@ -26,17 +24,6 @@
       }
     } catch (error) {
       console.error(`打开${moduleName}模块失败:`, error);
-    }
-  }
-
-  // 打开日志窗口
-  async function openLogsWindow(): Promise<void> {
-    try {
-      if (electronAPI.openLogsWindow) {
-        await electronAPI.openLogsWindow();
-      }
-    } catch (error) {
-      console.error('打开日志窗口失败:', error);
     }
   }
 
@@ -87,8 +74,6 @@
     // 事件监听
     dependenciesModule.addEventListener('click', () => openModule('dependencies'));
     devicesModule.addEventListener('click', () => openModule('devices'));
-    logsModule.addEventListener('click', () => openLogsWindow());
-    viewLogsBtn.addEventListener('click', () => openLogsWindow());
 
     // 检查状态
     checkDependenciesStatus();

@@ -231,10 +231,9 @@
     const helpTab = helpTabEl();
     if (!helpTab) return null;
     if (!helpTab.classList.contains('active')) {
-      const logContainer = document.getElementById('logContainer');
       const Tabs = (window as any).AppModules?.Tabs;
-      if (Tabs?.switchToTab && logContainer) {
-        Tabs.switchToTab('help', logContainer, helpTab);
+      if (Tabs?.switchToTab) {
+        Tabs.switchToTab('help', helpTab);
       }
     }
     return helpTab;

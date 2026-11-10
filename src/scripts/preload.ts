@@ -58,8 +58,6 @@ const electronAPI: ElectronAPI = {
   onApplyAutoMount: (callback: () => void) => {
     ipcRenderer.on('apply-auto-mount', () => callback());
   },
-  openLogsWindow: () => ipcRenderer.invoke('open-logs-window'),
-  closeLogsWindow: () => ipcRenderer.invoke('close-logs-window'),
   openModuleWindow: (moduleName: string) => ipcRenderer.invoke('open-module-window', moduleName),
   closeModuleWindow: () => ipcRenderer.invoke('close-module-window'),
   readMarkdown: (filename: string) => ipcRenderer.invoke('read-markdown', filename),
@@ -75,13 +73,11 @@ const electronAPI: ElectronAPI = {
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings: Partial<import('../types/electron').AppSettings>) => ipcRenderer.invoke('save-settings', settings),
   applyAutoMount: () => ipcRenderer.invoke('apply-auto-mount'),
-  getWindowSizeConfig: () => ipcRenderer.invoke('get-window-size-config'),
   onSettingsChange: (callback: (settings: Partial<import('../types/electron').AppSettings>) => void) => {
     ipcRenderer.on('settings-changed', (_event: IpcRendererEvent, settings: Partial<import('../types/electron').AppSettings>) => callback(settings));
   },
   hasSavedPassword: () => ipcRenderer.invoke('has-saved-password'),
   deleteSavedPassword: () => ipcRenderer.invoke('delete-saved-password'),
-  exportLogs: (content: string) => ipcRenderer.invoke('export-logs', content),
   switchToTab: (tabName: string) => ipcRenderer.invoke('switch-to-tab', tabName),
   onSwitchTab: (callback: (tabName: string) => void) => {
     ipcRenderer.on('switch-tab', (_event: IpcRendererEvent, tabName: string) => callback(tabName));
@@ -98,8 +94,6 @@ const electronAPI: ElectronAPI = {
   runDeviceActionInMainWindow: (data: { action: string; device?: any }) => ipcRenderer.invoke('run-device-action-in-main-window', data),
   showConfirmDialog: (title: string, message: string) => ipcRenderer.invoke('show-confirm-dialog', { title, message }),
   showMessageDialog: (title: string, message: string, type?: 'info' | 'warning' | 'error') => ipcRenderer.invoke('show-message-dialog', { title, message, type }),
-  readLogsFile: () => ipcRenderer.invoke('read-logs-file'),
-  writeLogsFile: (content: string) => ipcRenderer.invoke('write-logs-file', content),
   showMainWindow: () => ipcRenderer.invoke('show-main-window'),
   onSyncDevicesFromTray: (callback: (devices: any[]) => void) => {
     ipcRenderer.on('sync-devices-from-tray', (_event: IpcRendererEvent, devices: any[]) => callback(devices));

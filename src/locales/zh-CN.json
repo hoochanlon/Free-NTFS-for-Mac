@@ -9,6 +9,10 @@
     "protectTooltip": "状态保护（长按3s保护）",
     "protectTooltipLocked": "状态已保护（长按3s解除保护）"
   },
+  "titleBar": {
+    "preventSleep": "防止休眠",
+    "preventSleepSmart": "智能防止休眠"
+  },
   "menu": {
     "about": "关于",
     "services": "服务",
@@ -42,7 +46,6 @@
   "tabs": {
     "dependencies": "系统依赖",
     "devices": "NTFS 设备",
-    "logs": "操作日志",
     "help": "指南手册",
     "settings": "设置"
   },
@@ -61,9 +64,43 @@
     "title": "系统依赖",
     "checkButton": "检查依赖",
     "autoInstall": "一键安装",
-    "autoInstallTitle": "在终端中依次自动安装缺失依赖",
-    "autoInstallOpened": "已打开终端。完成当前安装后会自动进入下一步，全部完成后会提示「所有步骤已完成」。",
+    "autoInstallTitle": "在终端中自动完成系统依赖标签页的全部可安装步骤",
+    "autoInstallOpened": "已打开终端，将自动安装 Gatekeeper、CLT、Homebrew、MacFUSE、ntfs-3g、fswatch。只需处理密码和系统弹窗。",
     "autoInstallFailed": "打开终端失败: {error}",
+    "installer": {
+      "title": "Nigate 依赖自动安装",
+      "intro": "将按系统依赖标签页的顺序，自动安装全部可执行步骤。设备读写请回到 Nigate。",
+      "wait": "如出现系统弹窗或密码提示，完成后会自动继续，不必再点一次「一键安装」。",
+      "skip": "已安装，跳过。",
+      "installing": "正在安装...",
+      "done": "此步骤已完成。",
+      "fail": "此步骤失败，已停止后续安装。",
+      "allDone": "所有可自动完成的步骤已结束",
+      "closeHint": "按回车键关闭此窗口...",
+      "next": "下一步",
+      "stepMacos": "macOS 版本",
+      "stepGatekeeper": "允许任何来源（Gatekeeper）",
+      "stepClt": "Xcode Command Line Tools",
+      "stepBrew": "Homebrew",
+      "stepMacfuse": "MacFUSE",
+      "stepNtfs": "ntfs-3g",
+      "stepFswatch": "fswatch（可选）",
+      "stepVerify": "核对安装结果",
+      "sudoHint": "后续安装需要管理员权限，请输入登录密码（通常只需一次）。",
+      "sudoFail": "未获得管理员权限，无法继续自动安装。",
+      "macosOk": "版本符合要求。",
+      "macosLow": "当前系统版本可能低于 macOS 14，仍继续安装。",
+      "gatekeeperHint": "正在执行 sudo spctl --master-disable。若系统要求确认，请到「系统设置 > 隐私与安全性」开启「任何来源」。",
+      "gatekeeperDone": "Gatekeeper 已处理。",
+      "macfuseHint": "若弹出内核扩展提示，请到「系统设置 > 隐私与安全性」批准 macFUSE。",
+      "kextHint": "Apple Silicon 若无法加载内核扩展：关机后长按电源键进入启动选项 → 选项 → 继续 → 实用工具 → 启动安全性实用工具，降低安全性并允许认可开发者的内核扩展。",
+      "fsExtHint": "请到「系统设置 > 通用 > 登录项与扩展 > 文件系统扩展」，启用 macFUSE 和 ntfs-3g。",
+      "brewMissing": "未检测到 Homebrew，无法继续安装后续依赖。",
+      "cltHint": "将弹出系统安装窗口，请按提示完成。完成后会自动进入下一步。",
+      "manualRemain": "以下步骤必须在系统设置中由你确认，脚本无法代替：",
+      "present": "已就绪",
+      "missing": "未就绪"
+    },
     "checking": "正在检查...",
     "installed": "已安装",
     "installedOptional": "已安装（可选）",
@@ -178,29 +215,9 @@
     "cancel": "取消",
     "confirm": "确认",
     "continue": "继续",
-    "ok": "确定"
-  },
-  "logs": {
-    "title": "操作日志",
-    "empty": "暂无日志",
-    "clear": "清空",
-    "export": "导出",
-    "enable": "启用操作日志",
-    "exportSuccess": "日志已导出",
-    "exportError": "导出失败",
-    "noLogsToExport": "没有日志可导出",
-    "clearConfirm": "确定要清空所有日志吗？",
-    "exportPath": "日志已导出到: {path}",
-    "exportHeader": "Nigate - 操作日志",
-    "exportTime": "导出时间: {time}",
-    "exportCount": "共 {count} 条日志",
-    "logTypes": {
-      "info": "信息",
-      "success": "成功",
-      "error": "错误",
-      "warning": "警告"
-    },
-    "logsEnabled": "操作日志已启用"
+    "ok": "确定",
+    "success": "成功",
+    "error": "错误"
   },
   "help": {
     "title": "指南手册",
@@ -231,11 +248,11 @@
         },
         "preventSleep": {
           "name": "防止休眠图标",
-          "description": "启用后，系统将禁止进入休眠状态，确保设备持续可用。图标激活时显示为咖啡色。"
+          "description": "默认关闭。点击循环：关闭 → 防止休眠（咖啡棕，一直阻止）→ 智能防止休眠（青色）→ 关闭。状态保护开启时此按钮会锁定。"
         },
         "protect": {
           "name": "状态保护图标",
-          "description": "长按3秒可切换保护状态。保护后，自动读写、托盘模式和防止休眠功能将被禁用，防止误操作。图标保护后显示为绿色并带有脉冲动画。"
+          "description": "长按3秒可切换保护状态。保护后，自动读写、托盘模式和防止休眠图标将被锁定，防止误操作。图标保护后显示为绿色并带有脉冲动画。"
         },
         "about": {
           "name": "关于图标",
@@ -246,12 +263,13 @@
           "description": "退出应用程序。"
         }
       },
-      "tabs": {
-        "title": "标签页图标",
-        "logs": {
-          "name": "日志图标",
-          "description": "切换到\"操作日志\"标签页，查看所有操作的记录。"
-        }
+      "preventSleepModes": {
+        "title": "防止休眠工作模式",
+        "intro": "标题栏咖啡因图标默认关闭。点击按关闭 → 防止休眠 → 智能防止休眠 → 关闭循环。状态保护开启时该按钮会锁定。",
+        "off": "关闭：不阻止系统休眠。图标无着色。",
+        "always": "防止休眠（咖啡棕）：持续阻止休眠，即使空闲也不会退出。只能通过标题栏图标切入，设置页开关不控制此模式。",
+        "smart": "智能防止休眠（青色）：只监视当前已挂载的 NTFS 设备。检测到读写传输时阻止休眠；传输停止约 20 秒后自动允许休眠。没有已挂载的 NTFS 设备、或设备空闲时，不会一直占着系统不休眠。设置页「智能防止休眠」勾选只对应此模式。",
+        "quit": "退出应用时会停止阻止休眠。"
       },
       "devices": {
         "title": "设备管理图标",
@@ -277,20 +295,8 @@
     "deletePasswordError": "删除密码失败，请重试",
     "startupTab": "启动时打开的标签页",
     "startupTabDesc": "选择应用启动时默认显示的标签页",
-    "enableLogs": "启用操作日志",
-    "enableLogsDesc": "默认关闭，需要手动开启。启用后，应用会记录所有操作日志。关闭后，将不再记录新的日志，但已记录的日志仍会保留。默认最长保存30天",
-    "resetLogsDaily": "每天自动重置日志",
-    "resetLogsDailyDesc": "启用后，应用会在每天首次启动时自动清空前一天的日志",
-    "exportLogs": "导出操作日志",
-    "exportLogsDesc": "将所有操作日志导出为文本文件",
     "language": "语言",
     "languageDesc": "选择应用界面语言",
-    "windowSize": "窗口尺寸",
-    "windowSizeDesc": "自定义应用窗口的宽度和高度（单位：像素）。修改后需要重启应用生效",
-    "width": "宽度",
-    "height": "高度",
-    "pixel": "像素",
-    "resetToDefault": "重置为默认值",
     "languages": {
       "system": "跟随系统",
       "zh-CN": "简中 (CN)",
@@ -303,8 +309,8 @@
     "autoMountDesc": "启用后，后台会把新插入的只读 NTFS 设备挂载为读写，无需打开窗口。手动还原为只读的设备在本次连接期间不会被改回",
     "trayMode": "托盘模式",
     "trayModeDesc": "启用后，关闭窗口时不会退出应用，而是最小化到系统托盘。可以通过托盘图标快速管理 NTFS 设备。",
-    "preventSleep": "禁止休眠",
-    "preventSleepDesc": "启用后，系统将防止进入休眠模式，确保设备保持可访问状态",
+    "preventSleep": "智能防止休眠",
+    "preventSleepDesc": "只监视已挂载的 NTFS 设备：有读写传输时阻止休眠，停止约 20 秒后自动允许休眠。此开关只打开智能模式，与标题栏青色状态同步；咖啡棕的一直阻止需点标题栏图标。",
     "enabled": "（已启用）",
     "autoStart": "系统自启",
     "autoStartDesc": "启用后，应用将在系统启动时自动运行"
@@ -313,9 +319,9 @@
     "showWindow": "显示窗口",
     "ntfsDevices": "NTFS 设备",
     "autoMount": "自动读写",
-    "preventSleep": "禁止休眠",
-    "preventSleepEnabled": "禁止休眠（已启用）",
-    "preventSleepDisabled": "禁止休眠（未启用）",
+    "preventSleep": "智能防止休眠",
+    "preventSleepEnabled": "智能防止休眠已启用",
+    "preventSleepDisabled": "智能防止休眠已关闭",
     "showMainWindow": "主界面",
     "refreshDevices": "刷新设备列表",
     "refreshing": "刷新中...",
@@ -324,7 +330,6 @@
     "ejectAll": "全推出",
     "quickActions": "一键操作",
     "settings": "设置",
-    "logs": "操作日志",
     "about": "关于",
     "quit": "退出",
     "quitConfirmTitle": "确认退出",

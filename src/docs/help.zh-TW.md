@@ -86,18 +86,25 @@ brew install ntfs-3g-mac
 
 - <img src="../imgs/svg/devices/flash-auto.svg" alt="自動讀寫" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **自動讀寫圖示** - 啟用後，背景會把新插入的唯讀 NTFS 裝置掛載為讀寫，不依賴視窗是否開啟。手動還原為唯讀的裝置在本次連接期間不會被改回。圖示啟用時顯示為藍色。
 - <img src="../imgs/svg/devices/tray.svg" alt="托盤模式" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **托盤模式圖示** - 啟用後，關閉視窗時應用程式會最小化到系統托盤而不是退出。圖示啟用時顯示為紅色。
-- <img src="../imgs/svg/system/caffe.svg" alt="防止休眠" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **防止休眠圖示** - 啟用後，系統將禁止進入休眠狀態，確保裝置持續可用。圖示啟用時顯示為咖啡色。
-- <img src="../imgs/svg/system/protect.svg" alt="狀態保護" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **狀態保護圖示** - 長按3s可切換保護狀態。保護後，自動讀寫、託盤模式和防止休眠功能將被禁用，防止誤操作。圖示保護後顯示為綠色並帶有脈衝動畫。
+- <img src="../imgs/svg/system/caffe.svg" alt="防止休眠" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **防止休眠圖示** - 預設關閉。點擊循環：關閉 → 防止休眠（咖啡色，一直阻止）→ 智慧防止休眠（青色）→ 關閉。狀態保護開啟時此按鈕會鎖定。工作方式見下方「防止休眠工作模式」。
+- <img src="../imgs/svg/system/protect.svg" alt="狀態保護" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **狀態保護圖示** - 長按3s可切換保護狀態。保護後，自動讀寫、托盤模式和防止休眠圖示將被鎖定，防止誤操作。圖示保護後顯示為綠色並帶有脈衝動畫。
 - <img src="../imgs/svg/ui/info.svg" alt="關於" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **關於圖示** - 開啟關於視窗，查看應用程式資訊和專案連結。
 - <img src="../imgs/svg/actions/exit.svg" alt="退出" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **退出圖示** - 退出應用程式。
 
 ### 設定頁圖示
 
 - 🤫 **彩蛋圖示** - 位於「應用設定」標題旁，長按 3 秒可切換全域圖示按鈕懸停提示的顯示狀態；選擇會被保存。
+- **智慧防止休眠** - 位於「應用設定」。勾選後進入智慧模式（青色），與標題列該模式同步；不控制咖啡色的一直阻止。
 
-### 標籤頁圖示
+### 防止休眠工作模式
 
-- <img src="../imgs/svg/ui/log.svg" alt="日誌" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **日誌圖示** - 切換到「操作日誌」標籤頁，查看所有操作的記錄。
+標題列咖啡因圖示預設關閉。點擊按 **關閉 → 防止休眠 → 智慧防止休眠 → 關閉** 循環。狀態保護開啟時該按鈕會鎖定。
+
+- **關閉**：不阻止系統休眠。圖示無著色。
+- **防止休眠**（咖啡色）：持續阻止休眠，即使閒置也不會退出。只能透過標題列圖示切入，設定頁開關不控制此模式。
+- **智慧防止休眠**（青色）：只監視目前已掛載的 NTFS 裝置。偵測到讀寫傳輸時阻止休眠；傳輸停止約 20 秒後自動允許休眠。沒有已掛載的 NTFS 裝置、或裝置閒置時，不會一直佔著系統不休眠。設定頁「智慧防止休眠」勾選只對應此模式。
+
+退出應用程式時會停止阻止休眠。
 
 ### 裝置管理圖示
 
@@ -326,43 +333,6 @@ brew install ntfs-3g-mac
 
 卸載後設備會從系統中移除。如果需要重新存取，請重新插入設備或使用系統自帶的掛載功能。
 
-## 操作日誌
-
-在"操作日誌"標籤頁中可以查看所有操作的記錄，包括：
-
-- 依賴檢查結果
-- 設備檢測狀態
-- 掛載、卸載、推出操作結果
-- 修復、重新命名、格式化操作結果
-- 錯誤資訊和警告
-
-**啟用操作日誌：**
-
-操作日誌預設關閉，需要手動啟用。在"操作日誌"標籤頁中勾選"啟用操作日誌"核取方塊即可開啟。啟用後，應用會記錄所有操作日誌。關閉後，將不再記錄新的日誌，但已記錄的日誌仍會保留。
-
-**日誌儲存：**
-
-日誌以 JSON 格式儲存在檔案系統中，儲存位置為：
-
-```
-~/Library/Application Support/Nigate/logs.json
-```
-
-日誌檔案採用格式化的 JSON 格式，可以直接用文字編輯器開啟查看。卸載應用時，日誌檔案不會自動刪除，便於後續查看或備份。
-
-**日誌限制：**
-
-為了確保應用效能和穩定性，日誌系統設定了以下限制：
-
-- **保留期限**：日誌預設最長保存 30 天，超過 30 天的日誌會自動清理
-- **記錄數量限制**：最多保留 500 條日誌記錄，超過限制時會自動刪除最舊的記錄，保留最新的 500 條
-- **檔案大小限制**：日誌檔案最大為 500KB，超過限制時會自動刪除舊記錄以保持檔案大小在限制內
-- **顯示數量限制**：介面中最多顯示 300 條日誌（最新的 300 條），以提高渲染效能
-
-**日誌管理：**
-
-- **清空日誌**：點擊"清空"按鈕可以清除所有日誌記錄
-- **匯出日誌**：點擊"匯出"按鈕可以將日誌匯出為文字檔案，便於備份或分享
 
 ## 更多疑難解答
 

@@ -46,20 +46,7 @@
     return key;
   }
 
-  async function addLog(message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info'): Promise<void> {
-    if (Utils && Utils.addLog) {
-      await Utils.addLog(message, type);
-      return;
-    }
-    // 降级实现
-    const time = new Date().toLocaleTimeString('zh-CN');
-    const logs = JSON.parse(localStorage.getItem('appLogs') || '[]');
-    logs.push({ time, message, type });
-    if (logs.length > 1000) {
-      logs.shift();
-    }
-    localStorage.setItem('appLogs', JSON.stringify(logs));
-  }
+  async function addLog(_message: string, _type: 'info' | 'success' | 'error' | 'warning' = 'info'): Promise<void> {}
 
   function showLoading(show: boolean = true): void {
     if (Utils && Utils.showLoading) {

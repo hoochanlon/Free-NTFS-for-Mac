@@ -115,20 +115,6 @@
     return key;
   }
 
-  async function addLog(message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info'): Promise<void> {
-    if (Utils && Utils.addLog) {
-      await Utils.addLog(message, type);
-      return;
-    }
-    const time = new Date().toLocaleTimeString('zh-CN');
-    const logs = JSON.parse(localStorage.getItem('appLogs') || '[]');
-    logs.push({ time, message, type });
-    if (logs.length > 1000) {
-      logs.shift();
-    }
-    localStorage.setItem('appLogs', JSON.stringify(logs));
-  }
-
   function showLoading(show: boolean = true): void {
     // 如果是托盘窗口，不显示加载遮罩（无感刷新）
     const isTrayWindow = document.body && document.body.classList.contains('tray-window');
@@ -354,38 +340,12 @@
         const readOnlyCount = devices.filter(d => d.isReadOnly).length;
         const currentState = `${currentDeviceCount}-${readOnlyCount}`;
 
-        // 只在设备状态变化时添加日志
-        const deviceStateChanged = currentDeviceCount !== state.lastDeviceCount || currentState !== state.lastDeviceState;
-
-        if (devices.length === 0) {
-          if (deviceStateChanged) {
-            await addLog(t('messages.noDevicesDetected'), 'info');
-          }
-        } else {
-          const readWriteCount = devices.length - readOnlyCount;
-
-          if (readOnlyCount > 0) {
-            if (deviceStateChanged) {
-              if (readWriteCount > 0) {
-                await addLog(t('messages.devicesDetected', { count: devices.length, readOnly: readOnlyCount, readWrite: readWriteCount }), 'info');
-              } else {
-                await addLog(t('messages.devicesDetectedAllReadOnly', { count: devices.length }), 'warning');
-              }
-            }
-          } else {
-            if (deviceStateChanged) {
-              await addLog(t('messages.devicesDetectedAllReadWrite', { count: devices.length }), 'success');
-            }
-          }
-        }
-
         state.lastDeviceCount = currentDeviceCount;
         state.lastDeviceState = currentState;
 
         return devices;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        await addLog(t('messages.refreshFailed', { error: errorMessage }), 'error');
+        console.error('刷新设备列表失败:', error);
         return state.devices;
       } finally {
         showLoading(false);
@@ -410,7 +370,7 @@
     }
   }
 
-  // 更新设备状态（用于日志）
+  // 更新设备状态
   async function updateDeviceState(
     devices: any[],
     state: {
@@ -421,30 +381,6 @@
     const currentDeviceCount = devices.length;
     const readOnlyCount = devices.filter(d => d.isReadOnly).length;
     const currentState = `${currentDeviceCount}-${readOnlyCount}`;
-
-    const stateChanged = currentDeviceCount !== state.lastDeviceCount || currentState !== state.lastDeviceState;
-
-    if (devices.length === 0) {
-      if (stateChanged) {
-        await addLog(t('messages.noDevicesDetected'), 'info');
-      }
-    } else {
-      const readWriteCount = devices.length - readOnlyCount;
-
-      if (readOnlyCount > 0) {
-        if (stateChanged) {
-          if (readWriteCount > 0) {
-            await addLog(t('messages.devicesDetected', { count: devices.length, readOnly: readOnlyCount, readWrite: readWriteCount }), 'info');
-          } else {
-            await addLog(t('messages.devicesDetectedAllReadOnly', { count: devices.length }), 'warning');
-          }
-        }
-      } else {
-        if (stateChanged) {
-          await addLog(t('messages.devicesDetectedAllReadWrite', { count: devices.length }), 'success');
-        }
-      }
-    }
 
     state.lastDeviceCount = currentDeviceCount;
     state.lastDeviceState = currentState;

@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { app } from 'electron';
-import { WINDOW_SIZE_CONFIG } from '../../config/window-config';
 
 // 设置文件路径
 function getSettingsPath(): string {
@@ -9,21 +8,16 @@ function getSettingsPath(): string {
   return path.join(userDataPath, 'settings.json');
 }
 
-// 导出窗口尺寸配置（从统一配置文件导入）
-export { WINDOW_SIZE_CONFIG };
-
 // 默认设置
 const DEFAULT_SETTINGS = {
   savePassword: true,
   autoMount: false,
-  startupTab: 'dependencies' as 'dependencies' | 'devices' | 'logs' | 'help',
-  enableLogs: false,
+  startupTab: 'dependencies' as 'dependencies' | 'devices' | 'help' | 'settings',
   language: 'system' as 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'de' | 'system',
-  windowWidth: WINDOW_SIZE_CONFIG.defaultWidth,
-  windowHeight: WINDOW_SIZE_CONFIG.defaultHeight,
   trayMode: false, // 托盘模式，默认关闭
   autoStart: false, // 系统自启，默认关闭
-  preventSleep: false, // 禁止休眠，默认关闭
+  preventSleep: false, // 智能防止休眠：由标题栏三态切入
+  keepAwake: false, // 标题栏一直不休眠，默认关闭
   hideIconTooltips: true,
   // 用户手动设置为只读的设备列表：
   // 优先存 volumeUuid（稳定，不会因插拔变化），拿不到时才存 disk（可能被系统复用，仅用于兼容旧数据）
@@ -33,14 +27,12 @@ const DEFAULT_SETTINGS = {
 export interface AppSettings {
   savePassword: boolean;
   autoMount: boolean;
-  startupTab: 'dependencies' | 'devices' | 'logs' | 'help';
-  enableLogs: boolean;
+  startupTab: 'dependencies' | 'devices' | 'help' | 'settings';
   language: 'zh-CN' | 'zh-TW' | 'ja' | 'en' | 'de' | 'system';
-  windowWidth: number;
-  windowHeight: number;
   trayMode: boolean; // 托盘模式
   autoStart: boolean; // 系统自启
-  preventSleep: boolean; // 禁止休眠
+  preventSleep: boolean; // 智能防止休眠
+  keepAwake: boolean; // 标题栏一直不休眠
   hideIconTooltips: boolean;
   manuallyReadOnlyDevices?: string[]; // 用户手动设置为只读的设备列表
 }
@@ -58,8 +50,11 @@ export class SettingsManager {
       if (fs.existsSync(settingsPath)) {
         const data = await fs.promises.readFile(settingsPath, 'utf-8');
         const settings = JSON.parse(data);
-        // 合并默认设置，确保所有字段都存在
-        return { ...DEFAULT_SETTINGS, ...settings };
+        const { windowWidth: _w, windowHeight: _h, enableLogs: _enableLogs, ...rest } = settings;
+        if ((rest as { startupTab?: string }).startupTab === 'logs') {
+          rest.startupTab = 'dependencies';
+        }
+        return { ...DEFAULT_SETTINGS, ...rest };
       }
       return { ...DEFAULT_SETTINGS };
     } catch (error) {

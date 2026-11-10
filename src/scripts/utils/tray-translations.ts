@@ -52,8 +52,12 @@ export function detectLanguage(settingsLanguage: string): string {
       return 'ja';
     } else if (systemLang.startsWith('en')) {
       return 'en';
+    } else if (systemLang.startsWith('de')) {
+      return 'de';
     } else if (systemLang.startsWith('zh-TW') || systemLang.startsWith('zh-Hant')) {
       return 'zh-TW';
+    } else if (systemLang.startsWith('zh')) {
+      return 'zh-CN';
     } else {
       return 'zh-CN';
     }

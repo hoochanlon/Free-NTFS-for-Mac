@@ -10,35 +10,17 @@ async function checkMacFUSE(brewExists: boolean): Promise<boolean> {
     try {
       const env = getCommandEnv();
 
-      let installedByBrew = false;
       try {
         await Promise.race([
           execAsync('brew list --cask macfuse 2>/dev/null', { env }),
           new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
         ]);
-        installedByBrew = true;
+        // brew list 只表示「已安装」。是否过期由一键安装 / 升级指引处理，
+        // 不能把 outdated 当成未安装，否则本机有 5.4.0、仓库有 5.5.0 时界面会误报。
+        console.log('[依赖检查] MacFUSE 通过 brew list --cask 检查');
+        return true;
       } catch {
         console.log('[依赖检查] brew list --cask 检查：MacFUSE 未通过 Homebrew 安装');
-      }
-
-      if (installedByBrew) {
-        try {
-          const outdatedResult = await Promise.race([
-            execAsync('brew outdated --cask --greedy macfuse 2>/dev/null', {
-              env: { ...env, HOMEBREW_NO_AUTO_UPDATE: '1' }
-            }),
-            new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
-          ]) as { stdout: string };
-          if (outdatedResult.stdout.trim()) {
-            console.log('[依赖检查] MacFUSE cask 已过期，需要升级');
-            return false;
-          }
-          console.log('[依赖检查] MacFUSE 已安装且为最新 cask 版本');
-          return true;
-        } catch (error) {
-          console.warn('[依赖检查] 无法确认 MacFUSE 是否为最新版本:', error);
-          return false;
-        }
       }
     } catch {
       // 忽略错误，继续尝试其他方法
@@ -307,7 +289,7 @@ export async function installDependencies(): Promise<string> {
       } else {
         await execAsync('brew install --cask macfuse', { env });
       }
-      await execAsync('brew install ntfs-3g-mac', { env });
+      await execAsync('brew install gromgit/fuse/ntfs-3g-mac', { env });
       logs.push('MacFUSE 和 ntfs-3g 安装完成');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

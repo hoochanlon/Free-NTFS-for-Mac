@@ -4,8 +4,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { app } from 'electron';
 import {
-  createLogsWindow,
-  closeLogsWindow,
   createModuleWindow,
   closeModuleWindow,
   mainWindow,
@@ -19,11 +17,10 @@ import {
 } from './window-manager';
 import { openAboutWindow, getAboutWindow } from './about-window';
 import { SettingsManager, AppSettings } from './utils/settings';
-import { WINDOW_SIZE_CONFIG } from '../config/window-config';
 import { KeychainManager } from './utils/keychain';
 import { rebuildApplicationMenu } from './app-config';
 import { initTray, destroyTray, updateTrayMenu, updateTrayTooltip, isTrayInitialized } from './utils/tray-manager';
-import { caffeinateManager } from './utils/caffeinate-manager';
+import { preventSleepController } from './utils/prevent-sleep-controller';
 import { openDependencyInstaller } from './ntfs-manager/dep-auto-installer';
 
 let quitWindow: BrowserWindow | null = null;
@@ -559,6 +556,7 @@ export function setupNTFSHandlers(): void {
       // 只在第一次调用时初始化混合检测（避免重复初始化）
       if (!hybridDetectionInitialized) {
         await ntfsManager.startHybridDetection((devices) => {
+          preventSleepController.setDevices(devices);
           // 设备变化时清理陈旧的“手动只读”列表，避免 disk 复用导致误判
           pruneManuallyReadOnlyDevices(devices as any)
             .catch(() => {})
@@ -631,37 +629,6 @@ export function setupNTFSHandlers(): void {
     return await ntfsManager.checkEventDrivenAvailable();
   });
 
-  ipcMain.handle('export-logs', async (event: IpcMainInvokeEvent, content: string) => {
-    try {
-      const { dialog } = require('electron');
-      const fs = require('fs').promises;
-      const path = require('path');
-      const { app } = require('electron');
-
-      const result = await dialog.showSaveDialog({
-        title: '导出操作日志',
-        defaultPath: path.join(
-          app.getPath('documents'),
-          `操作日志_${new Date().toISOString().split('T')[0]}.txt`
-        ),
-        filters: [
-          { name: '文本文件', extensions: ['txt'] },
-          { name: '所有文件', extensions: ['*'] }
-        ]
-      });
-
-      if (result.canceled) {
-        return { success: false, error: '用户取消' };
-      }
-
-      await fs.writeFile(result.filePath, content, 'utf-8');
-      return { success: true, path: result.filePath };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      return { success: false, error: errorMessage };
-    }
-  });
-
   // 已移除自动安装功能，改为仅检测和提供安装指引
   // ipcMain.handle('install-dependencies', async () => {
   //   try {
@@ -722,40 +689,6 @@ export function setupNTFSHandlers(): void {
         defaultId: 0,
         noLink: true
       });
-    }
-  });
-
-  // 读取日志文件
-  ipcMain.handle('read-logs-file', async () => {
-    try {
-      const userDataPath = app.getPath('userData');
-      const logsFilePath = path.join(userDataPath, 'logs.json');
-
-      if (fs.existsSync(logsFilePath)) {
-        const content = await fs.promises.readFile(logsFilePath, 'utf-8');
-        // 确保返回的内容不为空
-        return { success: true, content: content || '[]' };
-      }
-      // 文件不存在时返回空数组
-      return { success: true, content: '[]' };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('读取日志文件失败:', errorMessage);
-      return { success: false, error: errorMessage };
-    }
-  });
-
-  // 保存日志文件
-  ipcMain.handle('write-logs-file', async (event: IpcMainInvokeEvent, content: string) => {
-    try {
-      const userDataPath = app.getPath('userData');
-      const logsFilePath = path.join(userDataPath, 'logs.json');
-
-      await fs.promises.writeFile(logsFilePath, content, 'utf-8');
-      return { success: true };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      return { success: false, error: errorMessage };
     }
   });
 }
@@ -821,14 +754,6 @@ export function setupWindowHandlers(): void {
       console.error('[Update] 检查更新失败:', error);
       return { success: false, reason, currentVersion, releaseUrl };
     }
-  });
-
-  ipcMain.handle('open-logs-window', async () => {
-    await createLogsWindow();
-  });
-
-  ipcMain.handle('close-logs-window', async () => {
-    closeLogsWindow();
   });
 
   ipcMain.handle('open-module-window', async (event: IpcMainInvokeEvent, moduleName: string) => {
@@ -1038,11 +963,6 @@ export function setupSettingsHandlers(): void {
     return await SettingsManager.getSettings();
   });
 
-  // 获取窗口尺寸配置
-  ipcMain.handle('get-window-size-config', async () => {
-    return WINDOW_SIZE_CONFIG;
-  });
-
   // 保存设置
   ipcMain.handle('save-settings', async (event: IpcMainInvokeEvent, settings: Partial<AppSettings>) => {
     const oldSettings = await SettingsManager.getSettings();
@@ -1144,6 +1064,18 @@ export function setupSettingsHandlers(): void {
         openAsHidden: false
       });
     }
+    if (settings.keepAwake !== undefined || settings.preventSleep !== undefined) {
+      let keepAwake = !!oldSettings.keepAwake;
+      let smart = !!oldSettings.preventSleep;
+      if (settings.keepAwake !== undefined) keepAwake = !!settings.keepAwake;
+      if (settings.preventSleep !== undefined) smart = !!settings.preventSleep;
+      if (settings.preventSleep === true) keepAwake = false;
+      if (settings.keepAwake === true && settings.preventSleep !== true) smart = false;
+      const mode = keepAwake ? 'always' : (smart ? 'smart' : 'off');
+      if (mode !== preventSleepController.getMode()) {
+        await preventSleepController.setMode(mode, { persist: false });
+      }
+    }
     return { success: true };
   });
 
@@ -1173,17 +1105,10 @@ export function setupSettingsHandlers(): void {
 
 // Caffeinate 相关 IPC handlers
 export function setupCaffeinateHandlers(): void {
-  // 启动防止休眠
   ipcMain.handle('caffeinate-start', async () => {
     try {
-      const result = await caffeinateManager.start();
-      // 广播状态变化到所有窗口
-      const allWindows = BrowserWindow.getAllWindows();
-      allWindows.forEach((window: BrowserWindow) => {
-        if (!window.isDestroyed()) {
-          window.webContents.send('caffeinate-status-changed', result.success);
-        }
-      });
+      const result = await preventSleepController.setMode('always');
+      void updateTrayMenu(false);
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -1191,35 +1116,21 @@ export function setupCaffeinateHandlers(): void {
     }
   });
 
-  // 停止防止休眠
   ipcMain.handle('caffeinate-stop', async () => {
     try {
-      caffeinateManager.stop();
-      // 广播状态变化到所有窗口
-      const allWindows = BrowserWindow.getAllWindows();
-      allWindows.forEach((window: BrowserWindow) => {
-        if (!window.isDestroyed()) {
-          window.webContents.send('caffeinate-status-changed', false);
-        }
-      });
-      return { success: true };
+      const result = await preventSleepController.setMode('off');
+      void updateTrayMenu(false);
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       return { success: false, error: errorMessage };
     }
   });
 
-  // 切换防止休眠状态
   ipcMain.handle('caffeinate-toggle', async () => {
     try {
-      const result = await caffeinateManager.toggle();
-      // 广播状态变化到所有窗口
-      const allWindows = BrowserWindow.getAllWindows();
-      allWindows.forEach((window: BrowserWindow) => {
-        if (!window.isDestroyed()) {
-          window.webContents.send('caffeinate-status-changed', result.isActive);
-        }
-      });
+      const result = await preventSleepController.toggle();
+      void updateTrayMenu(false);
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -1227,9 +1138,8 @@ export function setupCaffeinateHandlers(): void {
     }
   });
 
-  // 获取防止休眠状态
   ipcMain.handle('caffeinate-status', async () => {
-    return caffeinateManager.getStatus();
+    return preventSleepController.isEnabled();
   });
 }
 
@@ -1244,7 +1154,10 @@ export function setupIpcHandlers(): void {
 
   // 启动期即建立设备监听。自动读写不再等待窗口渲染器注册回调。
   // 监听就绪后再预创建托盘窗口，后续插拔才能在打开前完成预渲染。
-  ntfsManager.startHybridDetection(() => {}).then(() => {
+  ntfsManager.startHybridDetection((devices) => {
+    preventSleepController.setDevices(devices);
+  }).then(() => {
+    preventSleepController.setDevices(ntfsManager.getCachedDevices());
     void ensureTrayDevicesWindow();
   }).catch(error => {
     console.error('[自动读写] 启动设备监听失败:', error);

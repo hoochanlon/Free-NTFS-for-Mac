@@ -63,20 +63,6 @@
     return key;
   }
 
-  async function addLog(message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info'): Promise<void> {
-    if (Utils && Utils.addLog) {
-      await Utils.addLog(message, type);
-      return;
-    }
-    const time = new Date().toLocaleTimeString('zh-CN');
-    const logs = JSON.parse(localStorage.getItem('appLogs') || '[]');
-    logs.push({ time, message, type });
-    if (logs.length > 1000) {
-      logs.shift();
-    }
-    localStorage.setItem('appLogs', JSON.stringify(logs));
-  }
-
   // 刷新设备列表（委托给 Refresh 模块）
   async function refreshDevices(force: boolean = false): Promise<void> {
     if (Refresh && Refresh.refreshDevices) {
@@ -285,7 +271,7 @@
         autoMountBtn.title = t('tray.autoMount') || t('devices.autoMount') || '自动读写';
       }
       if (caffeinateBtn) {
-        caffeinateBtn.title = t('tray.preventSleep') || '禁止休眠';
+        caffeinateBtn.title = t('titleBar.preventSleep') || '防止休眠';
       }
       if (refreshDevicesBtn) {
         refreshDevicesBtn.title = t('tray.refreshDevices') || t('devices.refreshDevices') || '刷新';
@@ -399,16 +385,70 @@
           // 检查是否锁定（通过检查保护按钮的状态）
           const protectBtn = document.getElementById('protectBtn') as HTMLButtonElement | null;
           if (protectBtn && protectBtn.classList.contains('locked')) {
-            const AppUtils = (window as any).AppUtils;
-            if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
-              await AppUtils.Logs.addLog(t('app.protectLockedMessage') || '状态已锁定，无法修改', 'warning');
-            }
             return;
           }
           autoMountEnabled = !autoMountEnabled;
           updateAutoMountButtonState();
           if (electronAPI.saveSettings) {
             await electronAPI.saveSettings({ autoMount: autoMountEnabled });
+          }
+        } catch (e) {
+          // 静默处理
+        }
+      });
+    }
+
+    if (caffeinateBtn) {
+      const preventSleepModeOf = (settings: { keepAwake?: boolean; preventSleep?: boolean }) => {
+        if (settings.keepAwake) return 'always' as const;
+        if (settings.preventSleep) return 'smart' as const;
+        return 'off' as const;
+      };
+      const nextPreventSleepMode = (mode: 'off' | 'always' | 'smart') => {
+        if (mode === 'off') return 'always' as const;
+        if (mode === 'always') return 'smart' as const;
+        return 'off' as const;
+      };
+      const paintCaffeinateButton = (mode: 'off' | 'always' | 'smart') => {
+        caffeinateBtn.classList.toggle('active', mode === 'always');
+        caffeinateBtn.classList.toggle('smart', mode === 'smart');
+        const titleKey = mode === 'smart' ? 'titleBar.preventSleepSmart' : 'titleBar.preventSleep';
+        caffeinateBtn.title = t(titleKey) || (mode === 'smart' ? '智能防止休眠' : '防止休眠');
+      };
+      const loadCaffeinateSetting = async () => {
+        try {
+          if (electronAPI.getSettings) {
+            const settings = await electronAPI.getSettings();
+            if (settings) {
+              paintCaffeinateButton(preventSleepModeOf(settings));
+            }
+          }
+        } catch (e) {
+          // 静默处理
+        }
+      };
+      loadCaffeinateSetting();
+      if (electronAPI.onSettingsChange) {
+        electronAPI.onSettingsChange((settings: any) => {
+          if (settings && (typeof settings.keepAwake === 'boolean' || typeof settings.preventSleep === 'boolean')) {
+            void loadCaffeinateSetting();
+          }
+        });
+      }
+      caffeinateBtn.addEventListener('click', async () => {
+        try {
+          const protectBtn = document.getElementById('protectBtn') as HTMLButtonElement | null;
+          if (protectBtn && protectBtn.classList.contains('locked')) {
+            return;
+          }
+          const settings = electronAPI.getSettings ? await electronAPI.getSettings() : {};
+          const next = nextPreventSleepMode(preventSleepModeOf(settings || {}));
+          paintCaffeinateButton(next);
+          if (electronAPI.saveSettings) {
+            await electronAPI.saveSettings({
+              keepAwake: next === 'always',
+              preventSleep: next === 'smart'
+            });
           }
         } catch (e) {
           // 静默处理
@@ -438,7 +478,6 @@
             await refreshDevices(true);
           } catch (error) {
             console.error('刷新设备列表失败:', error);
-            await addLog('刷新设备列表失败: ' + (error instanceof Error ? error.message : String(error)), 'error');
           } finally {
             if (refreshDevicesBtn) {
               refreshDevicesBtn.disabled = false;
@@ -530,13 +569,6 @@
           isLocked = !isLocked;
           updateLockState();
           await saveLockState(isLocked);
-          const message = isLocked
-            ? (t('app.protectLocked') || '状态已锁定')
-            : (t('app.protectUnlocked') || '状态已解锁');
-          const AppUtils = (window as any).AppUtils;
-          if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
-            AppUtils.Logs.addLog(message, 'info').catch(console.error);
-          }
           longPressTimer = null;
         }, LONG_PRESS_DURATION);
       });
@@ -564,13 +596,6 @@
           isLocked = !isLocked;
           updateLockState();
           await saveLockState(isLocked);
-          const message = isLocked
-            ? (t('app.protectLocked') || '状态已锁定')
-            : (t('app.protectUnlocked') || '状态已解锁');
-          const AppUtils = (window as any).AppUtils;
-          if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
-            AppUtils.Logs.addLog(message, 'info').catch(console.error);
-          }
           longPressTimer = null;
         }, LONG_PRESS_DURATION);
       });
@@ -604,90 +629,6 @@
           }
         });
       }
-    }
-
-    // 防止休眠按钮（托盘窗口）
-    if (caffeinateBtn) {
-      const updateCaffeinateButtonState = async () => {
-        try {
-          const isActive = await electronAPI.caffeinateStatus();
-          if (isActive) {
-            caffeinateBtn.classList.add('active');
-          } else {
-            caffeinateBtn.classList.remove('active');
-          }
-        } catch (error) {
-          console.error('获取防止休眠状态失败:', error);
-        }
-      };
-
-      // 初始化按钮状态
-      updateCaffeinateButtonState().catch(err => {
-        console.error('初始化防止休眠按钮状态失败:', err);
-      });
-
-      // 监听状态变化
-      if (electronAPI.onCaffeinateStatusChange) {
-        electronAPI.onCaffeinateStatusChange(async () => {
-          await updateCaffeinateButtonState();
-        });
-      }
-
-      // 语言切换时更新提示文案
-      window.addEventListener('languageChanged', async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        await updateCaffeinateButtonState();
-      });
-
-      // 点击切换
-      caffeinateBtn.addEventListener('click', async () => {
-        try {
-          // 检查是否锁定（通过检查保护按钮的状态）
-          const protectBtn = document.getElementById('protectBtn') as HTMLButtonElement | null;
-          if (protectBtn && protectBtn.classList.contains('locked')) {
-            const AppUtils = (window as any).AppUtils;
-            if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
-              await AppUtils.Logs.addLog(t('app.protectLockedMessage') || '状态已锁定，无法修改', 'warning');
-            }
-            return;
-          }
-          const result = await electronAPI.caffeinateToggle();
-          if (result.success) {
-            // 关键：托盘窗口切换后也要把状态写回设置
-            // 否则主界面会按 settings.preventSleep 进行“纠偏”，把实际 caffeinate 状态关掉
-            try {
-              if (electronAPI.saveSettings) {
-                await electronAPI.saveSettings({ preventSleep: result.isActive });
-              }
-            } catch (error) {
-              console.warn('[托盘窗口] 保存防止休眠设置失败:', error);
-            }
-
-            await updateCaffeinateButtonState();
-            const message = result.isActive
-              ? t('tray.preventSleepEnabled')
-              : t('tray.preventSleepDisabled');
-            const AppUtils = (window as any).AppUtils;
-            if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
-              await AppUtils.Logs.addLog(message, result.isActive ? 'success' : 'info');
-            }
-          } else {
-            console.error('切换防止休眠状态失败:', result.error);
-            const AppUtils = (window as any).AppUtils;
-            if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
-              const errorMsg = `${t('tray.preventSleep')}操作失败: ${result.error || t('devices.unknownError') || '未知错误'}`;
-              await AppUtils.Logs.addLog(errorMsg, 'error');
-            }
-          }
-        } catch (error) {
-          console.error('防止休眠操作失败:', error);
-          const AppUtils = (window as any).AppUtils;
-          if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
-            const errorMsg = `${t('tray.preventSleep')}操作失败: ${error instanceof Error ? error.message : String(error)}`;
-            await AppUtils.Logs.addLog(errorMsg, 'error');
-          }
-        }
-      });
     }
 
     if (quitBtn) {

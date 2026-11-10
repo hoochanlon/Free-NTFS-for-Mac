@@ -9,6 +9,10 @@
     "protectTooltip": "Status Protection (Long press 3s to protect)",
     "protectTooltipLocked": "Status Protected (Long press 3s to remove protection)"
   },
+  "titleBar": {
+    "preventSleep": "Prevent Sleep",
+    "preventSleepSmart": "Smart Prevent Sleep"
+  },
   "menu": {
     "about": "About",
     "services": "Services",
@@ -42,7 +46,6 @@
   "tabs": {
     "dependencies": "System Dependencies",
     "devices": "NTFS Devices",
-    "logs": "Operation Logs",
     "help": "Guide",
     "settings": "Settings"
   },
@@ -61,9 +64,43 @@
     "title": "System Dependencies",
     "checkButton": "Check Dependencies",
     "autoInstall": "One-click Install",
-    "autoInstallTitle": "Install missing dependencies in Terminal, step by step",
-    "autoInstallOpened": "Terminal opened. After you finish the current step, the next one starts automatically. You will see “All steps completed” when done.",
+    "autoInstallTitle": "Automatically install every automatable step from the System Dependencies tab",
+    "autoInstallOpened": "Terminal opened. Gatekeeper, CLT, Homebrew, MacFUSE, ntfs-3g, and fswatch will install automatically. You only need to handle passwords and system dialogs.",
     "autoInstallFailed": "Failed to open Terminal: {error}",
+    "installer": {
+      "title": "Nigate Dependency Installer",
+      "intro": "This window installs every automatable step from the System Dependencies tab. Use the Nigate app for disk read/write.",
+      "wait": "If macOS shows a dialog or password prompt, finish it. The next step starts automatically.",
+      "skip": "Already installed, skipping.",
+      "installing": "Installing...",
+      "done": "This step is done.",
+      "fail": "This step failed. Remaining steps were stopped.",
+      "allDone": "All automatable steps finished",
+      "closeHint": "Press Enter to close this window...",
+      "next": "Next",
+      "stepMacos": "macOS version",
+      "stepGatekeeper": "Allow apps from anywhere (Gatekeeper)",
+      "stepClt": "Xcode Command Line Tools",
+      "stepBrew": "Homebrew",
+      "stepMacfuse": "MacFUSE",
+      "stepNtfs": "ntfs-3g",
+      "stepFswatch": "fswatch (optional)",
+      "stepVerify": "Verify installation",
+      "sudoHint": "Administrator access is required. Enter your login password once.",
+      "sudoFail": "Administrator access was not granted. Automatic install cannot continue.",
+      "macosOk": "Version meets the requirement.",
+      "macosLow": "This macOS version may be below 14. Continuing anyway.",
+      "gatekeeperHint": "Running sudo spctl --master-disable. If macOS asks for confirmation, enable “Anywhere” in System Settings > Privacy & Security.",
+      "gatekeeperDone": "Gatekeeper step finished.",
+      "macfuseHint": "If macOS asks about a kernel extension, approve macFUSE in System Settings > Privacy & Security.",
+      "kextHint": "On Apple Silicon, if the kernel extension cannot load: shut down, press and hold the power button, open Startup Options > Options > Utilities > Startup Security Utility, then reduce security and allow kernel extensions from identified developers.",
+      "fsExtHint": "In System Settings > General > Login Items & Extensions > File System Extensions, enable macFUSE and ntfs-3g.",
+      "brewMissing": "Homebrew was not found. Cannot install the remaining dependencies.",
+      "cltHint": "A system installer window will appear. After you finish it, the next step starts automatically.",
+      "manualRemain": "These remaining steps must be confirmed in System Settings:",
+      "present": "Ready",
+      "missing": "Not ready"
+    },
     "checking": "Checking...",
     "installed": "Installed",
     "installedOptional": "Installed (Optional)",
@@ -178,29 +215,9 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "continue": "Continue",
-    "ok": "OK"
-  },
-  "logs": {
-    "title": "Operation Logs",
-    "empty": "No logs",
-    "clear": "Clear",
-    "export": "Export",
-    "enable": "Enable Operation Logs",
-    "exportSuccess": "Logs exported successfully",
-    "exportError": "Export failed",
-    "noLogsToExport": "No logs to export",
-    "clearConfirm": "Are you sure you want to clear all logs?",
-    "exportPath": "Logs exported to: {path}",
-    "exportHeader": "Nigate - Operation Logs",
-    "exportTime": "Export time: {time}",
-    "exportCount": "Total {count} logs",
-    "logTypes": {
-      "info": "Info",
-      "success": "Success",
-      "error": "Error",
-      "warning": "Warning"
-    },
-    "logsEnabled": "Operation logs enabled"
+    "ok": "OK",
+    "success": "Success",
+    "error": "Error"
   },
   "help": {
     "title": "Guide",
@@ -231,11 +248,11 @@
         },
         "preventSleep": {
           "name": "Prevent Sleep Icon",
-          "description": "When enabled, the system will prevent entering sleep mode to ensure devices remain accessible. The icon appears coffee-colored when active."
+          "description": "Off by default. Click to cycle: Off → Prevent Sleep (coffee brown, always on) → Smart Prevent Sleep (teal) → Off. Status protection locks this button."
         },
         "protect": {
           "name": "Status Protection Icon",
-          "description": "Long press for 3 seconds to toggle protection status. When protected, auto read-write, tray mode, and prevent sleep features will be disabled to prevent accidental operations. The icon appears green with a pulse animation when protected."
+          "description": "Long press for 3 seconds to toggle protection status. When protected, auto read-write, tray mode, and the prevent-sleep icon are locked to prevent accidental operations. The icon appears green with a pulse animation when protected."
         },
         "about": {
           "name": "About Icon",
@@ -246,12 +263,13 @@
           "description": "Quits the application."
         }
       },
-      "tabs": {
-        "title": "Tab Icons",
-        "logs": {
-          "name": "Logs Icon",
-          "description": "Switches to the \"Operation Logs\" tab to view records of all operations."
-        }
+      "preventSleepModes": {
+        "title": "Prevent Sleep Modes",
+        "intro": "The title bar coffee icon is off by default. Click to cycle Off → Prevent Sleep → Smart Prevent Sleep → Off. Status protection locks this button.",
+        "off": "Off: Sleep is not blocked. The icon is uncolored.",
+        "always": "Prevent Sleep (coffee brown): Sleep stays blocked even when idle. Enter this mode only from the title bar icon; the Settings checkbox does not control it.",
+        "smart": "Smart Prevent Sleep (teal): Watches currently mounted NTFS volumes only. Sleep is blocked while those volumes have read/write traffic, then allowed again about 20 seconds after traffic stops. With no mounted NTFS volume, or while idle, the Mac is not kept awake. The Settings checkbox syncs only with this mode.",
+        "quit": "Sleep prevention stops when you quit the app."
       },
       "devices": {
         "title": "Device Management Icons",
@@ -277,20 +295,8 @@
     "deletePasswordError": "Failed to delete password, please try again",
     "startupTab": "Tab to Open on Startup",
     "startupTabDesc": "Select the default tab to display when the app starts",
-    "enableLogs": "Enable Operation Logs",
-    "enableLogsDesc": "Disabled by default, requires manual activation. When enabled, the app will record all operation logs. When disabled, new logs will not be recorded, but previously recorded logs will still be retained. Logs are saved for a maximum of 30 days by default",
-    "resetLogsDaily": "Automatically Reset Logs Daily",
-    "resetLogsDailyDesc": "When enabled, the app will automatically clear the previous day's logs on the first launch each day",
-    "exportLogs": "Export Operation Logs",
-    "exportLogsDesc": "Export all operation logs as a text file",
     "language": "Language",
     "languageDesc": "Select the application interface language",
-    "windowSize": "Window Size",
-    "windowSizeDesc": "Customize the width and height of the application window (in pixels). Changes will take effect after restarting the application",
-    "width": "Width",
-    "height": "Height",
-    "pixel": "px",
-    "resetToDefault": "Reset to Default",
     "languages": {
       "system": "Follow System",
       "zh-CN": "简中 (CN)",
@@ -303,8 +309,8 @@
     "autoMountDesc": "When enabled, the background mounts newly inserted read-only NTFS volumes as read-write without opening a window. A volume restored to read-only stays unchanged for the current connection",
     "trayMode": "Tray Mode",
     "trayModeDesc": "When enabled, closing the window will minimize to the system tray instead of quitting the app. You can quickly manage NTFS devices through the tray icon.",
-    "preventSleep": "Prevent Sleep",
-    "preventSleepDesc": "When enabled, the system will prevent entering sleep mode to ensure devices remain accessible",
+    "preventSleep": "Smart Prevent Sleep",
+    "preventSleepDesc": "Watches mounted NTFS volumes only: sleep is blocked during transfers and allowed again about 20 seconds after idle. This checkbox turns on smart mode and matches the teal title-bar state; always-on (coffee brown) is title-bar only.",
     "enabled": "(Enabled)",
     "autoStart": "Launch at Login",
     "autoStartDesc": "When enabled, the app will automatically launch when the system starts"
@@ -313,9 +319,9 @@
     "showWindow": "Show Window",
     "ntfsDevices": "NTFS Devices",
     "autoMount": "Auto Read/Write",
-    "preventSleep": "No Sleep",
-    "preventSleepEnabled": "No Sleep (Enabled)",
-    "preventSleepDisabled": "No Sleep (Disabled)",
+    "preventSleep": "Smart Prevent Sleep",
+    "preventSleepEnabled": "Smart prevent sleep enabled",
+    "preventSleepDisabled": "Smart prevent sleep disabled",
     "showMainWindow": "Main Interface",
     "refreshDevices": "Refresh Device List",
     "refreshing": "Refreshing...",
@@ -324,7 +330,6 @@
     "ejectAll": "All Eject",
     "quickActions": "Quick Actions",
     "settings": "Settings",
-    "logs": "Operation Logs",
     "about": "About",
     "quit": "Quit",
     "quitConfirmTitle": "Confirm Quit",

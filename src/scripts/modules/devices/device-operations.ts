@@ -25,24 +25,6 @@
     return key; // 如果 i18n 未初始化，返回 key
   }
 
-  // 安全地添加日志（优先使用 DeviceUtils，降级到 AppUtils，最后使用 console）
-  async function addLog(message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info'): Promise<void> {
-    try {
-      if (DeviceUtils && DeviceUtils.addLog) {
-        await DeviceUtils.addLog(message, type);
-        return;
-      }
-      if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
-        await AppUtils.Logs.addLog(message, type);
-        return;
-      }
-      // 降级到 console（托盘窗口场景）
-      console.log(`[${type.toUpperCase()}] ${message}`);
-    } catch (error) {
-      // 如果所有方法都失败，至少输出到控制台
-      console.log(`[${type.toUpperCase()}] ${message}`);
-    }
-  }
 
   function isPasswordError(error: unknown): boolean {
     const message = error instanceof Error ? error.message : String(error);
@@ -295,8 +277,6 @@
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
           DeviceUtils.showLoading(true);
         }
-        await addLog(t('messages.mounting', { name: device.volumeName }), 'info');
-        await addLog(t('messages.enterPassword'), 'info');
 
         const result = await electronAPI.mountDevice(device);
 
@@ -317,7 +297,6 @@
           }
 
           if (result.result) {
-            await addLog(result.result, 'success');
           }
           // 等待一小段时间，确保挂载操作完全完成，标记文件已创建
           await new Promise(resolve => setTimeout(resolve, 500));
@@ -326,20 +305,16 @@
           await refreshDeviceList(devicesList, 0);
         } else {
           const errorMessage = result.error || t('messages.mountError');
-          await addLog(`${t('messages.mountError')}: ${errorMessage}`, 'error');
           if (isPasswordError(errorMessage)) {
             const passwordError = t('messages.passwordError');
-            await addLog(passwordError, 'warning');
             await showOperationMessage(t('messages.mountError'), passwordError, 'warning');
           } else if (isOperationCancelled(errorMessage)) {
-            await addLog(t('messages.cancelled'), 'info');
           } else {
             await showOperationMessage(t('messages.mountError'), errorMessage);
           }
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await addLog(`${t('messages.mountError')}: ${errorMessage}`, 'error');
         if (isPasswordError(error)) {
           await showOperationMessage(t('messages.mountError'), t('messages.passwordError'), 'warning');
         } else if (!isOperationCancelled(error)) {
@@ -364,8 +339,6 @@
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
           DeviceUtils.showLoading(true);
         }
-        await addLog(t('messages.resetting', { name: device.volumeName }) || `正在重置 ${device.volumeName}（卸载并修复）...`, 'info');
-        await addLog(t('messages.enterPassword'), 'info');
 
         // 在重置之前，先将设备添加到手动只读列表，防止自动读写功能立即将其设置为读写
         // 重置操作和手动设置为只读保持一样的逻辑
@@ -403,7 +376,6 @@
 
         if (result.success) {
           if (result.result) {
-            await addLog(result.result, 'success');
           }
           // 等待一小段时间，确保操作完全完成
           await new Promise(resolve => setTimeout(resolve, 1000));
@@ -412,20 +384,16 @@
           await refreshDeviceList(devicesList, 0);
         } else {
           const errorMessage = result.error || t('messages.resetError') || '未知错误';
-          await addLog(`${t('messages.resetError') || '重置失败'}: ${errorMessage}`, 'error');
           if (isPasswordError(errorMessage)) {
             const passwordError = t('messages.passwordError');
-            await addLog(passwordError, 'warning');
             await showOperationMessage(t('messages.resetError') || '重置失败', passwordError, 'warning');
           } else if (isOperationCancelled(errorMessage)) {
-            await addLog(t('messages.cancelled'), 'info');
           } else {
             await showOperationMessage(t('messages.resetError') || '重置失败', errorMessage);
           }
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await addLog(`${t('messages.resetError') || '重置失败'}: ${errorMessage}`, 'error');
         if (isPasswordError(error)) {
           await showOperationMessage(t('messages.resetError') || '重置失败', t('messages.passwordError'), 'warning');
         } else if (!isOperationCancelled(error)) {
@@ -471,8 +439,6 @@
           DeviceUtils.showLoading(true);
         }
 
-        await addLog(t('messages.repairing', { name: device.volumeName }), 'info');
-        await addLog(t('messages.enterPassword'), 'info');
 
         const autoMountCooldown: Map<string, number> =
           (AppModules.Devices as any).autoMountCooldown || new Map<string, number>();
@@ -490,7 +456,6 @@
             mode: t(device.isReadOnly ? 'devices.readOnly' : 'devices.readWrite')
           });
           markDeviceActionDone(device.disk, 'repair', devicesList, readWriteDevicesList);
-          await addLog(successMessage, 'success');
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refreshDeviceList(devicesList, 0);
           if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
@@ -500,7 +465,6 @@
           const errorMessage = getRepairErrorMessage(result.error || t('messages.unknownError'));
           const errorType = errorMessage === t('messages.cancelled') ? 'info' :
             errorMessage === t('messages.passwordError') ? 'warning' : 'error';
-          await addLog(errorMessage, errorType);
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refreshDeviceList(devicesList, 0);
           if (errorType === 'error' || errorType === 'warning') {
@@ -511,7 +475,6 @@
         const errorMessage = getRepairErrorMessage(error);
         const errorType = errorMessage === t('messages.cancelled') ? 'info' :
           errorMessage === t('messages.passwordError') ? 'warning' : 'error';
-        await addLog(errorMessage, errorType);
         if (errorType === 'error' || errorType === 'warning') {
           await showRepairMessage(t('messages.repairFailedTitle'), errorMessage, errorType);
         }
@@ -547,7 +510,6 @@
 
       const trimmedName = String(newName).trim();
       if (!trimmedName) {
-        await addLog(t('messages.renameInvalidName'), 'warning');
         await showOperationMessage(t('messages.renameFailedTitle'), t('messages.renameInvalidName'), 'warning');
         return;
       }
@@ -555,7 +517,6 @@
         return;
       }
       if (trimmedName.length > 32 || /[\\/:*?"<>|]/.test(trimmedName)) {
-        await addLog(t('messages.renameInvalidName'), 'warning');
         await showOperationMessage(t('messages.renameFailedTitle'), t('messages.renameInvalidName'), 'warning');
         return;
       }
@@ -565,8 +526,6 @@
           DeviceUtils.showLoading(true);
         }
 
-        await addLog(t('messages.renaming', { name: device.volumeName, newName: trimmedName }), 'info');
-        await addLog(t('messages.enterPassword'), 'info');
 
         const autoMountCooldown: Map<string, number> =
           (AppModules.Devices as any).autoMountCooldown || new Map<string, number>();
@@ -583,7 +542,6 @@
             name: device.volumeName,
             newName: trimmedName
           });
-          await addLog(successMessage, 'success');
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refreshDeviceList(devicesList, 0);
           if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
@@ -598,7 +556,6 @@
           const errorMessage = getRenameErrorMessage(result.error || t('messages.unknownError'));
           const errorType = errorMessage === t('messages.cancelled') ? 'info' :
             errorMessage === t('messages.passwordError') ? 'warning' : 'error';
-          await addLog(errorMessage, errorType);
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refreshDeviceList(devicesList, 0);
           if (errorType === 'error' || errorType === 'warning') {
@@ -609,7 +566,6 @@
         const errorMessage = getRenameErrorMessage(error);
         const errorType = errorMessage === t('messages.cancelled') ? 'info' :
           errorMessage === t('messages.passwordError') ? 'warning' : 'error';
-        await addLog(errorMessage, errorType);
         if (errorType === 'error' || errorType === 'warning') {
           await showOperationMessage(t('messages.renameFailedTitle'), errorMessage, errorType);
         }
@@ -647,8 +603,6 @@
           DeviceUtils.showLoading(true);
         }
 
-        await addLog(t('messages.formatting', { name: device.volumeName }), 'info');
-        await addLog(t('messages.enterPassword'), 'info');
 
         const autoMountCooldown: Map<string, number> =
           (AppModules.Devices as any).autoMountCooldown || new Map<string, number>();
@@ -663,7 +617,6 @@
         if (result.success) {
           const successMessage = t('messages.formatSuccess', { name: device.volumeName });
           markDeviceActionDone(device.disk, 'format', devicesList, readWriteDevicesList);
-          await addLog(successMessage, 'success');
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refreshDeviceList(devicesList, 0);
           if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
@@ -673,7 +626,6 @@
           const errorMessage = getFormatErrorMessage(result.error || t('messages.unknownError'));
           const errorType = errorMessage === t('messages.cancelled') ? 'info' :
             errorMessage === t('messages.passwordError') ? 'warning' : 'error';
-          await addLog(errorMessage, errorType);
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refreshDeviceList(devicesList, 0);
           if (errorType === 'error' || errorType === 'warning') {
@@ -684,7 +636,6 @@
         const errorMessage = getFormatErrorMessage(error);
         const errorType = errorMessage === t('messages.cancelled') ? 'info' :
           errorMessage === t('messages.passwordError') ? 'warning' : 'error';
-        await addLog(errorMessage, errorType);
         if (errorType === 'error' || errorType === 'warning') {
           await showOperationMessage(t('messages.formatFailedTitle'), errorMessage, errorType);
         }
@@ -709,8 +660,6 @@
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
           DeviceUtils.showLoading(true);
         }
-        await addLog(t('messages.restoring', { name: device.volumeName }), 'info');
-        await addLog(t('messages.enterPassword'), 'info');
 
         // 在还原为只读之前，先将设备添加到手动只读列表，防止自动读写功能立即将其设置为读写
         try {
@@ -748,7 +697,6 @@
         if (result.success) {
 
           if (result.result) {
-            await addLog(result.result, 'success');
           }
           // 等待一小段时间，让系统重新挂载（restoreToReadOnly 需要更长时间）
           await new Promise(resolve => setTimeout(resolve, 1500));
@@ -776,20 +724,16 @@
           }, 1000);
         } else {
           const errorMessage = result.error || t('messages.restoreError');
-          await addLog(`${t('messages.restoreError')}: ${errorMessage}`, 'error');
           if (isPasswordError(errorMessage)) {
             const passwordError = t('messages.passwordError');
-            await addLog(passwordError, 'warning');
             await showOperationMessage(t('messages.restoreError'), passwordError, 'warning');
           } else if (isOperationCancelled(errorMessage)) {
-            await addLog(t('messages.cancelled'), 'info');
           } else {
             await showOperationMessage(t('messages.restoreError'), errorMessage);
           }
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await addLog(`${t('messages.restoreError')}: ${errorMessage}`, 'error');
         if (isPasswordError(error)) {
           await showOperationMessage(t('messages.restoreError'), t('messages.passwordError'), 'warning');
         } else if (!isOperationCancelled(error)) {
@@ -819,7 +763,6 @@
       const readWriteDevices = devices.filter((d: any) => !d.isReadOnly && !d.isUnmounted);
 
       if (readWriteDevices.length === 0) {
-        await addLog(t('messages.noDevicesToUnmount'), 'info');
         return;
       }
 
@@ -849,8 +792,6 @@
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
           DeviceUtils.showLoading(true);
         }
-        await addLog(t('messages.restoreAllStart', { count: readWriteDevices.length }), 'info');
-        await addLog(t('messages.enterPassword'), 'info');
 
         let successCount = 0;
         let failCount = 0;
@@ -861,19 +802,16 @@
         // 逐个还原设备
         for (const device of readWriteDevices) {
           try {
-            await addLog(`正在还原 ${device.volumeName} 为只读模式...`, 'info');
             const result = await electronAPI.restoreToReadOnly(device);
 
             if (result.success) {
               successCount++;
               if (result.result) {
-                await addLog(result.result, 'success');
               }
             } else {
               failCount++;
               const errorMessage = result.error || '未知错误';
               failureMessages.push(`${device.volumeName}: ${isPasswordError(errorMessage) ? t('messages.passwordError') : errorMessage}`);
-              await addLog(`还原 ${device.volumeName} 失败: ${errorMessage}`, 'error');
               hadPasswordError = isPasswordError(errorMessage);
               wasCancelled = isOperationCancelled(errorMessage);
               if (hadPasswordError || wasCancelled) break;
@@ -881,7 +819,6 @@
           } catch (error) {
             failCount++;
             const errorMessage = error instanceof Error ? error.message : String(error);
-            await addLog(`还原 ${device.volumeName} 失败: ${errorMessage}`, 'error');
             failureMessages.push(`${device.volumeName}: ${isPasswordError(error) ? t('messages.passwordError') : errorMessage}`);
             hadPasswordError = isPasswordError(error);
             wasCancelled = isOperationCancelled(error);
@@ -897,10 +834,8 @@
 
         // 显示总结
         if (successCount > 0) {
-          await addLog(t('messages.restoreAllSuccess', { count: successCount }), 'success');
         }
         if (failCount > 0) {
-          await addLog(t('messages.restoreAllError', { count: failCount }), 'warning');
           if (hadPasswordError) {
             await showOperationMessage(t('devices.restoreAllReadOnly'), failureMessages.join('\n'), 'warning');
           } else if (!wasCancelled) {
@@ -909,7 +844,6 @@
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await addLog(`${t('messages.restoreError')}: ${errorMessage}`, 'error');
       } finally {
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
           DeviceUtils.showLoading(false);
@@ -931,8 +865,6 @@
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
           DeviceUtils.showLoading(true);
         }
-        await addLog(t('messages.unmounting', { name: device.volumeName }), 'info');
-        await addLog('提示：请在弹出的对话框中输入管理员密码', 'info');
 
         // 卸载：立即清理“已尝试自动挂载”记录
         clearAutoMountAttemptedDisk(device.disk);
@@ -941,20 +873,15 @@
 
         if (result.success) {
           if (result.result) {
-            await addLog(result.result, 'success');
           }
           await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
         } else {
-          await addLog(`卸载失败: ${result.error || '未知错误'}`, 'error');
           if (result.error?.includes('密码错误')) {
-            await addLog('提示：密码错误，请重试', 'warning');
           } else if (result.error?.includes('用户取消')) {
-            await addLog('提示：已取消操作', 'info');
           }
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await addLog(`卸载失败: ${errorMessage}`, 'error');
       } finally {
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
           DeviceUtils.showLoading(false);
@@ -979,7 +906,6 @@
       const readOnlyDevices = devices.filter((d: any) => d.isReadOnly || d.isUnmounted);
 
       if (readOnlyDevices.length === 0) {
-        await addLog(t('messages.noDevicesToMount'), 'info');
         return;
       }
 
@@ -998,8 +924,6 @@
         if (DeviceUtils && typeof DeviceUtils.showLoading === 'function') {
           DeviceUtils.showLoading(true);
         }
-        await addLog(t('messages.mountAllStart', { count: readOnlyDevices.length }), 'info');
-        await addLog(t('messages.enterPassword'), 'info');
 
         let successCount = 0;
         let failCount = 0;
@@ -1007,22 +931,18 @@
         // 逐个配置设备
         for (const device of readOnlyDevices) {
           try {
-            await addLog(`正在配置 ${device.volumeName} 为可读写模式...`, 'info');
             const result = await electronAPI.mountDevice(device);
 
             if (result.success) {
               successCount++;
               if (result.result) {
-                await addLog(result.result, 'success');
               }
             } else {
               failCount++;
-              await addLog(`配置 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
             }
           } catch (error) {
             failCount++;
             const errorMessage = error instanceof Error ? error.message : String(error);
-            await addLog(`配置 ${device.volumeName} 失败: ${errorMessage}`, 'error');
           }
         }
 
@@ -1031,14 +951,11 @@
 
         // 显示总结
         if (successCount > 0) {
-          await addLog(t('messages.mountAllSuccess', { count: successCount }), 'success');
         }
         if (failCount > 0) {
-          await addLog(t('messages.mountAllError', { count: failCount }), 'warning');
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await addLog(`${t('messages.mountError')}: ${errorMessage}`, 'error');
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
       }
@@ -1056,7 +973,6 @@
       const mountedDevices = devices.filter((d: any) => !d.isUnmounted);
 
       if (mountedDevices.length === 0) {
-        await addLog(t('messages.noDevicesToUnmount') || '没有已挂载的设备', 'info');
         return;
       }
 
@@ -1073,8 +989,6 @@
 
       try {
         AppUtils.UI.showLoading(loadingOverlay, true);
-        await addLog(`开始卸载 ${mountedDevices.length} 个设备...`, 'info');
-        await addLog('提示：请在弹出的对话框中输入管理员密码', 'info');
 
         let successCount = 0;
         let failCount = 0;
@@ -1082,7 +996,6 @@
         // 逐个卸载设备
         for (const device of mountedDevices) {
           try {
-            await addLog(`正在卸载 ${device.volumeName}...`, 'info');
             // 卸载：立即清理“已尝试自动挂载”记录
             clearAutoMountAttemptedDisk(device.disk);
             const result = await electronAPI.unmountDevice(device);
@@ -1090,16 +1003,13 @@
             if (result.success) {
               successCount++;
               if (result.result) {
-                await addLog(result.result, 'success');
               }
             } else {
               failCount++;
-              await addLog(`卸载 ${device.volumeName} 失败: ${result.error || '未知错误'}`, 'error');
             }
           } catch (error) {
             failCount++;
             const errorMessage = error instanceof Error ? error.message : String(error);
-            await addLog(`卸载 ${device.volumeName} 失败: ${errorMessage}`, 'error');
           }
         }
 
@@ -1108,14 +1018,11 @@
 
         // 显示总结
         if (successCount > 0) {
-          await addLog(t('messages.unmountAllSuccess', { count: successCount }), 'success');
         }
         if (failCount > 0) {
-          await addLog(t('messages.unmountAllError', { count: failCount }), 'warning');
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await addLog(`${t('messages.unmountError')}: ${errorMessage}`, 'error');
       } finally {
         AppUtils.UI.showLoading(loadingOverlay, false);
       }
@@ -1130,7 +1037,6 @@
       statusText: HTMLElement
     ): Promise<void> {
       try {
-        await addLog(`正在推出 ${device.volumeName}...`, 'info');
 
         // 推出：立即清理“已尝试自动挂载”记录
         clearAutoMountAttemptedDisk(device.disk);
@@ -1139,17 +1045,14 @@
 
         if (result.success) {
           if (result.result) {
-            await addLog(result.result, 'success');
           }
           // 等待一小段时间，让系统完全断开设备
           await new Promise(resolve => setTimeout(resolve, 1000));
           await AppModules.Devices.refreshDevices(devicesList, readWriteDevicesList, statusDot, statusText);
         } else {
-          await addLog(`推出失败: ${result.error || '未知错误'}`, 'error');
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await addLog(`推出失败: ${errorMessage}`, 'error');
       }
     },
 
@@ -1173,7 +1076,6 @@
       const t = AppUtils && AppUtils.I18n ? AppUtils.I18n.t : ((key: string, params?: Record<string, string | number>) => key);
 
       if (mountedDevices.length === 0) {
-        await addLog(t('messages.noDevicesToUnmount') || '没有已挂载的设备', 'info');
         return;
       }
 
@@ -1187,7 +1089,6 @@
       }
 
       try {
-        await addLog(t('messages.ejectAllStart', { count: mountedDevices.length }), 'info');
 
         let successCount = 0;
         let failCount = 0;
@@ -1195,7 +1096,6 @@
         // 逐个推出设备
         for (const device of mountedDevices) {
           try {
-            await addLog(t('messages.ejecting', { name: device.volumeName }), 'info');
             // 推出：立即清理“已尝试自动挂载”记录
             clearAutoMountAttemptedDisk(device.disk);
             const result = await electronAPI.ejectDevice(device);
@@ -1203,16 +1103,13 @@
             if (result.success) {
               successCount++;
               if (result.result) {
-                await addLog(result.result, 'success');
               }
             } else {
               failCount++;
-              await addLog(t('messages.ejectError', { name: device.volumeName }) + `: ${result.error || t('messages.unknownError') || '未知错误'}`, 'error');
             }
           } catch (error) {
             failCount++;
             const errorMessage = error instanceof Error ? error.message : String(error);
-            await addLog(t('messages.ejectError', { name: device.volumeName }) + `: ${errorMessage}`, 'error');
           }
         }
 
@@ -1224,14 +1121,11 @@
 
         // 显示总结
         if (successCount > 0) {
-          await addLog(t('messages.ejectAllSuccess', { count: successCount }), 'success');
         }
         if (failCount > 0) {
-          await addLog(t('messages.ejectAllError', { count: failCount }), 'warning');
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        await addLog(`${t('messages.ejectAllError', { count: 0 })}: ${errorMessage}`, 'error');
       }
     }
   };

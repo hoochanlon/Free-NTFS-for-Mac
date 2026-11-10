@@ -85,18 +85,25 @@ Die Hauptoberfläche der Anwendung bietet mehrere Funktionssymbole, die Ihnen he
 
 - <img src="../imgs/svg/devices/flash-auto.svg" alt="Automatisches Lesen/Schreiben" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Automatisches Lese-Schreib-Symbol** - Wenn aktiviert, hängt der Hintergrund neu angeschlossene schreibgeschützte NTFS-Volumes mit Schreibzugriff ein, auch ohne geöffnetes Fenster. Ein manuell auf Schreibschutz zurückgesetztes Volume bleibt für die aktuelle Verbindung unverändert. Aktiv erscheint das Symbol blau.
 - <img src="../imgs/svg/devices/tray.svg" alt="Systemleisten-Modus" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Systemleisten-Modus-Symbol** - Wenn aktiviert, wird die Anwendung beim Schließen des Fensters in die Systemleiste minimiert, anstatt beendet zu werden. Das Symbol erscheint rot, wenn es aktiv ist.
-- <img src="../imgs/svg/system/caffe.svg" alt="Ruhezustand verhindern" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Ruhezustand verhindern-Symbol** - Wenn aktiviert, verhindert das System, dass es in den Ruhezustand wechselt, um sicherzustellen, dass Geräte kontinuierlich verfügbar bleiben. Das Symbol erscheint kaffeefarben, wenn es aktiv ist.
-- <img src="../imgs/svg/system/protect.svg" alt="Status-Schutz" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Status-Schutz Symbol** - 3s lang drücken, um den Schutzstatus umzuschalten. Wenn geschützt, werden automatisches Lesen/Schreiben, Tray-Modus und Ruhezustand verhindern deaktiviert, um versehentliche Vorgänge zu verhindern. Das Symbol erscheint grün mit einer Pulsanimation, wenn es geschützt ist.
+- <img src="../imgs/svg/system/caffe.svg" alt="Ruhezustand verhindern" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Ruhezustand verhindern** - Standardmäßig aus. Klickzyklus: Aus → Ruhezustand verhindern (kaffeebraun, dauerhaft) → intelligenter Schutz (teal) → aus. Bei aktivem Statusschutz ist die Schaltfläche gesperrt. Details siehe **Arbeitsweisen des Ruhezustandsschutzes**.
+- <img src="../imgs/svg/system/protect.svg" alt="Status-Schutz" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Status-Schutz Symbol** - 3s lang drücken, um den Schutzstatus umzuschalten. Wenn geschützt, werden automatisches Lesen/Schreiben, Tray-Modus und das Ruhezustandsschutz-Symbol gesperrt, um versehentliche Vorgänge zu verhindern. Das Symbol erscheint grün mit einer Pulsanimation, wenn es geschützt ist.
 - <img src="../imgs/svg/ui/info.svg" alt="Info" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Info-Symbol** - Öffnet das Info-Fenster, um Anwendungsinformationen und Projektlinks anzuzeigen.
 - <img src="../imgs/svg/actions/exit.svg" alt="Beenden" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Beenden-Symbol** - Beendet die Anwendung.
 
 ### Symbol im Einstellungsbereich
 
 - 🤫 **Easter-Egg-Symbol** - Neben der Überschrift „Anwendungseinstellungen“. 3 Sekunden gedrückt halten, um die Hover-Tooltips für Symbolschaltflächen in der gesamten App umzuschalten; die Auswahl wird gespeichert.
+- **Intelligenter Ruhezustandsschutz** - In den Anwendungseinstellungen. Aktivieren schaltet den intelligenten Modus (teal) ein und bleibt mit diesem Titelleisten-Zustand synchron; der dauerhafte kaffeebraune Modus wird nicht gesteuert.
 
-### Registerkarten-Symbole
+### Arbeitsweisen des Ruhezustandsschutzes
 
-- <img src="../imgs/svg/ui/log.svg" alt="Protokoll" style="height: 14px; width: 14px; vertical-align: middle; margin-right: 4px; display: inline-block;"> **Protokoll-Symbol** - Wechselt zur Registerkarte "Betriebsprotokolle", um Aufzeichnungen aller Vorgänge anzuzeigen.
+Das Kaffee-Symbol in der Titelleiste ist standardmäßig aus. Klickzyklus: **Aus → Ruhezustand verhindern → Intelligenter Schutz → Aus**. Bei aktivem Statusschutz ist die Schaltfläche gesperrt.
+
+- **Aus**: Der Ruhezustand wird nicht verhindert. Das Symbol bleibt ungefärbt.
+- **Ruhezustand verhindern** (kaffeebraun): Der Ruhezustand bleibt auch im Leerlauf blockiert. Nur über das Titelleisten-Symbol erreichbar; das Kontrollkästchen in den Einstellungen steuert diesen Modus nicht.
+- **Intelligenter Ruhezustandsschutz** (teal): Überwacht nur derzeit eingehängte NTFS-Volumes. Bei Lese-/Schreibverkehr wird der Ruhezustand verhindert; etwa 20 Sekunden nach dem Ende der Übertragung wieder zugelassen. Ohne eingehängtes NTFS-Volume oder im Leerlauf bleibt der Mac nicht dauerhaft wach. Das Kontrollkästchen in den Einstellungen synchronisiert nur mit diesem Modus.
+
+Beim Beenden der App wird der Ruhezustandsschutz gestoppt.
 
 ### Geräteverwaltungs-Symbole
 
@@ -326,43 +333,6 @@ Wenn das Problem weiterhin besteht, konsultieren Sie bitte die offizielle Dokume
 
 Nach dem Aushängen wird das Gerät aus dem System entfernt. Wenn Sie erneut darauf zugreifen müssen, stecken Sie das Gerät bitte erneut ein oder verwenden Sie die integrierte Einhängefunktion des Systems.
 
-## Betriebsprotokolle
-
-Im Tab "Betriebsprotokolle" können Sie Aufzeichnungen aller Vorgänge anzeigen, einschließlich:
-
-- Abhängigkeitsprüfungsergebnisse
-- Geräteerkennungsstatus
-- Ein-, Aushänge- und Auswurfvorgänge
-- Reparatur-, Umbenennungs- und Formatierungsvorgänge
-- Fehlermeldungen und Warnungen
-
-**Betriebsprotokolle aktivieren:**
-
-Betriebsprotokolle sind standardmäßig deaktiviert und müssen manuell aktiviert werden. Aktivieren Sie das Kontrollkästchen "Betriebsprotokolle aktivieren" im Tab "Betriebsprotokolle", um die Protokollierung zu aktivieren. Wenn aktiviert, zeichnet die App alle Betriebsprotokolle auf. Wenn deaktiviert, werden keine neuen Protokolle aufgezeichnet, aber zuvor aufgezeichnete Protokolle bleiben erhalten.
-
-**Protokollspeicherung:**
-
-Protokolle werden im JSON-Format im Dateisystem an folgendem Speicherort gespeichert:
-
-```
-~/Library/Application Support/Nigate/logs.json
-```
-
-Die Protokolldatei verwendet formatiertes JSON-Format und kann direkt mit einem Texteditor geöffnet werden, um sie anzuzeigen. Wenn Sie die App deinstallieren, wird die Protokolldatei nicht automatisch gelöscht, sodass sie später leicht angezeigt oder gesichert werden kann.
-
-**Protokollgrenzen:**
-
-Um die Anwendungsleistung und Stabilität sicherzustellen, hat das Protokollierungssystem die folgenden Grenzen:
-
-- **Aufbewahrungsdauer**: Protokolle werden standardmäßig maximal 30 Tage gespeichert. Protokolle, die älter als 30 Tage sind, werden automatisch bereinigt
-- **Datensatzanzahlgrenze**: Es werden maximal 500 Protokolleinträge aufbewahrt. Wenn die Grenze überschritten wird, werden die ältesten Einträge automatisch gelöscht, sodass nur die neuesten 500 Einträge erhalten bleiben
-- **Dateigrößenbegrenzung**: Die Protokolldatei hat eine maximale Größe von 500 KB. Wenn die Grenze überschritten wird, werden alte Einträge automatisch gelöscht, um die Dateigröße innerhalb der Grenze zu halten
-- **Anzeigegrenze**: Die Benutzeroberfläche zeigt maximal 300 Protokolleinträge (die neuesten 300) an, um die Rendering-Leistung zu verbessern
-
-**Protokollverwaltung:**
-
-- **Protokolle löschen**: Klicken Sie auf die Schaltfläche "Löschen", um alle Protokolleinträge zu löschen
-- **Protokolle exportieren**: Klicken Sie auf die Schaltfläche "Exportieren", um Protokolle als Textdatei zu exportieren, um sie zu sichern oder zu teilen
 
 ## Weitere Fehlerbehebung
 

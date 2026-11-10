@@ -129,11 +129,6 @@
           });
         }
 
-        // 只在设备状态变化时添加日志
-        const stateChanged = currentDeviceCount !== AppModules.Devices.lastDeviceCount ||
-                           currentState !== AppModules.Devices.lastDeviceState;
-
-        // 获取翻译文本的辅助函数
         function t(key: string, params?: Record<string, string | number>): string {
           const i18n = (window as any).AppUtils?.I18n;
           if (i18n?.isReady?.() && i18n.t) {
@@ -144,40 +139,10 @@
 
         if (AppModules.Devices.devices.length === 0) {
           AppUtils.UI.updateStatus('active', t('status.waitingDevices'), statusDot, statusText);
-          if (stateChanged) {
-            await AppUtils.Logs.addLog(t('messages.noDevicesDetected'), 'info');
-          }
+        } else if (readOnlyCount > 0) {
+          AppUtils.UI.updateStatus('error', t('status.devicesReadOnly', { count: readOnlyCount }), statusDot, statusText);
         } else {
-          const readWriteCount = AppModules.Devices.devices.length - readOnlyCount;
-
-          if (readOnlyCount > 0) {
-            AppUtils.UI.updateStatus('error', t('status.devicesReadOnly', { count: readOnlyCount }), statusDot, statusText);
-            if (stateChanged) {
-              if (readWriteCount > 0) {
-                await AppUtils.Logs.addLog(
-                  t('messages.devicesDetected', {
-                    count: AppModules.Devices.devices.length,
-                    readOnly: readOnlyCount,
-                    readWrite: readWriteCount
-                  }),
-                  'info'
-                );
-              } else {
-                await AppUtils.Logs.addLog(
-                  t('messages.devicesDetectedAllReadOnly', { count: AppModules.Devices.devices.length }),
-                  'warning'
-                );
-              }
-            }
-          } else {
-            AppUtils.UI.updateStatus('active', t('status.devicesReady', { count: AppModules.Devices.devices.length }), statusDot, statusText);
-            if (stateChanged) {
-              await AppUtils.Logs.addLog(
-                t('messages.devicesDetectedAllReadWrite', { count: AppModules.Devices.devices.length }),
-                'success'
-              );
-            }
-          }
+          AppUtils.UI.updateStatus('active', t('status.devicesReady', { count: AppModules.Devices.devices.length }), statusDot, statusText);
         }
 
         AppModules.Devices.lastDeviceCount = currentDeviceCount;
@@ -192,8 +157,7 @@
           return key;
         }
         AppUtils.UI.updateStatus('error', t('status.detectFailed'), statusDot, statusText);
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        await AppUtils.Logs.addLog(t('messages.refreshFailed', { error: errorMessage }), 'error');
+        console.error('刷新设备列表失败:', error);
       }
     },
 

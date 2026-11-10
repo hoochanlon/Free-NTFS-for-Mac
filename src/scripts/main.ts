@@ -9,13 +9,19 @@ import { initTray, destroyTray, updateTrayMenu } from './utils/tray-manager';
 // 注意：由于模块加载顺序，这里无法直接设置 ipc-handlers 中的变量
 // 但可以通过 IPC 通信来同步，或者在应用启动时通过其他方式初始化
 import { SettingsManager } from './utils/settings';
-import { caffeinateManager } from './utils/caffeinate-manager';
+import { preventSleepController } from './utils/prevent-sleep-controller';
 
 // 初始化热重载（开发模式）
 setupHotReload();
 
 // 应用生命周期管理
 app.whenReady().then(async () => {
+  const startupSettings = await SettingsManager.getSettings();
+  const startupMode = startupSettings.keepAwake
+    ? 'always'
+    : (startupSettings.preventSleep ? 'smart' : 'off');
+  await preventSleepController.setMode(startupMode, { persist: false });
+
   await createMainWindow();
   await setupAppConfig();
   setupIpcHandlers();
@@ -23,8 +29,7 @@ app.whenReady().then(async () => {
   // 初始化 Dock 状态（必须在托盘初始化之前调用）
   await initializeDockState();
 
-  // 检查是否启用托盘模式
-  const settings = await SettingsManager.getSettings();
+  const settings = startupSettings;
   if (settings.trayMode) {
     try {
       await initTray();
@@ -44,16 +49,6 @@ app.whenReady().then(async () => {
     openAtLogin: settings.autoStart || false,
     openAsHidden: false
   });
-
-  // 恢复禁止休眠状态
-  if (settings.preventSleep) {
-    try {
-      await caffeinateManager.start();
-      console.log('[Main] 已恢复禁止休眠状态');
-    } catch (error) {
-      console.error('[Main] 恢复禁止休眠状态失败:', error);
-    }
-  }
 
   app.on('activate', async () => {
     const settings = await SettingsManager.getSettings();
@@ -100,5 +95,5 @@ app.on('window-all-closed', async () => {
 // 应用退出前清理托盘和防止休眠进程
 app.on('before-quit', () => {
   destroyTray();
-  caffeinateManager.stop();
+  preventSleepController.stop();
 });

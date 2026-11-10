@@ -21,20 +21,6 @@
   // 状态管理
   let dependencies: any = null;
 
-  type LogType = 'info' | 'success' | 'error' | 'warning';
-
-  // 添加日志
-  function addLog(message: string, type: LogType = 'info'): void {
-    const time = new Date().toLocaleTimeString('zh-CN');
-    const logs = JSON.parse(localStorage.getItem('appLogs') || '[]');
-    logs.push({ time, message, type });
-    // 限制日志数量
-    if (logs.length > 1000) {
-      logs.shift();
-    }
-    localStorage.setItem('appLogs', JSON.stringify(logs));
-  }
-
   // 检查进行中只锁按钮，不盖全页遮罩
   function showLoading(show: boolean = true): void {
     checkDepsBtn.classList.toggle('is-checking', show);
@@ -46,7 +32,6 @@
   async function checkDependencies(): Promise<void> {
     try {
       showLoading(true);
-      addLog('开始检查系统依赖...', 'info');
 
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => reject(new Error('检查超时，请重试')), 15000);
@@ -65,14 +50,10 @@
 
       if (allInstalled) {
         installSection.classList.remove('visible');
-        addLog('所有依赖已安装', 'success');
       } else {
         installSection.classList.add('visible');
-        addLog('检测到缺失的依赖，请点击安装', 'warning');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      addLog(`检查依赖失败: ${errorMessage}`, 'error');
       console.error('检查依赖错误:', error);
     } finally {
       showLoading(false);
@@ -119,12 +100,10 @@
   //     showLoading(true);
   //     installDepsBtn.disabled = true;
   //     installLog.textContent = '开始安装依赖...\n';
-  //     addLog('开始安装系统依赖...', 'info');
 
   //     const result = await electronAPI.installDependencies();
   //     if (result.success && result.result) {
   //       installLog.textContent += result.result;
-  //       addLog('依赖安装完成，请重新检查依赖状态', 'success');
 
   //       setTimeout(() => {
   //         checkDependencies();
@@ -135,7 +114,6 @@
   //   } catch (error) {
   //     const errorMessage = error instanceof Error ? error.message : String(error);
   //     installLog.textContent += `\n错误: ${errorMessage}`;
-  //     addLog(`安装依赖失败: ${errorMessage}`, 'error');
   //   } finally {
   //     showLoading(false);
   //     installDepsBtn.disabled = false;

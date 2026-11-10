@@ -159,33 +159,6 @@
       display flex
       flex-direction column
 
-  // 操作日志标签页需要滚动
-  &#logsTab
-    overflow-y auto
-    overflow-x hidden
-
-    .section
-      display flex
-      flex-direction column
-      height 100%
-      // macOS 系统设置风格：更紧凑的设计
-      padding 16px 20px
-      border-radius 8px
-      box-shadow 0 1px 2px var(--shadow)
-
-      .section-header
-        margin-bottom 12px
-
-        h2
-          font-size 15px
-          font-weight 500
-
-        .header-actions
-          display flex
-          gap 8px
-          align-items center
-          flex-wrap nowrap
-
   // 设置标签页需要滚动
   &#settingsTab
     &.active
@@ -513,11 +486,6 @@ body.light-theme
     blockquote
       background var(--light-bg-tertiary)
 
-// 夜间模式下日志标签页图标优化（改为白色，提高可见性）
-body:not(.light-theme)
-  .tab[data-tab="logs"] .tab-icon
-    dark-mode-icon-white()
-
 // 夜间模式下指南手册中的图标优化（改为白色，提高可见性）
 body:not(.light-theme)
   .help-content
@@ -531,10 +499,6 @@ body:not(.light-theme)
 
     // 防止休眠图标
     img[src*="caffe.svg"]
-      dark-mode-icon-white()
-
-    // 日志图标
-    img[src*="log.svg"]
       dark-mode-icon-white()
 
     // 刷新图标
@@ -625,30 +589,41 @@ body:not(.light-theme)
   &:active
     background rgba(232, 60, 60, 0.15)
 
-.btn-reset-size
-  margin-top 8px
-  color var(--accent)
-  font-size 13px
-  padding 6px 12px
-  border-radius 6px
-  transition all 0.2s ease
-  display inline-block
-  background transparent
-  border none
-  cursor pointer
-
-  &:hover
-    background rgba(0, 122, 255, 0.1)
-    color var(--accent)
-
-  &:active
-    background rgba(0, 122, 255, 0.15)
-
 .setting-checkbox
   width 18px
   height 18px
   cursor pointer
   accent-color var(--accent)
+
+#preventSleepCheckbox
+  accent-color var(--smart)
+
+.setting-label label[for="preventSleepCheckbox"]
+  display inline-flex
+  align-items center
+  gap 6px
+
+  &::before
+    content ''
+    width 15px
+    height 15px
+    flex-shrink 0
+    background-color currentColor
+    mask url('src/imgs/svg/system/caffe.svg') center / contain no-repeat
+    -webkit-mask url('src/imgs/svg/system/caffe.svg') center / contain no-repeat
+    opacity 0.72
+
+.setting-item:has(#preventSleepCheckbox:checked)
+  label[for="preventSleepCheckbox"]
+    color var(--smart)
+
+    &::before
+      opacity 1
+
+html:not(.light-theme) .setting-item:has(#preventSleepCheckbox:checked),
+body:not(.light-theme) .setting-item:has(#preventSleepCheckbox:checked)
+  label[for="preventSleepCheckbox"]
+    color var(--smart-on-dark)
 
 .setting-select
   padding 6px 10px
@@ -781,103 +756,9 @@ body:not(.light-theme)
   span
     pointer-events none
 
-// 夜间模式下图标变白（仅针对设置标签页中的日志和地球图标）
+// 夜间模式下图标变白（设置标签页地球图标）
 body:not(.light-theme)
-  // 日志图标
-  .custom-select-icon[src*="log.svg"],
-  .custom-select-option-icon[src*="log.svg"]
-    dark-mode-icon-white()
-
   // 地球图标
   .custom-select-icon[src*="earth.svg"],
   .custom-select-option-icon[src*="earth.svg"]
     dark-mode-icon-white()
-
-.setting-size-control
-  display flex
-  gap 16px
-  align-items flex-start
-  flex-wrap wrap
-
-.size-input-group
-  display flex
-  flex-direction column
-  gap 8px
-  min-width 85px
-  align-items center
-
-.size-label
-  font-size 12px
-  font-weight 600
-  color var(--text-secondary)
-  white-space nowrap
-  user-select none
-  letter-spacing 0.2px
-  transition color 0.2s ease
-
-.setting-size-input
-  width 85px
-  padding 10px 8px
-  border 1.5px solid var(--border)
-  border-radius 10px
-  background var(--bg-secondary)
-  color var(--text-primary)
-  font-size 14px
-  font-weight 600
-  text-align center
-  letter-spacing 0.3px
-  transition all 0.25s cubic-bezier(0.4, 0, 0.2, 1)
-  appearance none
-  -webkit-appearance none
-  box-shadow 0 1px 2px rgba(0, 0, 0, 0.05)
-
-  &::-webkit-inner-spin-button,
-  &::-webkit-outer-spin-button
-    -webkit-appearance none
-    margin 0
-    display none
-
-  &[type="number"]
-    -moz-appearance textfield
-
-  &::placeholder
-    color var(--text-tertiary)
-    opacity 0.4
-    font-weight 400
-    letter-spacing normal
-
-  &:hover
-    border-color var(--accent)
-    background var(--bg-primary)
-    box-shadow 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 122, 255, 0.1)
-
-  &:focus
-    outline none
-    border-color var(--accent)
-    background var(--bg-primary)
-    box-shadow 0 0 0 4px rgba(0, 122, 255, 0.12), 0 4px 12px rgba(0, 0, 0, 0.15)
-
-  &:active
-    box-shadow 0 1px 3px rgba(0, 0, 0, 0.1)
-
-  &:disabled
-    opacity 0.5
-    cursor not-allowed
-    transform none
-
-  // 输入验证失败时的样式
-  &.invalid
-    border-color #ff3b30
-    background rgba(255, 59, 48, 0.05)
-    box-shadow 0 0 0 3px rgba(255, 59, 48, 0.1)
-
-.size-unit
-  font-size 10px
-  color var(--text-tertiary)
-  white-space nowrap
-  text-align center
-  margin-top -4px
-  opacity 0.65
-  font-weight 500
-  letter-spacing 0.5px
-  text-transform uppercase

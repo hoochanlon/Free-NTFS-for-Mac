@@ -19,8 +19,6 @@
     AppModules.Devices.Utils = {};
   }
 
-  type LogType = 'info' | 'success' | 'error' | 'warning';
-
   // 设备工具功能
   AppModules.Devices.Utils = {
     // 获取翻译文本的辅助函数
@@ -45,24 +43,6 @@
       } else {
         return `${(bytes / (1024 * 1024 * 1024 * 1024)).toFixed(2)} TB`;
       }
-    },
-
-    // 添加日志（使用 AppUtils.Logs 如果可用，否则使用 localStorage）
-    async addLog(message: string, type: LogType = 'info'): Promise<void> {
-      const AppUtils = (window as any).AppUtils;
-      if (AppUtils && AppUtils.Logs && AppUtils.Logs.addLog) {
-        await AppUtils.Logs.addLog(message, type);
-        return;
-      }
-      // 降级到 localStorage（向后兼容）
-      const time = new Date().toLocaleTimeString('zh-CN');
-      const logs = JSON.parse(localStorage.getItem('appLogs') || '[]');
-      logs.push({ time, message, type });
-      // 限制日志数量
-      if (logs.length > 1000) {
-        logs.shift();
-      }
-      localStorage.setItem('appLogs', JSON.stringify(logs));
     },
 
     // 显示/隐藏加载遮罩

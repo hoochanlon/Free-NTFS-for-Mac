@@ -17,7 +17,6 @@
     // 切换到指定标签页
     switchToTab(
       targetTab: string,
-      logContainer: HTMLElement,
       helpTab: HTMLElement
     ): void {
       const tabs = document.querySelectorAll('.tab');
@@ -45,19 +44,13 @@
         mainContent.classList.toggle('help-tab-active', targetTab === 'help');
       }
 
-      // 如果切换到日志标签页，刷新日志显示
-      if (targetTab === 'logs') {
-        AppUtils.Logs.renderLogs(logContainer, true).catch((err: any) => console.error('渲染日志失败:', err));
-      }
-      // 如果切换到指南手册标签页，加载 markdown（会自动根据当前语言加载对应文件）
-      else if (targetTab === 'help' && helpTab) {
+      if (targetTab === 'help' && helpTab) {
         AppUtils.Markdown.loadMarkdown('help.md', helpTab);
       }
     },
 
     // 初始化标签页
     initTabs(
-      logContainer: HTMLElement,
       helpTab: HTMLElement
     ): void {
       const tabs = document.querySelectorAll('.tab');
@@ -66,7 +59,7 @@
         tab.addEventListener('click', () => {
           const targetTab = tab.getAttribute('data-tab');
           if (targetTab) {
-            AppModules.Tabs.switchToTab(targetTab, logContainer, helpTab);
+            AppModules.Tabs.switchToTab(targetTab, helpTab);
           }
         });
       });
