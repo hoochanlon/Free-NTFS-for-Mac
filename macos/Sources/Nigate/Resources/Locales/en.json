@@ -62,8 +62,12 @@
     "unsupported": "Not supported by system",
     "fsKit": {
       "name": "FSKit (Native File System Framework)",
-      "description": "Apple's file system extension framework, supported from macOS 15.4. The FSKit mount control plane is not yet connected in this app, so this backend cannot mount NTFS yet.",
-      "installGuide": "FSKit is included with macOS and requires no separate installation. The FSKit backend requires macOS 15.4 or later. The mount control plane is not yet connected in this app; to mount NTFS, explicitly select ntfs-3g (Compatibility) in Settings > Mount Backend. No automatic fallback is performed."
+      "description": "Apple's file system extension framework (macOS 15.4+). Once the Nigate FSKit extension is installed and enabled, choose FSKit in Settings > Mount Backend to mount NTFS natively.",
+      "installGuide": "1. Build and install Nigate.app via macos/Scripts/build.sh (extension lives under Contents/PlugIns).\n2. Open System Settings → General → Login Items & Extensions → File System Extensions and enable Nigate NTFS.\n3. Switch Mount Backend to FSKit in the app Settings.\nIf the control plane is not ready, explicitly select ntfs-3g (Compatibility). Mount paths never silently fall back.",
+      "statusReady": "Control plane ready",
+      "statusNotInstalled": "Extension not installed",
+      "statusDisabled": "Extension disabled",
+      "statusUnavailable": "Control plane not ready"
     },
     "swift": {
       "name": "Xcode Command Line Tools",
@@ -259,8 +263,10 @@
     "autoMountDesc": "When enabled, the background mounts newly inserted read-only NTFS volumes as read-write without opening a window. A volume restored to read-only stays unchanged for the current connection",
     "mountBackend": "Mount Backend",
     "fsKitBackend": "FSKit (Native)",
+    "fsKitBackendUnavailable": "Unavailable",
     "ntfs3gCompatibilityBackend": "ntfs-3g (Compatibility)",
-    "mountBackendDesc": "FSKit requires macOS 15.4 or later and will not fall back automatically. The legacy driver is used only when ntfs-3g compatibility is selected.",
+    "mountBackendDesc": "FSKit needs macOS 15.4+ with the Nigate FSKit extension installed and enabled. Once ready, select FSKit to mount natively.",
+    "mountBackendUnavailableDesc": "The FSKit control plane is not ready yet (enabling a system extension is not enough). Install/enable the Nigate FSKit extension, or explicitly choose ntfs-3g compatibility.",
     "trayMode": "Tray Mode",
     "trayModeDesc": "When enabled, closing the window will minimize to the system tray instead of quitting the app. You can quickly manage NTFS devices through the tray icon.",
     "preventSleep": "Smart Prevent Sleep",

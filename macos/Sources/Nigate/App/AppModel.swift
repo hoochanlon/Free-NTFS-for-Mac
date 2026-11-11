@@ -1,6 +1,7 @@
 import Foundation
 import AppKit
 import ServiceManagement
+import NigateFSKitCore
 
 @MainActor
 final class AppModel: ObservableObject {
@@ -18,6 +19,8 @@ final class AppModel: ObservableObject {
     @Published var renameDevice: NTFSDevice?
     @Published var toast: String?
     @Published var languageStamp = 0
+    /// 供 Settings / Dependencies 观察；MountBackendPolicy 同步持有同一快照。
+    @Published private(set) var fsKitControlPlane = NigateFSKitControlPlaneState.unavailable
 
     let monitor = DiskMonitor()
     let sleepGuard = SleepGuard()
@@ -37,6 +40,8 @@ final class AppModel: ObservableObject {
     }
 
     func bootstrap() async {
+        await refreshFSKitControlPlane()
+        normalizeMountBackendIfNeeded()
         applyAppearance()
         applyLoginItem()
         applyDockPolicy()
@@ -49,6 +54,14 @@ final class AppModel: ObservableObject {
         await refreshDependencies()
         await refreshDevices()
         TrayController.shared.attach(self)
+    }
+
+    /// 探测扩展安装/启用态，注入 MountBackendPolicy；Settings 与挂载路径共用此快照。
+    func refreshFSKitControlPlane() async {
+        let state = await FSKitControlPlaneService.probe()
+        fsKitControlPlane = state
+        MountBackendPolicy.updateControlPlaneState(state)
+        normalizeMountBackendIfNeeded()
     }
 
     func shutdown() {
@@ -115,6 +128,8 @@ final class AppModel: ObservableObject {
 
     func refreshDependencies() async {
         statusText = L10n.t("status.checking")
+        // 先刷新控制面，再汇总依赖状态，避免 UI 读到过期的 FSKit 可用性。
+        await refreshFSKitControlPlane()
         dependencies = await DependencyService.check()
         updateStatus()
     }
@@ -226,7 +241,7 @@ final class AppModel: ObservableObject {
         guard !busyDisks.contains(diskKey) else { return }
         busyDisks.insert(diskKey)
         defer { busyDisks.remove(diskKey) }
-        let service = MountService(backend: settings.mountBackend) { [weak self] key, params in
+        let service = MountService(backend: resolvedMountBackend()) { [weak self] key, params in
             guard let self else { throw AppError.cancelled }
             return try await self.askPassword(key, params)
         }
@@ -314,6 +329,23 @@ final class AppModel: ObservableObject {
         case .success(let value): continuation?.resume(returning: value)
         case .failure(let error): continuation?.resume(throwing: error)
         }
+    }
+
+    private func resolvedMountBackend() -> NigateMountBackend {
+        let resolved = MountBackendPolicy.sanitize(settings.mountBackend)
+        if resolved != settings.mountBackend {
+            settings.mountBackend = resolved
+            persist()
+        }
+        return resolved
+    }
+
+    /// 启动时纠正不可用的 FSKit 选择（扩展开关开着 ≠ 控制面可挂载）。
+    private func normalizeMountBackendIfNeeded() {
+        let resolved = MountBackendPolicy.sanitize(settings.mountBackend)
+        guard resolved != settings.mountBackend else { return }
+        settings.mountBackend = resolved
+        persist()
     }
 
     private func updateStatus() {

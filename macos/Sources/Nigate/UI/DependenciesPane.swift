@@ -152,10 +152,10 @@ struct DependenciesPane: View {
                 id: "fsKit",
                 icon: "externaldrive.badge.timemachine",
                 name: L10n.t("dependencies.fsKit.name"),
-                status: model.dependencies.fsKitSupported ? L10n.t("dependencies.available") : L10n.t("dependencies.unsupported"),
-                isSatisfied: model.dependencies.fsKitSupported,
+                status: fsKitStatusText,
+                isSatisfied: model.dependencies.fsKitControlPlaneAvailable,
                 description: L10n.t("dependencies.fsKit.description"),
-                guide: L10n.t("dependencies.fsKit.installGuide"),
+                guide: fsKitGuideText,
                 optional: true
             ),
             DependencyItem(
@@ -170,6 +170,31 @@ struct DependenciesPane: View {
                 optional: true
             )
         ]
+    }
+
+    private var fsKitStatusText: String {
+        let d = model.dependencies
+        if d.fsKitControlPlaneAvailable {
+            return L10n.t("dependencies.fsKit.statusReady")
+        }
+        if !d.fsKitSupported {
+            return L10n.t("dependencies.unsupported")
+        }
+        if !d.fsKitExtensionInstalled {
+            return L10n.t("dependencies.fsKit.statusNotInstalled")
+        }
+        if !d.fsKitExtensionEnabled {
+            return L10n.t("dependencies.fsKit.statusDisabled")
+        }
+        return L10n.t("dependencies.fsKit.statusUnavailable")
+    }
+
+    private var fsKitGuideText: String {
+        var guide = L10n.t("dependencies.fsKit.installGuide")
+        if let detail = model.dependencies.fsKitDetail, !detail.isEmpty {
+            guide += "\n\n" + detail
+        }
+        return guide
     }
 
     private func dependencyRow(index: Int, item: DependencyItem) -> some View {

@@ -95,6 +95,7 @@ EXTENSION="$APP/Contents/PlugIns/NigateFSKitExtension.appex"
 APP_PLIST="$APP/Contents/Info.plist"
 EXTENSION_PLIST="$EXTENSION/Contents/Info.plist"
 EXTENSION_ENTITLEMENTS="$MACOS_ROOT/Sources/NigateFSKitExtension/NigateFSKitExtension.entitlements"
+APP_ENTITLEMENTS="$MACOS_ROOT/Sources/Nigate/Nigate.entitlements"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/PlugIns"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
@@ -130,13 +131,23 @@ if [[ -n "$SIGNING_IDENTITY" ]]; then
   codesign --force --options runtime --timestamp \
     --entitlements "$EXTENSION_ENTITLEMENTS" \
     --sign "$SIGNING_IDENTITY" "$EXTENSION"
-  codesign --force --options runtime --timestamp --sign "$SIGNING_IDENTITY" "$APP"
+  if [[ -f "$APP_ENTITLEMENTS" ]]; then
+    codesign --force --options runtime --timestamp \
+      --entitlements "$APP_ENTITLEMENTS" \
+      --sign "$SIGNING_IDENTITY" "$APP"
+  else
+    codesign --force --options runtime --timestamp --sign "$SIGNING_IDENTITY" "$APP"
+  fi
 else
   printf '%s\n' 'Warning: DEVELOPER_ID_APPLICATION 未设置，使用 ad-hoc 签名。' >&2
   codesign --force \
     --entitlements "$EXTENSION_ENTITLEMENTS" \
     --sign - "$EXTENSION"
-  codesign --force --sign - "$APP"
+  if [[ -f "$APP_ENTITLEMENTS" ]]; then
+    codesign --force --entitlements "$APP_ENTITLEMENTS" --sign - "$APP"
+  else
+    codesign --force --sign - "$APP"
+  fi
 fi
 
 codesign --verify --deep --strict "$EXTENSION"

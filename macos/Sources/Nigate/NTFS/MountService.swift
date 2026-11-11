@@ -11,11 +11,34 @@ struct MountService {
         try await assertNTFSPartition(device)
         switch backend {
         case .fsKit:
-            // 控制面接通后，这里只允许调用 FSKit 服务；绝不复用兼容后端。
-            throw AppError.fsKitUnavailable
+            // 控制面接通后只走 FSKit 数据面；失败即失败，绝不静默切 ntfs-3g。
+            return try await mountWithFSKit(device, passwordOverride: passwordOverride, readOnly: false)
         case .ntfs3gCompatibility:
             return try await mountWithNTFS3G(device, passwordOverride: passwordOverride)
         }
+    }
+
+    private func mountWithFSKit(
+        _ device: NTFSDevice,
+        passwordOverride: String?,
+        readOnly: Bool
+    ) async throws -> String {
+        var password: String
+        if let passwordOverride {
+            password = passwordOverride
+        } else {
+            password = try await askPassword("messages.passwordDialog.mountDevice", ["name": device.volumeName])
+        }
+        let message = try await FSKitMountService.mount(
+            device: device,
+            readOnly: readOnly,
+            run: { args, password, refreshKey, name, timeout in
+                try await self.run(args, password: &password, refreshKey: refreshKey, name: name, timeout: timeout)
+            },
+            password: &password
+        )
+        writeMarker(device.disk)
+        return message
     }
 
     private func mountWithNTFS3G(_ device: NTFSDevice, passwordOverride: String?) async throws -> String {
@@ -56,21 +79,32 @@ struct MountService {
     }
 
     func unmount(_ device: NTFSDevice) async throws -> String {
-        try requireCompatibilityBackend()
+        try validateBackend()
         try await assertNTFSPartition(device)
         var password = try await askPassword("messages.passwordDialog.unmountDevice", ["name": device.volumeName])
-        do {
-            _ = try await run(["umount", "-f", device.devicePath], password: &password, refreshKey: "messages.passwordDialog.unmountDevice", name: device.volumeName)
-        } catch {
-            let fallback = await Shell.runQuiet("/usr/sbin/diskutil", ["unmount", "force", device.devicePath], timeout: 8)
-            if !fallback.ok { throw AppError.failed("卸载失败: \(error.localizedDescription)") }
+        switch backend {
+        case .fsKit:
+            try await FSKitMountService.unmount(
+                device: device,
+                run: { args, password, refreshKey, name, timeout in
+                    try await self.run(args, password: &password, refreshKey: refreshKey, name: name, timeout: timeout)
+                },
+                password: &password
+            )
+        case .ntfs3gCompatibility:
+            do {
+                _ = try await run(["umount", "-f", device.devicePath], password: &password, refreshKey: "messages.passwordDialog.unmountDevice", name: device.volumeName)
+            } catch {
+                let fallback = await Shell.runQuiet("/usr/sbin/diskutil", ["unmount", "force", device.devicePath], timeout: 8)
+                if !fallback.ok { throw AppError.failed("卸载失败: \(error.localizedDescription)") }
+            }
         }
         clearMarker(device.disk)
         return "设备 \(device.volumeName) 已卸载"
     }
 
     func restore(_ device: NTFSDevice) async throws -> String {
-        try requireCompatibilityBackend()
+        try validateBackend()
         try await assertNTFSPartition(device)
         var password = try await askPassword("messages.passwordDialog.restoreToReadOnly", ["name": device.volumeName])
         do {
@@ -81,13 +115,25 @@ struct MountService {
         }
         clearMarker(device.disk)
         try await Task.sleep(nanoseconds: 1_000_000_000)
-        // FSKit/xntfs 默认可写；必须显式 readOnly，否则会回到读写
-        try await mountReadOnly(device.devicePath, password: &password, refreshKey: "messages.passwordDialog.restoreToReadOnly", name: device.volumeName)
+        switch backend {
+        case .fsKit:
+            // FSKit 默认可写；还原只读必须显式 rdonly，不能走无选项 mount。
+            _ = try await FSKitMountService.mount(
+                device: unmounted(device),
+                readOnly: true,
+                run: { args, password, refreshKey, name, timeout in
+                    try await self.run(args, password: &password, refreshKey: refreshKey, name: name, timeout: timeout)
+                },
+                password: &password
+            )
+        case .ntfs3gCompatibility:
+            try await mountReadOnly(device.devicePath, password: &password, refreshKey: "messages.passwordDialog.restoreToReadOnly", name: device.volumeName)
+        }
         return "设备 \(device.volumeName) 已还原为只读模式"
     }
 
     func eject(_ device: NTFSDevice) async throws -> String {
-        try requireCompatibilityBackend()
+        try validateBackend()
         try await assertNTFSPartition(device)
         let result = await Shell.runQuiet("/usr/sbin/diskutil", ["eject", device.devicePath], timeout: 12)
         if !result.ok { throw AppError.failed("推出设备失败: \(result.text)") }
@@ -250,7 +296,7 @@ struct MountService {
             try MountBackendPolicy.validate(
                 backend,
                 systemVersion: NigateSystemVersion(ProcessInfo.processInfo.operatingSystemVersion),
-                isFSKitControlPlaneAvailable: false
+                isFSKitControlPlaneAvailable: MountBackendPolicy.isControlPlaneAvailable
             )
         } catch let error as MountBackendPolicyError {
             switch error {

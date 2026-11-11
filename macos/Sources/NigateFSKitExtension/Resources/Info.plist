@@ -29,7 +29,7 @@
         <key>FSActivateOptionSyntax</key>
         <dict>
             <key>shortOptions</key>
-            <string>g:m:o:u:</string>
+            <string>o:</string>
         </dict>
         <key>FSCheckOptionSyntax</key>
         <dict>
@@ -42,13 +42,52 @@
             <string>v</string>
         </dict>
         <key>FSMediaTypes</key>
-        <dict/>
+        <dict>
+            <key>EBD0A0A2-B9E5-4433-87C0-68B6B72699C7</key>
+            <dict>
+                <key>FSMediaProperties</key>
+                <dict>
+                    <key>Content Hint</key>
+                    <string>EBD0A0A2-B9E5-4433-87C0-68B6B72699C7</string>
+                    <key>Leaf</key>
+                    <true/>
+                </dict>
+                <key>FSProbeOrder</key>
+                <integer>100</integer>
+            </dict>
+            <key>Windows_NTFS</key>
+            <dict>
+                <key>FSMediaProperties</key>
+                <dict>
+                    <key>Content Hint</key>
+                    <string>Windows_NTFS</string>
+                    <key>Leaf</key>
+                    <true/>
+                </dict>
+                <key>FSProbeOrder</key>
+                <integer>100</integer>
+            </dict>
+            <key>Partitionless</key>
+            <dict>
+                <key>FSMediaProperties</key>
+                <dict>
+                    <key>Leaf</key>
+                    <true/>
+                    <key>Whole</key>
+                    <true/>
+                </dict>
+                <key>FSProbeOrder</key>
+                <integer>200</integer>
+            </dict>
+        </dict>
         <key>FSPersonalities</key>
         <dict>
-            <key>NigateFSKitExtensionPersonality</key>
+            <key>NigateNTFS</key>
             <dict>
                 <key>FSName</key>
-                <string>NigateNTFS</string>
+                <string>NTFS (Nigate)</string>
+                <key>FSSubType</key>
+                <integer>0</integer>
                 <key>FSfileObjectsAreCaseSensitive</key>
                 <false/>
             </dict>
@@ -61,10 +100,14 @@
         <true/>
         <key>FSSupportsGenericURLResources</key>
         <false/>
+        <key>FSSupportsKernelOffloadedIO</key>
+        <false/>
         <key>FSSupportsPathURLs</key>
         <false/>
         <key>FSSupportsServerURLs</key>
         <false/>
+        <key>FSVolumeAlwaysIgnoreOwnership</key>
+        <true/>
     </dict>
 </dict>
 </plist>

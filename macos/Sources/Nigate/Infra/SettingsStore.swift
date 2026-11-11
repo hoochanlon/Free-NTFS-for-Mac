@@ -32,7 +32,9 @@ enum SettingsStore {
             settings.manuallyReadOnlyDevices = value
         }
         if let value = raw["mountBackend"] as? String {
-            settings.mountBackend = NigateMountBackend(rawValue: value) ?? .ntfs3gCompatibility
+            let parsed = NigateMountBackend(rawValue: value) ?? .ntfs3gCompatibility
+            // 控制面未接通时，历史 fsKit 选择不可用，纠正为兼容后端
+            settings.mountBackend = MountBackendPolicy.sanitize(parsed)
         }
         if let value = raw["themeIsLight"] as? Bool { settings.themeIsLight = value }
         return settings

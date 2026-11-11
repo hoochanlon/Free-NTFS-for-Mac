@@ -62,8 +62,12 @@
     "unsupported": "系统不支持",
     "fsKit": {
       "name": "FSKit（原生文件系统框架）",
-      "description": "Apple 提供的文件系统扩展框架，macOS 15.4 起支持。本应用当前尚未接通 FSKit 挂载控制面，选择此后端暂不能挂载 NTFS。",
-      "installGuide": "FSKit 随 macOS 提供，无需单独安装。使用 FSKit 后端需要 macOS 15.4 或更高版本；本应用当前版本尚未接通挂载控制面。如需挂载 NTFS，请在“设置 > 挂载后端”明确选择 ntfs-3g（兼容）；不会自动降级。"
+      "description": "Apple 提供的文件系统扩展框架（macOS 15.4+）。扩展安装并启用后，可在“设置 > 挂载后端”选择 FSKit 原生挂载 NTFS。",
+      "installGuide": "1. 使用 macos/Scripts/build.sh 构建并安装 Nigate.app（扩展位于 Contents/PlugIns）。\n2. 打开“系统设置 → 通用 → 登录项与扩展 → 文件系统扩展”，启用 Nigate NTFS。\n3. 在应用“设置”中将挂载后端切换为 FSKit。\n控制面未就绪时请明确选择 ntfs-3g 兼容后端；挂载路径不会静默降级。",
+      "statusReady": "控制面可用",
+      "statusNotInstalled": "扩展未安装",
+      "statusDisabled": "扩展已禁用",
+      "statusUnavailable": "控制面未就绪"
     },
     "swift": {
       "name": "Xcode Command Line Tools",
@@ -259,8 +263,10 @@
     "autoMountDesc": "启用后，后台会把新插入的只读 NTFS 设备挂载为读写，无需打开窗口。手动还原为只读的设备在本次连接期间不会被改回",
     "mountBackend": "挂载后端",
     "fsKitBackend": "FSKit（原生）",
+    "fsKitBackendUnavailable": "暂不可用",
     "ntfs3gCompatibilityBackend": "ntfs-3g（兼容）",
-    "mountBackendDesc": "FSKit 需要 macOS 15.4 或更高版本；不可用时不会自动降级。仅选择 ntfs-3g 兼容后端时才会使用旧驱动。",
+    "mountBackendDesc": "FSKit 需要 macOS 15.4+，且 Nigate FSKit 扩展已安装并启用。就绪后可直接选择 FSKit 挂载。",
+    "mountBackendUnavailableDesc": "FSKit 控制面尚未就绪（系统扩展开启不等于可挂载）。请安装/启用 Nigate FSKit 扩展，或明确选择 ntfs-3g 兼容后端。",
     "trayMode": "托盘模式",
     "trayModeDesc": "启用后，关闭窗口时不会退出应用，而是最小化到系统托盘。可以通过托盘图标快速管理 NTFS 设备。",
     "preventSleep": "智能防止休眠",

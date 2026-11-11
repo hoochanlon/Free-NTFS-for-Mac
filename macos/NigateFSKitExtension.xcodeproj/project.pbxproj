@@ -11,6 +11,9 @@
 		A10000000000000000000002 /* NigateFSKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* NigateFSKit.swift */; };
 		A10000000000000000000003 /* FSKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* FSKit.framework */; };
 		A10000000000000000000004 /* NigateFSKitCore in Frameworks */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* libNigateFSKitCore.a */; };
+		A10000000000000000000005 /* NigateNTFSItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* NigateNTFSItem.swift */; };
+		A10000000000000000000006 /* NigateNTFSVolume.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000008 /* NigateNTFSVolume.swift */; };
+		A10000000000000000000007 /* NigateNTFSEngine.c in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000A /* NigateNTFSEngine.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +24,11 @@
 		B10000000000000000000004 /* NigateFSKitExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NigateFSKitExtension.entitlements; sourceTree = "<group>"; };
 		B10000000000000000000005 /* FSKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FSKit.framework; path = System/Library/Frameworks/FSKit.framework; sourceTree = SDKROOT; };
 		B10000000000000000000006 /* libNigateFSKitCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNigateFSKitCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000007 /* NigateNTFSItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NigateNTFSItem.swift; sourceTree = "<group>"; };
+		B10000000000000000000008 /* NigateNTFSVolume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NigateNTFSVolume.swift; sourceTree = "<group>"; };
+		B10000000000000000000009 /* NigateFSKitExtension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NigateFSKitExtension-Bridging-Header.h"; sourceTree = "<group>"; };
+		B1000000000000000000000A /* NigateNTFSEngine.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = NigateNTFSEngine.c; sourceTree = "<group>"; };
+		B1000000000000000000000B /* NigateNTFSEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NigateNTFSEngine.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +55,7 @@
 			isa = PBXGroup;
 			children = (
 				D10000000000000000000001 /* NigateFSKitExtension */,
+				D10000000000000000000006 /* NigateNTFSEngine */,
 				D10000000000000000000002 /* NigateFSKitCore */,
 				D10000000000000000000003 /* Frameworks */,
 				D10000000000000000000004 /* Products */,
@@ -57,10 +66,30 @@
 			isa = PBXGroup;
 			children = (
 				B10000000000000000000001 /* NigateFSKitExtension.swift */,
+				B10000000000000000000007 /* NigateNTFSItem.swift */,
+				B10000000000000000000008 /* NigateNTFSVolume.swift */,
+				B10000000000000000000009 /* NigateFSKitExtension-Bridging-Header.h */,
 				D10000000000000000000005 /* Resources */,
 				B10000000000000000000004 /* NigateFSKitExtension.entitlements */,
 			);
 			path = Sources/NigateFSKitExtension;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000006 /* NigateNTFSEngine */ = {
+			isa = PBXGroup;
+			children = (
+				B1000000000000000000000A /* NigateNTFSEngine.c */,
+				D10000000000000000000007 /* include */,
+			);
+			path = Sources/NigateNTFSEngine;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000007 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				B1000000000000000000000B /* NigateNTFSEngine.h */,
+			);
+			path = include;
 			sourceTree = "<group>";
 		};
 		D10000000000000000000005 /* Resources */ = {
@@ -200,6 +229,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000001 /* NigateFSKitExtension.swift in Sources */,
+				A10000000000000000000005 /* NigateNTFSItem.swift in Sources */,
+				A10000000000000000000006 /* NigateNTFSVolume.swift in Sources */,
+				A10000000000000000000007 /* NigateNTFSEngine.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -214,9 +246,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		E10000000000000000000002 /* Debug */ = {
+		E1000000000000000000000D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = arm64;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Sources/NigateFSKitExtension/NigateFSKitExtension.entitlements;
 				CODE_SIGN_STYLE = Manual;
@@ -224,6 +257,11 @@
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Sources/NigateNTFSEngine/include",
+					/opt/homebrew/include,
+				);
 				INFOPLIST_FILE = Sources/NigateFSKitExtension/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -232,17 +270,28 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.4;
 				MARKETING_VERSION = 1.6.0;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					/opt/homebrew/lib/libntfs-3g.a,
+					/opt/homebrew/opt/gettext/lib/libintl.a,
+					"-liconv",
+					"-framework",
+					CoreFoundation,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.hoochanlon.github.NigateFSKitExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "Sources/NigateFSKitExtension/NigateFSKitExtension-Bridging-Header.h";
 				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
-		E10000000000000000000003 /* Release */ = {
+		E1000000000000000000000E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = arm64;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Sources/NigateFSKitExtension/NigateFSKitExtension.entitlements;
 				CODE_SIGN_STYLE = Manual;
@@ -250,6 +299,11 @@
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Sources/NigateNTFSEngine/include",
+					/opt/homebrew/include,
+				);
 				INFOPLIST_FILE = Sources/NigateFSKitExtension/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -258,10 +312,20 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.4;
 				MARKETING_VERSION = 1.6.0;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					/opt/homebrew/lib/libntfs-3g.a,
+					/opt/homebrew/opt/gettext/lib/libintl.a,
+					"-liconv",
+					"-framework",
+					CoreFoundation,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.hoochanlon.github.NigateFSKitExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "Sources/NigateFSKitExtension/NigateFSKitExtension-Bridging-Header.h";
 				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
@@ -324,8 +388,8 @@
 		E10000000000000000000004 /* Build configuration list for PBXNativeTarget "NigateFSKitExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E10000000000000000000002 /* Debug */,
-				E10000000000000000000003 /* Release */,
+				E1000000000000000000000D /* Debug */,
+				E1000000000000000000000E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

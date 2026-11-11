@@ -10,6 +10,12 @@ enum DependencyService {
         let major = Int(version.split(separator: ".").first.map(String.init) ?? "0") ?? 0
         status.macosVersion = major >= 14
         status.fsKitSupported = NigateFSKit.isSupportedOnCurrentSystem
+        // 控制面快照由 AppModel 注入；依赖页直接读取，避免重复 probe。
+        let plane = MountBackendPolicy.controlPlaneState
+        status.fsKitControlPlaneAvailable = plane.isControlPlaneAvailable
+        status.fsKitExtensionInstalled = plane.extensionInstalled
+        status.fsKitExtensionEnabled = plane.extensionEnabled
+        status.fsKitDetail = plane.detail
         status.swift = Shell.which("swift") != nil
         status.brew = Shell.which("brew") != nil
         status.fswatch = Shell.which("fswatch") != nil

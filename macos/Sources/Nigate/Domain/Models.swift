@@ -46,7 +46,13 @@ struct DependencyStatus: Sendable, Equatable {
     var ntfs3gPath: String? = nil
     var macosVersion: Bool = false
     var macosVersionString: String = "未知"
+    /// 系统版本是否达到 FSKit 门槛（≥15.4）
     var fsKitSupported: Bool = false
+    /// 扩展已安装且已启用（控制面可挂载）
+    var fsKitControlPlaneAvailable: Bool = false
+    var fsKitExtensionInstalled: Bool = false
+    var fsKitExtensionEnabled: Bool = false
+    var fsKitDetail: String? = nil
     var fswatch: Bool = false
 
     var missingCore: Bool { !macosVersion || !macfuse || !ntfs3g }

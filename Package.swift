@@ -1,6 +1,11 @@
 // swift-tools-version: 6.0
 import PackageDescription
 
+let homebrewPrefix = "/opt/homebrew"
+let homebrewInclude = "\(homebrewPrefix)/include"
+let ntfsStatic = "\(homebrewPrefix)/lib/libntfs-3g.a"
+let intlStatic = "\(homebrewPrefix)/opt/gettext/lib/libintl.a"
+
 let package = Package(
     name: "Nigate",
     platforms: [
@@ -9,25 +14,46 @@ let package = Package(
     products: [
         .executable(name: "Nigate", targets: ["Nigate"]),
         .executable(name: "NigateFSKitExtension", targets: ["NigateFSKitExtension"]),
-        .library(name: "NigateFSKitCore", targets: ["NigateFSKitCore"])
+        .library(name: "NigateFSKitCore", targets: ["NigateFSKitCore"]),
+        .library(name: "NigateNTFSEngine", targets: ["NigateNTFSEngine"])
     ],
     targets: [
         .target(
             name: "NigateFSKitCore",
             path: "macos/Sources/NigateFSKitCore"
         ),
+        .target(
+            name: "NigateNTFSEngine",
+            path: "macos/Sources/NigateNTFSEngine",
+            publicHeadersPath: "include",
+            cSettings: [
+                .unsafeFlags([
+                    "-I\(homebrewInclude)"
+                ])
+            ]
+        ),
         .executableTarget(
             name: "NigateFSKitExtension",
-            dependencies: ["NigateFSKitCore"],
+            dependencies: [
+                "NigateFSKitCore",
+                "NigateNTFSEngine"
+            ],
             path: "macos/Sources/NigateFSKitExtension",
             exclude: [
-                "NigateFSKitExtension.entitlements"
+                "NigateFSKitExtension.entitlements",
+                "NigateFSKitExtension-Bridging-Header.h"
             ],
             resources: [
                 .copy("Resources")
             ],
             linkerSettings: [
-                .linkedFramework("FSKit")
+                .linkedFramework("FSKit"),
+                .linkedFramework("CoreFoundation"),
+                .linkedLibrary("iconv"),
+                .unsafeFlags([
+                    ntfsStatic,
+                    intlStatic
+                ])
             ]
         ),
         .executableTarget(
@@ -35,7 +61,8 @@ let package = Package(
             dependencies: ["NigateFSKitCore"],
             path: "macos/Sources/Nigate",
             exclude: [
-                "Resources/AppIcon-white.icns"
+                "Resources/AppIcon-white.icns",
+                "Nigate.entitlements"
             ],
             resources: [
                 .copy("Resources/AppIcon.icns"),
@@ -48,7 +75,8 @@ let package = Package(
                 .linkedFramework("DiskArbitration"),
                 .linkedFramework("IOKit"),
                 .linkedFramework("Security"),
-                .linkedFramework("ServiceManagement")
+                .linkedFramework("ServiceManagement"),
+                .linkedFramework("FSKit")
             ]
         ),
         .testTarget(

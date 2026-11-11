@@ -3,12 +3,16 @@ import Foundation
 /// FSKit 与主应用共享的稳定边界。
 ///
 /// 这里只描述模块身份、系统能力和资源元数据；实际文件系统状态由 FSKit 扩展拥有，
-/// 主应用通过后续控制面查询，不直接持有扩展内部对象。
+/// 主应用通过控制面查询，不直接持有扩展内部对象。
 public enum NigateFSKit {
     public static let moduleIdentifier = "io.hoochanlon.github.NigateFSKitExtension"
     public static let fileSystemName = "NigateNTFS"
+    public static let shortName = "NigateNTFS"
     public static let minimumMajorVersion = 15
     public static let minimumMinorVersion = 4
+
+    /// 数据面已随本版本一并交付；是否“可用”仍取决于系统版本 + 扩展安装/启用。
+    public static let isDataPlaneImplemented = true
 
     public static var isSupportedOnCurrentSystem: Bool {
         if #available(macOS 15.4, *) {
@@ -38,9 +42,6 @@ public enum NigateFSKit {
 }
 
 /// 可跨模块传递的系统版本快照。
-///
-/// `OperatingSystemVersion` 不提供稳定的值语义；控制面状态不能直接携带它，
-/// 因此在进入共享模型时立即转换为纯值结构。
 public struct NigateSystemVersion: Codable, Equatable, Sendable {
     public let major: Int
     public let minor: Int
@@ -73,9 +74,88 @@ public enum NigateFSKitAvailability: Equatable, Sendable {
     case requiresMacOS15_4(current: NigateSystemVersion)
 }
 
+/// 控制面探测结果：系统能力 + 扩展身份 + 启用态。
+///
+/// `isControlPlaneAvailable` 的判定是：
+/// 系统支持 ∧ 数据面已实现 ∧ 扩展已安装 ∧ 扩展已启用。
+public struct NigateFSKitControlPlaneState: Codable, Equatable, Sendable {
+    public var systemSupported: Bool
+    public var dataPlaneImplemented: Bool
+    public var extensionInstalled: Bool
+    public var extensionEnabled: Bool
+    public var moduleURL: String?
+    public var election: NigateFSKitExtensionElection
+    public var source: NigateFSKitControlPlaneSource
+    public var detail: String?
+
+    public init(
+        systemSupported: Bool,
+        dataPlaneImplemented: Bool = NigateFSKit.isDataPlaneImplemented,
+        extensionInstalled: Bool,
+        extensionEnabled: Bool,
+        moduleURL: String? = nil,
+        election: NigateFSKitExtensionElection = .unknown,
+        source: NigateFSKitControlPlaneSource = .none,
+        detail: String? = nil
+    ) {
+        self.systemSupported = systemSupported
+        self.dataPlaneImplemented = dataPlaneImplemented
+        self.extensionInstalled = extensionInstalled
+        self.extensionEnabled = extensionEnabled
+        self.moduleURL = moduleURL
+        self.election = election
+        self.source = source
+        self.detail = detail
+    }
+
+    public var isControlPlaneAvailable: Bool {
+        systemSupported
+            && dataPlaneImplemented
+            && extensionInstalled
+            && extensionEnabled
+    }
+
+    public static let unavailable = NigateFSKitControlPlaneState(
+        systemSupported: false,
+        dataPlaneImplemented: NigateFSKit.isDataPlaneImplemented,
+        extensionInstalled: false,
+        extensionEnabled: false,
+        source: .none,
+        detail: "FSKit control plane unavailable"
+    )
+
+    public static func unsupportedSystem(_ version: NigateSystemVersion) -> NigateFSKitControlPlaneState {
+        NigateFSKitControlPlaneState(
+            systemSupported: false,
+            extensionInstalled: false,
+            extensionEnabled: false,
+            source: .none,
+            detail: "requires macOS 15.4+, current \(version.major).\(version.minor).\(version.patch)"
+        )
+    }
+}
+
+public enum NigateFSKitExtensionElection: String, Codable, Equatable, Sendable {
+    case use
+    case ignore
+    case debugger
+    case superseded
+    case defaulted
+    case unknown
+}
+
+public enum NigateFSKitControlPlaneSource: String, Codable, Equatable, Sendable {
+    case none
+    case fsClient
+    case pluginKit
+    case combined
+}
+
 /// 主应用与数据面之间的选择约束。
 ///
-/// FSKit 控制面尚未接通时，`.fsKit` 只能返回明确错误；它不能把请求转发给 ntfs-3g。
+/// 控制面状态由主应用注入；未注入时默认不可用（失败关闭）。
+/// 已保存的无效选择由 `sanitize` 纠正到可工作的兼容后端——这是配置自愈，
+/// 不是挂载路径上的静默降级。
 public enum MountBackendPolicyError: Error, Equatable, Sendable {
     case fsKitRequiresMacOS15_4
     case fsKitControlPlaneUnavailable
@@ -83,6 +163,46 @@ public enum MountBackendPolicyError: Error, Equatable, Sendable {
 }
 
 public enum MountBackendPolicy {
+    /// 运行时注入的控制面快照。测试与主应用共用同一判定入口。
+    nonisolated(unsafe) private static var injectedState: NigateFSKitControlPlaneState = .unavailable
+
+    public static var controlPlaneState: NigateFSKitControlPlaneState {
+        get { injectedState }
+        set { injectedState = newValue }
+    }
+
+    public static var isControlPlaneAvailable: Bool {
+        controlPlaneState.isControlPlaneAvailable
+    }
+
+    public static func updateControlPlaneState(_ state: NigateFSKitControlPlaneState) {
+        injectedState = state
+    }
+
+    public static func canUseFSKit(
+        systemVersion: NigateSystemVersion = .init(ProcessInfo.processInfo.operatingSystemVersion),
+        isFSKitControlPlaneAvailable: Bool = isControlPlaneAvailable
+    ) -> Bool {
+        NigateFSKit.isSupported(systemVersion) && isFSKitControlPlaneAvailable
+    }
+
+    /// 纠正无法工作的后端选择，返回实际应使用的后端。
+    public static func sanitize(
+        _ backend: NigateMountBackend,
+        systemVersion: NigateSystemVersion = .init(ProcessInfo.processInfo.operatingSystemVersion),
+        isFSKitControlPlaneAvailable: Bool = isControlPlaneAvailable
+    ) -> NigateMountBackend {
+        switch backend {
+        case .ntfs3gCompatibility:
+            return .ntfs3gCompatibility
+        case .fsKit:
+            return canUseFSKit(
+                systemVersion: systemVersion,
+                isFSKitControlPlaneAvailable: isFSKitControlPlaneAvailable
+            ) ? .fsKit : .ntfs3gCompatibility
+        }
+    }
+
     public static func validate(
         _ backend: NigateMountBackend,
         systemVersion: NigateSystemVersion,

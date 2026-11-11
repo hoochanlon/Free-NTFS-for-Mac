@@ -381,4 +381,35 @@ final class MountBackendPolicyTests: XCTestCase {
             isFSKitControlPlaneAvailable: false
         ))
     }
+
+    func testSanitizeRepairsFSKitWhenControlPlaneUnavailable() {
+        XCTAssertEqual(
+            MountBackendPolicy.sanitize(
+                .fsKit,
+                systemVersion: NigateSystemVersion(major: 15, minor: 4, patch: 0),
+                isFSKitControlPlaneAvailable: false
+            ),
+            .ntfs3gCompatibility
+        )
+        XCTAssertEqual(
+            MountBackendPolicy.sanitize(
+                .fsKit,
+                systemVersion: NigateSystemVersion(major: 15, minor: 4, patch: 0),
+                isFSKitControlPlaneAvailable: true
+            ),
+            .fsKit
+        )
+        XCTAssertEqual(
+            MountBackendPolicy.sanitize(
+                .ntfs3gCompatibility,
+                systemVersion: NigateSystemVersion(major: 15, minor: 4, patch: 0),
+                isFSKitControlPlaneAvailable: false
+            ),
+            .ntfs3gCompatibility
+        )
+        XCTAssertFalse(MountBackendPolicy.canUseFSKit(
+            systemVersion: NigateSystemVersion(major: 15, minor: 4, patch: 0),
+            isFSKitControlPlaneAvailable: false
+        ))
+    }
 }

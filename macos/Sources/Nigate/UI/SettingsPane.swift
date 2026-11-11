@@ -5,6 +5,12 @@ import NigateFSKitCore
 struct SettingsPane: View {
     @EnvironmentObject private var model: AppModel
 
+    /// 依赖 @Published fsKitControlPlane，避免只读 MountBackendPolicy 静态值导致 UI 不刷新。
+    private var fsKitSelectable: Bool {
+        _ = model.fsKitControlPlane
+        return MountBackendPolicy.canUseFSKit()
+    }
+
     var body: some View {
         Form {
             Section(L10n.t("settings.title")) {
@@ -22,13 +28,18 @@ struct SettingsPane: View {
                 Toggle(L10n.t("settings.autoMount"), isOn: bind(\.autoMount))
                     .disabled(model.protectLocked)
                 Text(L10n.t("settings.autoMountDesc")).font(.caption).foregroundStyle(.secondary)
-                Picker(L10n.t("settings.mountBackend"), selection: bind(\.mountBackend)) {
-                    Text(L10n.t("settings.fsKitBackend")).tag(NigateMountBackend.fsKit)
+                Picker(L10n.t("settings.mountBackend"), selection: mountBackendBinding) {
+                    Text(fsKitLabel).tag(NigateMountBackend.fsKit)
                     Text(L10n.t("settings.ntfs3gCompatibilityBackend")).tag(NigateMountBackend.ntfs3gCompatibility)
                 }
-                Text(L10n.t("settings.mountBackendDesc"))
+                Text(L10n.t(fsKitSelectable ? "settings.mountBackendDesc" : "settings.mountBackendUnavailableDesc"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if !fsKitSelectable, let detail = model.fsKitControlPlane.detail, !detail.isEmpty {
+                    Text(detail)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
                 Toggle(L10n.t("settings.trayMode"), isOn: Binding(
                     get: { model.settings.trayMode },
                     set: { model.setTrayMode($0) }
@@ -62,6 +73,23 @@ struct SettingsPane: View {
         }
         .formStyle(.grouped)
         .padding(8)
+    }
+
+    private var fsKitLabel: String {
+        let base = L10n.t("settings.fsKitBackend")
+        return fsKitSelectable ? base : "\(base) — \(L10n.t("settings.fsKitBackendUnavailable"))"
+    }
+
+    /// 控制面未接通时禁止选回 FSKit，避免再次落入不可用状态。
+    private var mountBackendBinding: Binding<NigateMountBackend> {
+        Binding(
+            get: { MountBackendPolicy.sanitize(model.settings.mountBackend) },
+            set: { value in
+                let next = MountBackendPolicy.sanitize(value)
+                model.settings.mountBackend = next
+                model.persist()
+            }
+        )
     }
 
     private func bind<T>(_ keyPath: WritableKeyPath<AppSettings, T>) -> Binding<T> {

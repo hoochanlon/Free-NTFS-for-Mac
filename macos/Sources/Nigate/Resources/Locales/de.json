@@ -62,8 +62,12 @@
     "unsupported": "Vom System nicht unterstützt",
     "fsKit": {
       "name": "FSKit (natives Dateisystem-Framework)",
-      "description": "Apples Framework für Dateisystemerweiterungen, unterstützt ab macOS 15.4. Die FSKit-Einbindung für das Einhängen ist in dieser App noch nicht verbunden; NTFS kann mit diesem Backend derzeit nicht eingehängt werden.",
-      "installGuide": "FSKit ist in macOS enthalten und muss nicht separat installiert werden. Das FSKit-Backend erfordert macOS 15.4 oder neuer. Die Einbindung zum Einhängen ist in dieser App noch nicht verbunden. Um NTFS einzuhängen, wählen Sie unter Einstellungen > Mount-Backend ausdrücklich ntfs-3g (Kompatibilität). Es erfolgt kein automatischer Wechsel."
+      "description": "Apples Framework für Dateisystemerweiterungen (macOS 15.4+). Nach Installation und Aktivierung der Nigate-FSKit-Erweiterung kann FSKit unter Einstellungen > Mount-Backend für natives NTFS-Mounten gewählt werden.",
+      "installGuide": "1. Nigate.app mit macos/Scripts/build.sh bauen und installieren (Erweiterung unter Contents/PlugIns).\n2. Systemeinstellungen → Allgemein → Anmeldeobjekte & Erweiterungen → Dateisystemerweiterungen öffnen und Nigate NTFS aktivieren.\n3. Im App-Bereich Einstellungen Mount-Backend auf FSKit umstellen.\nIst die Control Plane nicht bereit, ntfs-3g (Kompatibilität) explizit wählen. Mount-Pfade fallen nicht stillschweigend zurück.",
+      "statusReady": "Control Plane bereit",
+      "statusNotInstalled": "Erweiterung nicht installiert",
+      "statusDisabled": "Erweiterung deaktiviert",
+      "statusUnavailable": "Control Plane nicht bereit"
     },
     "swift": {
       "name": "Xcode Command Line Tools",
@@ -258,7 +262,7 @@
     "mountBackend": "Mount-Backend",
     "fsKitBackend": "FSKit (nativ)",
     "ntfs3gCompatibilityBackend": "ntfs-3g (Kompatibilität)",
-    "mountBackendDesc": "FSKit erfordert macOS 15.4 oder neuer und wechselt nicht automatisch. Der alte Treiber wird nur bei ausdrücklich ausgewählter ntfs-3g-Kompatibilität verwendet.",
+    "mountBackendDesc": "FSKit braucht macOS 15.4+ sowie die installierte und aktivierte Nigate-FSKit-Erweiterung. Danach FSKit für natives Mounten wählen.",
     "autoMount": "Automatisches Lesen/Schreiben",
     "autoMountDesc": "Wenn aktiviert, hängt der Hintergrund neu angeschlossene schreibgeschützte NTFS-Volumes mit Schreibzugriff ein, ohne ein Fenster zu öffnen. Ein auf Schreibschutz zurückgesetztes Volume bleibt für die aktuelle Verbindung unverändert",
     "trayMode": "Tray-Modus",
@@ -267,7 +271,8 @@
     "preventSleepDesc": "Überwacht nur eingehängte NTFS-Volumes: Bei Übertragung wird der Ruhezustand verhindert, etwa 20 Sekunden nach dem Leerlauf wieder zugelassen. Dieses Kontrollkästchen schaltet nur den intelligenten Modus ein und entspricht dem teal-Zustand in der Titelleiste; Dauerhaft an (kaffeebraun) nur über das Titelleisten-Symbol.",
     "enabled": "（Aktiviert）",
     "autoStart": "Beim Anmelden starten",
-    "autoStartDesc": "Wenn aktiviert, startet die App automatisch beim Systemstart"
+    "autoStartDesc": "Wenn aktiviert, startet die App automatisch beim Systemstart",
+    "mountBackendUnavailableDesc": "Die FSKit-Control-Plane ist noch nicht bereit (Systemerweiterung einschalten reicht nicht). Nigate-FSKit-Erweiterung installieren/aktivieren oder ntfs-3g-Kompatibilität explizit wählen."
   },
   "tray": {
     "showWindow": "Fenster anzeigen",
