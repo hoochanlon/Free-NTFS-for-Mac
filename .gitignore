@@ -1,19 +1,33 @@
-# Build output
+# 构建目录与发布产物
 dist/
 build/
-fuse-ext2.build
 out/
-# local packages / caches / archived assets (keep out of git history)
-shell_for_helpdesk/
-archived/
-shashin/
+.build/
+DerivedData/
+*.app/
+*.dSYM/
+*.dSYM.zip
+*.dmg
+*.ipa
+*.pkg
+fuse-ext2.build
 
-# macOS
+# Swift Package Manager
+.swiftpm/
+
+# macOS 系统文件
 .DS_Store
 .AppleDouble
 .LSOverride
+._*
+Icon?
 
-# IDE
+# Xcode 用户与本地状态
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+
+# IDE 编辑器临时文件
 .vscode/
 .idea/
 *.swp
@@ -21,25 +35,30 @@ shashin/
 *~
 Free-NTFS-for-Mac.code-workspace
 
-# Logs
+# 日志、测试覆盖率与缓存
 *.log
 logs/
+coverage/
+.cache/
 
-# Environment
+# 环境变量与本地配置
 .env
-.env.local
+.env.*
+!.env.example
+!.env.template
 
-# Temporary files
+# 临时文件
 *.tmp
 *.temp
+*.orig
 .dmg-staging/
 
-# Swift
-.build/
-macos/.build/
-.swiftpm/
+# 本地签名与证书文件
+*.p12
+*.mobileprovision
+*.provisionprofile
 
-# Swift
-.build/
-macos/.build/
-.swiftpm/
+# 本地包、缓存与归档目录
+shell_for_helpdesk/
+archived/
+shashin/
