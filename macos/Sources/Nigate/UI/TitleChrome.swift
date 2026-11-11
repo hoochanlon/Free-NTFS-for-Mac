@@ -81,6 +81,6 @@ struct TitleChrome: View {
                 .foregroundStyle(active ? tint : Color.primary.opacity(0.7))
         }
         .buttonStyle(.plain)
-        .help(model.settings.hideIconTooltips ? "" : title)
+        .help(title)
     }
 }

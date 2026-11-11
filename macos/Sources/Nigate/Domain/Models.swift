@@ -59,7 +59,6 @@ struct AppSettings: Codable, Sendable, Equatable {
     var autoStart: Bool = false
     var preventSleep: Bool = false
     var keepAwake: Bool = false
-    var hideIconTooltips: Bool = true
     var manuallyReadOnlyDevices: [String] = []
     var themeIsLight: Bool = true
 

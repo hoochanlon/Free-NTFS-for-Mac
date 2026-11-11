@@ -46,7 +46,10 @@ final class TrayController {
             menu.addItem(empty)
         } else {
             for device in model.devices {
-                let item = NSMenuItem(title: "\(device.volumeName)  ·  \(device.isReadWrite ? L10n.t("devices.readWrite") : L10n.t("devices.readOnly"))", action: nil, keyEquivalent: "")
+                let status = device.isReadWrite ? L10n.t("devices.readWrite") : L10n.t("devices.readOnly")
+                let item = NSMenuItem(title: device.volumeName, action: nil, keyEquivalent: "")
+                item.image = statusImage(for: device, accessibilityDescription: status)
+                item.setAccessibilityLabel("\(device.volumeName), \(status)")
                 let sub = NSMenu()
                 sub.addItem(action(L10n.t("devices.mount")) { model.perform(.mount, on: device) })
                 sub.addItem(action(L10n.t("devices.restoreReadOnly")) { model.perform(.restore, on: device) })
@@ -63,6 +66,16 @@ final class TrayController {
         menu.addItem(.separator())
         menu.addItem(action(L10n.t("tray.quit")) { NSApp.terminate(nil) })
         return menu
+    }
+
+    private func statusImage(for device: NTFSDevice, accessibilityDescription: String) -> NSImage? {
+        guard let image = NSImage(systemSymbolName: "externaldrive.fill", accessibilityDescription: accessibilityDescription) else {
+            return nil
+        }
+        let color: NSColor = device.isReadWrite ? .systemGreen : .systemOrange
+        let configured = image.withSymbolConfiguration(.init(paletteColors: [color])) ?? image
+        configured.isTemplate = false
+        return configured
     }
 
     private func action(_ title: String, _ handler: @escaping () -> Void) -> NSMenuItem {

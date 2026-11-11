@@ -39,7 +39,6 @@ struct SettingsPane: View {
                 Text(L10n.t("settings.preventSleepDesc")).font(.caption).foregroundStyle(.secondary)
                 Toggle(L10n.t("settings.autoStart"), isOn: bind(\.autoStart))
                 Text(L10n.t("settings.autoStartDesc")).font(.caption).foregroundStyle(.secondary)
-                Toggle(L10n.t("settings.hideIconTooltips"), isOn: bind(\.hideIconTooltips))
                 Picker(L10n.t("settings.startupTab"), selection: bind(\.startupTab)) {
                     Text(L10n.t("tabs.dependencies")).tag(AppTab.dependencies)
                     Text(L10n.t("tabs.devices")).tag(AppTab.devices)

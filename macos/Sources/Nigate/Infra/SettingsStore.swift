@@ -27,7 +27,6 @@ enum SettingsStore {
         if let value = raw["autoStart"] as? Bool { settings.autoStart = value }
         if let value = raw["preventSleep"] as? Bool { settings.preventSleep = value }
         if let value = raw["keepAwake"] as? Bool { settings.keepAwake = value }
-        if let value = raw["hideIconTooltips"] as? Bool { settings.hideIconTooltips = value }
         if let value = raw["manuallyReadOnlyDevices"] as? [String] {
             settings.manuallyReadOnlyDevices = value
         }
