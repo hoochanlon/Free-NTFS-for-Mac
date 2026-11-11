@@ -1,15 +1,8 @@
-# Dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# build output
+# Build output
 dist/
 build/
 fuse-ext2.build
 out/
-.electron-cache/
 # local packages / caches / archived assets (keep out of git history)
 shell_for_helpdesk/
 archived/
@@ -41,9 +34,12 @@ logs/
 *.temp
 .dmg-staging/
 
-# Compiled files (from TypeScript and Stylus)
-*.js
-*.js.map
-styles.css
-!node_modules/**/*.js
-!ninja/**/*.js
+# Swift
+.build/
+macos/.build/
+.swiftpm/
+
+# Swift
+.build/
+macos/.build/
+.swiftpm/

@@ -1,87 +1,38 @@
-### Nigate 安装说明
+# Nigate 文档
 
-#### 一、安装
+Nigate 是原生 Swift/SwiftUI macOS 应用，最低支持 macOS 14。仓库只有根目录 `Package.swift` 一个 Swift Package Manager 入口，应用源码位于 `macos/Sources/Nigate`。
 
-1. 将 `Nigate.app` 拖到右侧的「应用程序」文件夹。
-2. 若首次打开提示「已损坏」或「无法验证开发者」，按下面方法处理。
+## 本地构建
 
-#### 二、解除限制
+在仓库根目录执行：
 
-##### 方法一（推荐）
-
-1. 双击本 DMG 中的 `提示损坏？点我.command`。
-2. 安装后也可与 `Nigate.app` 放在同一目录后运行。
-3. 完成后重新打开 Nigate。
-
-##### 方法二（终端）
-
-打开「终端」，执行：
-
-```bash
-xattr -cr /Applications/Nigate.app
+```sh
+swift test
+swift build
+./dev.sh
+./macos/Scripts/dev.sh
+./macos/Scripts/build.sh
 ```
 
-若安装在其他位置，请改路径。例如桌面：
+`build.sh` 只生成本地 `dist/Nigate.app` 并进行临时签名，不提供公证或正式发布流程。
 
-```bash
-xattr -cr ~/Desktop/Nigate.app
+## 安全边界
+
+- 格式化是不可逆的数据销毁操作。
+- 只有在设备信息完整、明确为外置物理整盘、不是启动盘且没有任何负面安全标记时才允许格式化。
+- 内置盘、虚拟盘、磁盘映像、分区、设备类型未知、信息缺失或验证失败的目标一律拒绝。
+- `ntfsfix` 只能处理有限的 NTFS 问题，不能替代 Windows `chkdsk`。
+- 读写挂载依赖 MacFUSE 与 `ntfs-3g`，真实设备操作需要硬件集成测试。
+
+## 运行时结构
+
+```text
+Domain        纯数据模型与磁盘安全策略
+Infra         Shell、提权、路径、Keychain、设置等系统适配
+NTFS          扫描、监控、挂载、修复、格式化与依赖服务
+App           SwiftUI 应用状态、生命周期与菜单栏协调
+UI            SwiftUI 页面、弹窗和交互
+Tests         磁盘安全与自动挂载决策测试
 ```
 
-##### 方法三（方法一、二无效时，请谨慎）
-
-在终端执行：
-
-```bash
-sudo spctl --master-disable
-```
-
-然后打开「系统设置」→「隐私与安全性」，选择「任何来源」。
-
-#### 三、帮助
-
-https://github.com/hoochanlon/Free-NTFS-for-Mac
-
----
-
-###  Nigate · Installation Guide
-
-#### 1. Install
-
-1. Drag `Nigate.app` to the Applications folder on the right.
-2. If macOS says the app is damaged or the developer cannot be verified, use one of the methods below.
-
-#### 2. Unlock the app
-
-##### Method 1 (recommended)
-
-1. Double-click `提示损坏？点我.command` in this DMG.
-2. After install, you can also run it next to `Nigate.app`.
-3. Then open Nigate again.
-
-##### Method 2 (Terminal)
-
-Open Terminal and run:
-
-```bash
-xattr -cr /Applications/Nigate.app
-```
-
-If installed elsewhere, change the path. Example (Desktop):
-
-```bash
-xattr -cr ~/Desktop/Nigate.app
-```
-
-##### Method 3 (last resort; use with care)
-
-In Terminal run:
-
-```bash
-sudo spctl --master-disable
-```
-
-Then go to **System Settings → Privacy & Security** and choose **Anywhere**.
-
-#### 3. Help
-
-https://github.com/hoochanlon/Free-NTFS-for-Mac
+应用内帮助位于 `macos/Sources/Nigate/Resources/Help`，本文件只描述当前 Swift 工程，不保留历史运行时或旧安装绕过指南。

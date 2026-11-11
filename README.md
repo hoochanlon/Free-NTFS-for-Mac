@@ -1,293 +1,53 @@
-## Nigate
+# Nigate
 
 **Language / 言語 / 语言**: [English](README.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
-![](https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/src/imgs/example/demo.gif)
+Nigate is a native macOS application built with Swift and SwiftUI for managing NTFS volumes. The repository has one Swift Package Manager entry point at the root; the former Electron/Node runtime is no longer used.
 
-This is the Electron GUI version of Nigate, which provides a modern and intuitive interface for NTFS device management while retaining the original geek terminal version.[^1]
+## Features
 
-### Features
+- Detect mounted and unmounted NTFS volumes and display mount state and capacity.
+- Mount NTFS volumes read-write, restore read-only mounts, unmount, or eject devices.
+- Repair with `ntfsfix`, rename volume labels, and manage automatic mounting.
+- Store an administrator password in macOS Keychain when explicitly enabled.
+- Provide dependency checks, an optional menu-bar mode, launch-at-login, sleep prevention, and localized settings.
+- Format only a verified external physical whole disk. Formatting erases the entire disk and its partitions.
 
-- 🎨 **Modern Interface** - Dark theme with clean and beautiful design
-- 📱 **Real-time Monitoring** - Automatically detects NTFS device connections
-- ✅ **Dependency Check** - Automatically checks and installs required system dependencies
-- 🔄 **One-Click Mount** - Easily mount read-only NTFS devices in read-write mode
-- ⚡ **Auto Read-Write** - When enabled, newly inserted NTFS devices will be automatically mounted in read-write mode without manual operation. Intelligently skips devices you manually set to read-only, respecting your choices
-- 📊 **Status Display** - Clearly displays device status
-- 🛡️ **Secure & Reliable** - Uses Electron security best practices and provides a non-destructive disk repair **Reset** button
-- ☕ **Prevent Sleep** - Title bar coffee icon cycles: prevent sleep → smart mode → off. Smart mode blocks sleep only during NTFS transfers
-- 🍃 **Status Protection** - Long press for 3s to toggle protection status. When protected, auto read-write and tray mode will be disabled to prevent accidental operations
-- 🥷 **Ninja Tools** - Provide cross-filesystem mounting and end-to-end scripts from development to release, with one-click permission fixes and multi-language output to simplify complex operations and lower the usage barrier
-- 💻 **Apple Silicon Support** - Built for Apple Silicon Macs (arm64)
+## Requirements
 
-### Important Notes
+- macOS 14 or later.
+- Swift 6 toolchain to build from source.
+- For NTFS read-write mounting: MacFUSE and `ntfs-3g` (for example, install with Homebrew). `fswatch` is optional.
 
-> [!CAUTION]
-> The stable operation and data integrity of this software depend on the performance of storage devices. To avoid data read/write errors, transfer interruptions, or device recognition failures, it is recommended to use USB drives made with high-quality flash memory chips that have reliable read/write performance.
+The app's dependency installer opens Terminal and may install Xcode Command Line Tools, Homebrew, MacFUSE, and `ntfs-3g`. macOS may require you to approve the filesystem extension in System Settings and restart. The installer does not disable Gatekeeper or change global macOS security settings.
 
-> [!important]
-> **Read-Write Notes**:
->  - **Basic Operations**: Supports file copy, cut, delete, and rename (metadata-level operations)
->  - **Editing and Saving**: The GUI mounts NTFS volumes read-write with file ownership mapped to the current macOS user (`uid`/`gid`). Text and image editing and saving work in tested configurations, but compatibility may vary by editor and save operation
->  - **If Saving Fails**: Keep a backup of important data. As a workaround, copy the file to your Mac, edit it locally, then copy it back. Editors that save through a temporary file and rename may help in some cases, but are not guaranteed to bypass every limitation
->  - **Additional Note**: Ninja Tools `/ninja/kamui.sh` supports direct in-place data modification on original files, suitable for scenarios requiring direct file editing [^2]
+## Build and run
 
+Run these commands from the repository root:
 
-
-- **Administrator Privileges**: Mounting operations require administrator privileges, and the system will prompt for a password
-- **Windows Fast Startup**: If the device uses Fast Startup in Windows, mounting may fail. It is recommended to fully shut down (not hibernate) in Windows, or disable Fast Startup
-- **Device Name**: USB drive names do not support spaces or illegal characters
-- **Gatekeeper (Allow Anywhere)**: First-time use may require disabling Gatekeeper to allow unsigned applications. Run in terminal: `sudo spctl --master-disable`. After disabling, you can see the "Anywhere" option in "System Settings" > "Privacy & Security"
-- **System Integrity Protection (SIP)** (Optional): To disable SIP, you need to operate in Recovery Mode:
-  1. Restart Mac, hold the power button until the Apple logo and progress bar appear, enter Recovery Mode
-  2. Find and open Terminal from the toolbar at the top of the screen, enter command: `csrutil disable`
-  3. Close Terminal and restart Mac
-  4. After restart, you can run `csrutil status` in terminal to check the status
-- **Bootable USB Drives**: If a USB drive has been used to create bootable media like Ventoy or WePE, it may take some time when mounting it in read-write mode
-
-### Quick Start
-
-#### Method 1: Online Experience (Shell - Ninja Tools)
-
-The following scripts are from the `ninja/` folder's Ninja Tools collection, providing command-line support for NTFS and Linux filesystem read-write access.
-
-**🌍 All scripts support multiple languages!** Use `LANG=ja` or `LANG=zh` to set the language.
-
-##### NTFS Read-Write Support
-
-Copy and paste into a ***terminal with full administrative privileges*** and press Enter:
-
-```shell
-# English (default)
-/bin/bash -c \"$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)\"
-
-# Japanese
-LANG=ja /bin/bash -c \"$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)\"
-
-# Chinese
-LANG=zh /bin/bash -c \"$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/nigate.sh)\"
-```
-
-##### Linux ext4 and Other Filesystem Read-Write Support
-
-Supports ext2/3/4, btrfs, xfs, zfs, NTFS, exFAT, LUKS encryption, LVM, RAID, and many other filesystems:
-
-```shell
-# English (default)
-/bin/bash -c \"$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)\"
-
-# Japanese
-LANG=ja /bin/bash -c \"$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)\"
-
-# Chinese
-LANG=zh /bin/bash -c \"$(curl -fsSL https://cdn.statically.io/gh/hoochanlon/Free-NTFS-for-Mac/main/ninja/kamui.sh)\"
-```
-
-#### Method 2: Download Locally (Shell - Ninja Tools)
-
-After downloading, you can directly type `nigate` to start:
-
-```shell
-curl https://fastly.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac/ninja/nigate.sh > ~/Public/nigate.sh && sudo -S mkdir -p /usr/local/bin && cd /usr/local/bin && sudo ln -s ~/Public/nigate.sh nigate.shortcut && echo \"alias nigate='bash nigate.shortcut'\" >> ~/.zshrc && osascript -e 'tell application \"Terminal\" to do script \"nigate\"'
-```
-
-#### Method 3: GUI Version (Electron)
-
-Download and use from [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags).
-
-- **🌍 Application interface supports multiple languages**: Chinese (Simplified/Traditional), Japanese, English, German, and more
-
-**Tray**
-
-![ ](src/imgs/example/2026-01-21-10.52.29.png)
-
-### Dependency Management
-
-#### One-Click Install Dependencies
-
-```shell
-# English (default)
-/bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)\"
-
-# Japanese
-LANG=ja /bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)\"
-
-# Chinese
-LANG=zh /bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/kunai.sh)\"
-```
-
-#### One-Click Uninstall Dependencies
-
-```shell
-# English (default)
-/bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)\"
-
-# Japanese
-LANG=ja /bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)\"
-
-# Chinese
-LANG=zh /bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/ninpo.sh)\"
-```
-
-### System Permission Settings
-
-Configure system permissions and security settings (Gatekeeper, SIP, etc.):
-
-```shell
-# English (default)
-/bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/shuriken.sh)\"
-
-# Japanese
-LANG=ja /bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/shuriken.sh)\"
-
-# Chinese
-LANG=zh /bin/bash -c \"$(curl -fsSL https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/ninja/shuriken.sh)\"
-```
-
-> For more information, see: [Ninja Tools Testing #39](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/39) and [Ninja Tools Documentation](docs/07-忍者工具集内容说明.md)
-
-### Operations & Development
-
-### 🚀 One-Click Run (Recommended for Beginners)
-
-**Users without any development environment can deploy in one step!**
-
-The project provides intelligent one-click run scripts that automatically detect and install all necessary tools (Node.js, pnpm, dependencies, etc.), then automatically compile and start the application.
-
-#### Method 1: Use One-Click Script in Project Root (Recommended)
-
-```bash
-# Clone project
-git clone <repository-url>
-cd Free-NTFS-for-Mac
-
-# One-click run (auto-install environment, compile, start)
+```sh
+swift test
+swift build
 ./dev.sh
 ```
 
-Or use the script in the ninja directory:
+The SwiftPM entry point and app source are `Package.swift` and `macos/Sources/Nigate`. An equivalent development launcher is available at `./macos/Scripts/dev.sh`. To assemble a local `.app` bundle under `dist/Nigate.app`, run:
 
-```bash
-./ninja/izanaki.sh
+```sh
+./macos/Scripts/build.sh          # release
+./macos/Scripts/build.sh debug    # debug
 ```
 
-**The script automatically completes:**
-- ✅ Detects and installs Node.js (if not present)
-- ✅ Detects and installs pnpm (if not present)
-- ✅ Syncs version numbers
-- ✅ Installs project dependencies
-- ✅ Compiles TypeScript code
-- ✅ Compiles Stylus styles
-- ✅ Starts application (development mode)
+The build script creates a locally ad-hoc-signed bundle; it does not notarize or package a distributable release.
 
-#### Method 2: Manual Installation (For Experienced Developers)
+## Safety and limitations
 
-1. **Clone and Initialize**
+- **Formatting is destructive.** The app fails closed unless it can verify a complete external, physical, whole-disk target and confirm it is not the startup disk. Internal, virtual, disk-image, partition-only, unknown, incomplete, or negatively flagged targets are rejected. Back up the entire disk before formatting.
+- **NTFS repair is best effort.** `ntfsfix` handles only limited NTFS issues and is not a replacement for Windows `chkdsk`.
+- **Read-write mounts use `ntfs-3g`.** Compatibility and data integrity depend on the device, filesystem state, and macFUSE/driver versions. Keep backups. A volume left hibernated or in Windows Fast Startup state may not be safe to mount.
+- The current tests exercise disk-safety and auto-mount decision logic. Real-device mounting, repair, and formatting require hardware integration testing and are not covered by the unit test suite.
+- This repository provides a local build workflow, not a signed/notarized release pipeline.
 
-```bash
-git clone <repository-url>
-cd Free-NTFS-for-Mac
-pnpm install
-```
+## License
 
-2. **Run Application**
-
-```bash
-# Production mode
-pnpm start
-
-# Development mode (automatically opens DevTools)
-pnpm run dev
-```
-
-3. **Build Application**
-
-```bash
-pnpm run build
-```
-
-### 🌍 Multi-Language Support
-
-All scripts and tools support multiple languages, can be set via `LANG` environment variable:
-
-```bash
-# English (default)
-./dev.sh
-
-# Japanese
-LANG=ja ./dev.sh
-
-# Chinese
-LANG=zh ./dev.sh
-```
-
-Supported scripts include:
-- `dev.sh` / `ninja/izanaki.sh` - One-click run script
-- `ninja/kamui.sh` - Linux filesystem mount
-- `ninja/nigate.sh` - NTFS auto mount
-- `ninja/build.sh` - Application packaging
-- `ninja/shuriken.sh` - System permission settings
-- And all other ninja tools collection scripts
-
-#### Project Setup Script
-
-If you encounter errors with `pnpm run dev`, run the setup script to fix them:
-
-```bash
-pnpm run setup
-```
-
-Or run directly:
-
-```bash
-./ninja/izanaki.sh
-```
-
-This script automatically:
-- ✅ Checks if required files exist
-- ✅ Sets script execution permissions
-- ✅ Creates necessary directory structure
-- ✅ Syncs version numbers
-- ✅ Compiles TypeScript and Stylus
-- ✅ Verifies critical files
-
-After building, you can find the packaged application in the `dist` directory.
-
-### Mac Packaging Instructions
-
-After packaging, the following will be generated in the `dist` directory:
-- **DMG File**: Installation package for distribution
-- **ZIP File**: Compressed application package
-
-Other notes:
-- Use `./ninja/build.sh` script for more flexible packaging
-- First run may require right-clicking the application and selecting \"Open\" (macOS security restrictions)
-
-### Troubleshooting
-
-#### Mount Failure
-
-1. Check if all dependencies are installed
-2. Confirm the device is not occupied by other programs
-3. If it's a Windows Fast Startup issue, fully shut down the device in Windows
-
-#### Dependency Installation Failure
-
-1. Ensure network connection is normal
-2. Check if Homebrew is correctly installed
-3. May need to manually run installation commands in terminal
-
-#### Application Won't Start
-
-1. Check if Node.js version meets requirements
-2. Delete `node_modules` and rerun `pnpm install`
-3. Check console error messages
-
-### Acknowledgments
-
-Thank you to all developers, testers, and users who have contributed to this project! See [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md) for details.
-
-[^1]: **Note**: Using this tool to mount or modify NTFS devices carries a risk of data loss. It is strongly recommended to backup important data before operation. This tool is provided \"as is\" without any warranty. The developer is not responsible for data loss caused by using this tool.
-
-[^2]: Powered by [nohajc/anylinuxfs](https://github.com/nohajc/anylinuxfs) with secondary encapsulation
-
+See [LICENSE](LICENSE) and [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md).
