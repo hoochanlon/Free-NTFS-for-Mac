@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "title": "Systemabhängigkeiten",
+    "openFileSystemExtensions": "Dateisystemerweiterungen öffnen",
     "checkButton": "Abhängigkeiten prüfen",
     "autoInstall": "Ein-Klick-Installation",
     "autoInstallTitle": "Benötigte Systemabhängigkeiten im Terminal installieren",
@@ -57,6 +58,13 @@
     "checkFailed": "Prüfung der Abhängigkeiten fehlgeschlagen: {error}",
     "checkTimeout": "Prüfung abgelaufen, bitte erneut versuchen",
     "installCommandLabel": "Installationsbefehl:",
+    "available": "Vom System unterstützt",
+    "unsupported": "Vom System nicht unterstützt",
+    "fsKit": {
+      "name": "FSKit (natives Dateisystem-Framework)",
+      "description": "Apples Framework für Dateisystemerweiterungen, unterstützt ab macOS 15.4. Die FSKit-Einbindung für das Einhängen ist in dieser App noch nicht verbunden; NTFS kann mit diesem Backend derzeit nicht eingehängt werden.",
+      "installGuide": "FSKit ist in macOS enthalten und muss nicht separat installiert werden. Das FSKit-Backend erfordert macOS 15.4 oder neuer. Die Einbindung zum Einhängen ist in dieser App noch nicht verbunden. Um NTFS einzuhängen, wählen Sie unter Einstellungen > Mount-Backend ausdrücklich ntfs-3g (Kompatibilität). Es erfolgt kein automatischer Wechsel."
+    },
     "swift": {
       "name": "Xcode Command Line Tools",
       "description": "Offizielle Apple-Entwicklungstools, die Swift-Compiler und grundlegende Entwicklungsbibliotheken bereitstellen",
@@ -247,6 +255,10 @@
       "en": "English (US)",
       "de": "Deutsch (DE)"
     },
+    "mountBackend": "Mount-Backend",
+    "fsKitBackend": "FSKit (nativ)",
+    "ntfs3gCompatibilityBackend": "ntfs-3g (Kompatibilität)",
+    "mountBackendDesc": "FSKit erfordert macOS 15.4 oder neuer und wechselt nicht automatisch. Der alte Treiber wird nur bei ausdrücklich ausgewählter ntfs-3g-Kompatibilität verwendet.",
     "autoMount": "Automatisches Lesen/Schreiben",
     "autoMountDesc": "Wenn aktiviert, hängt der Hintergrund neu angeschlossene schreibgeschützte NTFS-Volumes mit Schreibzugriff ein, ohne ein Fenster zu öffnen. Ein auf Schreibschutz zurückgesetztes Volume bleibt für die aktuelle Verbindung unverändert",
     "trayMode": "Tray-Modus",

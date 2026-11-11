@@ -1,4 +1,5 @@
 import Foundation
+import NigateFSKitCore
 
 enum SettingsStore {
     private static var url: URL {
@@ -29,6 +30,9 @@ enum SettingsStore {
         if let value = raw["keepAwake"] as? Bool { settings.keepAwake = value }
         if let value = raw["manuallyReadOnlyDevices"] as? [String] {
             settings.manuallyReadOnlyDevices = value
+        }
+        if let value = raw["mountBackend"] as? String {
+            settings.mountBackend = NigateMountBackend(rawValue: value) ?? .ntfs3gCompatibility
         }
         if let value = raw["themeIsLight"] as? Bool { settings.themeIsLight = value }
         return settings

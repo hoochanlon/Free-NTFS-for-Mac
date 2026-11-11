@@ -7,17 +7,19 @@ enum DeviceScanner {
         let mountOut = await mountTask.stdout
         let listOut = await listTask.stdout
         let tags = DiskSafety.parentDiskTags(from: listOut)
+        let mounts = MountTable.parse(mountOut)
 
         var devices: [NTFSDevice] = []
         var seen = Set<String>()
 
-        for line in mountOut.split(whereSeparator: \.isNewline).map(String.init) {
-            guard DiskSafety.isNTFSFilesystem(line) || line.localizedCaseInsensitiveContains("fuse") else { continue }
-            guard let device = parseMountLine(line, tags: tags) else { continue }
+        // 1) 挂载表优先：已挂载事实决定列表与读写状态
+        for mounted in mounts {
+            guard let device = await deviceFromMount(mounted, mountOut: mountOut, tags: tags) else { continue }
             seen.insert(device.devicePath)
             devices.append(device)
         }
 
+        // 2) diskutil list 补未挂载的 NTFS 分区
         var currentDisk = ""
         for line in listOut.split(whereSeparator: \.isNewline).map(String.init) {
             if let match = line.range(of: #"^/dev/(disk\d+)"#, options: .regularExpression) {
@@ -48,45 +50,59 @@ enum DeviceScanner {
         return filled.sorted { $0.disk < $1.disk }
     }
 
-    private static func parseMountLine(_ line: String, tags: [String: String]) -> NTFSDevice? {
-        guard let on = line.range(of: " on ") else { return nil }
-        let devicePath = String(line[..<on.lowerBound]).trimmingCharacters(in: .whitespaces)
-        let rest = String(line[on.upperBound...]).trimmingCharacters(in: .whitespaces)
-        guard let optionRange = rest.range(of: #"\s+\(((?:[\w-]*ntfs|[^,\s]*fuse)\b[^()]*)\)\s*$"#, options: [.regularExpression, .caseInsensitive]) else {
-            return nil
+    /// 将一条挂载记录转成 NTFS 设备；非 NTFS / 未确认的 fuse 返回 nil。
+    private static func deviceFromMount(
+        _ mounted: MountedVolume,
+        mountOut: String,
+        tags: [String: String]
+    ) async -> NTFSDevice? {
+        if DiskSafety.isFuseDriver(mounted.driver) {
+            let info = await Shell.runQuiet("/usr/sbin/diskutil", ["info", mounted.devicePath], timeout: 1.5).stdout
+            guard DiskSafety.isConfirmedNTFSFuseMount(
+                mountOut,
+                deviceInfo: info,
+                devicePath: mounted.devicePath,
+                mountPoint: mounted.mountPoint
+            ) else { return nil }
+        } else {
+            // 原生挂载：仅放行 xntfs / ntfs 明确类型
+            let mountLine = "\(mounted.devicePath) on \(mounted.mountPoint) (\(mounted.options.joined(separator: ", ")))"
+            let nativeNTFS = DiskSafety.isNTFSFilesystem(mountLine)
+                || mounted.driver.lowercased().contains("ntfs")
+                || DiskSafety.isMountedXNTFSFilesystem(
+                    mountOut,
+                    devicePath: mounted.devicePath,
+                    mountPoint: mounted.mountPoint
+                )
+            guard nativeNTFS else { return nil }
         }
-        let volume = String(rest[..<optionRange.lowerBound]).trimmingCharacters(in: .whitespaces)
-        guard volume.hasPrefix("/Volumes/") else { return nil }
-        let options = String(rest[optionRange]).trimmingCharacters(in: CharacterSet(charactersIn: " ()"))
-        let isFuse = line.lowercased().contains("fuse")
-            || line.lowercased().contains("ntfs-3g")
-            || (options.contains("local") && options.contains("allow_other"))
-        let isReadOnly = options.contains("read-only") && !isFuse
-        let disk = devicePath.replacingOccurrences(of: "/dev/", with: "")
+
         return NTFSDevice(
-            disk: disk,
-            devicePath: devicePath,
-            volume: volume,
-            volumeName: String(volume.dropFirst("/Volumes/".count)),
+            disk: mounted.disk,
+            devicePath: mounted.devicePath,
+            volume: mounted.mountPoint,
+            volumeName: mounted.volumeName,
             volumeUuid: nil,
-            isReadOnly: isReadOnly || !isFuse,
-            options: options,
+            // 只读状态只认内核挂载选项，禁止用探测结果覆盖
+            isReadOnly: mounted.isReadOnly,
+            options: mounted.options.joined(separator: ", "),
             isMounted: true,
             isUnmounted: false,
-            canFormat: DiskSafety.canFormat(fromListTags: tags[DiskSafety.parentDiskId(disk)]),
+            canFormat: DiskSafety.canFormat(fromListTags: tags[DiskSafety.parentDiskId(mounted.disk)]),
             capacity: nil
         )
     }
 
     private static func infoDevice(path: String, disk: String, tags: [String: String]) async -> NTFSDevice? {
         let info = await Shell.runQuiet("/usr/sbin/diskutil", ["info", path], timeout: 1.5).stdout
-        guard DiskSafety.isNTFSFilesystem(info) else { return nil }
+        guard DiskSafety.isNTFSFilesystem(info) || DiskSafety.isNTFSVolumeInfo(info) else { return nil }
         let name = DiskSafety.field(info, "Volume Name") ?? disk
         let mount = DiskSafety.field(info, "Mount Point") ?? ""
         let mounted = !mount.isEmpty && mount != "Not applicable" && mount != "none"
         let uuid = DiskSafety.field(info, "Volume UUID")
             ?? DiskSafety.field(info, "Disk / Partition UUID")
             ?? DiskSafety.field(info, "Partition UUID")
+        // 未走挂载表的路径：系统原生挂载按只读处理；未挂载也标只读待用户选择
         return NTFSDevice(
             disk: disk,
             devicePath: path,

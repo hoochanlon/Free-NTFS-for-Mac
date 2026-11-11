@@ -226,7 +226,7 @@ final class AppModel: ObservableObject {
         guard !busyDisks.contains(diskKey) else { return }
         busyDisks.insert(diskKey)
         defer { busyDisks.remove(diskKey) }
-        let service = MountService { [weak self] key, params in
+        let service = MountService(backend: settings.mountBackend) { [weak self] key, params in
             guard let self else { throw AppError.cancelled }
             return try await self.askPassword(key, params)
         }
@@ -246,6 +246,8 @@ final class AppModel: ObservableObject {
                 toast = try await service.restore(device)
             case .reset:
                 AutoMount.markManualReadOnly(device, settings: &settings)
+                cooldown[device.identity] = Date().addingTimeInterval(90)
+                cooldown[device.disk] = Date().addingTimeInterval(90)
                 persist()
                 toast = try await service.reset(device)
             case .repair:
@@ -257,7 +259,9 @@ final class AppModel: ObservableObject {
             case .eject:
                 toast = try await service.eject(device)
             }
-            await refreshDevices()
+            // 还原/重置只读后禁止立刻 autoMount，否则会把刚挂上的只读又改成读写
+            let skipAuto = action == .restore || action == .reset
+            await refreshDevices(applyAutoMount: !skipAuto)
         } catch AppError.cancelled {
             toast = L10n.t("messages.cancelled")
             await refreshDevices(applyAutoMount: false)

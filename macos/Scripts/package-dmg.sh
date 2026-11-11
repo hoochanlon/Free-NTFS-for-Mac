@@ -62,6 +62,12 @@ else
   "$MACOS_ROOT/Scripts/build.sh" "$CONFIGURATION"
 fi
 
+FSKIT_EXTENSION="$APP/Contents/PlugIns/NigateFSKitExtension.appex"
+if [[ ! -d "$FSKIT_EXTENSION" || ! -f "$FSKIT_EXTENSION/Contents/MacOS/NigateFSKitExtension" ]]; then
+  echo "Built app does not contain a real FSKit extension bundle: $FSKIT_EXTENSION" >&2
+  exit 1
+fi
+
 rm -rf "$STAGING_ROOT"
 mkdir -p "$STAGING_DIR/.background" "$DIST_DIR"
 cp -R "$APP" "$STAGING_DIR/Nigate.app"

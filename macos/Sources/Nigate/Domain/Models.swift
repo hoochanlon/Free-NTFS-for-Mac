@@ -1,4 +1,5 @@
 import Foundation
+import NigateFSKitCore
 
 enum AppTab: String, Codable, CaseIterable, Sendable {
     case dependencies, devices, help, settings
@@ -45,6 +46,7 @@ struct DependencyStatus: Sendable, Equatable {
     var ntfs3gPath: String? = nil
     var macosVersion: Bool = false
     var macosVersionString: String = "未知"
+    var fsKitSupported: Bool = false
     var fswatch: Bool = false
 
     var missingCore: Bool { !macosVersion || !macfuse || !ntfs3g }
@@ -60,6 +62,7 @@ struct AppSettings: Codable, Sendable, Equatable {
     var preventSleep: Bool = false
     var keepAwake: Bool = false
     var manuallyReadOnlyDevices: [String] = []
+    var mountBackend: NigateMountBackend = .ntfs3gCompatibility
     var themeIsLight: Bool = true
 
     var sleepMode: SleepMode {

@@ -7,11 +7,32 @@ let package = Package(
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "Nigate", targets: ["Nigate"])
+        .executable(name: "Nigate", targets: ["Nigate"]),
+        .executable(name: "NigateFSKitExtension", targets: ["NigateFSKitExtension"]),
+        .library(name: "NigateFSKitCore", targets: ["NigateFSKitCore"])
     ],
     targets: [
+        .target(
+            name: "NigateFSKitCore",
+            path: "macos/Sources/NigateFSKitCore"
+        ),
+        .executableTarget(
+            name: "NigateFSKitExtension",
+            dependencies: ["NigateFSKitCore"],
+            path: "macos/Sources/NigateFSKitExtension",
+            exclude: [
+                "NigateFSKitExtension.entitlements"
+            ],
+            resources: [
+                .copy("Resources")
+            ],
+            linkerSettings: [
+                .linkedFramework("FSKit")
+            ]
+        ),
         .executableTarget(
             name: "Nigate",
+            dependencies: ["NigateFSKitCore"],
             path: "macos/Sources/Nigate",
             exclude: [
                 "Resources/AppIcon-white.icns"
@@ -32,7 +53,7 @@ let package = Package(
         ),
         .testTarget(
             name: "NigateTests",
-            dependencies: ["Nigate"],
+            dependencies: ["Nigate", "NigateFSKitCore"],
             path: "Tests/NigateTests"
         )
     ]

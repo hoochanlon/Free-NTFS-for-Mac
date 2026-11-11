@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "title": "系统依赖",
+    "openFileSystemExtensions": "打开文件系统扩展",
     "checkButton": "检查依赖",
     "autoInstall": "一键安装",
     "autoInstallTitle": "在终端中安装所需系统依赖",
@@ -57,6 +58,13 @@
     "checkFailed": "检查依赖失败: {error}",
     "checkTimeout": "检查超时，请重试",
     "installCommandLabel": "安装命令：",
+    "available": "系统支持",
+    "unsupported": "系统不支持",
+    "fsKit": {
+      "name": "FSKit（原生文件系统框架）",
+      "description": "Apple 提供的文件系统扩展框架，macOS 15.4 起支持。本应用当前尚未接通 FSKit 挂载控制面，选择此后端暂不能挂载 NTFS。",
+      "installGuide": "FSKit 随 macOS 提供，无需单独安装。使用 FSKit 后端需要 macOS 15.4 或更高版本；本应用当前版本尚未接通挂载控制面。如需挂载 NTFS，请在“设置 > 挂载后端”明确选择 ntfs-3g（兼容）；不会自动降级。"
+    },
     "swift": {
       "name": "Xcode Command Line Tools",
       "description": "Apple 官方开发工具，提供 Swift 编译器和基础开发库",
@@ -249,6 +257,10 @@
     },
     "autoMount": "自动读写",
     "autoMountDesc": "启用后，后台会把新插入的只读 NTFS 设备挂载为读写，无需打开窗口。手动还原为只读的设备在本次连接期间不会被改回",
+    "mountBackend": "挂载后端",
+    "fsKitBackend": "FSKit（原生）",
+    "ntfs3gCompatibilityBackend": "ntfs-3g（兼容）",
+    "mountBackendDesc": "FSKit 需要 macOS 15.4 或更高版本；不可用时不会自动降级。仅选择 ntfs-3g 兼容后端时才会使用旧驱动。",
     "trayMode": "托盘模式",
     "trayModeDesc": "启用后，关闭窗口时不会退出应用，而是最小化到系统托盘。可以通过托盘图标快速管理 NTFS 设备。",
     "preventSleep": "智能防止休眠",

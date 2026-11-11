@@ -11,6 +11,30 @@ struct DependenciesPane: View {
                 Text(L10n.t("dependencies.title")).font(.title2.weight(.semibold))
                 Spacer()
                 Button {
+                    Task { @MainActor in
+                        do {
+                            let result = try await Shell.run("/usr/bin/open", [
+                                "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointIdentifier=com.apple.fskit.fsmodule"
+                            ])
+                            if !result.ok {
+                                model.alert = AppAlert(
+                                    title: L10n.t("dialog.error"),
+                                    message: result.text,
+                                    kind: .error
+                                )
+                            }
+                        } catch {
+                            model.alert = AppAlert(
+                                title: L10n.t("dialog.error"),
+                                message: error.localizedDescription,
+                                kind: .error
+                            )
+                        }
+                    }
+                } label: {
+                    Label(L10n.t("dependencies.openFileSystemExtensions"), systemImage: "macwindow")
+                }
+                Button {
                     model.openInstaller()
                 } label: {
                     Label(L10n.t("dependencies.autoInstall"), systemImage: "terminal")
@@ -123,6 +147,16 @@ struct DependenciesPane: View {
                 guide: L10n.t("dependencies.ntfs3g.installGuide"),
                 command: "brew tap gromgit/homebrew-fuse && brew install ntfs-3g-mac",
                 note: L10n.t("dependencies.ntfs3g.installGuideTip")
+            ),
+            DependencyItem(
+                id: "fsKit",
+                icon: "externaldrive.badge.timemachine",
+                name: L10n.t("dependencies.fsKit.name"),
+                status: model.dependencies.fsKitSupported ? L10n.t("dependencies.available") : L10n.t("dependencies.unsupported"),
+                isSatisfied: model.dependencies.fsKitSupported,
+                description: L10n.t("dependencies.fsKit.description"),
+                guide: L10n.t("dependencies.fsKit.installGuide"),
+                optional: true
             ),
             DependencyItem(
                 id: "fswatch",

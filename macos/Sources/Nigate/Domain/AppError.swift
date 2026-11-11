@@ -8,6 +8,9 @@ enum AppError: Error, Sendable {
     case timeout(String)
     case missingTool(String)
     case ntfs3gMissing
+    case fsKitRequiresMacOS15_4
+    case fsKitUnavailable
+    case ntfs3gCompatibilityNotSelected
     case invalidPath
     case invalidName
     case formatNotAllowed
@@ -30,6 +33,9 @@ extension AppError: LocalizedError {
         case .timeout(let message): return message
         case .missingTool(let name): return name
         case .ntfs3gMissing: return "未找到 ntfs-3g，请先安装依赖"
+        case .fsKitRequiresMacOS15_4: return "FSKit 数据面需要 macOS 15.4 或更高版本；当前系统不会自动降级到 ntfs-3g"
+        case .fsKitUnavailable: return "FSKit 数据面当前不可用；如需兼容挂载，请在设置中明确选择 ntfs-3g 兼容后端"
+        case .ntfs3gCompatibilityNotSelected: return "此操作依赖 ntfs-3g 兼容后端；请在设置中明确选择该后端后重试"
         case .invalidPath: return L10n.t("messages.repairDeviceUnavailable")
         case .invalidName: return L10n.t("messages.renameInvalidName")
         case .formatNotAllowed: return L10n.t("messages.formatNotAllowed")

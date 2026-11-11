@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import NigateFSKitCore
 
 struct SettingsPane: View {
     @EnvironmentObject private var model: AppModel
@@ -21,6 +22,13 @@ struct SettingsPane: View {
                 Toggle(L10n.t("settings.autoMount"), isOn: bind(\.autoMount))
                     .disabled(model.protectLocked)
                 Text(L10n.t("settings.autoMountDesc")).font(.caption).foregroundStyle(.secondary)
+                Picker(L10n.t("settings.mountBackend"), selection: bind(\.mountBackend)) {
+                    Text(L10n.t("settings.fsKitBackend")).tag(NigateMountBackend.fsKit)
+                    Text(L10n.t("settings.ntfs3gCompatibilityBackend")).tag(NigateMountBackend.ntfs3gCompatibility)
+                }
+                Text(L10n.t("settings.mountBackendDesc"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 Toggle(L10n.t("settings.trayMode"), isOn: Binding(
                     get: { model.settings.trayMode },
                     set: { model.setTrayMode($0) }

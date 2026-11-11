@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>zh-Hans</string>
+    <key>CFBundleDisplayName</key>
+    <string>Nigate NTFS File System</string>
+    <key>CFBundleExecutable</key>
+    <string>NigateFSKitExtension</string>
+    <key>CFBundleIdentifier</key>
+    <string>io.hoochanlon.github.NigateFSKitExtension</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>NigateFSKitExtension</string>
+    <key>CFBundlePackageType</key>
+    <string>XPC!</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.6.0</string>
+    <key>CFBundleVersion</key>
+    <string>1.6.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>15.4</string>
+    <key>EXAppExtensionAttributes</key>
+    <dict>
+        <key>EXExtensionPointIdentifier</key>
+        <string>com.apple.fskit.fsmodule</string>
+        <key>FSActivateOptionSyntax</key>
+        <dict>
+            <key>shortOptions</key>
+            <string>g:m:o:u:</string>
+        </dict>
+        <key>FSCheckOptionSyntax</key>
+        <dict>
+            <key>shortOptions</key>
+            <string>nqy</string>
+        </dict>
+        <key>FSFormatOptionSyntax</key>
+        <dict>
+            <key>shortOptions</key>
+            <string>v</string>
+        </dict>
+        <key>FSMediaTypes</key>
+        <dict/>
+        <key>FSPersonalities</key>
+        <dict>
+            <key>NigateFSKitExtensionPersonality</key>
+            <dict>
+                <key>FSName</key>
+                <string>NigateNTFS</string>
+                <key>FSfileObjectsAreCaseSensitive</key>
+                <false/>
+            </dict>
+        </dict>
+        <key>FSRequiresSecurityScopedPathURLResources</key>
+        <false/>
+        <key>FSShortName</key>
+        <string>NigateNTFS</string>
+        <key>FSSupportsBlockResources</key>
+        <true/>
+        <key>FSSupportsGenericURLResources</key>
+        <false/>
+        <key>FSSupportsPathURLs</key>
+        <false/>
+        <key>FSSupportsServerURLs</key>
+        <false/>
+    </dict>
+</dict>
+</plist>

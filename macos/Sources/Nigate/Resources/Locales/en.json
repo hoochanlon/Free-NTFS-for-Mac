@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "title": "System Dependencies",
+    "openFileSystemExtensions": "Open File System Extensions",
     "checkButton": "Check Dependencies",
     "autoInstall": "One-click Install",
     "autoInstallTitle": "Install required system dependencies from Terminal",
@@ -57,6 +58,13 @@
     "checkFailed": "Failed to check dependencies: {error}",
     "checkTimeout": "Check timeout, please try again",
     "installCommandLabel": "Installation command:",
+    "available": "Supported by system",
+    "unsupported": "Not supported by system",
+    "fsKit": {
+      "name": "FSKit (Native File System Framework)",
+      "description": "Apple's file system extension framework, supported from macOS 15.4. The FSKit mount control plane is not yet connected in this app, so this backend cannot mount NTFS yet.",
+      "installGuide": "FSKit is included with macOS and requires no separate installation. The FSKit backend requires macOS 15.4 or later. The mount control plane is not yet connected in this app; to mount NTFS, explicitly select ntfs-3g (Compatibility) in Settings > Mount Backend. No automatic fallback is performed."
+    },
     "swift": {
       "name": "Xcode Command Line Tools",
       "description": "Apple official development tools, providing Swift compiler and basic development libraries",
@@ -249,6 +257,10 @@
     },
     "autoMount": "Auto Read-Write",
     "autoMountDesc": "When enabled, the background mounts newly inserted read-only NTFS volumes as read-write without opening a window. A volume restored to read-only stays unchanged for the current connection",
+    "mountBackend": "Mount Backend",
+    "fsKitBackend": "FSKit (Native)",
+    "ntfs3gCompatibilityBackend": "ntfs-3g (Compatibility)",
+    "mountBackendDesc": "FSKit requires macOS 15.4 or later and will not fall back automatically. The legacy driver is used only when ntfs-3g compatibility is selected.",
     "trayMode": "Tray Mode",
     "trayModeDesc": "When enabled, closing the window will minimize to the system tray instead of quitting the app. You can quickly manage NTFS devices through the tray icon.",
     "preventSleep": "Smart Prevent Sleep",

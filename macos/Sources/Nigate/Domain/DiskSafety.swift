@@ -21,6 +21,91 @@ enum DiskSafety {
         }
     }
 
+    /// diskutil 卷身份：任一身份字段命中 NTFS 即真。
+    /// personality 可能误报 ExFAT/MS-DOS，不能用“第一个字段非 NTFS”直接否决。
+    static func isNTFSVolumeInfo(_ info: String) -> Bool {
+        let identityFields = [
+            "File System Personality",
+            "File System Type",
+            "Type (Bundle)",
+            "FilesystemType",
+            "FilesystemName",
+            "Partition Type",
+            "Format",
+            "格式"
+        ]
+        for name in identityFields {
+            if let value = field(info, name),
+               isNTFSFilesystem("\(name): \(value)") {
+                return true
+            }
+        }
+        return isNTFSFilesystem(info)
+    }
+
+    /// 已挂载的 macfuse/ntfs-3g 是否应视为本应用管理的 NTFS 卷。
+    ///
+    /// 证据优先级：挂载表 fuse 事实 > diskutil 身份字段。
+    /// personality 误报不得否决已确认的 fuse 挂载。
+    ///
+    /// 实机常见矛盾：
+    /// - Partition Type = Windows_NTFS，Personality = ExFAT
+    /// - Partition Type = Microsoft Basic Data，Personality = MS-DOS
+    /// - mount 选项仅有 macfuse,local,...（allow_other 不一定出现在 mount 表）
+    static func isConfirmedNTFSFuseMount(
+        _ mountOutput: String,
+        deviceInfo: String,
+        devicePath: String,
+        mountPoint: String
+    ) -> Bool {
+        guard isPartition(devicePath),
+              mountPoint.hasPrefix("/Volumes/"),
+              mountPoint != "/Volumes/",
+              let mounted = fuseMount(
+                in: mountOutput,
+                devicePath: devicePath,
+                mountPoint: mountPoint
+              ) else { return false }
+
+        // 正向身份：personality / partition type 任一报 NTFS
+        if isNTFSVolumeInfo(deviceInfo) { return true }
+
+        // GPT 上 NTFS 常标为 Microsoft Basic Data，而 personality 误报 MS-DOS/ExFAT
+        if let partitionType = field(deviceInfo, "Partition Type")?.lowercased(),
+           partitionType.contains("microsoft basic data") || partitionType.contains("ntfs") {
+            return true
+        }
+
+        // 本应用留下的挂载标记（mount 表不一定回显 allow_other）
+        let disk = devicePath.replacingOccurrences(of: "/dev/", with: "")
+        if FileManager.default.fileExists(atPath: "/tmp/ntfs_mounted_\(disk)") {
+            return true
+        }
+
+        // 兼容：显式带上 ntfs-3g 特征选项时仍确认
+        let options = Set(mounted.options)
+        return options.contains("local")
+            && (options.contains("allow_other") || options.contains("auto_xattr"))
+    }
+
+    /// 从挂载表取出指定设备+挂载点的 fuse 记录；不是 fuse 则 nil。
+    static func fuseMount(
+        in mountOutput: String,
+        devicePath: String,
+        mountPoint: String
+    ) -> MountedVolume? {
+        MountTable.parse(mountOutput).first { volume in
+            volume.devicePath == devicePath
+                && volume.mountPoint == mountPoint
+                && isFuseDriver(volume.driver)
+        }
+    }
+
+    static func isFuseDriver(_ driver: String) -> Bool {
+        let value = driver.lowercased()
+        return value == "macfuse" || value == "fuse" || value == "ntfs-3g" || value.contains("fuse")
+    }
+
     static func isMountedXNTFSFilesystem(_ mountOutput: String, devicePath: String, mountPoint: String) -> Bool {
         guard isPartition(devicePath),
               mountPoint.hasPrefix("/Volumes/"),

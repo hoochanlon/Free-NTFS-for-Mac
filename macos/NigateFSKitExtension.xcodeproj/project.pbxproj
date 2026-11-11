@@ -1,0 +1,354 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 70;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000001 /* NigateFSKitExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* NigateFSKitExtension.swift */; };
+		A10000000000000000000002 /* NigateFSKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* NigateFSKit.swift */; };
+		A10000000000000000000003 /* FSKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* FSKit.framework */; };
+		A10000000000000000000004 /* NigateFSKitCore in Frameworks */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* libNigateFSKitCore.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B10000000000000000000000 /* NigateFSKitExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = NigateFSKitExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000001 /* NigateFSKitExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NigateFSKitExtension.swift; sourceTree = "<group>"; };
+		B10000000000000000000002 /* NigateFSKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NigateFSKit.swift; sourceTree = "<group>"; };
+		B10000000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		B10000000000000000000004 /* NigateFSKitExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NigateFSKitExtension.entitlements; sourceTree = "<group>"; };
+		B10000000000000000000005 /* FSKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FSKit.framework; path = System/Library/Frameworks/FSKit.framework; sourceTree = SDKROOT; };
+		B10000000000000000000006 /* libNigateFSKitCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNigateFSKitCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C10000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000003 /* FSKit.framework in Frameworks */,
+				A10000000000000000000004 /* NigateFSKitCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C10000000000000000000004 /* Core Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D10000000000000000000000 = {
+			isa = PBXGroup;
+			children = (
+				D10000000000000000000001 /* NigateFSKitExtension */,
+				D10000000000000000000002 /* NigateFSKitCore */,
+				D10000000000000000000003 /* Frameworks */,
+				D10000000000000000000004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D10000000000000000000001 /* NigateFSKitExtension */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000001 /* NigateFSKitExtension.swift */,
+				D10000000000000000000005 /* Resources */,
+				B10000000000000000000004 /* NigateFSKitExtension.entitlements */,
+			);
+			path = Sources/NigateFSKitExtension;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000005 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000003 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000002 /* NigateFSKitCore */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000002 /* NigateFSKit.swift */,
+			);
+			path = Sources/NigateFSKitCore;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000003 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000005 /* FSKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000000 /* NigateFSKitExtension.appex */,
+				B10000000000000000000006 /* libNigateFSKitCore.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E10000000000000000000001 /* NigateFSKitExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E10000000000000000000004 /* Build configuration list for PBXNativeTarget "NigateFSKitExtension" */;
+			buildPhases = (
+				C10000000000000000000002 /* Sources */,
+				C10000000000000000000001 /* Frameworks */,
+				C10000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E1000000000000000000000A /* NigateFSKitCore */,
+			);
+			name = NigateFSKitExtension;
+			productName = NigateFSKitExtension;
+			productReference = B10000000000000000000000 /* NigateFSKitExtension.appex */;
+			productType = "com.apple.product-type.extensionkit-extension";
+		};
+		E10000000000000000000002 /* NigateFSKitCore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E10000000000000000000008 /* Build configuration list for PBXNativeTarget "NigateFSKitCore" */;
+			buildPhases = (
+				C10000000000000000000005 /* Core Sources */,
+				C10000000000000000000004 /* Core Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NigateFSKitCore;
+			productName = NigateFSKitCore;
+			productReference = B10000000000000000000006 /* libNigateFSKitCore.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXContainerItemProxy section */
+		E10000000000000000000009 /* Proxy for NigateFSKitCore */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E10000000000000000000002;
+			remoteInfo = NigateFSKitCore;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		E1000000000000000000000A /* NigateFSKitCore */ = {
+			isa = PBXTargetDependency;
+			target = E10000000000000000000002 /* NigateFSKitCore */;
+			targetProxy = E10000000000000000000009 /* Proxy for NigateFSKitCore */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXProject section */
+		F10000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				TargetAttributes = {
+					E10000000000000000000001 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+				};
+			};
+			buildConfigurationList = E10000000000000000000005 /* Build configuration list for PBXProject "NigateFSKitExtension" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D10000000000000000000000;
+			productRefGroup = D10000000000000000000004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E10000000000000000000001 /* NigateFSKitExtension */,
+				E10000000000000000000002 /* NigateFSKitCore */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C10000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C10000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000001 /* NigateFSKitExtension.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C10000000000000000000005 /* Core Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000002 /* NigateFSKit.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		E10000000000000000000002 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Sources/NigateFSKitExtension/NigateFSKitExtension.entitlements;
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Sources/NigateFSKitExtension/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.6.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.hoochanlon.github.NigateFSKitExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		E10000000000000000000003 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Sources/NigateFSKitExtension/NigateFSKitExtension.entitlements;
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Sources/NigateFSKitExtension/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.6.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.hoochanlon.github.NigateFSKitExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		E10000000000000000000006 /* Project Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		E10000000000000000000007 /* Project Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		E1000000000000000000000B /* Core Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				PRODUCT_MODULE_NAME = NigateFSKitCore;
+				PRODUCT_NAME = NigateFSKitCore;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		E1000000000000000000000C /* Core Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				PRODUCT_MODULE_NAME = NigateFSKitCore;
+				PRODUCT_NAME = NigateFSKitCore;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E10000000000000000000004 /* Build configuration list for PBXNativeTarget "NigateFSKitExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E10000000000000000000002 /* Debug */,
+				E10000000000000000000003 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E10000000000000000000008 /* Build configuration list for PBXNativeTarget "NigateFSKitCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1000000000000000000000B /* Core Debug */,
+				E1000000000000000000000C /* Core Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E10000000000000000000005 /* Build configuration list for PBXProject "NigateFSKitExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E10000000000000000000006 /* Project Debug */,
+				E10000000000000000000007 /* Project Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F10000000000000000000001 /* Project object */;
+}

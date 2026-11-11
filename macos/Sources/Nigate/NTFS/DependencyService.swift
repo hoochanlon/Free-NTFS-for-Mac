@@ -1,4 +1,5 @@
 import Foundation
+import NigateFSKitCore
 
 enum DependencyService {
     static func check() async -> DependencyStatus {
@@ -8,6 +9,7 @@ enum DependencyService {
         status.macosVersionString = version.isEmpty ? "未知" : version
         let major = Int(version.split(separator: ".").first.map(String.init) ?? "0") ?? 0
         status.macosVersion = major >= 14
+        status.fsKitSupported = NigateFSKit.isSupportedOnCurrentSystem
         status.swift = Shell.which("swift") != nil
         status.brew = Shell.which("brew") != nil
         status.fswatch = Shell.which("fswatch") != nil

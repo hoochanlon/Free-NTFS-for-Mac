@@ -1,5 +1,6 @@
 import XCTest
 @testable import Nigate
+import NigateFSKitCore
 
 final class DiskSafetyTests: XCTestCase {
     func testPartitionAndWholeDiskBoundaries() {
@@ -23,6 +24,123 @@ final class DiskSafetyTests: XCTestCase {
         XCTAssertFalse(DiskSafety.isNTFSFilesystem("File System Personality: Unknown (exFAT)"))
         XCTAssertFalse(DiskSafety.isNTFSFilesystem("Volume Name: My NTFS Backup"))
         XCTAssertFalse(DiskSafety.isNTFSFilesystem("File System Personality: exFAT"))
+    }
+
+    func testNTFSVolumeInfoAcceptsPartitionTypeWhenPersonalityMisreports() {
+        let contradictory = """
+        Device Identifier:        disk4s1
+        Volume Name:              Samsung USB
+        File System Personality:  ExFAT
+        Type (Bundle):            msdos
+        Partition Type:           Microsoft Basic Data
+        """
+        // personality 误报时，单靠 personality 不能定 NTFS
+        XCTAssertFalse(DiskSafety.isNTFSVolumeInfo(contradictory))
+
+        let partitionNTFS = """
+        Device Identifier:        disk4s1
+        Volume Name:              Samsung USB
+        File System Personality:  ExFAT
+        Type (Bundle):            msdos
+        Partition Type:           Windows_NTFS
+        """
+        XCTAssertTrue(DiskSafety.isNTFSVolumeInfo(partitionNTFS))
+
+        let plainNTFS = """
+        File System Personality:  NTFS
+        Partition Type:           Windows_NTFS
+        """
+        XCTAssertTrue(DiskSafety.isNTFSVolumeInfo(plainNTFS))
+    }
+
+    func testConfirmedFuseMountPrefersMountFactOverPersonality() {
+        // 实机 mount 表通常不回显 allow_other
+        let mountOutput = """
+        /dev/disk4s1 on /Volumes/Samsung USB (macfuse, local, nodev, synchronous, noatime)
+        /dev/disk5s2 on /Volumes/SanDisk 32G (macfuse, local, nodev, synchronous, noatime)
+        /dev/disk6s1 on /Volumes/Other (macfuse, local)
+        /dev/disk7s1 on /Volumes/Legacy (macfuse, local, allow_other)
+        """
+        let samsung = """
+        Device Identifier:        disk4s1
+        File System Personality:  ExFAT
+        Type (Bundle):            exfat
+        Partition Type:           Windows_NTFS
+        """
+        let sandisk = """
+        Device Identifier:        disk5s2
+        File System Personality:  MS-DOS
+        Type (Bundle):            msdos
+        Partition Type:           Microsoft Basic Data
+        """
+        let nonNTFS = """
+        Device Identifier:        disk6s1
+        File System Personality:  APFS
+        Partition Type:           Apple_APFS
+        """
+        let legacyNoIdentity = """
+        Device Identifier:        disk7s1
+        File System Personality:  MS-DOS
+        """
+
+        XCTAssertTrue(DiskSafety.isConfirmedNTFSFuseMount(
+            mountOutput,
+            deviceInfo: samsung,
+            devicePath: "/dev/disk4s1",
+            mountPoint: "/Volumes/Samsung USB"
+        ))
+        XCTAssertTrue(DiskSafety.isConfirmedNTFSFuseMount(
+            mountOutput,
+            deviceInfo: sandisk,
+            devicePath: "/dev/disk5s2",
+            mountPoint: "/Volumes/SanDisk 32G"
+        ))
+        XCTAssertFalse(DiskSafety.isConfirmedNTFSFuseMount(
+            mountOutput,
+            deviceInfo: nonNTFS,
+            devicePath: "/dev/disk6s1",
+            mountPoint: "/Volumes/Other"
+        ))
+        // 无分区身份时，依赖 allow_other 特征选项
+        XCTAssertTrue(DiskSafety.isConfirmedNTFSFuseMount(
+            mountOutput,
+            deviceInfo: legacyNoIdentity,
+            devicePath: "/dev/disk7s1",
+            mountPoint: "/Volumes/Legacy"
+        ))
+        XCTAssertFalse(DiskSafety.isConfirmedNTFSFuseMount(
+            mountOutput,
+            deviceInfo: samsung,
+            devicePath: "/dev/disk4s1",
+            mountPoint: "/Volumes/Wrong"
+        ))
+    }
+
+    func testMountTableParsesReadOnlyFromKernelOptionsOnly() {
+        let rw = MountTable.parseLine(
+            "/dev/disk4s1 on /Volumes/Samsung USB (macfuse, local, nodev, synchronous, noatime, allow_other)"
+        )
+        let ro = MountTable.parseLine(
+            "/dev/disk5s2 on /Volumes/Backup (xntfs, local, nodev, nosuid, read-only, noowners)"
+        )
+        let spaced = MountTable.parseLine(
+            "/dev/disk7s1 on /Volumes/My Volume (Name) (macfuse, local, allow_other)"
+        )
+
+        XCTAssertEqual(rw?.devicePath, "/dev/disk4s1")
+        XCTAssertEqual(rw?.mountPoint, "/Volumes/Samsung USB")
+        XCTAssertEqual(rw?.driver, "macfuse")
+        XCTAssertFalse(rw?.isReadOnly ?? true)
+        XCTAssertTrue(rw?.isFUSE ?? false)
+
+        XCTAssertEqual(ro?.driver, "xntfs")
+        XCTAssertTrue(ro?.isReadOnly ?? false)
+        XCTAssertFalse(ro?.isFUSE ?? true)
+
+        // 卷名含括号时，选项组仍取行尾
+        XCTAssertEqual(spaced?.mountPoint, "/Volumes/My Volume (Name)")
+        XCTAssertEqual(spaced?.driver, "macfuse")
+        XCTAssertFalse(spaced?.isReadOnly ?? true)
     }
 
     func testMountedXNTFSRequiresExactDeviceAndMountPoint() {
@@ -187,5 +305,80 @@ final class AutoMountTests: XCTestCase {
             inProgress: [],
             explicit: true
         ).isEmpty)
+    }
+
+    func testMarkManualReadOnlyTracksDiskAndUUID() {
+        let device = NTFSDevice(
+            disk: "disk4s1",
+            devicePath: "/dev/disk4s1",
+            volume: "/Volumes/Samsung USB",
+            volumeName: "Samsung USB",
+            volumeUuid: "B280EF1C-95EF-4CC4-BCCE-A152DBA1528A",
+            isReadOnly: true,
+            options: "read-only",
+            isMounted: true,
+            isUnmounted: false,
+            canFormat: true,
+            capacity: nil
+        )
+        var settings = AppSettings(autoMount: true)
+        AutoMount.markManualReadOnly(device, settings: &settings)
+
+        // uuid 缺失时仍能靠 disk 挡住
+        let withoutUUID = NTFSDevice(
+            disk: device.disk,
+            devicePath: device.devicePath,
+            volume: device.volume,
+            volumeName: device.volumeName,
+            volumeUuid: nil,
+            isReadOnly: true,
+            options: "read-only",
+            isMounted: true,
+            isUnmounted: false,
+            canFormat: true,
+            capacity: nil
+        )
+        XCTAssertTrue(AutoMount.isManuallyReadOnly(withoutUUID, settings: settings))
+        XCTAssertTrue(AutoMount.candidates(
+            devices: [withoutUUID],
+            settings: settings,
+            attempted: [],
+            cooldown: [:],
+            inProgress: [],
+            explicit: true
+        ).isEmpty)
+
+        AutoMount.clearManualReadOnly(device, settings: &settings)
+        XCTAssertFalse(AutoMount.isManuallyReadOnly(device, settings: settings))
+    }
+}
+
+final class MountBackendPolicyTests: XCTestCase {
+    func testFSKitFailsClosedBelowSupportedSystemVersion() {
+        XCTAssertThrowsError(try MountBackendPolicy.validate(
+            .fsKit,
+            systemVersion: NigateSystemVersion(major: 15, minor: 3, patch: 0),
+            isFSKitControlPlaneAvailable: true
+        )) { error in
+            XCTAssertEqual(error as? MountBackendPolicyError, .fsKitRequiresMacOS15_4)
+        }
+    }
+
+    func testFSKitDoesNotFallbackWhenControlPlaneIsUnavailable() {
+        XCTAssertThrowsError(try MountBackendPolicy.validate(
+            .fsKit,
+            systemVersion: NigateSystemVersion(major: 15, minor: 4, patch: 0),
+            isFSKitControlPlaneAvailable: false
+        )) { error in
+            XCTAssertEqual(error as? MountBackendPolicyError, .fsKitControlPlaneUnavailable)
+        }
+    }
+
+    func testCompatibilityBackendIsExplicitlyAllowed() throws {
+        XCTAssertNoThrow(try MountBackendPolicy.validate(
+            .ntfs3gCompatibility,
+            systemVersion: NigateSystemVersion(major: 14, minor: 0, patch: 0),
+            isFSKitControlPlaneAvailable: false
+        ))
     }
 }

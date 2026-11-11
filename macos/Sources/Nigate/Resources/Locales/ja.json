@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "title": "システム依存",
+    "openFileSystemExtensions": "ファイルシステム機能拡張を開く",
     "checkButton": "依存関係を確認",
     "autoInstall": "ワンクリックインストール",
     "autoInstallTitle": "ターミナルから必要なシステム依存関係をインストール",
@@ -57,6 +58,13 @@
     "checkFailed": "依存関係の確認に失敗しました: {error}",
     "checkTimeout": "チェックがタイムアウトしました。もう一度お試しください",
     "installCommandLabel": "インストールコマンド：",
+    "available": "システムでサポート",
+    "unsupported": "システムで未サポート",
+    "fsKit": {
+      "name": "FSKit（ネイティブファイルシステムフレームワーク）",
+      "description": "Apple が提供するファイルシステム拡張フレームワークで、macOS 15.4 以降でサポートされます。このアプリでは FSKit のマウント制御面がまだ接続されていないため、このバックエンドでは現在 NTFS をマウントできません。",
+      "installGuide": "FSKit は macOS に含まれており、別途インストールする必要はありません。FSKit バックエンドには macOS 15.4 以降が必要です。このアプリではマウント制御面がまだ接続されていません。NTFS をマウントするには、「設定 > マウントバックエンド」で ntfs-3g（互換）を明示的に選択してください。自動で切り替わることはありません。"
+    },
     "swift": {
       "name": "Xcode Command Line Tools",
       "description": "Apple公式開発ツール、Swiftコンパイラと基本開発ライブラリを提供",
@@ -249,6 +257,10 @@
     },
     "autoMount": "自動読み書き",
     "autoMountDesc": "有効にすると、ウィンドウを開かなくても、新しく挿入された読み取り専用の NTFS ボリュームをバックグラウンドで読み書きマウントします。手動で読み取り専用に戻したボリュームは、その接続中は変更しません",
+    "mountBackend": "マウントバックエンド",
+    "fsKitBackend": "FSKit（ネイティブ）",
+    "ntfs3gCompatibilityBackend": "ntfs-3g（互換）",
+    "mountBackendDesc": "FSKit は明示的なデータ面です。ntfs-3g は互換バックエンドを選択した場合のみ使用され、自動フォールバックはありません。",
     "trayMode": "トレイモード",
     "trayModeDesc": "有効にすると、ウィンドウを閉じたときにアプリが終了せず、システムトレイに最小化されます。トレイアイコンから NTFS デバイスをすばやく管理できます。",
     "preventSleep": "スマートスリープ防止",
