@@ -54,6 +54,7 @@ Programmatic `FSClient.mountSingleVolume` needs a trusted signature with `com.ap
 git clone https://github.com/hoochanlon/Free-NTFS-for-Mac.git
 cd Free-NTFS-for-Mac
 swift test
+swift run Nigate
 ./dev.sh
 ```
 

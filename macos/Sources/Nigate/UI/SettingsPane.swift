@@ -43,8 +43,8 @@ struct SettingsPane: View {
                 Text(L10n.t(fsKitSelectable ? "settings.mountBackendDesc" : "settings.mountBackendUnavailableDesc"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                if !fsKitSelectable, let detail = model.fsKitControlPlane.detail, !detail.isEmpty {
-                    Text(detail)
+                if !fsKitSelectable, let diagnostic = model.fsKitControlPlane.diagnostic {
+                    Text(L10n.fsKitDiagnosticText(diagnostic))
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }

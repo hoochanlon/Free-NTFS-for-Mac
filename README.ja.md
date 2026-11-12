@@ -54,6 +54,7 @@ FSKit を有効にする手順：
 git clone https://github.com/hoochanlon/Free-NTFS-for-Mac.git
 cd Free-NTFS-for-Mac
 swift test
+swift run Nigate
 ./dev.sh
 ```
 

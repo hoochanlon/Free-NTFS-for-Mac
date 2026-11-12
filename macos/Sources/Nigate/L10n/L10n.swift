@@ -1,4 +1,5 @@
 import Foundation
+import NigateFSKitCore
 
 enum L10n {
     private static let table = LockedValue<[String: Any]>([:])
@@ -33,6 +34,21 @@ enum L10n {
             text = text.replacingOccurrences(of: "{\(name)}", with: replacement)
         }
         return text
+    }
+
+    static func fsKitDiagnosticText(_ diagnostic: NigateFSKitControlPlaneDiagnostic) -> String {
+        switch diagnostic {
+        case .controlPlaneUnavailable:
+            return t("dependencies.fsKit.diagnosticUnavailable")
+        case let .unsupportedSystem(current):
+            return t("dependencies.fsKit.diagnosticUnsupportedSystem", [
+                "version": "\(current.major).\(current.minor).\(current.patch)"
+            ])
+        case .extensionDisabled:
+            return t("dependencies.fsKit.diagnosticExtensionDisabled")
+        case .extensionNotRegistered:
+            return t("dependencies.fsKit.diagnosticExtensionNotRegistered")
+        }
     }
 
     static func helpMarkdown() -> String {

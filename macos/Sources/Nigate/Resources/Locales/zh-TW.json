@@ -63,11 +63,15 @@
     "fsKit": {
       "name": "FSKit（原生檔案系統框架，可選）",
       "description": "Apple 提供的檔案系統延伸功能框架（macOS 15.4+）。正式簽章的延伸功能可出現在「系統設定 → 檔案系統延伸功能」；目前 ad-hoc 本機建置通常不會出現在該清單，但仍可能被 pluginkit 註冊。產品預設請使用 ntfs-3g 相容掛載。",
-      "installGuide": "1. 以 macos/Scripts/build.sh 建置並安裝 Nigate.app 到 /Applications（擴充功能位於 Contents/Extensions）。\n2. 若本機沒有 Apple 程式碼簽章憑證（Developer ID / Development Team），系統設定的「檔案系統延伸功能」清單通常不會顯示 Nigate——這是簽章策略，不是擴充功能未打包。\n3. 可用終端確認註冊：pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. 日常掛載請維持 ntfs-3g（相容）。僅在具備有效簽章且控制面就緒時，再於應用程式設定中嘗試 FSKit；失敗不會靜默降級。",
-      "statusReady": "控制面可用",
+      "installGuide": "1. 以 macos/Scripts/build.sh 建置並安裝 Nigate.app 到 /Applications（擴充功能位於 Contents/Extensions）。\n2. 若本機沒有 Apple 程式碼簽章憑證（Developer ID / Development Team），系統設定的「檔案系統延伸功能」清單通常不會顯示 Nigate——這是簽章策略，不是擴充功能未打包。\n3. 可用終端確認註冊：pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. 日常掛載請維持 ntfs-3g（相容）。僅在擴充功能簽章有效且可用時再嘗試 FSKit；失敗不會自動切換後端。",
+      "statusReady": "FSKit 可用",
       "statusNotInstalled": "擴充功能未安裝",
       "statusDisabled": "擴充功能已停用",
-      "statusUnavailable": "控制面未就緒"
+      "statusUnavailable": "控制面未就緒",
+      "diagnosticUnavailable": "FSKit 控制面狀態尚未就緒。請重新啟動應用程式後再次檢查延伸功能狀態。",
+      "diagnosticUnsupportedSystem": "FSKit 需要 macOS 15.4 或更新版本；目前系統版本為 {version}。",
+      "diagnosticExtensionDisabled": "Nigate FSKit 延伸功能已安裝，但目前未啟用。若系統設定未顯示延伸功能，請確認程式碼簽章條件；沒有 Apple 簽章憑證時，延伸功能清單可能不會顯示 Nigate。",
+      "diagnosticExtensionNotRegistered": "找不到已註冊的 Nigate FSKit 延伸功能。請重新建置並安裝應用程式。"
     },
     "swift": {
       "name": "Xcode Command Line Tools",

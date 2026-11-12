@@ -33,7 +33,7 @@ enum FSKitControlPlaneService {
                 moduleURL: client.url?.absoluteString ?? plugin?.url,
                 election: plugin?.election ?? (client.isEnabled ? .use : .ignore),
                 source: plugin == nil ? .fsClient : .combined,
-                detail: enabled ? nil : "extension installed but disabled"
+                diagnostic: enabled ? nil : .extensionDisabled
             )
         }
 
@@ -47,9 +47,7 @@ enum FSKitControlPlaneService {
                 moduleURL: plugin.url,
                 election: plugin.election,
                 source: .pluginKit,
-                detail: enabled
-                    ? "detected via pluginkit; enable in System Settings > File System Extensions if mount fails"
-                    : "extension election is ignore"
+                diagnostic: enabled ? nil : .extensionDisabled
             )
         }
 
@@ -59,7 +57,7 @@ enum FSKitControlPlaneService {
             extensionInstalled: false,
             extensionEnabled: false,
             source: .none,
-            detail: "Nigate FSKit extension not registered; rebuild/install app bundle"
+            diagnostic: .extensionNotRegistered
         )
     }
 }

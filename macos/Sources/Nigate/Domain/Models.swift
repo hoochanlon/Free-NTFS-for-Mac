@@ -52,7 +52,7 @@ struct DependencyStatus: Sendable, Equatable {
     var fsKitControlPlaneAvailable: Bool = false
     var fsKitExtensionInstalled: Bool = false
     var fsKitExtensionEnabled: Bool = false
-    var fsKitDetail: String? = nil
+    var fsKitDiagnostic: NigateFSKitControlPlaneDiagnostic? = nil
     var fswatch: Bool = false
 
     var missingCore: Bool { !macosVersion || !macfuse || !ntfs3g }

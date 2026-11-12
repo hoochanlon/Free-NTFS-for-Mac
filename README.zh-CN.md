@@ -34,7 +34,7 @@
 
 ## 重要说明
 
-> [!CAUTION]
+> [!important]
 > 稳定性取决于存储设备，请使用可靠的 USB 介质。
 
 - 挂载需要管理员权限。
@@ -52,6 +52,7 @@
 git clone https://github.com/hoochanlon/Free-NTFS-for-Mac.git
 cd Free-NTFS-for-Mac
 swift test
+swift run Nigate
 ./dev.sh
 ```
 

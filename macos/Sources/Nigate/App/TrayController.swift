@@ -229,7 +229,7 @@ final class TrayController: NSObject, NSMenuDelegate {
 
         switch status {
         case .ready:
-            NSColor.systemBlue.setFill()
+            NSColor.secondaryLabelColor.setFill()
             NSBezierPath(ovalIn: interior).fill()
         case .allReadWrite:
             NSColor.systemGreen.setFill()

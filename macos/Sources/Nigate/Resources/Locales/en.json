@@ -63,11 +63,15 @@
     "fsKit": {
       "name": "FSKit (Native File System Framework, Optional)",
       "description": "Apple's file system extension framework (macOS 15.4+). Properly signed extensions can appear under System Settings → File System Extensions. Ad-hoc local builds usually do not appear in that list, even if pluginkit already registered them. Keep ntfs-3g as the product default mount path.",
-      "installGuide": "1. Build and install Nigate.app into /Applications via macos/Scripts/build.sh (extension under Contents/Extensions).\n2. Without an Apple code-signing identity (Developer ID / Development Team), System Settings → File System Extensions typically will not list Nigate. That is a signing policy filter, not a missing appex.\n3. Verify registration with: pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. Keep Mount Backend on ntfs-3g (Compatibility) for daily use. Only try FSKit when you have a valid signature and the control plane is ready; failures never silently fall back.",
-      "statusReady": "Control plane ready",
+      "installGuide": "1. Build and install Nigate.app into /Applications via macos/Scripts/build.sh (extension under Contents/Extensions).\n2. Without an Apple code-signing identity (Developer ID / Development Team), System Settings → File System Extensions typically will not list Nigate. That is a signing policy filter, not a missing appex.\n3. Verify registration with: pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. Keep Mount Backend on ntfs-3g (Compatibility) for daily use. Try FSKit only when the extension is signed and available; failures never silently fall back.",
+      "statusReady": "FSKit available",
       "statusNotInstalled": "Extension not installed",
       "statusDisabled": "Extension disabled",
-      "statusUnavailable": "Control plane not ready"
+      "statusUnavailable": "Control plane not ready",
+      "diagnosticUnavailable": "The FSKit control plane is not ready. Restart the app and check the extension status again.",
+      "diagnosticUnsupportedSystem": "FSKit requires macOS 15.4 or later; the current system version is {version}.",
+      "diagnosticExtensionDisabled": "The Nigate FSKit extension is installed but not enabled. If it is not listed in System Settings, check the code-signing requirements; without an Apple signing identity, Nigate may not appear in the extension list.",
+      "diagnosticExtensionNotRegistered": "The Nigate FSKit extension is not registered. Rebuild and reinstall the app bundle."
     },
     "swift": {
       "name": "Xcode Command Line Tools",

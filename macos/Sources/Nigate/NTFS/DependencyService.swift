@@ -15,7 +15,7 @@ enum DependencyService {
         status.fsKitControlPlaneAvailable = plane.isControlPlaneAvailable
         status.fsKitExtensionInstalled = plane.extensionInstalled
         status.fsKitExtensionEnabled = plane.extensionEnabled
-        status.fsKitDetail = plane.detail
+        status.fsKitDiagnostic = plane.diagnostic
         status.swift = Shell.which("swift") != nil
         status.brew = Shell.which("brew") != nil
         status.fswatch = Shell.which("fswatch") != nil

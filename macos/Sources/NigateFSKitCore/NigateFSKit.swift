@@ -74,6 +74,14 @@ public enum NigateFSKitAvailability: Equatable, Sendable {
     case requiresMacOS15_4(current: NigateSystemVersion)
 }
 
+/// 可本地化的 FSKit 控制面诊断；共享层传递状态，界面层负责翻译。
+public enum NigateFSKitControlPlaneDiagnostic: Codable, Equatable, Sendable {
+    case controlPlaneUnavailable
+    case unsupportedSystem(current: NigateSystemVersion)
+    case extensionDisabled
+    case extensionNotRegistered
+}
+
 /// 控制面探测结果：系统能力 + 扩展身份 + 启用态。
 ///
 /// `isControlPlaneAvailable` 的判定是：
@@ -86,7 +94,7 @@ public struct NigateFSKitControlPlaneState: Codable, Equatable, Sendable {
     public var moduleURL: String?
     public var election: NigateFSKitExtensionElection
     public var source: NigateFSKitControlPlaneSource
-    public var detail: String?
+    public var diagnostic: NigateFSKitControlPlaneDiagnostic?
 
     public init(
         systemSupported: Bool,
@@ -96,7 +104,7 @@ public struct NigateFSKitControlPlaneState: Codable, Equatable, Sendable {
         moduleURL: String? = nil,
         election: NigateFSKitExtensionElection = .unknown,
         source: NigateFSKitControlPlaneSource = .none,
-        detail: String? = nil
+        diagnostic: NigateFSKitControlPlaneDiagnostic? = nil
     ) {
         self.systemSupported = systemSupported
         self.dataPlaneImplemented = dataPlaneImplemented
@@ -105,7 +113,7 @@ public struct NigateFSKitControlPlaneState: Codable, Equatable, Sendable {
         self.moduleURL = moduleURL
         self.election = election
         self.source = source
-        self.detail = detail
+        self.diagnostic = diagnostic
     }
 
     public var isControlPlaneAvailable: Bool {
@@ -121,7 +129,7 @@ public struct NigateFSKitControlPlaneState: Codable, Equatable, Sendable {
         extensionInstalled: false,
         extensionEnabled: false,
         source: .none,
-        detail: "FSKit control plane unavailable"
+        diagnostic: .controlPlaneUnavailable
     )
 
     public static func unsupportedSystem(_ version: NigateSystemVersion) -> NigateFSKitControlPlaneState {
@@ -130,7 +138,7 @@ public struct NigateFSKitControlPlaneState: Codable, Equatable, Sendable {
             extensionInstalled: false,
             extensionEnabled: false,
             source: .none,
-            detail: "requires macOS 15.4+, current \(version.major).\(version.minor).\(version.patch)"
+            diagnostic: .unsupportedSystem(current: version)
         )
     }
 }

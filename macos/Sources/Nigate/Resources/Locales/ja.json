@@ -63,11 +63,15 @@
     "fsKit": {
       "name": "FSKit（ネイティブファイルシステムフレームワーク・オプション）",
       "description": "Apple のファイルシステム拡張フレームワーク（macOS 15.4+）。正式署名された拡張は「システム設定 → ファイルシステム拡張機能」に表示されます。ad-hoc のローカルビルドは pluginkit に登録されても、その一覧に出ないことが一般的です。製品既定は ntfs-3g 互換マウントです。",
-      "installGuide": "1. macos/Scripts/build.sh で Nigate.app をビルドし /Applications にインストールします（拡張は Contents/Extensions）。\n2. Apple のコード署名 ID（Developer ID / Development Team）が無い場合、「システム設定 → ファイルシステム拡張機能」に Nigate は通常表示されません。appex 欠落ではなく署名ポリシーです。\n3. 登録確認: pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. 日常利用は ntfs-3g（互換）のまま。有効な署名と制御プレーン準備完了時のみ FSKit を試してください。失敗時の暗黙フォールバックはありません。",
-      "statusReady": "制御プレーン利用可",
+      "installGuide": "1. macos/Scripts/build.sh で Nigate.app をビルドし /Applications にインストールします（拡張は Contents/Extensions）。\n2. Apple のコード署名 ID（Developer ID / Development Team）が無い場合、「システム設定 → ファイルシステム拡張機能」に Nigate は通常表示されません。appex 欠落ではなく署名ポリシーです。\n3. 登録確認: pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. 日常利用は ntfs-3g（互換）のまま。拡張が署名され、利用可能な場合のみ FSKit を試してください。失敗時の暗黙フォールバックはありません。",
+      "statusReady": "FSKit 利用可能",
       "statusNotInstalled": "拡張未インストール",
       "statusDisabled": "拡張が無効",
-      "statusUnavailable": "制御プレーン未準備"
+      "statusUnavailable": "制御プレーン未準備",
+      "diagnosticUnavailable": "FSKit 制御プレーンの準備ができていません。アプリを再起動して拡張の状態を再確認してください。",
+      "diagnosticUnsupportedSystem": "FSKit には macOS 15.4 以降が必要です。現在のシステムバージョンは {version} です。",
+      "diagnosticExtensionDisabled": "Nigate FSKit 拡張はインストールされていますが、有効になっていません。システム設定に表示されない場合は署名要件を確認してください。Apple の署名 ID がないと、拡張一覧に Nigate が表示されないことがあります。",
+      "diagnosticExtensionNotRegistered": "Nigate FSKit 拡張が登録されていません。アプリを再ビルドしてインストールしてください。"
     },
     "swift": {
       "name": "Xcode Command Line Tools",
@@ -263,6 +267,7 @@
     "autoMountDesc": "有効にすると、ウィンドウを開かなくても、新しく挿入された読み取り専用の NTFS ボリュームをバックグラウンドで読み書きマウントします。手動で読み取り専用に戻したボリュームは、その接続中は変更しません",
     "mountBackend": "マウントバックエンド",
     "fsKitBackend": "FSKit（ネイティブ）",
+    "fsKitBackendUnavailable": "現在利用できません",
     "ntfs3gCompatibilityBackend": "ntfs-3g（互換）",
     "mountBackendDesc": "デフォルトは ntfs-3g（互換）です。FSKit はオプションで、macOS 15.4+ とインストール／有効化済みの Nigate FSKit 拡張が必要です。",
     "trayMode": "トレイモード",

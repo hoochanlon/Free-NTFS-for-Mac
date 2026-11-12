@@ -63,11 +63,15 @@
     "fsKit": {
       "name": "FSKit (natives Dateisystem-Framework, optional)",
       "description": "Apples Dateisystem-Erweiterungsrahmen (macOS 15.4+). Korrekt signierte Erweiterungen erscheinen unter Systemeinstellungen → Dateisystemerweiterungen. Ad-hoc-Lokalbuilds erscheinen dort meist nicht, auch wenn pluginkit sie bereits registriert hat. Produktstandard bleibt ntfs-3g.",
-      "installGuide": "1. Nigate.app mit macos/Scripts/build.sh bauen und nach /Applications installieren (Erweiterung unter Contents/Extensions).\n2. Ohne Apple-Codesignatur (Developer ID / Development Team) erscheint Nigate in den Systemeinstellungen → Dateisystemerweiterungen in der Regel nicht — Signaturfilter, kein fehlendes appex.\n3. Registrierung prüfen: pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. Für den Alltag ntfs-3g (Kompatibilität) belassen. FSKit nur bei gültiger Signatur und bereiter Control Plane versuchen; kein stilles Fallback.",
-      "statusReady": "Control Plane bereit",
+      "installGuide": "1. Nigate.app mit macos/Scripts/build.sh bauen und nach /Applications installieren (Erweiterung unter Contents/Extensions).\n2. Ohne Apple-Codesignatur (Developer ID / Development Team) erscheint Nigate in den Systemeinstellungen → Dateisystemerweiterungen in der Regel nicht — Signaturfilter, kein fehlendes appex.\n3. Registrierung prüfen: pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. Für den Alltag ntfs-3g (Kompatibilität) belassen. FSKit nur verwenden, wenn die Erweiterung signiert und verfügbar ist; es gibt keinen stillen Rückfall.",
+      "statusReady": "FSKit verfügbar",
       "statusNotInstalled": "Erweiterung nicht installiert",
       "statusDisabled": "Erweiterung deaktiviert",
-      "statusUnavailable": "Control Plane nicht bereit"
+      "statusUnavailable": "Control Plane nicht bereit",
+      "diagnosticUnavailable": "Die FSKit-Control-Plane ist nicht bereit. Starten Sie die App neu und prüfen Sie den Erweiterungsstatus erneut.",
+      "diagnosticUnsupportedSystem": "FSKit erfordert macOS 15.4 oder neuer; die aktuelle Systemversion ist {version}.",
+      "diagnosticExtensionDisabled": "Die Nigate-FSKit-Erweiterung ist installiert, aber nicht aktiviert. Wenn sie nicht in den Systemeinstellungen erscheint, prüfen Sie die Signaturanforderungen. Ohne Apple-Signatur kann Nigate in der Erweiterungsliste fehlen.",
+      "diagnosticExtensionNotRegistered": "Die Nigate-FSKit-Erweiterung ist nicht registriert. Erstellen und installieren Sie das App-Bundle erneut."
     },
     "swift": {
       "name": "Xcode Command Line Tools",
@@ -261,6 +265,7 @@
     },
     "mountBackend": "Mount-Backend",
     "fsKitBackend": "FSKit (nativ)",
+    "fsKitBackendUnavailable": "Derzeit nicht verfügbar",
     "ntfs3gCompatibilityBackend": "ntfs-3g (Kompatibilität)",
     "mountBackendDesc": "Standard ist ntfs-3g (Kompatibilität). FSKit ist optional und braucht macOS 15.4+ sowie die installierte/aktivierte Nigate-FSKit-Erweiterung.",
     "autoMount": "Automatisches Lesen/Schreiben",

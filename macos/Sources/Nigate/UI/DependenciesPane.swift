@@ -191,8 +191,8 @@ struct DependenciesPane: View {
 
     private var fsKitGuideText: String {
         var guide = L10n.t("dependencies.fsKit.installGuide")
-        if let detail = model.dependencies.fsKitDetail, !detail.isEmpty {
-            guide += "\n\n" + detail
+        if let diagnostic = model.dependencies.fsKitDiagnostic {
+            guide += "\n\n" + L10n.fsKitDiagnosticText(diagnostic)
         }
         return guide
     }

@@ -63,11 +63,15 @@
     "fsKit": {
       "name": "FSKit（原生文件系统框架，可选）",
       "description": "Apple 提供的文件系统扩展框架（macOS 15.4+）。正式签名的扩展可在“系统设置 → 文件系统扩展”中出现；当前 ad-hoc 本地构建通常不会出现在该列表，但仍可能被 pluginkit 注册。产品默认请用 ntfs-3g 兼容挂载。",
-      "installGuide": "1. 用 macos/Scripts/build.sh 构建并安装 Nigate.app 到 /Applications（扩展在 Contents/Extensions）。\n2. 本机若无 Apple 代码签名证书（Developer ID / Development Team），系统设置的“文件系统扩展”列表通常不会显示 Nigate——这是签名策略，不是扩展没打进包。\n3. 可用终端确认注册：pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. 日常挂载请保持 ntfs-3g（兼容）。只有具备有效签名且控制面就绪时，再在应用设置中尝试 FSKit；失败不会静默降级。",
-      "statusReady": "控制面可用",
+      "installGuide": "1. 用 macos/Scripts/build.sh 构建并安装 Nigate.app 到 /Applications（扩展在 Contents/Extensions）。\n2. 本机若无Apple 代码签名证书，系统设置的“文件系统扩展”列表通常不会显示Nigate。这是签名策略，不是扩展没打进包。\n3. 可用终端确认注册：pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. 日常挂载请保持 ntfs-3g（兼容）。仅在扩展签名有效且可用时再尝试 FSKit；失败不会自动切换后端。",
+      "statusReady": "FSKit 可用",
       "statusNotInstalled": "扩展未安装",
       "statusDisabled": "扩展已禁用",
-      "statusUnavailable": "控制面未就绪"
+      "statusUnavailable": "控制面未就绪",
+      "diagnosticUnavailable": "FSKit 控制面状态尚未就绪。请重新启动应用后再检查扩展状态。",
+      "diagnosticUnsupportedSystem": "FSKit 需要 macOS 15.4 或更高版本；当前系统版本为 {version}。",
+      "diagnosticExtensionDisabled": "Nigate FSKit 扩展已安装，但当前未启用。若系统设置未显示扩展，请确认代码签名条件；没有 Apple 签名证书时，扩展列表可能不显示 Nigate。",
+      "diagnosticExtensionNotRegistered": "未检测到已注册的 Nigate FSKit 扩展。请重新构建并安装应用包。"
     },
     "swift": {
       "name": "Xcode Command Line Tools",
