@@ -185,10 +185,29 @@ struct AboutSheet: View {
                 Text("\(L10n.t("about.version")) \(appVersion)")
                 Text("\(L10n.t("about.technology")) SwiftUI · DiskArbitration · ntfs-3g")
             }
-            HStack {
-                Link(L10n.t("about.projectLink"), destination: URL(string: githubRepo)!)
-                Link(L10n.t("about.email"), destination: URL(string: "mailto:\(authorEmail)")!)
+            VStack(alignment: .leading, spacing: 10) {
+                aboutLink(
+                    destination: URL(string: githubRepo)!,
+                    accessibilityLabel: L10n.t("about.projectLink")
+                ) {
+                    GitHubMark()
+                        .frame(width: 16, height: 16)
+                    Text(githubRepo)
+                        .textSelection(.enabled)
+                }
+                aboutLink(
+                    destination: URL(string: "mailto:\(authorEmail)")!,
+                    accessibilityLabel: L10n.t("about.email")
+                ) {
+                    Image(systemName: "envelope.fill")
+                        .font(.system(size: 13))
+                        .frame(width: 16, height: 16)
+                    Text(authorEmail)
+                        .textSelection(.enabled)
+                }
             }
+            .font(.body)
+            .foregroundStyle(Palette.accent)
             HStack {
                 Button(L10n.t("about.checkUpdates")) {
                     Task { await model.checkUpdates() }
@@ -199,7 +218,35 @@ struct AboutSheet: View {
             }
         }
         .padding(24)
-        .frame(width: 460)
+        .frame(width: 520)
+    }
+
+    private func aboutLink<Content: View>(
+        destination: URL,
+        accessibilityLabel: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        Link(destination: destination) {
+            HStack(alignment: .center, spacing: 8) {
+                content()
+            }
+            .contentShape(Rectangle())
+        }
+        .accessibilityLabel(accessibilityLabel)
+    }
+}
+
+/// 仓库入口图标：圆底 + 代码括号（SF 无官方 GitHub logo）。
+private struct GitHubMark: View {
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(Palette.accent)
+            Image(systemName: "chevron.left.forwardslash.chevron.right")
+                .font(.system(size: 8, weight: .bold))
+                .foregroundStyle(.white)
+        }
+        .accessibilityHidden(true)
     }
 }
 

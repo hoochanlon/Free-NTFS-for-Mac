@@ -244,7 +244,7 @@ struct DependenciesPane: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(item.name).font(.headline)
                         Text(item.description)
-                            .font(.callout)
+                            .font(.body)
                             .foregroundStyle(.secondary)
                     }
 
@@ -264,8 +264,9 @@ struct DependenciesPane: View {
                             guideCallout(text)
                         case let .paragraph(_, text):
                             Text(text)
-                                .font(.callout)
+                                .font(.body)
                                 .foregroundStyle(.secondary)
+                                .lineSpacing(3)
                                 .fixedSize(horizontal: false, vertical: true)
                         case let .command(_, label, command):
                             commandCard(command, label: label)
@@ -302,11 +303,11 @@ struct DependenciesPane: View {
     private func commandCard(_ command: String, label: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label)
-                .font(.caption)
+                .font(.callout)
                 .foregroundStyle(.secondary)
             HStack(spacing: 10) {
                 Text(command)
-                    .font(.system(.callout, design: .monospaced))
+                    .font(.system(.body, design: .monospaced))
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Button {
@@ -326,17 +327,19 @@ struct DependenciesPane: View {
     }
 
     private func guideCallout(_ text: String) -> some View {
-        HStack(spacing: 9) {
+        HStack(alignment: .top, spacing: 9) {
             RoundedRectangle(cornerRadius: 2)
                 .fill(Palette.accent)
                 .frame(width: 3)
             Text(text)
-                .font(.caption)
+                // 安装步骤/说明是主阅读内容，caption 过小；与描述同级 body。
+                .font(.body)
                 .foregroundStyle(.secondary)
+                .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(10)
+        .padding(12)
         .background(Color.primary.opacity(0.045), in: RoundedRectangle(cornerRadius: 7))
     }
 }
