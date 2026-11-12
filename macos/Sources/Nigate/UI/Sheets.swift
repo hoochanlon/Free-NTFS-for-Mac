@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import ImageIO
 
 struct HelpPane: View {
     @State private var blocks: [HelpBlock]
@@ -159,18 +160,35 @@ struct AboutSheet: View {
         return NSImage(contentsOf: url)
     }
 
+    private var authorAvatar: NSImage? {
+        guard let url = Bundle.module.url(forResource: "avatar", withExtension: "svg") else { return nil }
+        let pixelSize = 176
+        let options: [CFString: Any] = [
+            kCGImageSourceShouldCache: true,
+            kCGImageSourceThumbnailMaxPixelSize: pixelSize,
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true
+        ]
+        if let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+           let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) {
+            return NSImage(cgImage: cgImage, size: NSSize(width: 88, height: 88))
+        }
+        return NSImage(contentsOf: url)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
+            HStack(spacing: 10) {
                 if let appIcon {
                     Image(nsImage: appIcon)
                         .resizable()
+                        .interpolation(.high)
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 64, height: 64)
+                        .frame(width: 44, height: 44)
                         .accessibilityLabel("Nigate")
                 } else {
                     Image(systemName: "bolt.horizontal.circle.fill")
-                        .font(.largeTitle)
+                        .font(.title)
                         .foregroundStyle(Palette.accent)
                 }
                 VStack(alignment: .leading) {
@@ -179,11 +197,24 @@ struct AboutSheet: View {
                 }
             }
             Text(L10n.t("about.description"))
-            VStack(alignment: .leading, spacing: 6) {
-                Text(L10n.t("about.softwareInfo")).font(.headline)
-                Text("\(L10n.t("about.author")) hoochanlon(胡成龙)")
-                Text("\(L10n.t("about.version")) \(appVersion)")
-                Text("\(L10n.t("about.technology")) SwiftUI · DiskArbitration · ntfs-3g")
+            HStack(alignment: .center, spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(L10n.t("about.softwareInfo")).font(.headline)
+                    Text("\(L10n.t("about.author")) hoochanlon(胡成龙)")
+                    Text("\(L10n.t("about.version")) \(appVersion)")
+                    Text("\(L10n.t("about.technology")) SwiftUI · DiskArbitration · ntfs-3g")
+                }
+                Spacer(minLength: 8)
+                if let authorAvatar {
+                    Image(nsImage: authorAvatar)
+                        .resizable()
+                        .interpolation(.high)
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 88, height: 88)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.primary.opacity(0.08), lineWidth: 1))
+                        .accessibilityLabel("hoochanlon")
+                }
             }
             VStack(alignment: .leading, spacing: 10) {
                 aboutLink(
