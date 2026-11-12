@@ -400,6 +400,16 @@ final class AppModel: ObservableObject {
             }
             if code == "RENAME_INVALID_NAME" { return L10n.t("messages.renameInvalidName") }
             if code == "RENAME_TOOL_MISSING" { return L10n.t("messages.renameToolMissing") }
+            if code.hasPrefix("RENAME_UNMOUNT_FAILED:") {
+                return L10n.t("messages.renameUnmountFailed", ["error": String(code.dropFirst("RENAME_UNMOUNT_FAILED:".count))])
+            }
+            if code.hasPrefix("RENAME_LABEL_FAILED:") {
+                // 脏卷/校验标记导致写标失败：引导 Windows chkdsk，避免把 ntfslabel 英文原文甩给用户。
+                return L10n.t("messages.renameFailedNeedChkdsk")
+            }
+            if code.hasPrefix("RENAME_REMOUNT_FAILED:") {
+                return L10n.t("messages.renameRemountFailed", ["error": String(code.dropFirst("RENAME_REMOUNT_FAILED:".count))])
+            }
             if code == "FORMAT_NOT_ALLOWED" { return L10n.t("messages.formatNotAllowed") }
             if code == "FORMAT_TOOL_MISSING" { return L10n.t("messages.formatToolMissing") }
             return code

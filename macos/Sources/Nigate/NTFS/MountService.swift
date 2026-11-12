@@ -213,21 +213,30 @@ struct MountService {
         clearMarker(device.disk)
         try await Task.sleep(nanoseconds: 500_000_000)
         do {
-            _ = try await run([ntfslabel, device.devicePath, trimmed], password: &password, refreshKey: "messages.passwordDialog.renameDevice", name: device.volumeName)
+            // 卷已卸载：先常规写标；dirty / scheduled-for-check 时再用 -f（ntfslabel 官方提示）。
+            try await writeVolumeLabel(
+                ntfslabel: ntfslabel,
+                devicePath: device.devicePath,
+                label: trimmed,
+                password: &password,
+                volumeName: device.volumeName
+            )
         } catch {
             throw AppError.coded("RENAME_LABEL_FAILED:\(error.localizedDescription)")
         }
-        try await refreshGPTName(device, newName: trimmed, password: &password)
+        // GPT 分区名仅作 diskutil 侧装饰；SIP 常拒绝 gpt label，失败不回滚已写入的 NTFS 卷标。
+        await refreshGPTNameBestEffort(device, newName: trimmed, password: &password)
         try await Task.sleep(nanoseconds: 500_000_000)
         do {
-            if wasReadOnly {
-                try await mountReadOnly(device.devicePath, password: &password, refreshKey: "messages.passwordDialog.renameDevice", name: device.volumeName)
-            } else {
-                var next = unmounted(device)
-                next.volumeName = trimmed
-                next.volume = newVolume
-                _ = try await mount(next, passwordOverride: password)
-            }
+            // ntfslabel 成功已证明目标是 NTFS；卸载后 diskutil personality 常误报，
+            // 不能再走 mount() 内的 assertNTFSPartition，否则会出现“已改名却报失败”。
+            try await remountAfterRename(
+                device,
+                newName: trimmed,
+                newVolume: newVolume,
+                wasReadOnly: wasReadOnly,
+                password: &password
+            )
         } catch {
             throw AppError.coded("RENAME_REMOUNT_FAILED:\(error.localizedDescription)")
         }
@@ -362,6 +371,40 @@ struct MountService {
         }
     }
 
+    /// 写 NTFS 卷标。脏卷（scheduled for check）在已卸载前提下用 -f 重试。
+    private func writeVolumeLabel(
+        ntfslabel: String,
+        devicePath: String,
+        label: String,
+        password: inout String,
+        volumeName: String
+    ) async throws {
+        do {
+            _ = try await run(
+                [ntfslabel, devicePath, label],
+                password: &password,
+                refreshKey: "messages.passwordDialog.renameDevice",
+                name: volumeName
+            )
+        } catch {
+            guard isNTFSDirtyVolumeError(error) else { throw error }
+            _ = try await run(
+                [ntfslabel, "-f", devicePath, label],
+                password: &password,
+                refreshKey: "messages.passwordDialog.renameDevice",
+                name: volumeName
+            )
+        }
+    }
+
+    private func isNTFSDirtyVolumeError(_ error: Error) -> Bool {
+        let text = error.localizedDescription.lowercased()
+        return text.contains("scheduled for check")
+            || text.contains("volume is dirty")
+            || text.contains("dirty volume")
+            || (text.contains("force") && text.contains("option"))
+    }
+
     private func run(
         _ args: [String],
         password: inout String,
@@ -383,15 +426,79 @@ struct MountService {
         throw AppError.missingTool("ntfsfix not found. Install ntfs-3g-mac before repairing an NTFS volume.")
     }
 
-    private func refreshGPTName(_ device: NTFSDevice, newName: String, password: inout String) async throws {
+    /// 尝试同步 GPT 分区名。失败可忽略：用户可见卷名来自 NTFS 卷标 / 挂载 volname。
+    private func refreshGPTNameBestEffort(_ device: NTFSDevice, newName: String, password: inout String) async {
         let parent = DiskSafety.parentDiskPath(device.devicePath)
         guard parent != device.devicePath else { return }
-        _ = try await run(["diskutil", "unmountDisk", "force", parent], password: &password, refreshKey: "messages.passwordDialog.renameDevice", name: device.volumeName)
-        guard let index = DiskSafety.partitionIndex(device.disk) else {
-            throw AppError.coded("RENAME_PARTITION_INDEX_FAILED")
-        }
+        guard let index = DiskSafety.partitionIndex(device.disk) else { return }
+        // 不 force unmount 整盘：只写 GPT 名，避免拖垮同盘其他分区。
         let raw = parent.replacingOccurrences(of: "/dev/disk", with: "/dev/rdisk")
-        _ = try await run(["gpt", "label", "-f", "-i", index, "-l", newName, raw], password: &password, refreshKey: "messages.passwordDialog.renameDevice", name: device.volumeName)
+        _ = try? await run(
+            ["gpt", "label", "-f", "-i", index, "-l", newName, raw],
+            password: &password,
+            refreshKey: "messages.passwordDialog.renameDevice",
+            name: device.volumeName
+        )
+    }
+
+    /// 改名后的重新挂载：只确认设备节点仍在，不依赖 diskutil 的 NTFS personality。
+    private func remountAfterRename(
+        _ device: NTFSDevice,
+        newName: String,
+        newVolume: String,
+        wasReadOnly: Bool,
+        password: inout String
+    ) async throws {
+        try await assertDeviceNodePresent(device)
+        var lastError: Error?
+        for attempt in 1...3 {
+            do {
+                if wasReadOnly {
+                    try await mountReadOnly(
+                        device.devicePath,
+                        password: &password,
+                        refreshKey: "messages.passwordDialog.renameDevice",
+                        name: newName
+                    )
+                } else {
+                    var next = unmounted(device)
+                    next.volumeName = newName
+                    next.volume = newVolume
+                    _ = try await mountWithNTFS3G(next, passwordOverride: password)
+                }
+                return
+            } catch {
+                lastError = error
+                // 内核/diskutil 在 ntfslabel 后偶发短暂不可用，退避重试。
+                if attempt < 3 {
+                    try await Task.sleep(nanoseconds: UInt64(attempt) * 700_000_000)
+                    try await assertDeviceNodePresent(device)
+                }
+            }
+        }
+        throw lastError ?? AppError.failed("重新挂载失败")
+    }
+
+    /// 仅校验分区节点仍指向同一 identifier（可选 UUID），用于写标后的 remount。
+    private func assertDeviceNodePresent(_ device: NTFSDevice) async throws {
+        guard DiskSafety.isPartition(device.devicePath),
+              device.devicePath == "/dev/\(device.disk)" else {
+            throw AppError.invalidPath
+        }
+        let result = await Shell.runQuiet("/usr/sbin/diskutil", ["info", device.devicePath], timeout: 5)
+        guard result.ok,
+              let identifier = DiskSafety.field(result.stdout, "Device Identifier"),
+              identifier == device.disk else {
+            throw AppError.failed("设备已断开或分区路径已变化，操作已停止")
+        }
+        guard let expected = device.volumeUuid, !expected.isEmpty else { return }
+        let current = DiskSafety.field(result.stdout, "Volume UUID")
+            ?? DiskSafety.field(result.stdout, "Disk / Partition UUID")
+            ?? DiskSafety.field(result.stdout, "Partition UUID")
+        // UUID 缺失时不否决（部分盘 util 在卸载态不回显）；有值且不一致才视为换盘。
+        if let current, !current.isEmpty, current != expected {
+            throw AppError.failed("设备已断开或分区路径已变化，操作已停止")
+        }
     }
 
     private func assertNTFSPartition(_ device: NTFSDevice) async throws {
