@@ -366,6 +366,57 @@ final class DiskSafetyTests: XCTestCase {
     }
 }
 
+final class TrayDeviceStatusTests: XCTestCase {
+    func testReadyStatusIgnoresUnmountedDevices() {
+        XCTAssertEqual(TrayDeviceStatus(devices: []), .ready)
+        XCTAssertEqual(TrayDeviceStatus(devices: [trayDevice(mounted: false, readOnly: true)]), .ready)
+    }
+
+    func testAllReadWriteStatus() {
+        XCTAssertEqual(
+            TrayDeviceStatus(devices: [trayDevice(mounted: true, readOnly: false)]),
+            .allReadWrite
+        )
+    }
+
+    func testAllReadOnlyStatus() {
+        XCTAssertEqual(
+            TrayDeviceStatus(devices: [trayDevice(mounted: true, readOnly: true)]),
+            .allReadOnly
+        )
+    }
+
+    func testMixedStatus() {
+        XCTAssertEqual(
+            TrayDeviceStatus(devices: [
+                trayDevice(disk: "disk1s1", mounted: true, readOnly: false),
+                trayDevice(disk: "disk2s1", mounted: true, readOnly: true)
+            ]),
+            .mixed
+        )
+    }
+
+    private func trayDevice(
+        disk: String = "disk1s1",
+        mounted: Bool,
+        readOnly: Bool
+    ) -> NTFSDevice {
+        NTFSDevice(
+            disk: disk,
+            devicePath: "/dev/\(disk)",
+            volume: mounted ? "/Volumes/Test" : "",
+            volumeName: "Test",
+            volumeUuid: nil,
+            isReadOnly: readOnly,
+            options: "",
+            isMounted: mounted,
+            isUnmounted: !mounted,
+            canFormat: false,
+            capacity: nil
+        )
+    }
+}
+
 final class AutoMountTests: XCTestCase {
     func testManualReadOnlyPreferenceBlocksAutoMount() {
         let device = NTFSDevice(

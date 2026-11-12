@@ -1,11 +1,36 @@
 import AppKit
 
+enum TrayDeviceStatus: Equatable {
+    case ready
+    case allReadWrite
+    case allReadOnly
+    case mixed
+
+    init(devices: [NTFSDevice]) {
+        let mounted = devices.filter { $0.isMounted && !$0.isUnmounted }
+        let readWriteCount = mounted.filter(\.isReadWrite).count
+        if mounted.isEmpty {
+            self = .ready
+        } else if readWriteCount == 0 {
+            self = .allReadOnly
+        } else if readWriteCount == mounted.count {
+            self = .allReadWrite
+        } else {
+            self = .mixed
+        }
+    }
+}
+
 @MainActor
 final class TrayController: NSObject, NSMenuDelegate {
     static let shared = TrayController()
     private var item: NSStatusItem?
     private weak var model: AppModel?
     private let menu = NSMenu()
+    private lazy var trayLogo: NSImage? = {
+        guard let url = Bundle.module.url(forResource: "AppIcon-white", withExtension: "icns") else { return nil }
+        return NSImage(contentsOf: url)
+    }()
     /// 菜单打开期间禁止 removeAllItems：否则移入子菜单会被拆掉。
     private var menuIsOpen = false
 
@@ -81,8 +106,8 @@ final class TrayController: NSObject, NSMenuDelegate {
     private func ensureStatusItem() {
         guard item == nil else { return }
         let created = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        created.button?.image = NSImage(systemSymbolName: "externaldrive.fill", accessibilityDescription: "Nigate")
-        created.button?.image?.isTemplate = true
+        created.button?.image = makeStatusItemImage(status: .ready)
+        created.button?.image?.accessibilityDescription = "Nigate"
         created.menu = menu
         item = created
     }
@@ -163,21 +188,63 @@ final class TrayController: NSObject, NSMenuDelegate {
     }
 
     private func updateStatusItemTint(from model: AppModel) {
-        let button = item?.button
-        guard let base = NSImage(systemSymbolName: "externaldrive.fill", accessibilityDescription: "Nigate") else {
-            return
+        item?.button?.image = makeStatusItemImage(status: TrayDeviceStatus(devices: model.devices))
+    }
+
+    private func makeStatusItemImage(status: TrayDeviceStatus) -> NSImage? {
+        let size = NSSize(width: 22, height: 22)
+        guard let trayLogo else {
+            guard let symbol = NSImage(systemSymbolName: "externaldrive.fill", accessibilityDescription: "Nigate") else {
+                return nil
+            }
+            symbol.isTemplate = true
+            return symbol
         }
-        if model.devices.contains(where: \.isReadWrite) {
-            let image = base.withSymbolConfiguration(.init(paletteColors: [.systemGreen])) ?? base
-            image.isTemplate = false
-            button?.image = image
-        } else if !model.devices.isEmpty {
-            let image = base.withSymbolConfiguration(.init(paletteColors: [.systemOrange])) ?? base
-            image.isTemplate = false
-            button?.image = image
-        } else {
-            base.isTemplate = true
-            button?.image = base
+
+        let image = NSImage(size: size)
+        image.lockFocus()
+        NSGraphicsContext.current?.shouldAntialias = true
+        NSGraphicsContext.current?.imageInterpolation = .high
+
+        let bounds = NSRect(origin: .zero, size: size)
+        let shadow = NSShadow()
+        shadow.shadowColor = NSColor.black.withAlphaComponent(0.7)
+        shadow.shadowBlurRadius = 1.2
+        shadow.set()
+        trayLogo.draw(in: bounds)
+        NSShadow().set()
+        drawStatusBadge(for: status)
+        image.unlockFocus()
+
+        image.isTemplate = false
+        image.accessibilityDescription = "Nigate"
+        return image
+    }
+
+    private func drawStatusBadge(for status: TrayDeviceStatus) {
+        let badge = NSRect(x: 13.5, y: 0.5, width: 8, height: 8)
+        let interior = badge.insetBy(dx: 1, dy: 1)
+        NSColor.white.setFill()
+        NSBezierPath(ovalIn: badge).fill()
+
+        switch status {
+        case .ready:
+            NSColor.systemBlue.setFill()
+            NSBezierPath(ovalIn: interior).fill()
+        case .allReadWrite:
+            NSColor.systemGreen.setFill()
+            NSBezierPath(ovalIn: interior).fill()
+        case .allReadOnly:
+            NSColor.systemOrange.setFill()
+            NSBezierPath(ovalIn: interior).fill()
+        case .mixed:
+            NSGraphicsContext.saveGraphicsState()
+            NSBezierPath(ovalIn: interior).addClip()
+            NSColor.systemGreen.setFill()
+            NSBezierPath(rect: NSRect(x: interior.minX, y: interior.minY, width: interior.width / 2, height: interior.height)).fill()
+            NSColor.systemOrange.setFill()
+            NSBezierPath(rect: NSRect(x: interior.midX, y: interior.minY, width: interior.width / 2, height: interior.height)).fill()
+            NSGraphicsContext.restoreGraphicsState()
         }
     }
 

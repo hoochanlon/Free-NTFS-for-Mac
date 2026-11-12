@@ -61,11 +61,11 @@ let package = Package(
             dependencies: ["NigateFSKitCore"],
             path: "macos/Sources/Nigate",
             exclude: [
-                "Resources/AppIcon-white.icns",
                 "Nigate.entitlements"
             ],
             resources: [
                 .copy("Resources/AppIcon.icns"),
+                .copy("Resources/AppIcon-white.icns"),
                 .copy("Resources/Locales"),
                 .copy("Resources/Help")
             ],
