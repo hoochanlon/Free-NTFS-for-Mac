@@ -124,26 +124,38 @@ struct DeviceCard: View {
     private func confirm(_ action: DeviceAction) {
         let title: String
         let message: String
+        let symbol: String
+        let style: NSAlert.Style
         switch action {
         case .eject:
             title = L10n.t("devices.ejectConfirm", ["name": device.volumeName])
             message = L10n.t("devices.ejectConfirmNote")
+            symbol = "externaldrive.badge.xmark"
+            style = .warning
         case .repair:
             title = L10n.t("devices.repairConfirm")
             message = L10n.t("devices.repairConfirmNote") + "\n" + L10n.t("devices.targetDevice", ["name": device.volumeName])
+            symbol = "wrench.and.screwdriver"
+            style = .warning
         case .format:
             title = L10n.t("devices.formatConfirm")
             message = L10n.t("devices.formatConfirmNote")
+            symbol = "exclamationmark.triangle.fill"
+            style = .critical
         default:
-            title = ""
-            message = ""
+            return
         }
-        let alert = NSAlert()
-        alert.messageText = title
-        alert.informativeText = message
-        alert.addButton(withTitle: L10n.t("dialog.continue"))
-        alert.addButton(withTitle: L10n.t("dialog.cancel"))
-        if alert.runModal() == .alertFirstButtonReturn {
+        let confirmed = ConfirmAlert.run(
+            .init(
+                title: title,
+                message: message,
+                symbolName: symbol,
+                style: style,
+                continueTitle: L10n.t("dialog.continue"),
+                cancelTitle: L10n.t("dialog.cancel")
+            )
+        )
+        if confirmed {
             model.perform(action, on: device)
         }
     }

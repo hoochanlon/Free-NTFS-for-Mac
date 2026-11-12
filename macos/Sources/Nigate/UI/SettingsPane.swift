@@ -17,11 +17,18 @@ struct SettingsPane: View {
                 Toggle(L10n.t("settings.savePassword"), isOn: bind(\.savePassword))
                 Text(L10n.t("settings.savePasswordDesc")).font(.caption).foregroundStyle(.secondary)
                 Button(L10n.t("settings.deletePassword")) {
-                    let alert = NSAlert()
-                    alert.messageText = L10n.t("settings.deletePasswordConfirm")
-                    alert.addButton(withTitle: L10n.t("dialog.confirm"))
-                    alert.addButton(withTitle: L10n.t("dialog.cancel"))
-                    if alert.runModal() == .alertFirstButtonReturn {
+                    let confirmed = ConfirmAlert.run(
+                        .init(
+                            title: L10n.t("settings.deletePasswordConfirm"),
+                            message: "",
+                            symbolName: "key.slash",
+                            style: .warning,
+                            continueTitle: L10n.t("dialog.confirm"),
+                            cancelTitle: L10n.t("dialog.cancel"),
+                            minContentWidth: 400
+                        )
+                    )
+                    if confirmed {
                         model.deleteSavedPassword()
                     }
                 }

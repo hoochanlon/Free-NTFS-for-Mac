@@ -152,7 +152,15 @@ struct MountService {
         try await Task.sleep(nanoseconds: 500_000_000)
         _ = try await run([ntfsfix, device.devicePath], password: &password, refreshKey: "messages.passwordDialog.resetDevice", name: device.volumeName)
         try await Task.sleep(nanoseconds: 500_000_000)
-        try await mountReadOnly(device.devicePath, password: &password, refreshKey: "messages.passwordDialog.resetDevice", name: device.volumeName)
+        // ntfsfix 成功后 personality 常误报，跳过 assertNTFSPartition。
+        try await remountTrustedPartition(
+            device,
+            volumeName: device.volumeName,
+            volumePath: device.volume,
+            wasReadOnly: true,
+            password: &password,
+            refreshKey: "messages.passwordDialog.resetDevice"
+        )
         return "设备 \(device.volumeName) 已重置并重新挂载为只读模式"
     }
 
@@ -177,11 +185,15 @@ struct MountService {
         }
         try await Task.sleep(nanoseconds: 500_000_000)
         do {
-            if wasReadOnly {
-                try await mountReadOnly(device.devicePath, password: &password, refreshKey: "messages.passwordDialog.repairDevice", name: device.volumeName)
-            } else {
-                _ = try await mount(unmounted(device), passwordOverride: password)
-            }
+            // 同 rename：工具链已证明是 NTFS，remount 不再依赖 diskutil personality。
+            try await remountTrustedPartition(
+                device,
+                volumeName: device.volumeName,
+                volumePath: device.volume,
+                wasReadOnly: wasReadOnly,
+                password: &password,
+                refreshKey: "messages.passwordDialog.repairDevice"
+            )
         } catch {
             throw AppError.coded("REPAIR_REMOUNT_FAILED:\(error.localizedDescription)")
         }
@@ -230,12 +242,13 @@ struct MountService {
         do {
             // ntfslabel 成功已证明目标是 NTFS；卸载后 diskutil personality 常误报，
             // 不能再走 mount() 内的 assertNTFSPartition，否则会出现“已改名却报失败”。
-            try await remountAfterRename(
+            try await remountTrustedPartition(
                 device,
-                newName: trimmed,
-                newVolume: newVolume,
+                volumeName: trimmed,
+                volumePath: newVolume,
                 wasReadOnly: wasReadOnly,
-                password: &password
+                password: &password,
+                refreshKey: "messages.passwordDialog.renameDevice"
             )
         } catch {
             throw AppError.coded("RENAME_REMOUNT_FAILED:\(error.localizedDescription)")
@@ -441,13 +454,15 @@ struct MountService {
         )
     }
 
-    /// 改名后的重新挂载：只确认设备节点仍在，不依赖 diskutil 的 NTFS personality。
-    private func remountAfterRename(
+    /// 工具链（ntfslabel/ntfsfix）已证明目标是 NTFS 后的 remount。
+    /// 只确认设备节点仍在，不依赖 diskutil personality（卸载后常误报）。
+    private func remountTrustedPartition(
         _ device: NTFSDevice,
-        newName: String,
-        newVolume: String,
+        volumeName: String,
+        volumePath: String,
         wasReadOnly: Bool,
-        password: inout String
+        password: inout String,
+        refreshKey: String
     ) async throws {
         try await assertDeviceNodePresent(device)
         var lastError: Error?
@@ -457,19 +472,21 @@ struct MountService {
                     try await mountReadOnly(
                         device.devicePath,
                         password: &password,
-                        refreshKey: "messages.passwordDialog.renameDevice",
-                        name: newName
+                        refreshKey: refreshKey,
+                        name: volumeName
                     )
                 } else {
                     var next = unmounted(device)
-                    next.volumeName = newName
-                    next.volume = newVolume
+                    next.volumeName = volumeName
+                    if DiskSafety.isSafeMountPoint(volumePath) {
+                        next.volume = volumePath
+                    }
                     _ = try await mountWithNTFS3G(next, passwordOverride: password)
                 }
                 return
             } catch {
                 lastError = error
-                // 内核/diskutil 在 ntfslabel 后偶发短暂不可用，退避重试。
+                // 内核/diskutil 在写盘工具后偶发短暂不可用，退避重试。
                 if attempt < 3 {
                     try await Task.sleep(nanoseconds: UInt64(attempt) * 700_000_000)
                     try await assertDeviceNodePresent(device)
@@ -479,7 +496,7 @@ struct MountService {
         throw lastError ?? AppError.failed("重新挂载失败")
     }
 
-    /// 仅校验分区节点仍指向同一 identifier（可选 UUID），用于写标后的 remount。
+    /// 仅校验分区节点仍指向同一 identifier（可选 UUID），用于写盘后的 remount。
     private func assertDeviceNodePresent(_ device: NTFSDevice) async throws {
         guard DiskSafety.isPartition(device.devicePath),
               device.devicePath == "/dev/\(device.disk)" else {

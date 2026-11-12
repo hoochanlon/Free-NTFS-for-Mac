@@ -4,6 +4,7 @@ import Foundation
 final class SleepGuard {
     private var process: Process?
     private var iostat: Process?
+    private var iostatOutput: FileHandle?
     private var mode: SleepMode = .off
     private var disks: [String] = []
     private var lastActive = Date.distantPast
@@ -16,6 +17,7 @@ final class SleepGuard {
         self.mode = mode
         self.disks = disks
         idleTimer?.invalidate()
+        idleTimer = nil
         switch mode {
         case .off:
             stopCaffeinate()
@@ -38,6 +40,7 @@ final class SleepGuard {
         stopCaffeinate()
         stopIostat()
         idleTimer?.invalidate()
+        idleTimer = nil
     }
 
     private func startCaffeinate() {
@@ -47,13 +50,20 @@ final class SleepGuard {
         proc.arguments = ["-i", "-m"]
         proc.standardOutput = FileHandle.nullDevice
         proc.standardError = FileHandle.nullDevice
-        try? proc.run()
-        process = proc
+        do {
+            try proc.run()
+            process = proc
+        } catch {
+            process = nil
+        }
     }
 
     private func stopCaffeinate() {
-        process?.terminate()
+        guard let proc = process else { return }
         process = nil
+        if proc.isRunning {
+            proc.terminate()
+        }
     }
 
     private func startIostat() {
@@ -65,24 +75,44 @@ final class SleepGuard {
         let pipe = Pipe()
         proc.standardOutput = pipe
         proc.standardError = FileHandle.nullDevice
-        pipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
-            let data = handle.availableData
-            guard let text = String(data: data, encoding: .utf8) else { return }
+        let handle = pipe.fileHandleForReading
+        handle.readabilityHandler = { [weak self] file in
+            let data = file.availableData
+            // EOF / 空包：卸掉 handler，避免主线程被空回调刷死。
+            guard !data.isEmpty else {
+                file.readabilityHandler = nil
+                return
+            }
+            guard let text = String(data: data, encoding: .utf8), !text.isEmpty else { return }
             Task { @MainActor [weak self] in
                 self?.ingest(text)
             }
         }
-        try? proc.run()
-        iostat = proc
+        do {
+            try proc.run()
+            iostat = proc
+            iostatOutput = handle
+        } catch {
+            handle.readabilityHandler = nil
+            iostat = nil
+            iostatOutput = nil
+        }
     }
 
     private func stopIostat() {
-        iostat?.terminate()
-        iostat?.standardOutput = nil
+        let handle = iostatOutput
+        let proc = iostat
+        iostatOutput = nil
         iostat = nil
+        // 先摘 handler，再 terminate，避免 EOF 风暴打到 MainActor。
+        handle?.readabilityHandler = nil
+        if let proc, proc.isRunning {
+            proc.terminate()
+        }
     }
 
     private func ingest(_ text: String) {
+        guard mode == .smart else { return }
         let active = text.split(whereSeparator: \.isNewline).contains { line in
             let nums = line.split(whereSeparator: \.isWhitespace).compactMap { Double($0) }
             guard nums.count >= 3 else { return false }
@@ -99,7 +129,8 @@ final class SleepGuard {
             idleTimer?.invalidate()
             idleTimer = Timer.scheduledTimer(withTimeInterval: idleHold, repeats: false) { [weak self] _ in
                 Task { @MainActor [weak self] in
-                    self?.stopCaffeinate()
+                    guard let self, self.mode == .smart else { return }
+                    self.stopCaffeinate()
                 }
             }
         }

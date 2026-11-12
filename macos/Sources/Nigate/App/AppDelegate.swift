@@ -17,15 +17,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        let alert = NSAlert()
-        alert.alertStyle = .warning
-        alert.messageText = L10n.t("tray.quitConfirmTitle")
-        alert.informativeText = L10n.t("tray.quitConfirmMessage")
-        alert.icon = NSApp.applicationIconImage
-        alert.addButton(withTitle: L10n.t("tray.quit"))
-        alert.addButton(withTitle: L10n.t("dialog.cancel"))
-
-        return alert.runModal() == .alertFirstButtonReturn ? .terminateNow : .terminateCancel
+        let confirmed = ConfirmAlert.run(
+            .init(
+                title: L10n.t("tray.quitConfirmTitle"),
+                message: L10n.t("tray.quitConfirmMessage"),
+                symbolName: "power.circle",
+                style: .warning,
+                continueTitle: L10n.t("tray.quit"),
+                cancelTitle: L10n.t("dialog.cancel"),
+                minContentWidth: 420
+            )
+        )
+        return confirmed ? .terminateNow : .terminateCancel
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
