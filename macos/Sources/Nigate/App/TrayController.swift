@@ -132,15 +132,27 @@ final class TrayController: NSObject, NSMenuDelegate {
             }
         }
         menu.addItem(.separator())
-        menu.addItem(action(L10n.t("devices.mountAll")) { model.runBatch(.mount) })
-        menu.addItem(action(L10n.t("devices.restoreAllReadOnly")) { model.runBatch(.restore) })
-        menu.addItem(action(L10n.t("devices.ejectAll")) { model.runBatch(.eject) })
+        if model.devices.contains(where: \.needsMount) {
+            menu.addItem(action(L10n.t("devices.mountAllDevices")) { model.runBatch(.mount) })
+        }
+        if model.devices.contains(where: { !$0.needsMount && $0.isReadOnly }) {
+            menu.addItem(action(L10n.t("devices.mountAll")) { model.runBatch(.mount) })
+        }
+        if model.devices.contains(where: \.isReadWrite) {
+            menu.addItem(action(L10n.t("devices.restoreAllReadOnly")) { model.runBatch(.restore) })
+        }
+        if model.devices.contains(where: { !$0.needsMount }) {
+            menu.addItem(action(L10n.t("devices.unmountAll")) { model.runBatch(.unmount) })
+        }
+        if !model.devices.isEmpty {
+            menu.addItem(action(L10n.t("devices.ejectAll")) { model.runBatch(.eject) })
+        }
         menu.addItem(.separator())
         menu.addItem(action(L10n.t("tray.quit")) { NSApp.terminate(nil) })
     }
 
     private func deviceRow(_ device: NTFSDevice, model: AppModel) -> NSMenuItem {
-        let status = device.isReadWrite ? L10n.t("devices.readWrite") : L10n.t("devices.readOnly")
+        let status = statusText(for: device)
         let row = NSMenuItem(title: device.volumeName, action: nil, keyEquivalent: "")
         row.representedObject = DeviceMenuRef(identity: device.identity, disk: device.disk)
         row.image = statusImage(for: device, accessibilityDescription: status)
@@ -151,26 +163,34 @@ final class TrayController: NSObject, NSMenuDelegate {
         sub.autoenablesItems = false
         let identity = device.identity
         let disk = device.disk
-        sub.addItem(action(L10n.t("devices.mount")) {
-            TrayController.shared.prepareForAction()
-            guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
-            model.perform(.mount, on: latest)
-        })
-        sub.addItem(action(L10n.t("devices.restoreReadOnly")) {
-            TrayController.shared.prepareForAction()
-            guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
-            model.perform(.restore, on: latest)
-        })
-        sub.addItem(action(L10n.t("devices.unmount")) {
-            TrayController.shared.prepareForAction()
-            guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
-            model.perform(.unmount, on: latest)
-        })
-        sub.addItem(action(L10n.t("devices.eject")) {
-            TrayController.shared.prepareForAction()
-            guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
-            model.perform(.eject, on: latest)
-        })
+        if device.needsMount {
+            sub.addItem(action(L10n.t("devices.mountDevice")) {
+                TrayController.shared.prepareForAction()
+                guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
+                model.perform(.mount, on: latest)
+            })
+        } else {
+            sub.addItem(action(L10n.t("devices.mount")) {
+                TrayController.shared.prepareForAction()
+                guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
+                model.perform(.mount, on: latest)
+            })
+            sub.addItem(action(L10n.t("devices.restoreReadOnly")) {
+                TrayController.shared.prepareForAction()
+                guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
+                model.perform(.restore, on: latest)
+            })
+            sub.addItem(action(L10n.t("devices.unmount")) {
+                TrayController.shared.prepareForAction()
+                guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
+                model.perform(.unmount, on: latest)
+            })
+            sub.addItem(action(L10n.t("devices.eject")) {
+                TrayController.shared.prepareForAction()
+                guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
+                model.perform(.eject, on: latest)
+            })
+        }
         row.submenu = sub
         return row
     }
@@ -180,7 +200,7 @@ final class TrayController: NSObject, NSMenuDelegate {
         for item in menu.items {
             guard let ref = item.representedObject as? DeviceMenuRef else { continue }
             guard let device = Self.device(in: model, identity: ref.identity, disk: ref.disk) else { continue }
-            let status = device.isReadWrite ? L10n.t("devices.readWrite") : L10n.t("devices.readOnly")
+            let status = statusText(for: device)
             item.title = device.volumeName
             item.image = statusImage(for: device, accessibilityDescription: status)
             item.setAccessibilityLabel("\(device.volumeName), \(status)")
@@ -250,6 +270,13 @@ final class TrayController: NSObject, NSMenuDelegate {
 
     private static func device(in model: AppModel, identity: String, disk: String) -> NTFSDevice? {
         model.devices.first { $0.identity == identity || $0.disk == disk || $0.devicePath.hasSuffix(disk) }
+    }
+
+    private func statusText(for device: NTFSDevice) -> String {
+        if device.needsMount {
+            return L10n.t("devices.unmounted")
+        }
+        return device.isReadWrite ? L10n.t("devices.readWrite") : L10n.t("devices.readOnly")
     }
 
     private func statusImage(for device: NTFSDevice, accessibilityDescription: String) -> NSImage? {

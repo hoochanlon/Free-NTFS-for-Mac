@@ -30,6 +30,7 @@ final class AppModel: ObservableObject {
     private var passwordContinuation: CheckedContinuation<String, Error>?
     private var scanning = false
     private var rescanRequested = false
+    private var knownNTFSDevices: [String: NTFSDevice] = [:]
     /// 用于 persist 差分：避免每次切换休眠都 unregister 登录项 / 重建整棵 UI。
     private var lastPersistedSettings: AppSettings?
 
@@ -175,7 +176,9 @@ final class AppModel: ObservableObject {
         defer { scanning = false }
         repeat {
             rescanRequested = false
-            devices = await DeviceScanner.scan()
+            let knownDevices = Array(knownNTFSDevices.values) + devices
+            devices = await DeviceScanner.scan(knownDevices: knownDevices)
+            rememberNTFSDevices(devices)
             sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
             updateStatus()
             TrayController.shared.reload()
@@ -190,9 +193,9 @@ final class AppModel: ObservableObject {
         Task {
             let targets: [NTFSDevice]
             switch action {
-            case .mount: targets = devices.filter { $0.isReadOnly || $0.isUnmounted }
+            case .mount: targets = devices.filter { $0.isReadOnly || $0.needsMount }
             case .restore: targets = devices.filter { $0.isReadWrite }
-            case .unmount: targets = devices.filter { $0.isMounted }
+            case .unmount: targets = devices.filter { !$0.needsMount }
             case .eject: targets = devices
             default: targets = []
             }
@@ -330,6 +333,20 @@ final class AppModel: ObservableObject {
         }
     }
 
+    private func rememberNTFSDevices(_ devices: [NTFSDevice]) {
+        for var device in devices {
+            if device.volumeUuid?.isEmpty != false,
+               let knownUUID = knownNTFSDevices[device.devicePath]?.volumeUuid {
+                device.volumeUuid = knownUUID
+            }
+            if device.partitionUuid?.isEmpty != false,
+               let knownUUID = knownNTFSDevices[device.devicePath]?.partitionUuid {
+                device.partitionUuid = knownUUID
+            }
+            knownNTFSDevices[device.devicePath] = device
+        }
+    }
+
     private func markBusy(_ diskKey: String) {
         var next = busyDisks
         next.insert(diskKey)
@@ -366,12 +383,15 @@ final class AppModel: ObservableObject {
                 devices[idx].isUnmounted = true
                 devices[idx].isReadOnly = true
                 devices[idx].volume = ""
+                knownNTFSDevices[devices[idx].devicePath] = devices[idx]
             }
         case .eject, .format:
             devices.removeAll(where: match)
+            knownNTFSDevices.removeValue(forKey: device.devicePath)
         default:
             break
         }
+        rememberNTFSDevices(devices)
         updateStatus()
         TrayController.shared.syncAfterAction()
     }
@@ -382,23 +402,26 @@ final class AppModel: ObservableObject {
         device: NTFSDevice,
         applyAutoMount shouldAutoMount: Bool
     ) async {
-        let identity = device.identity
+        let volumeUuid = device.volumeUuid
+        let partitionUuid = device.partitionUuid
         let disk = device.disk
         let path = device.devicePath
 
         func matches(_ list: [NTFSDevice]) -> Bool {
-            let found = list.first {
-                $0.identity == identity || $0.disk == disk || $0.devicePath == path
-            }
+            let found = list.first { $0.devicePath == path }
+            if action == .eject || action == .format { return found == nil }
+            guard let found, found.disk == disk else { return false }
+            if let volumeUuid, !volumeUuid.isEmpty,
+               let foundUUID = found.volumeUuid, foundUUID != volumeUuid { return false }
+            if let partitionUuid, !partitionUuid.isEmpty,
+               let foundUUID = found.partitionUuid, foundUUID != partitionUuid { return false }
             switch action {
             case .mount:
-                return found?.isReadWrite == true
+                return found.isReadWrite
             case .restore, .reset:
-                return found?.isMounted == true && found?.isReadOnly == true
+                return found.isMounted && found.isReadOnly
             case .unmount:
-                return found == nil || found?.isUnmounted == true || found?.isMounted == false
-            case .eject, .format:
-                return found == nil
+                return found.isUnmounted || !found.isMounted
             default:
                 return true
             }
@@ -426,9 +449,19 @@ final class AppModel: ObservableObject {
 
         // 最多约 1.5s。未收敛前不覆盖乐观状态，避免托盘绿/橙来回跳。
         for attempt in 0..<10 {
-            let scanned = await DeviceScanner.scan()
-            if matches(scanned) || attempt == 9 {
+            let knownDevices = Array(knownNTFSDevices.values) + devices
+            let scanned = await DeviceScanner.scan(knownDevices: knownDevices)
+            if matches(scanned) {
                 devices = scanned
+                rememberNTFSDevices(scanned)
+                sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
+                updateStatus()
+                TrayController.shared.syncAfterAction()
+                break
+            }
+            if attempt == 9 {
+                devices = scanned
+                rememberNTFSDevices(scanned)
                 sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
                 updateStatus()
                 TrayController.shared.syncAfterAction()

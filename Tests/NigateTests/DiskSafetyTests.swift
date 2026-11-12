@@ -59,6 +59,85 @@ final class DiskSafetyTests: XCTestCase {
         XCTAssertTrue(DiskSafety.isNTFSVolumeInfo(xntfs))
     }
 
+    func testKnownNTFSVolumeRequiresMatchingDeviceAndUUID() {
+        let known = NTFSDevice(
+            disk: "disk4s2",
+            devicePath: "/dev/disk4s2",
+            volume: "",
+            volumeName: "Backup",
+            volumeUuid: "volume-uuid",
+            partitionUuid: "partition-uuid",
+            isReadOnly: true,
+            options: "",
+            isMounted: false,
+            isUnmounted: true,
+            canFormat: false,
+            capacity: nil
+        )
+        let sameVolume = """
+        Device Identifier:        disk4s2
+        Volume UUID:              volume-uuid
+        File System Personality:  Unknown
+        """
+        let changedVolume = sameVolume.replacingOccurrences(of: "volume-uuid", with: "different-uuid")
+        let missingUUID = """
+        Device Identifier:        disk4s2
+        File System Personality:  Unknown
+        """
+        let partitionUUIDOnly = """
+        Device Identifier:        disk4s2
+        Disk / Partition UUID:    partition-uuid
+        File System Personality:  Unknown
+        """
+        let changedPartitionUUID = partitionUUIDOnly.replacingOccurrences(of: "partition-uuid", with: "different-partition-uuid")
+        let mountedUUIDs = """
+        Device Identifier:        disk4s2
+        Volume UUID:              volume-uuid
+        Disk / Partition UUID:    partition-uuid
+        File System Personality:  Unknown
+        """
+        let knownFAT = """
+        Device Identifier:        disk4s2
+        Volume UUID:              volume-uuid
+        File System Personality:  MS-DOS (FAT)
+        """
+        let changedFATVolume = knownFAT.replacingOccurrences(of: "volume-uuid", with: "different-uuid")
+
+        XCTAssertTrue(DiskSafety.isSameKnownVolume(known, devicePath: "/dev/disk4s2", info: sameVolume))
+        XCTAssertTrue(DiskSafety.isSameKnownVolume(known, devicePath: "/dev/disk4s2", info: partitionUUIDOnly))
+        XCTAssertTrue(DiskSafety.isSameKnownVolume(known, devicePath: "/dev/disk4s2", info: mountedUUIDs))
+        XCTAssertTrue(DiskSafety.isSameKnownVolume(known, devicePath: "/dev/disk4s2", info: missingUUID))
+        XCTAssertFalse(DiskSafety.isSameKnownVolume(known, devicePath: "/dev/disk4s2", info: knownFAT))
+        XCTAssertTrue(DiskSafety.canRetainUnmountedNTFSCandidate(known, devicePath: "/dev/disk4s2", info: knownFAT))
+        XCTAssertFalse(DiskSafety.canRetainUnmountedNTFSCandidate(known, devicePath: "/dev/disk4s2", info: changedFATVolume))
+        var mountedKnown = known
+        mountedKnown.isUnmounted = false
+        XCTAssertFalse(DiskSafety.canRetainUnmountedNTFSCandidate(mountedKnown, devicePath: "/dev/disk4s2", info: knownFAT))
+        var noUUIDKnown = known
+        noUUIDKnown.volumeUuid = nil
+        noUUIDKnown.partitionUuid = nil
+        XCTAssertFalse(DiskSafety.canRetainUnmountedNTFSCandidate(noUUIDKnown, devicePath: "/dev/disk4s2", info: knownFAT))
+        XCTAssertTrue(DiskSafety.requiresUnmountedNTFSProbe(known, devicePath: "/dev/disk4s2", info: knownFAT))
+        XCTAssertFalse(DiskSafety.requiresUnmountedNTFSProbe(known, devicePath: "/dev/disk4s2", info: changedFATVolume))
+        XCTAssertFalse(DiskSafety.requiresUnmountedNTFSProbe(mountedKnown, devicePath: "/dev/disk4s2", info: knownFAT))
+        XCTAssertFalse(DiskSafety.requiresUnmountedNTFSProbe(known, devicePath: "/dev/disk4s2", info: sameVolume.replacingOccurrences(of: "Unknown", with: "NTFS")))
+        XCTAssertFalse(DiskSafety.isSameKnownVolume(known, devicePath: "/dev/disk4s2", info: changedPartitionUUID))
+        XCTAssertFalse(DiskSafety.isSameKnownVolume(known, devicePath: "/dev/disk4s2", info: changedFATVolume))
+        XCTAssertFalse(DiskSafety.isSameKnownVolume(known, devicePath: "/dev/disk4s1", info: sameVolume))
+        XCTAssertFalse(DiskSafety.isSameKnownVolume(known, devicePath: "/dev/disk4s2", info: changedVolume))
+
+        var withoutVolumeUUID = known
+        withoutVolumeUUID.volumeUuid = nil
+        XCTAssertFalse(DiskSafety.isSameKnownVolume(withoutVolumeUUID, devicePath: "/dev/disk4s2", info: knownFAT))
+    }
+
+    func testResolvedVolumeUUIDRetainsKnownIdentityWhenScanTemporarilyOmitsIt() {
+        XCTAssertEqual(DeviceScanner.resolvedVolumeUUID(scanned: nil, known: "volume-uuid"), "volume-uuid")
+        XCTAssertEqual(DeviceScanner.resolvedVolumeUUID(scanned: "", known: "volume-uuid"), "volume-uuid")
+        XCTAssertEqual(DeviceScanner.resolvedVolumeUUID(scanned: "new-volume-uuid", known: "volume-uuid"), "new-volume-uuid")
+        XCTAssertNil(DeviceScanner.resolvedVolumeUUID(scanned: nil, known: nil))
+    }
+
     func testConfirmedFuseMountAcceptsIdentityOrTrustedMarker() {
         let mountOutput = """
         /dev/disk40s1 on /Volumes/Samsung USB (macfuse, local, nodev, synchronous, noatime)

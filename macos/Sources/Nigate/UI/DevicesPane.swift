@@ -12,10 +12,21 @@ struct DevicesPane: View {
                 batch("arrow.clockwise", L10n.t("devices.refreshDevices")) {
                     Task { await model.refreshDevices() }
                 }
-                batch("pencil.and.outline", L10n.t("devices.mountAll")) { model.runBatch(.mount) }
-                batch("eye", L10n.t("devices.restoreAllReadOnly")) { model.runBatch(.restore) }
-                batch("eject", L10n.t("devices.unmountAll")) { model.runBatch(.unmount) }
-                batch("externaldrive.badge.xmark", L10n.t("devices.ejectAll")) { model.runBatch(.eject) }
+                if model.devices.contains(where: \.needsMount) {
+                    batch("externaldrive", L10n.t("devices.mountAllDevices")) { model.runBatch(.mount) }
+                }
+                if model.devices.contains(where: { !$0.needsMount && $0.isReadOnly }) {
+                    batch("pencil.and.outline", L10n.t("devices.mountAll")) { model.runBatch(.mount) }
+                }
+                if model.devices.contains(where: \.isReadWrite) {
+                    batch("eye", L10n.t("devices.restoreAllReadOnly")) { model.runBatch(.restore) }
+                }
+                if model.devices.contains(where: { !$0.needsMount }) {
+                    batch("eject", L10n.t("devices.unmountAll")) { model.runBatch(.unmount) }
+                }
+                if !model.devices.isEmpty {
+                    batch("externaldrive.badge.xmark", L10n.t("devices.ejectAll")) { model.runBatch(.eject) }
+                }
             }
             if model.devices.isEmpty {
                 VStack(spacing: 8) {
@@ -89,16 +100,20 @@ struct DeviceCard: View {
             }
 
             HStack {
-                action(L10n.t("devices.mount"), "pencil") { model.perform(.mount, on: device) }
-                action(L10n.t("devices.restoreReadOnly"), "eye") { model.perform(.restore, on: device) }
-                action(L10n.t("devices.unmount"), "eject") { model.perform(.unmount, on: device) }
-                action(L10n.t("devices.eject"), "externaldrive.badge.xmark") { confirm(.eject) }
-                action(L10n.t("devices.repair"), "wrench.and.screwdriver") { confirm(.repair) }
-                action(L10n.t("devices.rename"), "character.cursor.ibeam") { model.renameDevice = device }
-                if device.canFormat {
-                    action(L10n.t("devices.format"), "internaldrive") { confirm(.format) }
+                if device.needsMount {
+                    action(L10n.t("devices.mountDevice"), "externaldrive") { model.perform(.mount, on: device) }
+                } else {
+                    action(L10n.t("devices.mount"), "pencil") { model.perform(.mount, on: device) }
+                    action(L10n.t("devices.restoreReadOnly"), "eye") { model.perform(.restore, on: device) }
+                    action(L10n.t("devices.unmount"), "eject") { model.perform(.unmount, on: device) }
+                    action(L10n.t("devices.eject"), "externaldrive.badge.xmark") { confirm(.eject) }
+                    action(L10n.t("devices.repair"), "wrench.and.screwdriver") { confirm(.repair) }
+                    action(L10n.t("devices.rename"), "character.cursor.ibeam") { model.renameDevice = device }
+                    if device.canFormat {
+                        action(L10n.t("devices.format"), "internaldrive") { confirm(.format) }
+                    }
+                    action(L10n.t("devices.reset"), "arrow.counterclockwise") { model.perform(.reset, on: device) }
                 }
-                action(L10n.t("devices.reset"), "arrow.counterclockwise") { model.perform(.reset, on: device) }
             }
             .disabled(model.busyDisks.contains(device.parentDisk))
         }

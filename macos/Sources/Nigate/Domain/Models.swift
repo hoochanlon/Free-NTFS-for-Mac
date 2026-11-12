@@ -25,6 +25,7 @@ struct NTFSDevice: Sendable, Equatable, Identifiable {
     var volume: String
     var volumeName: String
     var volumeUuid: String?
+    var partitionUuid: String? = nil
     var isReadOnly: Bool
     var options: String
     var isMounted: Bool
@@ -32,10 +33,11 @@ struct NTFSDevice: Sendable, Equatable, Identifiable {
     var canFormat: Bool
     var capacity: Capacity?
 
-    var id: String { volumeUuid ?? disk }
-    var identity: String { volumeUuid ?? disk }
+    var id: String { volumeUuid ?? partitionUuid ?? disk }
+    var identity: String { volumeUuid ?? partitionUuid ?? disk }
     var parentDisk: String { DiskSafety.parentDiskId(disk) }
     var isReadWrite: Bool { isMounted && !isReadOnly && !isUnmounted }
+    var needsMount: Bool { isUnmounted || !isMounted }
 }
 
 struct DependencyStatus: Sendable, Equatable {

@@ -29,12 +29,13 @@ enum AutoMount {
         let manual = Set(settings.manuallyReadOnlyDevices)
         if manual.contains(device.identity) || manual.contains(device.disk) { return true }
         if let uuid = device.volumeUuid, manual.contains(uuid) { return true }
+        if let uuid = device.partitionUuid, manual.contains(uuid) { return true }
         return false
     }
 
     static func markManualReadOnly(_ device: NTFSDevice, settings: inout AppSettings) {
         // 同时记下 identity 与 disk，避免 uuid 短暂缺失时匹配失败
-        for key in [device.identity, device.disk, device.volumeUuid].compactMap({ $0 }) where !key.isEmpty {
+        for key in [device.identity, device.disk, device.volumeUuid, device.partitionUuid].compactMap({ $0 }) where !key.isEmpty {
             if !settings.manuallyReadOnlyDevices.contains(key) {
                 settings.manuallyReadOnlyDevices.append(key)
             }
@@ -42,7 +43,7 @@ enum AutoMount {
     }
 
     static func clearManualReadOnly(_ device: NTFSDevice, settings: inout AppSettings) {
-        let keys = Set([device.identity, device.disk, device.volumeUuid].compactMap { $0 }.filter { !$0.isEmpty })
+        let keys = Set([device.identity, device.disk, device.volumeUuid, device.partitionUuid].compactMap { $0 }.filter { !$0.isEmpty })
         settings.manuallyReadOnlyDevices.removeAll { keys.contains($0) }
     }
 }

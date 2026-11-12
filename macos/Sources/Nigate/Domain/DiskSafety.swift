@@ -77,6 +77,56 @@ enum DiskSafety {
         return mounted.driver == "ntfs-3g" || mounted.driver.contains("ntfs")
     }
 
+    static func isSameKnownDevice(_ known: NTFSDevice, devicePath: String, info: String) -> Bool {
+        guard known.devicePath == devicePath,
+              field(info, "Device Identifier") == known.disk,
+              knownUUIDsMatch(known, info: info) else { return false }
+        return true
+    }
+
+    static func isSameKnownVolume(_ known: NTFSDevice, devicePath: String, info: String) -> Bool {
+        isSameKnownDevice(known, devicePath: devicePath, info: info)
+            && !isKnownNonNTFSVolumeInfo(info)
+    }
+
+    static func canRetainUnmountedNTFSCandidate(_ known: NTFSDevice, devicePath: String, info: String) -> Bool {
+        guard known.isUnmounted,
+              isSameKnownDevice(known, devicePath: devicePath, info: info),
+              [known.volumeUuid, known.partitionUuid].contains(where: { $0?.isEmpty == false }) else { return false }
+        return hasMatchingUUID(known, info: info)
+    }
+
+    static func requiresUnmountedNTFSProbe(_ known: NTFSDevice, devicePath: String, info: String) -> Bool {
+        known.isUnmounted
+            && isSameKnownDevice(known, devicePath: devicePath, info: info)
+            && !isNTFSVolumeInfo(info)
+            && !isNTFSFilesystem(info)
+    }
+
+    static func knownUUIDsMatch(_ known: NTFSDevice, info: String) -> Bool {
+        let actualVolumeUUID = field(info, "Volume UUID")
+        let actualPartitionUUID = partitionUUID(in: info)
+        if hasConflictingUUID(known.volumeUuid, actualVolumeUUID) { return false }
+        if hasConflictingUUID(known.partitionUuid, actualPartitionUUID) { return false }
+        return true
+    }
+
+    static func hasMatchingUUID(_ known: NTFSDevice, info: String) -> Bool {
+        let actualVolumeUUID = field(info, "Volume UUID")
+        let actualPartitionUUID = partitionUUID(in: info)
+        return (known.volumeUuid == actualVolumeUUID && known.volumeUuid?.isEmpty == false)
+            || (known.partitionUuid == actualPartitionUUID && known.partitionUuid?.isEmpty == false)
+    }
+
+    static func partitionUUID(in info: String) -> String? {
+        field(info, "Disk / Partition UUID") ?? field(info, "Partition UUID")
+    }
+
+    private static func hasConflictingUUID(_ known: String?, _ actual: String?) -> Bool {
+        guard let known, !known.isEmpty, let actual, !actual.isEmpty else { return false }
+        return known != actual
+    }
+
     /// 判断 diskutil 是否已经给出明确的非 NTFS 文件系统身份。
     ///
     /// 只读取实际文件系统身份字段，刻意忽略 `Partition Type`。

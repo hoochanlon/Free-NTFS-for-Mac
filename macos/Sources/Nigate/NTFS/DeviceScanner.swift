@@ -1,7 +1,7 @@
 import Foundation
 
 enum DeviceScanner {
-    static func scan() async -> [NTFSDevice] {
+    static func scan(knownDevices: [NTFSDevice] = []) async -> [NTFSDevice] {
         async let mountTask = Shell.runQuiet("/sbin/mount", timeout: 2)
         async let listTask = Shell.runQuiet("/usr/sbin/diskutil", ["list"], timeout: 3)
         let mountOut = await mountTask.stdout
@@ -33,18 +33,49 @@ enum DeviceScanner {
             let partition = String(line[part])
             let path = "/dev/\(partition)"
             guard DiskSafety.isPartition(path), !seen.contains(path) else { continue }
-            guard let extra = await infoDevice(path: path, disk: partition, tags: tags) else { continue }
+            guard let extra = await infoDevice(
+                path: path,
+                disk: partition,
+                tags: tags,
+                knownDevice: knownDevices.first { $0.devicePath == path }
+            ) else { continue }
             seen.insert(path)
+            devices.append(extra)
+        }
+
+        // diskutil list can briefly omit a connected partition during unmount propagation.
+        // Revalidate known devices directly; only the same confirmed volume is retained.
+        for known in knownDevices where !seen.contains(known.devicePath) {
+            guard DiskSafety.isPartition(known.devicePath),
+                  let extra = await infoDevice(
+                    path: known.devicePath,
+                    disk: known.disk,
+                    tags: tags,
+                    knownDevice: known
+                  ) else { continue }
+            seen.insert(extra.devicePath)
             devices.append(extra)
         }
 
         var filled: [NTFSDevice] = []
         for var device in devices {
-            if device.volumeUuid == nil {
-                device.volumeUuid = await volumeUuid(device.devicePath)
+            let known = knownDevices.first { $0.devicePath == device.devicePath }
+            if device.volumeUuid?.isEmpty != false || device.partitionUuid?.isEmpty != false {
+                let scannedUUIDs = await volumeUUIDs(device.devicePath)
+                device.volumeUuid = resolvedVolumeUUID(
+                    scanned: device.volumeUuid?.isEmpty == false ? device.volumeUuid : scannedUUIDs.volume,
+                    known: known?.volumeUuid
+                )
+                device.partitionUuid = resolvedVolumeUUID(
+                    scanned: device.partitionUuid?.isEmpty == false ? device.partitionUuid : scannedUUIDs.partition,
+                    known: known?.partitionUuid
+                )
+            }
+            if device.volumeName == device.disk, let known {
+                device.volumeName = known.volumeName
             }
             if device.capacity == nil {
-                device.capacity = await capacity(volume: device.volume, devicePath: device.devicePath)
+                device.capacity = await capacity(volume: device.volume, devicePath: device.devicePath) ?? known?.capacity
             }
             filled.append(device)
         }
@@ -84,6 +115,7 @@ enum DeviceScanner {
             volume: mounted.mountPoint,
             volumeName: mounted.volumeName,
             volumeUuid: nil,
+            partitionUuid: nil,
             // 只读状态只认内核挂载选项，禁止用探测结果覆盖
             isReadOnly: mounted.isReadOnly,
             options: mounted.options.joined(separator: ", "),
@@ -94,22 +126,31 @@ enum DeviceScanner {
         )
     }
 
-    private static func infoDevice(path: String, disk: String, tags: [String: String]) async -> NTFSDevice? {
+    private static func infoDevice(
+        path: String,
+        disk: String,
+        tags: [String: String],
+        knownDevice: NTFSDevice?
+    ) async -> NTFSDevice? {
         let info = await Shell.runQuiet("/usr/sbin/diskutil", ["info", path], timeout: 1.5).stdout
-        guard DiskSafety.isNTFSFilesystem(info) || DiskSafety.isNTFSVolumeInfo(info) else { return nil }
+        let confirmedNTFS = DiskSafety.isNTFSFilesystem(info)
+            || DiskSafety.isNTFSVolumeInfo(info)
+            || knownDevice.map { DiskSafety.isSameKnownVolume($0, devicePath: path, info: info) } == true
+            || knownDevice.map { DiskSafety.canRetainUnmountedNTFSCandidate($0, devicePath: path, info: info) } == true
+        guard confirmedNTFS else { return nil }
         let name = DiskSafety.field(info, "Volume Name") ?? disk
         let mount = DiskSafety.field(info, "Mount Point") ?? ""
         let mounted = !mount.isEmpty && mount != "Not applicable" && mount != "none"
-        let uuid = DiskSafety.field(info, "Volume UUID")
-            ?? DiskSafety.field(info, "Disk / Partition UUID")
-            ?? DiskSafety.field(info, "Partition UUID")
+        let volumeUUID = DiskSafety.field(info, "Volume UUID")
+        let partitionUUID = DiskSafety.partitionUUID(in: info)
         // 未走挂载表的路径：系统原生挂载按只读处理；未挂载也标只读待用户选择
         return NTFSDevice(
             disk: disk,
             devicePath: path,
             volume: mounted ? mount : "",
             volumeName: name,
-            volumeUuid: uuid,
+            volumeUuid: volumeUUID,
+            partitionUuid: partitionUUID,
             isReadOnly: true,
             options: "",
             isMounted: mounted,
@@ -119,11 +160,17 @@ enum DeviceScanner {
         )
     }
 
-    private static func volumeUuid(_ path: String) async -> String? {
+    static func resolvedVolumeUUID(scanned: String?, known: String?) -> String? {
+        guard let scanned, !scanned.isEmpty else { return known }
+        return scanned
+    }
+
+    private static func volumeUUIDs(_ path: String) async -> (volume: String?, partition: String?) {
         let info = await Shell.runQuiet("/usr/sbin/diskutil", ["info", path], timeout: 1.2).stdout
-        return DiskSafety.field(info, "Volume UUID")
-            ?? DiskSafety.field(info, "Disk / Partition UUID")
-            ?? DiskSafety.field(info, "Partition UUID")
+        return (
+            volume: DiskSafety.field(info, "Volume UUID"),
+            partition: DiskSafety.partitionUUID(in: info)
+        )
     }
 
     private static func capacity(volume: String, devicePath: String) async -> Capacity? {

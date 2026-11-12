@@ -8,13 +8,21 @@ struct MountService {
 
     func mount(_ device: NTFSDevice, passwordOverride: String? = nil) async throws -> String {
         try validateBackend()
-        try await assertNTFSPartition(device)
+        let probePassword = try await assertNTFSPartitionForMount(device, passwordOverride: passwordOverride)
+        let password: String
+        if let passwordOverride {
+            password = passwordOverride
+        } else if let probePassword {
+            password = probePassword
+        } else {
+            password = try await askPassword("messages.passwordDialog.mountDevice", ["name": device.volumeName])
+        }
         switch backend {
         case .fsKit:
             // 控制面接通后只走 FSKit 数据面；失败即失败，绝不静默切 ntfs-3g。
-            return try await mountWithFSKit(device, passwordOverride: passwordOverride, readOnly: false)
+            return try await mountWithFSKit(device, passwordOverride: password, readOnly: false)
         case .ntfs3gCompatibility:
-            return try await mountWithNTFS3G(device, passwordOverride: passwordOverride)
+            return try await mountWithNTFS3G(device, passwordOverride: password)
         }
     }
 
@@ -508,14 +516,53 @@ struct MountService {
               identifier == device.disk else {
             throw AppError.failed("设备已断开或分区路径已变化，操作已停止")
         }
-        guard let expected = device.volumeUuid, !expected.isEmpty else { return }
-        let current = DiskSafety.field(result.stdout, "Volume UUID")
-            ?? DiskSafety.field(result.stdout, "Disk / Partition UUID")
-            ?? DiskSafety.field(result.stdout, "Partition UUID")
-        // UUID 缺失时不否决（部分盘 util 在卸载态不回显）；有值且不一致才视为换盘。
-        if let current, !current.isEmpty, current != expected {
+        guard DiskSafety.knownUUIDsMatch(device, info: result.stdout) else {
             throw AppError.failed("设备已断开或分区路径已变化，操作已停止")
         }
+    }
+
+    private func assertNTFSPartitionForMount(_ device: NTFSDevice, passwordOverride: String?) async throws -> String? {
+        guard DiskSafety.isPartition(device.devicePath),
+              device.devicePath == "/dev/\(device.disk)" else {
+            throw AppError.invalidPath
+        }
+        let info = await Shell.runQuiet("/usr/sbin/diskutil", ["info", device.devicePath], timeout: 5)
+        guard info.ok,
+              DiskSafety.field(info.stdout, "Device Identifier") == device.disk,
+              DiskSafety.knownUUIDsMatch(device, info: info.stdout) else {
+            throw AppError.failed("设备信息已变化或不是 NTFS 分区，操作已停止")
+        }
+        if DiskSafety.isNTFSFilesystem(info.stdout) || DiskSafety.isNTFSVolumeInfo(info.stdout) {
+            return passwordOverride
+        }
+        guard DiskSafety.requiresUnmountedNTFSProbe(device, devicePath: device.devicePath, info: info.stdout) else {
+            try await assertNTFSPartition(device)
+            return passwordOverride
+        }
+        guard let probe = PathLookup.sibling(of: await PathLookup.ntfs3g(), named: "ntfs-3g.probe") else {
+            throw AppError.failed("无法确认已卸载分区的 NTFS 身份，缺少 ntfs-3g.probe")
+        }
+        var password: String
+        if let passwordOverride {
+            password = passwordOverride
+        } else {
+            password = try await askPassword(
+                "messages.passwordDialog.mountDevice",
+                ["name": device.volumeName]
+            )
+        }
+        let result: ShellResult
+        do {
+            result = try await Privilege.sudo([probe, "--readonly", device.devicePath], password: password, timeout: 8)
+        } catch AppError.incorrectPassword {
+            KeychainStore.delete()
+            password = try await askPassword("messages.passwordDialog.mountDevice", ["name": device.volumeName])
+            result = try await Privilege.sudo([probe, "--readonly", device.devicePath], password: password, timeout: 8)
+        }
+        guard result.ok else {
+            throw AppError.failed("NTFS 只读探测未通过，已停止挂载：\(result.text)")
+        }
+        return password
     }
 
     private func assertNTFSPartition(_ device: NTFSDevice) async throws {
@@ -529,8 +576,14 @@ struct MountService {
               identifier == device.disk else {
             throw AppError.failed("设备信息已变化或不是 NTFS 分区，操作已停止")
         }
+        guard DiskSafety.knownUUIDsMatch(device, info: result.stdout) else {
+            throw AppError.failed("设备信息已变化或不是 NTFS 分区，操作已停止")
+        }
         // 仅接受 diskutil 的实际文件系统字段；分区表类型不等于文件系统类型。
         if DiskSafety.isNTFSFilesystem(result.stdout) || DiskSafety.isNTFSVolumeInfo(result.stdout) {
+            return
+        }
+        if DiskSafety.isSameKnownVolume(device, devicePath: device.devicePath, info: result.stdout) {
             return
         }
 
@@ -568,11 +621,9 @@ struct MountService {
         let listResult = await Shell.runQuiet("/usr/sbin/diskutil", ["list", parent], timeout: 5)
         guard parentResult.ok, partitionResult.ok, bootResult.ok, listResult.ok,
               !parentResult.stdout.isEmpty, !partitionResult.stdout.isEmpty, !bootResult.stdout.isEmpty,
-              let partitionUUID = partition.volumeUuid, !partitionUUID.isEmpty,
+              (partition.volumeUuid?.isEmpty == false || partition.partitionUuid?.isEmpty == false),
               DiskSafety.field(partitionResult.stdout, "Device Identifier") == partition.disk,
-              (DiskSafety.field(partitionResult.stdout, "Volume UUID")
-               ?? DiskSafety.field(partitionResult.stdout, "Disk / Partition UUID")
-               ?? DiskSafety.field(partitionResult.stdout, "Partition UUID")) == partitionUUID,
+              DiskSafety.hasMatchingUUID(partition, info: partitionResult.stdout),
               DiskSafety.canFormat(fromListTags: DiskSafety.parentDiskTags(from: listResult.stdout)[DiskSafety.parentDiskId(parent)]) else {
             throw AppError.formatNotAllowed
         }
