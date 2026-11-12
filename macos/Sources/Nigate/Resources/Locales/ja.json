@@ -67,8 +67,8 @@
       "statusReady": "FSKit 利用可能",
       "statusNotInstalled": "拡張未インストール",
       "statusDisabled": "拡張が無効",
-      "statusUnavailable": "制御プレーン未準備",
-      "diagnosticUnavailable": "FSKit 制御プレーンの準備ができていません。アプリを再起動して拡張の状態を再確認してください。",
+      "statusUnavailable": "FSKit を利用できません",
+      "diagnosticUnavailable": "Nigate は FSKit 拡張が利用可能な状態か確認できませんでした。アプリを再起動して、もう一度確認してください。",
       "diagnosticUnsupportedSystem": "FSKit には macOS 15.4 以降が必要です。現在のシステムバージョンは {version} です。",
       "diagnosticExtensionDisabled": "Nigate FSKit 拡張はインストールされていますが、有効になっていません。システム設定に表示されない場合は署名要件を確認してください。Apple の署名 ID がないと、拡張一覧に Nigate が表示されないことがあります。",
       "diagnosticExtensionNotRegistered": "Nigate FSKit 拡張が登録されていません。アプリを再ビルドしてインストールしてください。"
@@ -277,7 +277,7 @@
     "enabled": "（有効）",
     "autoStart": "システム起動時に自動起動",
     "autoStartDesc": "有効にすると、システム起動時にアプリが自動的に起動します",
-    "mountBackendUnavailableDesc": "デフォルトは ntfs-3g（互換）です。FSKit 制御プレーン未準備時は選択不可です（システム拡張の有効化だけでは不十分）。"
+    "mountBackendUnavailableDesc": "デフォルトは ntfs-3g（互換）です。FSKit 拡張が利用可能になるまで選択できません。システム設定で有効にするだけでは利用できない場合があります。"
   },
   "tray": {
     "showWindow": "ウィンドウを表示",
