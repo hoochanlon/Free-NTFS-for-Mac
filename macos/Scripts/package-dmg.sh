@@ -43,10 +43,11 @@ DMG_PATH="$DIST_DIR/Nigate-${VERSION}.dmg"
 RW_DMG_PATH="$STAGING_ROOT/Nigate-${VERSION}-rw.dmg"
 VOLUME_NAME="${DMG_VOLUME_NAME:-Nigate ${VERSION}}"
 BACKGROUND_IMAGE="$STAGING_DIR/.background/dmg-background.png"
-WINDOW_WIDTH=1024
-WINDOW_HEIGHT=760
-WINDOW_X=100
-WINDOW_Y=100
+# 相对旧版 1024×760 按 0.75 等比缩小，图标与坐标同步缩放。
+WINDOW_WIDTH=768
+WINDOW_HEIGHT=570
+WINDOW_X=120
+WINDOW_Y=120
 
 cleanup() {
   if [[ -n "$MOUNT_POINT" ]]; then
@@ -62,7 +63,7 @@ else
   "$MACOS_ROOT/Scripts/build.sh" "$CONFIGURATION"
 fi
 
-FSKIT_EXTENSION="$APP/Contents/PlugIns/NigateFSKitExtension.appex"
+FSKIT_EXTENSION="$APP/Contents/Extensions/NigateFSKitExtension.appex"
 if [[ ! -d "$FSKIT_EXTENSION" || ! -f "$FSKIT_EXTENSION/Contents/MacOS/NigateFSKitExtension" ]]; then
   echo "Built app does not contain a real FSKit extension bundle: $FSKIT_EXTENSION" >&2
   exit 1
@@ -120,16 +121,16 @@ osascript <<APPLESCRIPT
 
      set opts to the icon view options of container window
      tell opts
-       set icon size to 128
-       set text size to 14
+       set icon size to 96
+       set text size to 12
        set arrangement to not arranged
      end tell
      set background picture of opts to file ".background:dmg-background.png"
 
-     set position of item "Nigate.app" to {256, 250}
-     set position of item "Applications" to {768, 250}
-     set position of item "README.md" to {256, 530}
-     set position of item "提示损坏？点我.command" to {768, 530}
+     set position of item "Nigate.app" to {192, 188}
+     set position of item "Applications" to {576, 188}
+     set position of item "README.md" to {192, 398}
+     set position of item "提示损坏？点我.command" to {576, 398}
 
      close
      open

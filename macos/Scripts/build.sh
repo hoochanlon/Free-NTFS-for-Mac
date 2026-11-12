@@ -91,13 +91,15 @@ validate_plist_value() {
 }
 
 APP="$PROJECT_ROOT/dist/Nigate.app"
-EXTENSION="$APP/Contents/PlugIns/NigateFSKitExtension.appex"
+# FSKit 同行（xntfs / Volisle / TT NTFS）一律用 Contents/Extensions，不用经典 PlugIns。
+# 系统设置「文件系统扩展」列表也按 Extensions 目录约定扫描宿主 app。
+EXTENSION="$APP/Contents/Extensions/NigateFSKitExtension.appex"
 APP_PLIST="$APP/Contents/Info.plist"
 EXTENSION_PLIST="$EXTENSION/Contents/Info.plist"
 EXTENSION_ENTITLEMENTS="$MACOS_ROOT/Sources/NigateFSKitExtension/NigateFSKitExtension.entitlements"
 APP_ENTITLEMENTS="$MACOS_ROOT/Sources/Nigate/Nigate.entitlements"
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/PlugIns"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Extensions"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 
 cp "$APP_BINARY" "$APP/Contents/MacOS/Nigate"

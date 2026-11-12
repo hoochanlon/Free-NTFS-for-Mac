@@ -55,30 +55,40 @@ struct DeviceCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: "externaldrive.fill")
-                    .foregroundStyle(device.isReadWrite ? Palette.success : Palette.warning)
-                Text(device.volumeName).font(.headline)
-                Spacer()
-                Text(statusLabel)
-                    .font(.caption.weight(.semibold))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(statusColor.opacity(0.16), in: Capsule())
-                    .foregroundStyle(statusColor)
-            }
-            HStack(spacing: 18) {
-                labeled(L10n.t("devices.deviceLabel"), device.disk)
-                labeled(L10n.t("devices.mountPointLabel"), device.volume.isEmpty ? L10n.t("devices.notMounted") : device.volume)
-            }
-            if let capacity = device.capacity {
-                VStack(alignment: .leading, spacing: 4) {
-                    ProgressView(value: Double(capacity.used), total: Double(max(capacity.total, 1)))
-                    Text("\(L10n.t("devices.available")) \(byteText(capacity.available))  ·  \(L10n.t("devices.total")) \(byteText(capacity.total))")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            // 信息区：双击打开挂载点（与图2 Finder 一致）；按钮行不绑双击，避免误触。
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Image(systemName: "externaldrive.fill")
+                        .foregroundStyle(device.isReadWrite ? Palette.success : Palette.warning)
+                    Text(device.volumeName).font(.headline)
+                    Spacer()
+                    Text(statusLabel)
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(statusColor.opacity(0.16), in: Capsule())
+                        .foregroundStyle(statusColor)
+                }
+                HStack(spacing: 18) {
+                    labeled(L10n.t("devices.deviceLabel"), device.disk)
+                    labeled(L10n.t("devices.mountPointLabel"), device.volume.isEmpty ? L10n.t("devices.notMounted") : device.volume)
+                }
+                if let capacity = device.capacity {
+                    VStack(alignment: .leading, spacing: 4) {
+                        ProgressView(value: Double(capacity.used), total: Double(max(capacity.total, 1)))
+                        Text("\(L10n.t("devices.available")) \(byteText(capacity.available))  ·  \(L10n.t("devices.total")) \(byteText(capacity.total))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .onTapGesture(count: 2) {
+                openVolumeInFinder()
+            }
+            .help(openVolumeHelp)
+
             HStack {
                 action(L10n.t("devices.mount"), "pencil") { model.perform(.mount, on: device) }
                 action(L10n.t("devices.restoreReadOnly"), "eye") { model.perform(.restore, on: device) }
@@ -96,6 +106,23 @@ struct DeviceCard: View {
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color(nsColor: .controlBackgroundColor)))
         .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.primary.opacity(0.06)))
+    }
+
+    private var openVolumeHelp: String {
+        if device.isMounted, !device.volume.isEmpty {
+            return L10n.t("devices.openVolumeHint")
+        }
+        return L10n.t("devices.openVolumeUnavailable")
+    }
+
+    private func openVolumeInFinder() {
+        guard device.isMounted,
+              !device.isUnmounted,
+              DiskSafety.isSafeMountPoint(device.volume) else { return }
+        let url = URL(fileURLWithPath: device.volume, isDirectory: true)
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        // 与侧边栏双击卷宗一致：在 Finder 中打开挂载点。
+        NSWorkspace.shared.open(url)
     }
 
     private var statusLabel: String {

@@ -25,11 +25,12 @@
 
 启用 FSKit：
 
-1. 构建并安装 `Nigate.app`（`./macos/Scripts/build.sh`），扩展位于 `Contents/PlugIns`
-2. **系统设置 → 通用 → 登录项与扩展 → 文件系统扩展** → 启用 **Nigate NTFS**
-3. 应用内将 **挂载后端** 设为 **FSKit（原生）**
+1. 构建并安装 `Nigate.app` 到 `/Applications`（`./macos/Scripts/build.sh`），扩展位于 `Contents/Extensions`
+2. **无 Apple 代码签名证书时**，「系统设置 → 文件系统扩展」**通常不会列出 Nigate**（ad-hoc 会被设置页过滤；`pluginkit` 仍可能已注册）
+3. 确认注册：`pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate`
+4. 具备 Developer ID / Development Team 正式签名后，设置页才可能出现并可启用；应用内再将 **挂载后端** 设为 **FSKit（原生）**
 
-程序化 `FSClient.mountSingleVolume` 需要带 `com.apple.developer.fskit.mount` 的可信签名。无 Apple Developer ID 时，请继续以 **ntfs-3g** 为主路径；扩展能加载时，FSKit 可作为本地/实验选项。
+程序化 `FSClient.mountSingleVolume` 需要带 `com.apple.developer.fskit.mount` 的可信签名。无签名身份时，请继续以 **ntfs-3g** 为主路径。
 
 ## 重要说明
 

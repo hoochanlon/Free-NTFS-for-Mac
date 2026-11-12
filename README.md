@@ -27,11 +27,12 @@ The demo shows a version older than 1.6.0.
 
 Enable FSKit:
 
-1. Build/install `Nigate.app` (`./macos/Scripts/build.sh`); extension is under `Contents/PlugIns`
-2. **System Settings → General → Login Items & Extensions → File System Extensions** → enable **Nigate NTFS**
-3. In the app, set **Mount Backend** to **FSKit (Native)**
+1. Build/install `Nigate.app` into `/Applications` (`./macos/Scripts/build.sh`); extension is under `Contents/Extensions`
+2. **Without an Apple code-signing identity**, System Settings → File System Extensions **usually will not list Nigate** (ad-hoc builds are filtered there even if `pluginkit` already registered them)
+3. Verify registration: `pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate`
+4. With Developer ID / Development Team signing, the Settings row can appear; then set **Mount Backend** to **FSKit (Native)** in the app
 
-Programmatic `FSClient.mountSingleVolume` needs a trusted signature with `com.apple.developer.fskit.mount`. Without Apple Developer ID, keep **ntfs-3g** as the default path; FSKit remains a local/experimental option when the extension loads.
+Programmatic `FSClient.mountSingleVolume` needs a trusted signature with `com.apple.developer.fskit.mount`. Without a signing identity, keep **ntfs-3g** as the primary path.
 
 ## Important notes
 

@@ -27,11 +27,12 @@ Nigate は、NTFS ボリュームを読み書き可能な状態でマウント�
 
 FSKit を有効にする手順：
 
-1. `Nigate.app` をビルド/インストール（`./macos/Scripts/build.sh`）。拡張は `Contents/PlugIns`
-2. **システム設定 → 一般 → ログイン項目と拡張機能 → ファイルシステム拡張機能** で **Nigate NTFS** を有効化
-3. アプリで **マウントバックエンド** を **FSKit（ネイティブ）** に設定
+1. `Nigate.app` を `/Applications` にビルド/インストール（`./macos/Scripts/build.sh`）。拡張は `Contents/Extensions`
+2. **Apple のコード署名 ID が無い場合**、「システム設定 → ファイルシステム拡張機能」に **Nigate は通常表示されません**（ad-hoc は設定一覧でフィルタされる。`pluginkit` には登録済みのことがある）
+3. 登録確認: `pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate`
+4. Developer ID / Development Team で正式署名後、設定一覧に出る可能性あり。その後アプリで **マウントバックエンド** を **FSKit（ネイティブ）** に
 
-プログラム経由の `FSClient.mountSingleVolume` には `com.apple.developer.fskit.mount` 付きの信頼できる署名が必要です。Apple Developer ID がない場合は **ntfs-3g** を主経路にしてください。拡張が読み込める環境では、FSKit をローカル/実験オプションとして使えます。
+`FSClient.mountSingleVolume` には `com.apple.developer.fskit.mount` 付きの信頼できる署名が必要です。署名 ID が無い場合は **ntfs-3g** を主経路にしてください。
 
 ## 注意事項
 
