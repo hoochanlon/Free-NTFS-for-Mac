@@ -96,7 +96,7 @@ struct AppAlert: Identifiable, Equatable {
     enum Kind { case info, warning, error }
 }
 
-let appVersion = "1.5.4"
+let appVersion = "1.6.0"
 let appId = "io.hoochanlon.github"
 let githubReleases = "https://github.com/hoochanlon/Free-NTFS-for-Mac/releases"
 let githubRepo = "https://github.com/hoochanlon/Free-NTFS-for-Mac"

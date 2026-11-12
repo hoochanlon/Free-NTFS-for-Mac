@@ -181,7 +181,7 @@ struct AboutSheet: View {
             Text(L10n.t("about.description"))
             VStack(alignment: .leading, spacing: 6) {
                 Text(L10n.t("about.softwareInfo")).font(.headline)
-                Text("\(L10n.t("about.author")) hoochanlon")
+                Text("\(L10n.t("about.author")) hoochanlon(胡成龙)")
                 Text("\(L10n.t("about.version")) \(appVersion)")
                 Text("\(L10n.t("about.technology")) SwiftUI · DiskArbitration · ntfs-3g")
             }

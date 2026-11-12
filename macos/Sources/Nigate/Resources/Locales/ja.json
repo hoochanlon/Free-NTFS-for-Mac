@@ -61,7 +61,7 @@
     "available": "システムでサポート",
     "unsupported": "システムで未サポート",
     "fsKit": {
-      "name": "FSKit（ネイティブファイルシステムフレームワーク）",
+      "name": "FSKit（ネイティブファイルシステムフレームワーク・オプション）",
       "description": "Apple のファイルシステム拡張フレームワーク（macOS 15.4+）。Nigate FSKit 拡張をインストールして有効化すると、「設定 > マウントバックエンド」で FSKit を選び NTFS をネイティブにマウントできます。",
       "installGuide": "1. macos/Scripts/build.sh で Nigate.app をビルド／インストールします（拡張は Contents/PlugIns）。\n2. システム設定 → 一般 → ログイン項目と拡張機能 → ファイルシステム拡張機能 で Nigate NTFS を有効化。\n3. アプリの設定でマウントバックエンドを FSKit に切り替え。\n制御プレーン未準備時は ntfs-3g（互換）を明示選択。マウント経路は黙って降格しません。",
       "statusReady": "制御プレーン利用可",
@@ -264,7 +264,7 @@
     "mountBackend": "マウントバックエンド",
     "fsKitBackend": "FSKit（ネイティブ）",
     "ntfs3gCompatibilityBackend": "ntfs-3g（互換）",
-    "mountBackendDesc": "FSKit には macOS 15.4+ と、インストール／有効化された Nigate FSKit 拡張が必要です。準備できたら FSKit を選択してネイティブマウントできます。",
+    "mountBackendDesc": "デフォルトは ntfs-3g（互換）です。FSKit はオプションで、macOS 15.4+ とインストール／有効化済みの Nigate FSKit 拡張が必要です。",
     "trayMode": "トレイモード",
     "trayModeDesc": "有効にすると、ウィンドウを閉じたときにアプリが終了せず、システムトレイに最小化されます。トレイアイコンから NTFS デバイスをすばやく管理できます。",
     "preventSleep": "スマートスリープ防止",
@@ -272,7 +272,7 @@
     "enabled": "（有効）",
     "autoStart": "システム起動時に自動起動",
     "autoStartDesc": "有効にすると、システム起動時にアプリが自動的に起動します",
-    "mountBackendUnavailableDesc": "FSKit 制御プレーンは未準備です（システム拡張の有効化だけでは不十分）。Nigate FSKit 拡張をインストール／有効化するか、ntfs-3g 互換を明示選択してください。"
+    "mountBackendUnavailableDesc": "デフォルトは ntfs-3g（互換）です。FSKit 制御プレーン未準備時は選択不可です（システム拡張の有効化だけでは不十分）。"
   },
   "tray": {
     "showWindow": "ウィンドウを表示",

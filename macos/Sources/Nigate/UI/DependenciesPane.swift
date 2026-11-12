@@ -149,16 +149,6 @@ struct DependenciesPane: View {
                 note: L10n.t("dependencies.ntfs3g.installGuideTip")
             ),
             DependencyItem(
-                id: "fsKit",
-                icon: "externaldrive.badge.timemachine",
-                name: L10n.t("dependencies.fsKit.name"),
-                status: fsKitStatusText,
-                isSatisfied: model.dependencies.fsKitControlPlaneAvailable,
-                description: L10n.t("dependencies.fsKit.description"),
-                guide: fsKitGuideText,
-                optional: true
-            ),
-            DependencyItem(
                 id: "fswatch",
                 icon: "waveform.path.ecg",
                 name: L10n.t("dependencies.fswatch.name"),
@@ -167,6 +157,16 @@ struct DependenciesPane: View {
                 description: L10n.t("dependencies.fswatch.description"),
                 guide: L10n.t("dependencies.fswatch.installGuide"),
                 command: "brew install fswatch",
+                optional: true
+            ),
+            DependencyItem(
+                id: "fsKit",
+                icon: "externaldrive.badge.timemachine",
+                name: L10n.t("dependencies.fsKit.name"),
+                status: fsKitStatusText,
+                isSatisfied: model.dependencies.fsKitControlPlaneAvailable,
+                description: L10n.t("dependencies.fsKit.description"),
+                guide: fsKitGuideText,
                 optional: true
             )
         ]

@@ -63,10 +63,10 @@ public struct NigateSystemVersion: Codable, Equatable, Sendable {
 }
 
 public enum NigateMountBackend: String, Codable, Equatable, Sendable {
-    /// 真实 FSKit 数据面；不支持时必须明确失败，不能自动切换后端。
-    case fsKit
-    /// 仅在用户明确选择时启用的历史兼容数据面。
+    /// 默认与对外主路径：ntfs-3g + FUSE 兼容数据面。
     case ntfs3gCompatibility
+    /// 可选：真实 FSKit 数据面；不支持时必须明确失败，不能自动切换后端。
+    case fsKit
 }
 
 public enum NigateFSKitAvailability: Equatable, Sendable {

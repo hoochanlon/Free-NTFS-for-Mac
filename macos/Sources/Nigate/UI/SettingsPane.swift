@@ -29,8 +29,9 @@ struct SettingsPane: View {
                     .disabled(model.protectLocked)
                 Text(L10n.t("settings.autoMountDesc")).font(.caption).foregroundStyle(.secondary)
                 Picker(L10n.t("settings.mountBackend"), selection: mountBackendBinding) {
-                    Text(fsKitLabel).tag(NigateMountBackend.fsKit)
+                    // 默认与产品主路径：ntfs-3g 兼容；FSKit 为可选增强。
                     Text(L10n.t("settings.ntfs3gCompatibilityBackend")).tag(NigateMountBackend.ntfs3gCompatibility)
+                    Text(fsKitLabel).tag(NigateMountBackend.fsKit)
                 }
                 Text(L10n.t(fsKitSelectable ? "settings.mountBackendDesc" : "settings.mountBackendUnavailableDesc"))
                     .font(.caption)
