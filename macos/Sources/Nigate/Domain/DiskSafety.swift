@@ -122,9 +122,12 @@ enum DiskSafety {
     }
 
     static func parentDiskId(_ diskOrPath: String) -> String {
-        diskOrPath
-            .replacingOccurrences(of: "^/dev/", with: "", options: .regularExpression)
-            .replacingOccurrences(of: #"s\d+$"#, with: "", options: .regularExpression)
+        var id = diskOrPath.replacingOccurrences(of: "^/dev/", with: "", options: .regularExpression)
+        // APFS 快照形如 disk3s3s1，需反复剥掉 sN，得到真正 whole disk id。
+        while id.range(of: #"s\d+$"#, options: .regularExpression) != nil {
+            id = id.replacingOccurrences(of: #"s\d+$"#, with: "", options: .regularExpression)
+        }
+        return id
     }
 
     static func partitionIndex(_ disk: String) -> String? {
@@ -206,6 +209,11 @@ enum DiskSafety {
         return String(info[value]).trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// 是否允许整盘格式化：外接实体盘、非启动盘、非虚拟/映像。
+    ///
+    /// 实机注意（macOS 15+/27）：
+    /// - 外接 USB 的 `diskutil info` 常**不输出** `Internal:` 字段，不能再硬性要求 Internal=No。
+    /// - 启动卷可能是 APFS Snapshot（disk3s3s1），boot id 需剥多层 sN 或看 Physical Store。
     static func isExternalFormattable(parentInfo: String, bootWholeDiskId: String, parentDiskId: String) -> Bool {
         guard !parentDiskId.isEmpty,
               !bootWholeDiskId.isEmpty,
@@ -213,15 +221,43 @@ enum DiskSafety {
               isWholeDisk("/dev/\(parentDiskId)") else { return false }
         guard let identifier = field(parentInfo, "Device Identifier"),
               DiskSafety.parentDiskId(identifier) == parentDiskId,
-              field(parentInfo, "Whole")?.caseInsensitiveCompare("Yes") == .orderedSame,
-              field(parentInfo, "Internal")?.caseInsensitiveCompare("No") == .orderedSame,
-              field(parentInfo, "Device Location")?.caseInsensitiveCompare("External") == .orderedSame,
-              field(parentInfo, "Virtual")?.caseInsensitiveCompare("No") == .orderedSame,
-              let protocolName = field(parentInfo, "Protocol"),
-              !protocolName.isEmpty else { return false }
+              field(parentInfo, "Whole")?.caseInsensitiveCompare("Yes") == .orderedSame else { return false }
+
+        // 明确 Virtual=Yes 才拒；字段缺失不视为虚拟盘。
+        if let virtual = field(parentInfo, "Virtual"),
+           virtual.caseInsensitiveCompare("Yes") == .orderedSame {
+            return false
+        }
+        // 明确 Internal=Yes 才拒；外接 USB 常无此字段。
+        if let internalFlag = field(parentInfo, "Internal"),
+           internalFlag.caseInsensitiveCompare("Yes") == .orderedSame {
+            return false
+        }
+
+        let location = field(parentInfo, "Device Location")
+        let removable = field(parentInfo, "Removable Media")
+        let isExternal = location?.caseInsensitiveCompare("External") == .orderedSame
+            || removable?.caseInsensitiveCompare("Removable") == .orderedSame
+        guard isExternal else { return false }
+
+        guard let protocolName = field(parentInfo, "Protocol"), !protocolName.isEmpty else { return false }
         return !protocolName.localizedCaseInsensitiveContains("disk image")
             && !protocolName.localizedCaseInsensitiveContains("synthesized")
             && !protocolName.localizedCaseInsensitiveContains("unknown")
+    }
+
+    /// 从 `diskutil info /` 解析启动盘对应的 whole-disk id（优先物理盘）。
+    static func bootWholeDiskId(fromBootInfo info: String) -> String {
+        let candidates = [
+            field(info, "APFS Physical Store"),
+            field(info, "Part of Whole"),
+            field(info, "Device Identifier")
+        ]
+        for raw in candidates {
+            let id = parentDiskId(raw ?? "")
+            if !id.isEmpty { return id }
+        }
+        return ""
     }
 
     private static func containsSymlink(at path: String) -> Bool {

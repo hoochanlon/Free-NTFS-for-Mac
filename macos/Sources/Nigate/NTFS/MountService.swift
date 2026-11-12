@@ -576,7 +576,7 @@ struct MountService {
               DiskSafety.canFormat(fromListTags: DiskSafety.parentDiskTags(from: listResult.stdout)[DiskSafety.parentDiskId(parent)]) else {
             throw AppError.formatNotAllowed
         }
-        let bootId = DiskSafety.parentDiskId(DiskSafety.field(bootResult.stdout, "Device Identifier") ?? "")
+        let bootId = DiskSafety.bootWholeDiskId(fromBootInfo: bootResult.stdout)
         guard DiskSafety.isExternalFormattable(
             parentInfo: parentResult.stdout,
             bootWholeDiskId: bootId,
@@ -598,7 +598,7 @@ struct MountService {
         let list = await Shell.runQuiet("/usr/sbin/diskutil", ["list", parent], timeout: 5)
         let parentID = DiskSafety.parentDiskId(parent)
         let dataID = dataPath.replacingOccurrences(of: "/dev/", with: "")
-        let bootID = DiskSafety.parentDiskId(DiskSafety.field(bootInfo.stdout, "Device Identifier") ?? "")
+        let bootID = DiskSafety.bootWholeDiskId(fromBootInfo: bootInfo.stdout)
         guard parentInfo.ok, dataInfo.ok, bootInfo.ok, list.ok,
               DiskSafety.canFormat(fromListTags: DiskSafety.parentDiskTags(from: list.stdout)[parentID]),
               DiskSafety.isExternalFormattable(parentInfo: parentInfo.stdout, bootWholeDiskId: bootID, parentDiskId: parentID),

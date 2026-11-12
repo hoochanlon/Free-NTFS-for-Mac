@@ -179,7 +179,8 @@ final class DiskSafetyTests: XCTestCase {
     }
 
     func testFormattingRequiresExternalWholeDisk() {
-        let info = """
+        // 旧式：带 Internal=No
+        let legacy = """
         Device Identifier:        disk4
         Device Location:         External
         Whole:                    Yes
@@ -188,18 +189,35 @@ final class DiskSafetyTests: XCTestCase {
         Protocol:                 USB
         """
 
+        // 新版 macOS 外接 USB 常见：无 Internal 字段，有 Removable Media
+        let modernUSB = """
+        Device Identifier:         disk4
+        Device Node:               /dev/disk4
+        Whole:                     Yes
+        Part of Whole:             disk4
+        Protocol:                  USB
+        Device Location:           External
+        Removable Media:           Removable
+        Virtual:                   No
+        """
+
         XCTAssertTrue(DiskSafety.isExternalFormattable(
-            parentInfo: info,
+            parentInfo: legacy,
             bootWholeDiskId: "disk1",
             parentDiskId: "disk4"
         ))
+        XCTAssertTrue(DiskSafety.isExternalFormattable(
+            parentInfo: modernUSB,
+            bootWholeDiskId: "disk0",
+            parentDiskId: "disk4"
+        ))
         XCTAssertFalse(DiskSafety.isExternalFormattable(
-            parentInfo: info,
+            parentInfo: legacy,
             bootWholeDiskId: "disk4",
             parentDiskId: "disk4"
         ))
         XCTAssertFalse(DiskSafety.isExternalFormattable(
-            parentInfo: info.replacingOccurrences(of: "Device Identifier:        disk4", with: "Device Identifier:        disk5"),
+            parentInfo: legacy.replacingOccurrences(of: "Device Identifier:        disk4", with: "Device Identifier:        disk5"),
             bootWholeDiskId: "disk1",
             parentDiskId: "disk4"
         ))
@@ -207,6 +225,7 @@ final class DiskSafetyTests: XCTestCase {
 
     func testFormattingRejectsInternalVirtualAndNonWholeDisk() {
         let internalDisk = """
+        Device Identifier:        disk0
         Whole:                    Yes
         Internal:                 Yes
         Device Location:         Internal
@@ -214,6 +233,7 @@ final class DiskSafetyTests: XCTestCase {
         Protocol:                 SATA
         """
         let virtualDisk = """
+        Device Identifier:        disk4
         Whole:                    Yes
         Internal:                 No
         Virtual:                  Yes
@@ -221,6 +241,7 @@ final class DiskSafetyTests: XCTestCase {
         Protocol:                 Disk Image
         """
         let partition = """
+        Device Identifier:        disk4s1
         Whole:                    No
         Internal:                 No
         Device Location:         External
@@ -228,17 +249,43 @@ final class DiskSafetyTests: XCTestCase {
         Protocol:                 USB
         """
         let incompleteInfo = """
+        Device Identifier:        disk4
         Whole:                    Yes
         Protocol:                 USB
         """
 
-        XCTAssertFalse(DiskSafety.isExternalFormattable(parentInfo: internalDisk, bootWholeDiskId: "disk1", parentDiskId: "disk4"))
+        XCTAssertFalse(DiskSafety.isExternalFormattable(parentInfo: internalDisk, bootWholeDiskId: "disk1", parentDiskId: "disk0"))
         XCTAssertFalse(DiskSafety.isExternalFormattable(parentInfo: virtualDisk, bootWholeDiskId: "disk1", parentDiskId: "disk4"))
         XCTAssertFalse(DiskSafety.isExternalFormattable(parentInfo: partition, bootWholeDiskId: "disk1", parentDiskId: "disk4"))
+        // 无 External / Removable 时不可格式化
         XCTAssertFalse(DiskSafety.isExternalFormattable(parentInfo: incompleteInfo, bootWholeDiskId: "disk1", parentDiskId: "disk4"))
         XCTAssertFalse(DiskSafety.isExternalFormattable(parentInfo: "", bootWholeDiskId: "disk1", parentDiskId: "disk4"))
         XCTAssertFalse(DiskSafety.isExternalFormattable(parentInfo: incompleteInfo, bootWholeDiskId: "", parentDiskId: "disk4"))
         XCTAssertFalse(DiskSafety.isExternalFormattable(parentInfo: incompleteInfo, bootWholeDiskId: "disk1", parentDiskId: "not-a-disk"))
+    }
+
+    func testParentDiskIdStripsNestedAPFSSuffixes() {
+        XCTAssertEqual(DiskSafety.parentDiskId("disk4s1"), "disk4")
+        XCTAssertEqual(DiskSafety.parentDiskId("/dev/disk5s2"), "disk5")
+        XCTAssertEqual(DiskSafety.parentDiskId("disk3s3s1"), "disk3")
+        XCTAssertEqual(DiskSafety.parentDiskId("disk0"), "disk0")
+    }
+
+    func testBootWholeDiskIdPrefersPhysicalStore() {
+        let bootSnapshot = """
+        Device Identifier:         disk3s3s1
+        Whole:                     No
+        Part of Whole:             disk3
+        APFS Physical Store:       disk0s2
+        Device Location:           Internal
+        """
+        XCTAssertEqual(DiskSafety.bootWholeDiskId(fromBootInfo: bootSnapshot), "disk0")
+
+        let plain = """
+        Device Identifier:         disk2s1
+        Part of Whole:             disk2
+        """
+        XCTAssertEqual(DiskSafety.bootWholeDiskId(fromBootInfo: plain), "disk2")
     }
 
     func testMissingOrNonExternalDeviceTagsCannotBeFormatted() {
