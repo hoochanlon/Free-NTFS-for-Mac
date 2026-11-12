@@ -87,7 +87,6 @@ struct DeviceCard: View {
             .onTapGesture(count: 2) {
                 openVolumeInFinder()
             }
-            .help(openVolumeHelp)
 
             HStack {
                 action(L10n.t("devices.mount"), "pencil") { model.perform(.mount, on: device) }
@@ -106,13 +105,6 @@ struct DeviceCard: View {
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color(nsColor: .controlBackgroundColor)))
         .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.primary.opacity(0.06)))
-    }
-
-    private var openVolumeHelp: String {
-        if device.isMounted, !device.volume.isEmpty {
-            return L10n.t("devices.openVolumeHint")
-        }
-        return L10n.t("devices.openVolumeUnavailable")
     }
 
     private func openVolumeInFinder() {

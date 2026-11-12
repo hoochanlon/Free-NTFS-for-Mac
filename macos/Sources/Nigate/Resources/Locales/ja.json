@@ -151,8 +151,6 @@
     "deviceMountPointLabel": "デバイス・マウントポイント:",
     "capacityLabel": "容量:",
     "notMounted": "マウントされていません",
-    "openVolumeHint": "ダブルクリックで Finder にこのデバイスを開く",
-    "openVolumeUnavailable": "未マウントのため Finder で開けません",
     "available": "利用可能",
     "total": "合計",
     "usageRate": "使用率",

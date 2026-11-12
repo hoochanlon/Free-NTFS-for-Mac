@@ -12,17 +12,17 @@ enum DiskSafety {
 
     static func isNTFSFilesystem(_ description: String) -> Bool {
         let patterns = [
-            #"(?im)^\s*(?:File System Personality|File System Type|Type \(Bundle\)|Partition Type|Format|格式):\s*(?:(?:xntfs|ntfs(?:-[\w-]+)?|windows_ntfs)\b|(?:Unknown|未知)\s+\((?:xntfs|ntfs(?:-[\w-]+)?|windows_ntfs)\))\s*$"#,
-            #"(?im)^\s*\d+:\s*(?:xntfs|ntfs(?:-[\w-]+)?|windows_ntfs)\b"#,
-            #"(?im)^/dev/disk\d+s\d+\s+on\s+/Volumes/.*\s+\((?:xntfs|ntfs(?:-[\w-]+)?|windows_ntfs)\b[^)]*\)\s*$"#
+            #"(?im)^\s*(?:File System Personality|File System Type|Type \(Bundle\)|Format|格式):\s*(?:(?:xntfs|ntfs(?:-[\w-]+)?)(?:\s+\(macfuse\))?|(?:Unknown|未知)\s+\((?:xntfs|ntfs(?:-[\w-]+)?)\))\s*$"#,
+            #"(?im)^\s*\d+:\s*(?:xntfs|ntfs(?:-[\w-]+)?)\b"#,
+            #"(?im)^/dev/disk\d+s\d+\s+on\s+/Volumes/.*\s+\((?:xntfs|ntfs(?:-[\w-]+)?)\b[^)]*\)\s*$"#
         ]
         return patterns.contains { pattern in
             description.range(of: pattern, options: .regularExpression) != nil
         }
     }
 
-    /// diskutil 卷身份：任一身份字段命中 NTFS 即真。
-    /// personality 可能误报 ExFAT/MS-DOS，不能用“第一个字段非 NTFS”直接否决。
+    /// diskutil 卷身份：只读取实际文件系统字段，不能用分区类型推断。
+    /// `Microsoft Basic Data` / `Windows_NTFS` 只描述分区表类型，不能证明卷内是 NTFS。
     static func isNTFSVolumeInfo(_ info: String) -> Bool {
         let identityFields = [
             "File System Personality",
@@ -30,7 +30,6 @@ enum DiskSafety {
             "Type (Bundle)",
             "FilesystemType",
             "FilesystemName",
-            "Partition Type",
             "Format",
             "格式"
         ]
@@ -43,15 +42,10 @@ enum DiskSafety {
         return isNTFSFilesystem(info)
     }
 
-    /// 已挂载的 macfuse/ntfs-3g 是否应视为本应用管理的 NTFS 卷。
+    /// 已挂载的 macfuse/ntfs-3g 是否明确识别为 NTFS 卷。
     ///
-    /// 证据优先级：挂载表 fuse 事实 > diskutil 身份字段。
-    /// personality 误报不得否决已确认的 fuse 挂载。
-    ///
-    /// 实机常见矛盾：
-    /// - Partition Type = Windows_NTFS，Personality = ExFAT
-    /// - Partition Type = Microsoft Basic Data，Personality = MS-DOS
-    /// - mount 选项仅有 macfuse,local,...（allow_other 不一定出现在 mount 表）
+    /// 分区表类型和通用 FUSE 挂载选项都不具备文件系统身份，不能作为放行依据。
+    /// 应用成功挂载后留下的标记属于可信来源，用于兼容 diskutil 无法识别 FUSE 文件系统的情况。
     static func isConfirmedNTFSFuseMount(
         _ mountOutput: String,
         deviceInfo: String,
@@ -67,25 +61,42 @@ enum DiskSafety {
                 mountPoint: mountPoint
               ) else { return false }
 
-        // 正向身份：personality / partition type 任一报 NTFS
+        // 设备当前身份明确为 NTFS 时直接放行。
         if isNTFSVolumeInfo(deviceInfo) { return true }
 
-        // GPT 上 NTFS 常标为 Microsoft Basic Data，而 personality 误报 MS-DOS/ExFAT
-        if let partitionType = field(deviceInfo, "Partition Type")?.lowercased(),
-           partitionType.contains("microsoft basic data") || partitionType.contains("ntfs") {
-            return true
-        }
-
-        // 本应用留下的挂载标记（mount 表不一定回显 allow_other）
+        // FSKit / ntfs-3g 成功挂载后写入；macOS 可能把 FUSE 卷误报为 ExFAT。
         let disk = devicePath.replacingOccurrences(of: "/dev/", with: "")
         if FileManager.default.fileExists(atPath: "/tmp/ntfs_mounted_\(disk)") {
             return true
         }
 
-        // 兼容：显式带上 ntfs-3g 特征选项时仍确认
-        let options = Set(mounted.options)
-        return options.contains("local")
-            && (options.contains("allow_other") || options.contains("auto_xattr"))
+        // 无成功挂载标记时，diskutil 明确报告的其他文件系统仍应排除。
+        if isKnownNonNTFSVolumeInfo(deviceInfo) { return false }
+
+        // ntfs-3g 是明确的文件系统驱动身份，不是通用 FUSE 选项。
+        return mounted.driver == "ntfs-3g" || mounted.driver.contains("ntfs")
+    }
+
+    /// 判断 diskutil 是否已经给出明确的非 NTFS 文件系统身份。
+    ///
+    /// 只读取实际文件系统身份字段，刻意忽略 `Partition Type`。
+    static func isKnownNonNTFSVolumeInfo(_ info: String) -> Bool {
+        let identities = [
+            "exfat", "msdos", "ms-dos", "fat12", "fat16", "fat32",
+            "hfs", "hfs+", "apfs", "ufs", "udf", "iso9660", "cd9660",
+            "ext2", "ext3", "ext4", "btrfs", "zfs"
+        ]
+        let fields = [
+            "File System Personality",
+            "File System Type",
+            "Type (Bundle)",
+            "FilesystemType",
+            "FilesystemName",
+            "Format",
+            "格式"
+        ]
+        return fields.compactMap { field(info, $0)?.lowercased() }
+            .contains { value in identities.contains { value.contains($0) } }
     }
 
     /// 从挂载表取出指定设备+挂载点的 fuse 记录；不是 fuse 则 nil。

@@ -11,14 +11,16 @@ final class DiskSafetyTests: XCTestCase {
         XCTAssertEqual(DiskSafety.parentDiskPath("/dev/disk4s2"), "/dev/disk4")
     }
 
-    func testNTFSFilesystemRecognizesXNTFSWithoutSubstringFalsePositives() {
+    func testNTFSFilesystemRecognizesFilesystemIdentityWithoutPartitionTypeFalsePositives() {
         XCTAssertTrue(DiskSafety.isNTFSFilesystem("File System Personality: xntfs"))
         XCTAssertTrue(DiskSafety.isNTFSFilesystem("File System Personality: Unknown (xntfs)"))
         XCTAssertTrue(DiskSafety.isNTFSFilesystem("Format: Unknown (xntfs)"))
         XCTAssertTrue(DiskSafety.isNTFSFilesystem("格式: 未知 (xntfs)"))
         XCTAssertTrue(DiskSafety.isNTFSFilesystem("File System Personality: NTFS"))
-        XCTAssertTrue(DiskSafety.isNTFSFilesystem("File System Personality: Windows_NTFS"))
+        XCTAssertTrue(DiskSafety.isNTFSFilesystem("Type (Bundle): ntfs-3g"))
+        XCTAssertTrue(DiskSafety.isNTFSFilesystem("Format: NTFS-3g (macFUSE)"))
         XCTAssertTrue(DiskSafety.isNTFSFilesystem("/dev/disk4s2 on /Volumes/Backup (xntfs, local, read-only)"))
+        XCTAssertFalse(DiskSafety.isNTFSFilesystem("Partition Type: Windows_NTFS"))
         XCTAssertFalse(DiskSafety.isNTFSFilesystem("Volume Name: Unknown (xntfs)"))
         XCTAssertFalse(DiskSafety.isNTFSFilesystem("卷名: 未知 (xntfs)"))
         XCTAssertFalse(DiskSafety.isNTFSFilesystem("File System Personality: Unknown (exFAT)"))
@@ -26,92 +28,130 @@ final class DiskSafetyTests: XCTestCase {
         XCTAssertFalse(DiskSafety.isNTFSFilesystem("File System Personality: exFAT"))
     }
 
-    func testNTFSVolumeInfoAcceptsPartitionTypeWhenPersonalityMisreports() {
-        let contradictory = """
-        Device Identifier:        disk4s1
-        Volume Name:              Samsung USB
-        File System Personality:  ExFAT
-        Type (Bundle):            msdos
-        Partition Type:           Microsoft Basic Data
-        """
-        // personality 误报时，单靠 personality 不能定 NTFS
-        XCTAssertFalse(DiskSafety.isNTFSVolumeInfo(contradictory))
-
-        let partitionNTFS = """
-        Device Identifier:        disk4s1
-        Volume Name:              Samsung USB
-        File System Personality:  ExFAT
-        Type (Bundle):            msdos
-        Partition Type:           Windows_NTFS
-        """
-        XCTAssertTrue(DiskSafety.isNTFSVolumeInfo(partitionNTFS))
-
-        let plainNTFS = """
-        File System Personality:  NTFS
-        Partition Type:           Windows_NTFS
-        """
-        XCTAssertTrue(DiskSafety.isNTFSVolumeInfo(plainNTFS))
-    }
-
-    func testConfirmedFuseMountPrefersMountFactOverPersonality() {
-        // 实机 mount 表通常不回显 allow_other
-        let mountOutput = """
-        /dev/disk4s1 on /Volumes/Samsung USB (macfuse, local, nodev, synchronous, noatime)
-        /dev/disk5s2 on /Volumes/SanDisk 32G (macfuse, local, nodev, synchronous, noatime)
-        /dev/disk6s1 on /Volumes/Other (macfuse, local)
-        /dev/disk7s1 on /Volumes/Legacy (macfuse, local, allow_other)
-        """
-        let samsung = """
-        Device Identifier:        disk4s1
+    func testNTFSVolumeInfoRequiresFilesystemIdentity() {
+        let ventoy = """
+        Device Identifier:        disk5s1
+        Volume Name:              Ventoy
         File System Personality:  ExFAT
         Type (Bundle):            exfat
         Partition Type:           Windows_NTFS
         """
-        let sandisk = """
-        Device Identifier:        disk5s2
+        XCTAssertFalse(DiskSafety.isNTFSVolumeInfo(ventoy))
+
+        let plainNTFS = """
+        Device Identifier:        disk4s1
+        File System Personality:  NTFS
+        Partition Type:           Microsoft Basic Data
+        """
+        XCTAssertTrue(DiskSafety.isNTFSVolumeInfo(plainNTFS))
+
+        let xntfs = """
+        Device Identifier:        disk4s1
+        File System Personality:  Unknown (xntfs)
+        Partition Type:           Microsoft Basic Data
+        """
+        let ntfs3g = """
+        Device Identifier:        disk4s2
+        Format:                   NTFS-3g (macFUSE)
+        Partition Type:           Microsoft Basic Data
+        """
+        XCTAssertTrue(DiskSafety.isNTFSVolumeInfo(ntfs3g))
+        XCTAssertTrue(DiskSafety.isNTFSVolumeInfo(xntfs))
+    }
+
+    func testConfirmedFuseMountAcceptsIdentityOrTrustedMarker() {
+        let mountOutput = """
+        /dev/disk40s1 on /Volumes/Samsung USB (macfuse, local, nodev, synchronous, noatime)
+        /dev/disk41s2 on /Volumes/SanDisk 32G (macfuse, local, nodev, synchronous, noatime)
+        /dev/disk42s1 on /Volumes/Other (macfuse, local)
+        /dev/disk43s1 on /Volumes/Legacy (macfuse, local, allow_other)
+        /dev/disk44s1 on /Volumes/PreviouslyMounted (macfuse, local, allow_other)
+        /dev/disk45s1 on /Volumes/NTFS3G (macfuse, local, allow_other)
+        """
+        let ventoy = """
+        Device Identifier:        disk40s1
+        File System Personality:  ExFAT
+        Type (Bundle):            exfat
+        Partition Type:           Windows_NTFS
+        """
+        let basicData = """
+        Device Identifier:        disk41s2
         File System Personality:  MS-DOS
         Type (Bundle):            msdos
         Partition Type:           Microsoft Basic Data
         """
         let nonNTFS = """
-        Device Identifier:        disk6s1
+        Device Identifier:        disk42s1
         File System Personality:  APFS
         Partition Type:           Apple_APFS
         """
-        let legacyNoIdentity = """
-        Device Identifier:        disk7s1
-        File System Personality:  MS-DOS
+        let ntfs = """
+        Device Identifier:        disk43s1
+        File System Personality:  Unknown (xntfs)
+        Partition Type:           Microsoft Basic Data
+        """
+        let previouslyMounted = """
+        Device Identifier:        disk44s1
+        File System Personality:  ExFAT
+        Type (Bundle):            exfat
+        Partition Type:           Windows_NTFS
+        """
+        let ntfs3g = """
+        Device Identifier:        disk45s1
+        Format:                   NTFS-3g (macFUSE)
+        Partition Type:           Microsoft Basic Data
         """
 
-        XCTAssertTrue(DiskSafety.isConfirmedNTFSFuseMount(
+        XCTAssertTrue(DiskSafety.isKnownNonNTFSVolumeInfo(ventoy))
+        XCTAssertTrue(DiskSafety.isKnownNonNTFSVolumeInfo(basicData))
+        XCTAssertTrue(DiskSafety.isKnownNonNTFSVolumeInfo(nonNTFS))
+
+        XCTAssertFalse(DiskSafety.isConfirmedNTFSFuseMount(
             mountOutput,
-            deviceInfo: samsung,
-            devicePath: "/dev/disk4s1",
+            deviceInfo: ventoy,
+            devicePath: "/dev/disk40s1",
             mountPoint: "/Volumes/Samsung USB"
         ))
-        XCTAssertTrue(DiskSafety.isConfirmedNTFSFuseMount(
+        XCTAssertFalse(DiskSafety.isConfirmedNTFSFuseMount(
             mountOutput,
-            deviceInfo: sandisk,
-            devicePath: "/dev/disk5s2",
+            deviceInfo: basicData,
+            devicePath: "/dev/disk41s2",
             mountPoint: "/Volumes/SanDisk 32G"
         ))
         XCTAssertFalse(DiskSafety.isConfirmedNTFSFuseMount(
             mountOutput,
             deviceInfo: nonNTFS,
-            devicePath: "/dev/disk6s1",
+            devicePath: "/dev/disk42s1",
             mountPoint: "/Volumes/Other"
         ))
-        // 无分区身份时，依赖 allow_other 特征选项
         XCTAssertTrue(DiskSafety.isConfirmedNTFSFuseMount(
             mountOutput,
-            deviceInfo: legacyNoIdentity,
-            devicePath: "/dev/disk7s1",
+            deviceInfo: ntfs,
+            devicePath: "/dev/disk43s1",
             mountPoint: "/Volumes/Legacy"
         ))
+        XCTAssertTrue(DiskSafety.isConfirmedNTFSFuseMount(
+            mountOutput,
+            deviceInfo: ntfs3g,
+            devicePath: "/dev/disk45s1",
+            mountPoint: "/Volumes/NTFS3G"
+        ))
+
+        let markerPath = "/tmp/ntfs_mounted_disk44s1"
+        try? FileManager.default.removeItem(atPath: markerPath)
+        _ = FileManager.default.createFile(atPath: markerPath, contents: Data())
+        defer { try? FileManager.default.removeItem(atPath: markerPath) }
+        XCTAssertTrue(DiskSafety.isConfirmedNTFSFuseMount(
+            mountOutput,
+            deviceInfo: previouslyMounted,
+            devicePath: "/dev/disk44s1",
+            mountPoint: "/Volumes/PreviouslyMounted"
+        ))
+
         XCTAssertFalse(DiskSafety.isConfirmedNTFSFuseMount(
             mountOutput,
-            deviceInfo: samsung,
-            devicePath: "/dev/disk4s1",
+            deviceInfo: ntfs,
+            devicePath: "/dev/disk43s1",
             mountPoint: "/Volumes/Wrong"
         ))
     }

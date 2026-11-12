@@ -529,7 +529,7 @@ struct MountService {
               identifier == device.disk else {
             throw AppError.failed("设备信息已变化或不是 NTFS 分区，操作已停止")
         }
-        // diskutil 字段命中 NTFS（含 Partition Type，即使 personality 误报）
+        // 仅接受 diskutil 的实际文件系统字段；分区表类型不等于文件系统类型。
         if DiskSafety.isNTFSFilesystem(result.stdout) || DiskSafety.isNTFSVolumeInfo(result.stdout) {
             return
         }

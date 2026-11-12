@@ -151,8 +151,6 @@
     "deviceMountPointLabel": "Device & Mount Point:",
     "capacityLabel": "Capacity:",
     "notMounted": "Not Mounted",
-    "openVolumeHint": "Double-click to open this volume in Finder",
-    "openVolumeUnavailable": "Volume is not mounted, so it cannot be opened in Finder",
     "available": "available",
     "total": "total",
     "usageRate": "Usage Rate",

@@ -151,8 +151,6 @@
     "deviceMountPointLabel": "設備掛載點:",
     "capacityLabel": "硬碟容量:",
     "notMounted": "未掛載",
-    "openVolumeHint": "連按兩下可在 Finder 中開啟此裝置",
-    "openVolumeUnavailable": "裝置未掛載，無法在 Finder 中開啟",
     "available": "可用",
     "total": "共",
     "usageRate": "使用率",
