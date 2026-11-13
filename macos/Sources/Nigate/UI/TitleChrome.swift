@@ -6,21 +6,14 @@ struct TitleChrome: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Text("Nigate（Free NTFS for Mac）")
-                .font(.system(size: 15, weight: .semibold))
+            HStack(spacing: 8) {
+                nigateMark
+                Text("Nigate（Free NTFS for Mac）")
+                    .font(.system(size: 15, weight: .semibold))
+            }
             Spacer()
             // 交互区必须禁止“标题栏拖窗口”，否则状态刷新后系统拖拽热区会吞掉点击。
             HStack(spacing: 10) {
-                iconButton("bolt.horizontal.circle", L10n.t("devices.autoMount"), active: model.settings.autoMount, tint: Palette.accent) {
-                    model.toggleAutoMount()
-                }
-                .disabled(model.protectLocked)
-
-                iconButton("menubar.dock.rectangle", L10n.t("settings.trayMode"), active: model.settings.trayMode, tint: .purple) {
-                    model.toggleTray()
-                }
-                .disabled(model.protectLocked)
-
                 iconButton("cup.and.saucer.fill", sleepTitle, active: model.settings.sleepMode != .off, tint: sleepTint) {
                     model.cycleSleep()
                 }
@@ -44,7 +37,7 @@ struct TitleChrome: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .help(L10n.t("theme.toggle"))
+                .nigateHelp(L10n.t("theme.toggle"))
 
                 HStack(spacing: 6) {
                     Circle()
@@ -65,12 +58,35 @@ struct TitleChrome: View {
         .padding(.bottom, 8)
     }
 
+    /// 标题栏用白色剪影当模板图，随正文色走，避免红色 AppIcon 和交通灯/线性图标抢色。
+    @ViewBuilder
+    private var nigateMark: some View {
+        if let logo = Self.nigateLogo {
+            Image(nsImage: logo)
+                .renderingMode(.template)
+                .resizable()
+                .interpolation(.high)
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 22, height: 22)
+                .foregroundStyle(Color.primary.opacity(0.78))
+                .accessibilityHidden(true)
+        }
+    }
+
+    private static let nigateLogo: NSImage? = {
+        guard let url = Bundle.module.url(forResource: "AppIcon-white", withExtension: "icns"),
+              let loaded = NSImage(contentsOf: url) else { return nil }
+        let image = loaded.copy() as? NSImage ?? loaded
+        image.isTemplate = true
+        return image
+    }()
+
     private var protectButton: some View {
         Image(systemName: model.protectLocked ? "lock.shield.fill" : "lock.shield")
             .foregroundStyle(model.protectLocked ? Palette.success : Color.primary.opacity(0.7))
             .frame(width: 22, height: 22)
             .contentShape(Rectangle())
-            .help(model.protectLocked ? L10n.t("app.protectTooltipLocked") : L10n.t("app.protectTooltip"))
+            .nigateHelp(model.protectLocked ? L10n.t("app.protectTooltipLocked") : L10n.t("app.protectTooltip"))
             // longPress 不要直接挂在裸 Image 上扩散手势；限制在固定 hit box 内。
             .gesture(
                 LongPressGesture(minimumDuration: 3)
@@ -105,7 +121,7 @@ struct TitleChrome: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help(title)
+        .nigateHelp(title)
     }
 }
 

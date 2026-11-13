@@ -97,7 +97,11 @@ EXTENSION="$APP/Contents/Extensions/NigateFSKitExtension.appex"
 APP_PLIST="$APP/Contents/Info.plist"
 EXTENSION_PLIST="$EXTENSION/Contents/Info.plist"
 EXTENSION_ENTITLEMENTS="$MACOS_ROOT/Sources/NigateFSKitExtension/NigateFSKitExtension.entitlements"
+EXTENSION_LOCAL_ENTITLEMENTS="$MACOS_ROOT/Sources/NigateFSKitExtension/NigateFSKitExtension-local.entitlements"
 APP_ENTITLEMENTS="$MACOS_ROOT/Sources/Nigate/Nigate.entitlements"
+# fskit.mount / fskit.fsmodule 是受限 entitlement。ad-hoc 或未获 Apple 授权的签名
+# 一旦写入，taskgated 会在启动时 SIGKILL（Code Signature Invalid）。
+USE_RESTRICTED_ENTITLEMENTS="${FSKIT_RESTRICTED_ENTITLEMENTS:-0}"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Extensions"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
@@ -129,26 +133,50 @@ validate_plist_value "$EXTENSION_PLIST" \
 validate_plist_value "$EXTENSION_PLIST" \
   "EXAppExtensionAttributes.FSSupportsBlockResources" "true"
 
-if [[ -n "$SIGNING_IDENTITY" ]]; then
-  codesign --force --options runtime --timestamp \
-    --entitlements "$EXTENSION_ENTITLEMENTS" \
-    --sign "$SIGNING_IDENTITY" "$EXTENSION"
-  if [[ -f "$APP_ENTITLEMENTS" ]]; then
-    codesign --force --options runtime --timestamp \
-      --entitlements "$APP_ENTITLEMENTS" \
-      --sign "$SIGNING_IDENTITY" "$APP"
-  else
-    codesign --force --options runtime --timestamp --sign "$SIGNING_IDENTITY" "$APP"
+sign_bundle() {
+  local target="$1"
+  local entitlements="${2:-}"
+  local identity="-"
+  local -a args=(--force)
+
+  if [[ -n "$SIGNING_IDENTITY" ]]; then
+    identity="$SIGNING_IDENTITY"
+    args+=(--options runtime --timestamp)
   fi
+  if [[ -n "$entitlements" ]]; then
+    args+=(--entitlements "$entitlements")
+  fi
+  codesign "${args[@]}" --sign "$identity" "$target"
+}
+
+entitlements_contain() {
+  local target="$1"
+  local key="$2"
+  codesign -d --entitlements - "$target" 2>/dev/null | grep -Fq "$key"
+}
+
+if [[ "$USE_RESTRICTED_ENTITLEMENTS" == "1" ]]; then
+  if [[ -z "$SIGNING_IDENTITY" ]]; then
+    printf '%s\n' 'FSKIT_RESTRICTED_ENTITLEMENTS=1 需要 DEVELOPER_ID_APPLICATION；ad-hoc 不能声明 fskit.mount。' >&2
+    exit 1
+  fi
+  sign_bundle "$EXTENSION" "$EXTENSION_ENTITLEMENTS"
+  sign_bundle "$APP" "$APP_ENTITLEMENTS"
 else
-  printf '%s\n' 'Warning: DEVELOPER_ID_APPLICATION 未设置，使用 ad-hoc 签名。' >&2
-  codesign --force \
-    --entitlements "$EXTENSION_ENTITLEMENTS" \
-    --sign - "$EXTENSION"
-  if [[ -f "$APP_ENTITLEMENTS" ]]; then
-    codesign --force --entitlements "$APP_ENTITLEMENTS" --sign - "$APP"
+  if [[ -z "$SIGNING_IDENTITY" ]]; then
+    printf '%s\n' 'Warning: DEVELOPER_ID_APPLICATION 未设置，使用 ad-hoc 签名。' >&2
+  fi
+  printf '%s\n' '未嵌入 fskit.mount / fskit.fsmodule。受限 entitlement 会让 taskgated 在启动时 SIGKILL。' >&2
+  if [[ -f "$EXTENSION_LOCAL_ENTITLEMENTS" ]]; then
+    sign_bundle "$EXTENSION" "$EXTENSION_LOCAL_ENTITLEMENTS"
   else
-    codesign --force --sign - "$APP"
+    sign_bundle "$EXTENSION"
+  fi
+  sign_bundle "$APP"
+  if entitlements_contain "$APP" "com.apple.developer.fskit.mount" || \
+     entitlements_contain "$EXTENSION" "com.apple.developer.fskit.fsmodule"; then
+    printf '%s\n' '签名后仍检测到受限 FSKit entitlement，已中止以免生成秒退的 .app。' >&2
+    exit 1
   fi
 fi
 

@@ -41,6 +41,7 @@ let package = Package(
             path: "macos/Sources/NigateFSKitExtension",
             exclude: [
                 "NigateFSKitExtension.entitlements",
+                "NigateFSKitExtension-local.entitlements",
                 "NigateFSKitExtension-Bridging-Header.h"
             ],
             resources: [

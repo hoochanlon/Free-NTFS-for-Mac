@@ -318,7 +318,7 @@ struct DependenciesPane: View {
                         .frame(width: 28, height: 28)
                 }
                 .buttonStyle(.bordered)
-                .help(L10n.t("dependencies.copyCommand"))
+                .nigateHelp(L10n.t("dependencies.copyCommand"))
             }
             .padding(10)
             .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 7))

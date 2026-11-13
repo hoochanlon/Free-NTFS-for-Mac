@@ -10,6 +10,27 @@ enum Palette {
     static let smart = Color(red: 0.10, green: 0.61, blue: 0.56)
 }
 
+/// 按钮悬停提示：只在设置打开时挂 `.help`，默认关闭。
+private struct NigateHelpModifier: ViewModifier {
+    @EnvironmentObject private var model: AppModel
+    let text: String
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if model.settings.showButtonHints {
+            content.help(text)
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    func nigateHelp(_ text: String) -> some View {
+        modifier(NigateHelpModifier(text: text))
+    }
+}
+
 struct RootView: View {
     @EnvironmentObject private var model: AppModel
 

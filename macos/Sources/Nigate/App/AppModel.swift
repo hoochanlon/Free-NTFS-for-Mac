@@ -48,7 +48,6 @@ final class AppModel: ObservableObject {
         normalizeMountBackendIfNeeded()
         applyAppearance()
         applyLoginItem()
-        applyDockPolicy()
         sleepGuard.setMode(settings.sleepMode, disks: [])
         lastPersistedSettings = settings
         monitor.start { [weak self] in
@@ -96,33 +95,20 @@ final class AppModel: ObservableObject {
         if previous?.sleepMode != settings.sleepMode {
             sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
         }
-        if previous?.trayMode != settings.trayMode {
-            TrayController.shared.reload()
-        }
     }
 
     func setTab(_ next: AppTab) {
         tab = next
     }
 
-    func toggleAutoMount() {
-        guard !protectLocked else { return }
-        settings.autoMount.toggle()
-        persist()
-        if settings.autoMount {
-            Task { await applyAutoMount(explicit: true) }
-        }
+    func revealMainWindow() {
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.windows.first?.makeKeyAndOrderFront(nil)
     }
 
-    func toggleTray() {
-        setTrayMode(!settings.trayMode)
-    }
-
-    func setTrayMode(_ enabled: Bool) {
-        guard !protectLocked, settings.trayMode != enabled else { return }
-        settings.trayMode = enabled
-        persist()
-        applyDockPolicy()
+    func withdrawToTray() {
+        NSApp.setActivationPolicy(.accessory)
     }
 
     func cycleSleep() {
@@ -579,11 +565,6 @@ final class AppModel: ObservableObject {
                 }
             } catch {}
         }
-    }
-
-    private func applyDockPolicy() {
-        NSApp.setActivationPolicy(settings.trayMode ? .accessory : .regular)
-        if !settings.trayMode { NSApp.activate(ignoringOtherApps: true) }
     }
 
     private func mapError(_ error: Error, action: DeviceAction, device: NTFSDevice) -> String {

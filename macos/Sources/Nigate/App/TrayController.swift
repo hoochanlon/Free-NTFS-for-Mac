@@ -57,10 +57,6 @@ final class TrayController: NSObject, NSMenuDelegate {
     /// - 菜单结构：仅在关闭时 rebuild；打开时只改已有行的颜色，避免子菜单消失
     func reload() {
         guard let model else { return }
-        if !model.settings.trayMode {
-            tearDown()
-            return
-        }
         ensureStatusItem()
         item?.button?.toolTip = L10n.t("tray.tooltip")
         // 图标始终跟 model，不依赖是否打开主窗口。
@@ -115,9 +111,7 @@ final class TrayController: NSObject, NSMenuDelegate {
     private func rebuildMenu(from model: AppModel) {
         menu.removeAllItems()
         menu.addItem(action(L10n.t("tray.showMainWindow")) {
-            NSApp.setActivationPolicy(.regular)
-            NSApp.activate(ignoringOtherApps: true)
-            NSApp.windows.first?.makeKeyAndOrderFront(nil)
+            model.revealMainWindow()
             // 点主界面时也拉一次设备，避免托盘与主界面长期分叉。
             Task { await model.refreshDevices(applyAutoMount: false) }
         })
@@ -170,16 +164,20 @@ final class TrayController: NSObject, NSMenuDelegate {
                 model.perform(.mount, on: latest)
             })
         } else {
-            sub.addItem(action(L10n.t("devices.mount")) {
-                TrayController.shared.prepareForAction()
-                guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
-                model.perform(.mount, on: latest)
-            })
-            sub.addItem(action(L10n.t("devices.restoreReadOnly")) {
-                TrayController.shared.prepareForAction()
-                guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
-                model.perform(.restore, on: latest)
-            })
+            if device.isReadOnly {
+                sub.addItem(action(L10n.t("devices.mount")) {
+                    TrayController.shared.prepareForAction()
+                    guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
+                    model.perform(.mount, on: latest)
+                })
+            }
+            if device.isReadWrite {
+                sub.addItem(action(L10n.t("devices.restoreReadOnly")) {
+                    TrayController.shared.prepareForAction()
+                    guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
+                    model.perform(.restore, on: latest)
+                })
+            }
             sub.addItem(action(L10n.t("devices.unmount")) {
                 TrayController.shared.prepareForAction()
                 guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }

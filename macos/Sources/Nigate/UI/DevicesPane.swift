@@ -56,7 +56,7 @@ struct DevicesPane: View {
             Label(title, systemImage: icon)
         }
         .buttonStyle(.bordered)
-        .controlSize(.small)
+        .controlSize(.regular)
     }
 }
 
@@ -103,8 +103,12 @@ struct DeviceCard: View {
                 if device.needsMount {
                     action(L10n.t("devices.mountDevice"), "externaldrive") { model.perform(.mount, on: device) }
                 } else {
-                    action(L10n.t("devices.mount"), "pencil") { model.perform(.mount, on: device) }
-                    action(L10n.t("devices.restoreReadOnly"), "eye") { model.perform(.restore, on: device) }
+                    if device.isReadOnly {
+                        action(L10n.t("devices.mount"), "pencil") { model.perform(.mount, on: device) }
+                    }
+                    if device.isReadWrite {
+                        action(L10n.t("devices.restoreReadOnly"), "eye") { model.perform(.restore, on: device) }
+                    }
                     action(L10n.t("devices.unmount"), "eject") { model.perform(.unmount, on: device) }
                     action(L10n.t("devices.eject"), "externaldrive.badge.xmark") { confirm(.eject) }
                     action(L10n.t("devices.repair"), "wrench.and.screwdriver") { confirm(.repair) }
@@ -152,7 +156,7 @@ struct DeviceCard: View {
             Label(title, systemImage: icon)
         }
         .buttonStyle(.bordered)
-        .controlSize(.small)
+        .controlSize(.regular)
     }
 
     private func confirm(_ action: DeviceAction) {

@@ -15,7 +15,7 @@ struct SettingsPane: View {
         Form {
             Section(L10n.t("settings.title")) {
                 Toggle(L10n.t("settings.savePassword"), isOn: bind(\.savePassword))
-                Text(L10n.t("settings.savePasswordDesc")).font(.caption).foregroundStyle(.secondary)
+                Text(L10n.t("settings.savePasswordDesc")).font(.callout).foregroundStyle(.secondary)
                 Button(L10n.t("settings.deletePassword")) {
                     let confirmed = ConfirmAlert.run(
                         .init(
@@ -32,28 +32,19 @@ struct SettingsPane: View {
                         model.deleteSavedPassword()
                     }
                 }
-                Toggle(L10n.t("settings.autoMount"), isOn: bind(\.autoMount))
-                    .disabled(model.protectLocked)
-                Text(L10n.t("settings.autoMountDesc")).font(.caption).foregroundStyle(.secondary)
                 Picker(L10n.t("settings.mountBackend"), selection: mountBackendBinding) {
                     // 默认与产品主路径：ntfs-3g 兼容；FSKit 为可选增强。
                     Text(L10n.t("settings.ntfs3gCompatibilityBackend")).tag(NigateMountBackend.ntfs3gCompatibility)
                     Text(fsKitLabel).tag(NigateMountBackend.fsKit)
                 }
                 Text(L10n.t(fsKitSelectable ? "settings.mountBackendDesc" : "settings.mountBackendUnavailableDesc"))
-                    .font(.caption)
+                    .font(.callout)
                     .foregroundStyle(.secondary)
                 if !fsKitSelectable, let diagnostic = model.fsKitControlPlane.diagnostic {
                     Text(L10n.fsKitDiagnosticText(diagnostic))
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
-                Toggle(L10n.t("settings.trayMode"), isOn: Binding(
-                    get: { model.settings.trayMode },
-                    set: { model.setTrayMode($0) }
-                ))
-                    .disabled(model.protectLocked)
-                Text(L10n.t("settings.trayModeDesc")).font(.caption).foregroundStyle(.secondary)
                 Toggle(L10n.t("settings.preventSleep"), isOn: Binding(
                     get: { model.settings.preventSleep },
                     set: { value in
@@ -63,9 +54,9 @@ struct SettingsPane: View {
                     }
                 ))
                 .disabled(model.protectLocked)
-                Text(L10n.t("settings.preventSleepDesc")).font(.caption).foregroundStyle(.secondary)
+                Text(L10n.t("settings.preventSleepDesc")).font(.callout).foregroundStyle(.secondary)
                 Toggle(L10n.t("settings.autoStart"), isOn: bind(\.autoStart))
-                Text(L10n.t("settings.autoStartDesc")).font(.caption).foregroundStyle(.secondary)
+                Text(L10n.t("settings.autoStartDesc")).font(.callout).foregroundStyle(.secondary)
                 Picker(L10n.t("settings.startupTab"), selection: bind(\.startupTab)) {
                     Text(L10n.t("tabs.dependencies")).tag(AppTab.dependencies)
                     Text(L10n.t("tabs.devices")).tag(AppTab.devices)
@@ -77,6 +68,8 @@ struct SettingsPane: View {
                         Text(L10n.t("settings.languages.\(language.rawValue)")).tag(language)
                     }
                 }
+                Toggle(L10n.t("settings.showButtonHints"), isOn: bind(\.showButtonHints))
+                Text(L10n.t("settings.showButtonHintsDesc")).font(.callout).foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)

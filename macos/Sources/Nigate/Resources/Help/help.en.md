@@ -1,4 +1,4 @@
-# Nigate Help
+# Nigate Guide
 
 ## About and safety
 
@@ -22,7 +22,7 @@ After connecting an NTFS drive, Nigate scans it and lists recognized volumes on 
 ### Icon guide
 
 - **Navigation**: the puzzle piece opens Dependencies, the drive opens NTFS Devices, the question mark opens Help, and the gear opens Settings.
-- **Title bar**: the lightning bolt toggles automatic read-write mounting; the menu-bar/Dock symbol toggles menu bar mode; the coffee cup cycles sleep-prevention modes; long-press the shield for 3 seconds to toggle status protection; the power symbol quits, the information symbol opens About, and the sun/moon switches appearance.
+- **Title bar**: the coffee cup cycles sleep-prevention modes; long-press the shield for 3 seconds to toggle status protection; the power symbol quits, the information symbol opens About, and the sun/moon switches appearance.
 - **Status dot**: green means devices are recognized and none are read-only; orange means a core dependency is missing or at least one volume is read-only; gray means no NTFS device is recognized.
 - **Device actions**: the circular arrow refreshes; the pencil mounts read-write; the eye restores read-only; the eject symbol unmounts; the drive with an X ejects the device; the wrench and screwdriver repair; the text cursor renames; the internal drive formats; and the curved arrow resets. A device-card drive icon is green for read-write and orange for read-only. Action icons are accompanied by text labels.
 
@@ -52,13 +52,13 @@ For safety, formatting is allowed only when macOS confirms that the target is an
 
 ## Automatic read-write mounting
 
-The title-bar **Auto Read-Write** switch processes NTFS volumes that are **already mounted and currently read-only** when Nigate scans. Turning it on checks current devices immediately; later device changes and scans trigger further checks. Unmounted, already read-write, or unrecognized devices are not candidates.
+Nigate processes NTFS volumes that are **already mounted and currently read-only** when it scans, remounting them read-write. The window does not need to be open. Unmounted, already read-write, or unrecognized devices are not candidates. Automatic mounting may request administrator authorization.
 
-After you manually restore read-only mode or use **Reset**, the device is marked as manually read-only for the current connection, so auto-mount will not immediately change it back. A later manual read-write mount clears that choice. Automatic mounting may request administrator authorization. Turn the title-bar switch off if you do not want volumes to change modes automatically.
+After you manually restore read-only mode or use **Reset**, the device is marked as manually read-only for the current connection, so it will not immediately change back. A later manual read-write mount clears that choice.
 
 ## Sleep prevention and status protection
 
-Click the title-bar coffee-cup icon to cycle through **Off → Prevent Sleep → Smart Prevent Sleep → Off**. Status protection locks this control along with Auto Read-Write and menu-bar mode.
+Click the title-bar coffee-cup icon to cycle through **Off → Prevent Sleep → Smart Prevent Sleep → Off**. Status protection locks this control.
 
 - **Off**: Nigate does not prevent system sleep.
 - **Prevent Sleep**: Continuously prevents idle sleep, including when the drive is idle. Use it for long-running work.
@@ -68,9 +68,9 @@ Sleep prevention stops when the app quits. Long-press the title-bar shield for 3
 
 ## Settings
 
-The **Settings** page controls whether the administrator password is saved in macOS Keychain, launch at login, the startup page, interface language, menu-bar mode, icon tooltips, and appearance. The administrator password is stored in Keychain only when password saving is enabled. You can turn this off or delete the saved password at any time.
+The **Settings** page controls whether the administrator password is saved in macOS Keychain, launch at login, the startup page, interface language, appearance, and button hover hints. Hover hints are off by default. The administrator password is stored in Keychain only when password saving is enabled. You can turn this off or delete the saved password at any time.
 
-Menu-bar mode hides the Dock icon while keeping the menu-bar entry available. Language and appearance choices are saved automatically. Auto Read-Write and sleep prevention can also be controlled from the title bar.
+Closing the window keeps Nigate in the menu bar instead of quitting. Use the menu-bar icon to reopen the window or manage NTFS devices. Language and appearance choices are saved automatically. Sleep prevention can also be controlled from the title bar.
 
 ## Troubleshooting
 

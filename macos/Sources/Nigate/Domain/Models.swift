@@ -62,16 +62,15 @@ struct DependencyStatus: Sendable, Equatable {
 
 struct AppSettings: Codable, Sendable, Equatable {
     var savePassword: Bool = true
-    var autoMount: Bool = false
     var startupTab: AppTab = .dependencies
     var language: AppLanguage = .system
-    var trayMode: Bool = false
     var autoStart: Bool = false
     var preventSleep: Bool = false
     var keepAwake: Bool = false
     var manuallyReadOnlyDevices: [String] = []
     var mountBackend: NigateMountBackend = .ntfs3gCompatibility
     var themeIsLight: Bool = true
+    var showButtonHints: Bool = false
 
     var sleepMode: SleepMode {
         if keepAwake { return .always }

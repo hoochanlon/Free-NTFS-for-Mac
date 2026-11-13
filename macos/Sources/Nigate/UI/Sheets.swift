@@ -5,7 +5,6 @@ import ImageIO
 struct HelpPane: View {
     @State private var blocks: [HelpBlock]
     @State private var isContentsVisible = false
-    @State private var isSearchVisible = false
     @State private var searchText = ""
     @State private var selectedMatch = 0
     @State private var requestedHeadingID: Int?
@@ -29,30 +28,27 @@ struct HelpPane: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 10) {
+            HStack(spacing: 12) {
                 Button {
                     withAnimation(.easeInOut(duration: 0.18)) {
                         isContentsVisible.toggle()
                     }
                 } label: {
                     Label(L10n.t("help.toc"), systemImage: "list.bullet")
+                        .font(.body.weight(.medium))
+                        .padding(.horizontal, 2)
                 }
-                .help(L10n.t("help.toggleToc"))
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .nigateHelp(L10n.t("help.toggleToc"))
 
-                Button {
-                    isSearchVisible.toggle()
-                    if !isSearchVisible { searchText = "" }
-                } label: {
+                HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
-                }
-                .buttonStyle(.plain)
-                .help(L10n.t("help.toggleSearch"))
-                .accessibilityLabel(L10n.t("help.toggleSearch"))
-
-                if isSearchVisible {
+                        .font(.body)
+                        .foregroundStyle(.secondary)
                     TextField(L10n.t("help.searchPlaceholder"), text: $searchText)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(maxWidth: 320)
+                        .textFieldStyle(.plain)
+                        .font(.body)
                         .onChange(of: searchText) { _, _ in
                             selectedMatch = 0
                         }
@@ -60,7 +56,7 @@ struct HelpPane: View {
                     if searchMatches.isEmpty {
                         if !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             Text(L10n.t("help.searchNoResult"))
-                                .font(.caption)
+                                .font(.callout)
                                 .foregroundStyle(.secondary)
                         }
                     } else {
@@ -68,32 +64,48 @@ struct HelpPane: View {
                             "current": "\(selectedMatch + 1)",
                             "total": "\(searchMatches.count)"
                         ]))
-                        .font(.caption.monospacedDigit())
+                        .font(.callout.monospacedDigit())
                         .foregroundStyle(.secondary)
 
                         Button {
                             selectedMatch = (selectedMatch - 1 + searchMatches.count) % searchMatches.count
                         } label: {
                             Image(systemName: "chevron.up")
+                                .font(.body)
+                                .frame(width: 22, height: 22)
                         }
-                        .help(L10n.t("help.searchPrev"))
+                        .buttonStyle(.plain)
+                        .nigateHelp(L10n.t("help.searchPrev"))
                         .accessibilityLabel(L10n.t("help.searchPrev"))
 
                         Button {
                             selectedMatch = (selectedMatch + 1) % searchMatches.count
                         } label: {
                             Image(systemName: "chevron.down")
+                                .font(.body)
+                                .frame(width: 22, height: 22)
                         }
-                        .help(L10n.t("help.searchNext"))
+                        .buttonStyle(.plain)
+                        .nigateHelp(L10n.t("help.searchNext"))
                         .accessibilityLabel(L10n.t("help.searchNext"))
                     }
                 }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .frame(maxWidth: 560)
+                .background(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(Color(nsColor: .textBackgroundColor))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .strokeBorder(Color.primary.opacity(0.12))
+                )
+
                 Spacer(minLength: 0)
             }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 12)
 
             Divider()
 

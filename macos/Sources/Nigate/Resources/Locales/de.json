@@ -148,7 +148,6 @@
     "unmount": "Aushängen",
     "eject": "Auswerfen",
     "restoreReadOnly": "Nur lesen",
-    "autoMount": "Automatisch beim Einstecken",
     "readOnly": "Schreibgeschützt",
     "readWrite": "Lese-/Schreibzugriff",
     "unmounted": "Ausgehängt",
@@ -199,21 +198,13 @@
       "intro": "Die Hauptoberfläche der Anwendung bietet mehrere Funktionssymbole, die Ihnen helfen, schnell auf häufig verwendete Funktionen zuzugreifen:",
       "titleBar": {
         "title": "Titelleisten-Symbole",
-        "autoMount": {
-          "name": "Automatisches Lese-Schreib-Symbol",
-          "description": "Wenn aktiviert, hängt der Hintergrund neu angeschlossene schreibgeschützte NTFS-Volumes mit Schreibzugriff ein, auch ohne geöffnetes Fenster. Ein manuell auf Schreibschutz zurückgesetztes Volume bleibt für die aktuelle Verbindung unverändert. Aktiv erscheint das Symbol blau."
-        },
-        "trayMode": {
-          "name": "Systemleisten-Modus-Symbol",
-          "description": "Wenn aktiviert, wird die Anwendung beim Schließen des Fensters in die Systemleiste minimiert, anstatt beendet zu werden. Das Symbol erscheint lila, wenn es aktiv ist."
-        },
         "preventSleep": {
           "name": "Ruhezustand verhindern",
           "description": "Standardmäßig aus. Klickzyklus: Aus → Ruhezustand verhindern (kaffeebraun, dauerhaft) → intelligenter Schutz (teal) → aus. Bei aktivem Statusschutz ist die Schaltfläche gesperrt."
         },
         "protect": {
           "name": "Status-Schutz Symbol",
-          "description": "3 Sekunden lang drücken, um den Schutzstatus umzuschalten. Wenn geschützt, werden automatisches Lesen/Schreiben, Tray-Modus und das Ruhezustandsschutz-Symbol gesperrt, um versehentliche Vorgänge zu verhindern. Das Symbol erscheint grün mit einer Pulsanimation, wenn es geschützt ist."
+          "description": "3 Sekunden lang drücken, um den Schutzstatus umzuschalten. Wenn geschützt, wird das Ruhezustandsschutz-Symbol gesperrt, um versehentliche Vorgänge zu verhindern. Das Symbol erscheint grün mit einer Pulsanimation, wenn es geschützt ist."
         },
         "about": {
           "name": "Info-Symbol",
@@ -270,21 +261,18 @@
     "fsKitBackendUnavailable": "Derzeit nicht verfügbar",
     "ntfs3gCompatibilityBackend": "ntfs-3g (Kompatibilität)",
     "mountBackendDesc": "Standard ist ntfs-3g (Kompatibilität). FSKit ist optional und braucht macOS 15.4+ sowie die installierte/aktivierte Nigate-FSKit-Erweiterung.",
-    "autoMount": "Automatisches Lesen/Schreiben",
-    "autoMountDesc": "Wenn aktiviert, hängt der Hintergrund neu angeschlossene schreibgeschützte NTFS-Volumes mit Schreibzugriff ein, ohne ein Fenster zu öffnen. Ein auf Schreibschutz zurückgesetztes Volume bleibt für die aktuelle Verbindung unverändert",
-    "trayMode": "Tray-Modus",
-    "trayModeDesc": "Wenn aktiviert, wird beim Schließen des Fensters die App nicht beendet, sondern in die Systemleiste minimiert. Sie können NTFS-Geräte schnell über das Tray-Symbol verwalten.",
     "preventSleep": "Intelligenter Ruhezustandsschutz",
     "preventSleepDesc": "Überwacht nur eingehängte NTFS-Volumes: Bei Übertragung wird der Ruhezustand verhindert, etwa 20 Sekunden nach dem Leerlauf wieder zugelassen. Dieses Kontrollkästchen schaltet nur den intelligenten Modus ein und entspricht dem teal-Zustand in der Titelleiste; Dauerhaft an (kaffeebraun) nur über das Titelleisten-Symbol.",
     "enabled": "（Aktiviert）",
     "autoStart": "Beim Anmelden starten",
     "autoStartDesc": "Wenn aktiviert, startet die App automatisch beim Systemstart",
+    "showButtonHints": "Schaltflächenhinweise anzeigen",
+    "showButtonHintsDesc": "Zeigt beim Zeigen auf Schaltflächen eine kurze Beschreibung. Standardmäßig aus.",
     "mountBackendUnavailableDesc": "Standard ist ntfs-3g (Kompatibilität). FSKit kann erst ausgewählt werden, wenn die Erweiterung verfügbar ist. Das Aktivieren in den Systemeinstellungen allein reicht möglicherweise nicht."
   },
   "tray": {
     "showWindow": "Fenster anzeigen",
     "ntfsDevices": "NTFS-Geräte",
-    "autoMount": "Automatisch Lese-/Schreibzugriff",
     "preventSleep": "Intelligenter Ruhezustandsschutz",
     "preventSleepEnabled": "Intelligenter Ruhezustandsschutz aktiviert",
     "preventSleepDisabled": "Intelligenter Ruhezustandsschutz deaktiviert",

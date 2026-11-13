@@ -148,7 +148,6 @@
     "unmount": "卸载",
     "eject": "推出",
     "restoreReadOnly": "还原为只读",
-    "autoMount": "自动读写",
     "readOnly": "只读",
     "readWrite": "可读写",
     "unmounted": "已卸载",
@@ -199,21 +198,13 @@
       "intro": "应用主界面提供了多个功能图标，帮助您快速访问常用功能：",
       "titleBar": {
         "title": "标题栏图标",
-        "autoMount": {
-          "name": "自动读写图标",
-          "description": "启用后，后台会把新插入的只读 NTFS 设备挂载为读写，不依赖窗口是否打开。手动还原为只读的设备在本次连接期间不会被改回。图标激活时显示为蓝色。"
-        },
-        "trayMode": {
-          "name": "托盘模式图标",
-          "description": "启用后，关闭窗口时应用会最小化到系统托盘而不是退出。图标激活时显示为紫色。"
-        },
         "preventSleep": {
           "name": "防止休眠图标",
           "description": "默认关闭。点击循环：关闭 → 防止休眠（咖啡棕，一直阻止）→ 智能防止休眠（青色）→ 关闭。状态保护开启时此按钮会锁定。"
         },
         "protect": {
           "name": "状态保护图标",
-          "description": "长按3秒可切换保护状态。保护后，自动读写、托盘模式和防止休眠图标将被锁定，防止误操作。图标保护后显示为绿色并带有脉冲动画。"
+          "description": "长按3秒可切换保护状态。保护后，防止休眠图标将被锁定，防止误操作。图标保护后显示为绿色并带有脉冲动画。"
         },
         "about": {
           "name": "关于图标",
@@ -265,26 +256,23 @@
       "en": "English (US)",
       "de": "Deutsch (DE)"
     },
-    "autoMount": "自动读写",
-    "autoMountDesc": "启用后，后台会把新插入的只读 NTFS 设备挂载为读写，无需打开窗口。手动还原为只读的设备在本次连接期间不会被改回",
     "mountBackend": "挂载后端",
     "fsKitBackend": "FSKit（原生）",
     "fsKitBackendUnavailable": "暂不可用",
     "ntfs3gCompatibilityBackend": "ntfs-3g（兼容）",
     "mountBackendDesc": "默认使用 ntfs-3g（兼容）。FSKit 为可选：需 macOS 15.4+ 且 Nigate FSKit 扩展已安装并启用。",
     "mountBackendUnavailableDesc": "默认使用 ntfs-3g（兼容）。FSKit 扩展可用前无法选择；仅在系统设置中启用扩展可能还不够。",
-    "trayMode": "托盘模式",
-    "trayModeDesc": "启用后，关闭窗口时不会退出应用，而是最小化到系统托盘。可以通过托盘图标快速管理 NTFS 设备。",
     "preventSleep": "智能防止休眠",
     "preventSleepDesc": "只监视已挂载的 NTFS 设备：有读写传输时阻止休眠，停止约 20 秒后自动允许休眠。此开关只打开智能模式，与标题栏青色状态同步；咖啡棕的一直阻止需点标题栏图标。",
     "enabled": "（已启用）",
     "autoStart": "系统自启",
-    "autoStartDesc": "启用后，应用将在系统启动时自动运行"
+    "autoStartDesc": "启用后，应用将在系统启动时自动运行",
+    "showButtonHints": "显示操作提示",
+    "showButtonHintsDesc": "悬停在按钮上时显示简短说明。默认关闭。"
   },
   "tray": {
     "showWindow": "显示窗口",
     "ntfsDevices": "NTFS 设备",
-    "autoMount": "自动读写",
     "preventSleep": "智能防止休眠",
     "preventSleepEnabled": "智能防止休眠已启用",
     "preventSleepDisabled": "智能防止休眠已关闭",

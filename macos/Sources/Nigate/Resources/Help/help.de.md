@@ -1,4 +1,4 @@
-# Nigate Hilfe
+# Nigate Anleitung
 
 ## Über die App und Sicherheit
 
@@ -22,7 +22,7 @@ Nach dem Anschließen eines NTFS-Laufwerks scannt Nigate die erkannten Volumes u
 ### Symbolübersicht
 
 - **Navigation**: Das Puzzleteil öffnet **Abhängigkeiten**, das Laufwerk **NTFS-Geräte**, das Fragezeichen die **Hilfe** und das Zahnrad die **Einstellungen**.
-- **Titelleiste**: Der Blitz schaltet den automatischen Lese-/Schreibzugriff um; das Menüleisten-/Dock-Symbol schaltet den Menüleistenmodus um; die Kaffeetasse wechselt den Ruhezustandsschutz. Halten Sie das Schild 3 Sekunden gedrückt, um den Statusschutz umzuschalten. Das Energiesymbol beendet die App, das Informationssymbol öffnet **Über die App**, und Sonne/Mond wechseln das Erscheinungsbild.
+- **Titelleiste**: Die Kaffeetasse wechselt den Ruhezustandsschutz. Halten Sie das Schild 3 Sekunden gedrückt, um den Statusschutz umzuschalten. Das Energiesymbol beendet die App, das Informationssymbol öffnet **Über die App**, und Sonne/Mond wechseln das Erscheinungsbild.
 - **Statuspunkt**: Grün bedeutet, dass Geräte erkannt wurden und keines schreibgeschützt ist; Orange bedeutet, dass eine Kernabhängigkeit fehlt oder mindestens ein Volume schreibgeschützt ist; Grau bedeutet, dass kein NTFS-Gerät erkannt wurde.
 - **Geräteaktionen**: Der runde Pfeil aktualisiert; der Bleistift hängt mit Lese-/Schreibzugriff ein; das Auge stellt den Schreibschutz wieder her; das Auswurfsymbol hängt aus; das Laufwerk mit X wirft das Gerät aus; Schraubenschlüssel und Schraubendreher reparieren; der Textcursor benennt um; das interne Laufwerk formatiert; der gebogene Pfeil setzt zurück. Das Laufwerkssymbol auf einer Karte ist bei Lese-/Schreibzugriff grün und bei Schreibschutz orange. Neben den Aktionssymbolen stehen außerdem Textbezeichnungen.
 
@@ -52,13 +52,13 @@ Aus Sicherheitsgründen ist das Formatieren nur erlaubt, wenn macOS das Ziel als
 
 ## Automatischer Lese-/Schreibzugriff
 
-Der Schalter **Automatischer Lese-/Schreibzugriff** in der Titelleiste verarbeitet beim Scan nur NTFS-Volumes, die **bereits eingehängt und aktuell schreibgeschützt** sind. Beim Einschalten werden vorhandene Geräte sofort geprüft; spätere Geräteänderungen und Scans lösen weitere Prüfungen aus. Nicht eingehängte, bereits beschreibbare oder nicht erkannte Geräte sind keine Kandidaten.
+Beim Scan verarbeitet Nigate NTFS-Volumes, die **bereits eingehängt und aktuell schreibgeschützt** sind, und hängt sie mit Schreibzugriff neu ein. Das Fenster muss nicht geöffnet sein. Nicht eingehängte, bereits beschreibbare oder nicht erkannte Geräte sind keine Kandidaten. Für automatische Einhängeaktionen kann eine Administratorbestätigung erforderlich sein.
 
-Nach manuellem Wiederherstellen des Schreibschutzes oder **Zurücksetzen** wird das Gerät für die aktuelle Verbindung als manuell schreibgeschützt vorgemerkt. Auto-Einhängen stellt es dann nicht sofort wieder auf Schreibzugriff um. Ein späteres manuelles Einhängen mit Schreibzugriff hebt diese Auswahl auf. Für automatische Einhängeaktionen kann eine Administratorbestätigung erforderlich sein. Schalten Sie die Funktion aus, wenn Volumes ihren Modus nicht automatisch ändern sollen.
+Nach manuellem Wiederherstellen des Schreibschutzes oder **Zurücksetzen** wird das Gerät für die aktuelle Verbindung als manuell schreibgeschützt vorgemerkt und nicht sofort wieder auf Schreibzugriff umgestellt. Ein späteres manuelles Einhängen mit Schreibzugriff hebt diese Auswahl auf.
 
 ## Ruhezustandsschutz und Statusschutz
 
-Klicken Sie auf das Kaffeetassen-Symbol in der Titelleiste, um zwischen **Aus → Ruhezustand verhindern → Intelligenter Ruhezustandsschutz → Aus** zu wechseln. Bei aktivem Statusschutz sind diese Steuerung sowie automatischer Lese-/Schreibzugriff und Menüleistenmodus gesperrt.
+Klicken Sie auf das Kaffeetassen-Symbol in der Titelleiste, um zwischen **Aus → Ruhezustand verhindern → Intelligenter Ruhezustandsschutz → Aus** zu wechseln. Bei aktivem Statusschutz ist diese Steuerung gesperrt.
 
 - **Aus**: Nigate verhindert den Ruhezustand nicht.
 - **Ruhezustand verhindern**: Verhindert den Ruhezustand dauerhaft, auch wenn das Laufwerk gerade nicht verwendet wird. Geeignet für lange Aufgaben.
@@ -68,9 +68,9 @@ Beim Beenden der App wird der Ruhezustandsschutz beendet. Halten Sie das Schilds
 
 ## Einstellungen
 
-Unter **Einstellungen** können Sie festlegen, ob das Administratorkennwort im macOS-Schlüsselbund gespeichert wird, ob die App bei der Anmeldung startet, welche Seite beim Start geöffnet wird, welche Sprache und Darstellung verwendet werden, ob der Menüleistenmodus aktiv ist und ob Symbol-Tooltips angezeigt werden. Das Kennwort wird nur bei aktivierter Speicherung im Schlüsselbund abgelegt. Sie können die Option jederzeit deaktivieren oder das gespeicherte Kennwort löschen.
+Unter **Einstellungen** können Sie festlegen, ob das Administratorkennwort im macOS-Schlüsselbund gespeichert wird, ob die App bei der Anmeldung startet, welche Seite beim Start geöffnet wird sowie Sprache, Darstellung und Schaltflächenhinweise. Hinweise sind standardmäßig aus. Das Kennwort wird nur bei aktivierter Speicherung im Schlüsselbund abgelegt. Sie können die Option jederzeit deaktivieren oder das gespeicherte Kennwort löschen.
 
-Der Menüleistenmodus blendet das Dock-Symbol aus und lässt den Zugriff über die Menüleiste bestehen. Sprache und Darstellung werden automatisch gespeichert. Automatischer Lese-/Schreibzugriff und Ruhezustandsschutz lassen sich auch in der Titelleiste steuern.
+Beim Schließen des Fensters bleibt Nigate in der Menüleiste und wird nicht beendet. Über das Menüleisten-Symbol können Sie das Fenster wieder öffnen oder NTFS-Geräte verwalten. Sprache und Darstellung werden automatisch gespeichert. Der Ruhezustandsschutz lässt sich auch in der Titelleiste steuern.
 
 ## Fehlerbehebung
 

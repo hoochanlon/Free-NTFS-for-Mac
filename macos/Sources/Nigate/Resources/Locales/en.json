@@ -148,7 +148,6 @@
     "unmount": "Unmount",
     "eject": "Eject",
     "restoreReadOnly": "Restore to Read-Only",
-    "autoMount": "Auto Mount on Insert",
     "readOnly": "Read-Only",
     "readWrite": "Read-Write",
     "unmounted": "Unmounted",
@@ -199,21 +198,13 @@
       "intro": "The application's main interface provides several functional icons to help you quickly access common features:",
       "titleBar": {
         "title": "Title Bar Icons",
-        "autoMount": {
-          "name": "Auto Read-Write Icon",
-          "description": "When enabled, the background mounts newly inserted read-only NTFS volumes as read-write, whether or not a window is open. A volume you restore to read-only stays unchanged for the current connection. The icon appears blue when active."
-        },
-        "trayMode": {
-          "name": "Tray Mode Icon",
-          "description": "When enabled, closing the window will minimize the application to the system tray instead of quitting. The icon appears purple when active."
-        },
         "preventSleep": {
           "name": "Prevent Sleep Icon",
           "description": "Off by default. Click to cycle: Off → Prevent Sleep (coffee brown, always on) → Smart Prevent Sleep (teal) → Off. Status protection locks this button."
         },
         "protect": {
           "name": "Status Protection Icon",
-          "description": "Long press for 3 seconds to toggle protection status. When protected, auto read-write, tray mode, and the prevent-sleep icon are locked to prevent accidental operations. The icon appears green with a pulse animation when protected."
+          "description": "Long press for 3 seconds to toggle protection status. When protected, the prevent-sleep icon is locked to prevent accidental operations. The icon appears green with a pulse animation when protected."
         },
         "about": {
           "name": "About Icon",
@@ -265,26 +256,23 @@
       "en": "English (US)",
       "de": "Deutsch (DE)"
     },
-    "autoMount": "Auto Read-Write",
-    "autoMountDesc": "When enabled, the background mounts newly inserted read-only NTFS volumes as read-write without opening a window. A volume restored to read-only stays unchanged for the current connection",
     "mountBackend": "Mount Backend",
     "fsKitBackend": "FSKit (Native)",
     "fsKitBackendUnavailable": "Unavailable",
     "ntfs3gCompatibilityBackend": "ntfs-3g (Compatibility)",
     "mountBackendDesc": "Default is ntfs-3g (Compatibility). FSKit is optional: needs macOS 15.4+ with the Nigate FSKit extension installed and enabled.",
     "mountBackendUnavailableDesc": "Default is ntfs-3g (Compatibility). FSKit cannot be selected until its extension is ready; enabling the extension alone may not be enough.",
-    "trayMode": "Tray Mode",
-    "trayModeDesc": "When enabled, closing the window will minimize to the system tray instead of quitting the app. You can quickly manage NTFS devices through the tray icon.",
     "preventSleep": "Smart Prevent Sleep",
     "preventSleepDesc": "Watches mounted NTFS volumes only: sleep is blocked during transfers and allowed again about 20 seconds after idle. This checkbox turns on smart mode and matches the teal title-bar state; always-on (coffee brown) is title-bar only.",
     "enabled": "(Enabled)",
     "autoStart": "Launch at Login",
-    "autoStartDesc": "When enabled, the app will automatically launch when the system starts"
+    "autoStartDesc": "When enabled, the app will automatically launch when the system starts",
+    "showButtonHints": "Show Button Hints",
+    "showButtonHintsDesc": "Show a short description when hovering over buttons. Off by default."
   },
   "tray": {
     "showWindow": "Show Window",
     "ntfsDevices": "NTFS Devices",
-    "autoMount": "Auto Read/Write",
     "preventSleep": "Smart Prevent Sleep",
     "preventSleepEnabled": "Smart prevent sleep enabled",
     "preventSleepDisabled": "Smart prevent sleep disabled",

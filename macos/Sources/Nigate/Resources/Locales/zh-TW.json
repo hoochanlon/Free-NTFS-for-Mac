@@ -148,7 +148,6 @@
     "unmount": "卸載",
     "eject": "推出",
     "restoreReadOnly": "還原為只讀",
-    "autoMount": "自動讀寫",
     "readOnly": "只讀",
     "readWrite": "可讀寫",
     "unmounted": "已卸載",
@@ -199,21 +198,13 @@
       "intro": "應用程式主介面提供了多個功能圖示，幫助您快速存取常用功能：",
       "titleBar": {
         "title": "標題列圖示",
-        "autoMount": {
-          "name": "自動讀寫圖示",
-          "description": "啟用後，背景會把新插入的唯讀 NTFS 裝置掛載為讀寫，不依賴視窗是否開啟。手動還原為唯讀的裝置在本次連接期間不會被改回。圖示啟用時顯示為藍色。"
-        },
-        "trayMode": {
-          "name": "托盤模式圖示",
-          "description": "啟用後，關閉視窗時應用程式會最小化到系統托盤而不是退出。圖示啟用時顯示為紫色。"
-        },
         "preventSleep": {
           "name": "防止休眠圖示",
           "description": "預設關閉。點擊循環：關閉 → 防止休眠（咖啡色，一直阻止）→ 智慧防止休眠（青色）→ 關閉。狀態保護開啟時此按鈕會鎖定。"
         },
         "protect": {
           "name": "狀態保護圖示",
-          "description": "長按3秒可切換保護狀態。保護後，自動讀寫、托盤模式和防止休眠圖示將被鎖定，防止誤操作。圖示保護後顯示為綠色並帶有脈衝動畫。"
+          "description": "長按3秒可切換保護狀態。保護後，防止休眠圖示將被鎖定，防止誤操作。圖示保護後顯示為綠色並帶有脈衝動畫。"
         },
         "about": {
           "name": "關於圖示",
@@ -265,26 +256,23 @@
       "en": "English (US)",
       "de": "Deutsch (DE)"
     },
-    "autoMount": "自動讀寫",
-    "autoMountDesc": "啟用後，背景會把新插入的唯讀 NTFS 裝置掛載為讀寫，無需開啟視窗。手動還原為唯讀的裝置在本次連接期間不會被改回",
     "mountBackend": "掛載後端",
     "fsKitBackend": "FSKit（原生）",
     "fsKitBackendUnavailable": "暫不可用",
     "ntfs3gCompatibilityBackend": "ntfs-3g（相容）",
     "mountBackendDesc": "預設使用 ntfs-3g（相容）。FSKit 為可選：需 macOS 15.4+ 且 Nigate FSKit 擴充功能已安裝並啟用。",
     "mountBackendUnavailableDesc": "預設使用 ntfs-3g（相容）。FSKit 延伸功能可用前無法選取；僅在系統設定中啟用延伸功能可能還不夠。",
-    "trayMode": "托盤模式",
-    "trayModeDesc": "啟用後，關閉視窗時不會退出應用，而是最小化到系統托盤。可以通過托盤圖標快速管理 NTFS 設備。",
     "preventSleep": "智慧防止休眠",
     "preventSleepDesc": "只監視已掛載的 NTFS 裝置：有讀寫傳輸時阻止休眠，停止約 20 秒後自動允許休眠。此開關只打開智慧模式，與標題列青色狀態同步；咖啡色的一直阻止需點標題列圖示。",
     "enabled": "（已啟用）",
     "autoStart": "系統自啟",
-    "autoStartDesc": "啟用後，應用將在系統啟動時自動運行"
+    "autoStartDesc": "啟用後，應用將在系統啟動時自動運行",
+    "showButtonHints": "顯示操作提示",
+    "showButtonHintsDesc": "懸停在按鈕上時顯示簡短說明。預設關閉。"
   },
   "tray": {
     "showWindow": "顯示視窗",
     "ntfsDevices": "NTFS 設備",
-    "autoMount": "自動讀寫",
     "preventSleep": "智慧防止休眠",
     "preventSleepEnabled": "智慧防止休眠已啟用",
     "preventSleepDisabled": "智慧防止休眠已關閉",

@@ -497,6 +497,31 @@ final class TrayDeviceStatusTests: XCTestCase {
 }
 
 final class AutoMountTests: XCTestCase {
+    func testMountedReadOnlyVolumeIsAlwaysACandidate() {
+        let device = NTFSDevice(
+            disk: "disk4s2",
+            devicePath: "/dev/disk4s2",
+            volume: "/Volumes/Backup",
+            volumeName: "Backup",
+            volumeUuid: "uuid-4",
+            isReadOnly: true,
+            options: "read-only",
+            isMounted: true,
+            isUnmounted: false,
+            canFormat: true,
+            capacity: nil
+        )
+
+        XCTAssertEqual(AutoMount.candidates(
+            devices: [device],
+            settings: AppSettings(),
+            attempted: [],
+            cooldown: [:],
+            inProgress: [],
+            explicit: false
+        ).map(\.identity), [device.identity])
+    }
+
     func testManualReadOnlyPreferenceBlocksAutoMount() {
         let device = NTFSDevice(
             disk: "disk4s2",
@@ -511,7 +536,7 @@ final class AutoMountTests: XCTestCase {
             canFormat: true,
             capacity: nil
         )
-        var settings = AppSettings(autoMount: true)
+        var settings = AppSettings()
         settings.manuallyReadOnlyDevices = [device.identity]
 
         XCTAssertTrue(AutoMount.candidates(
@@ -538,7 +563,7 @@ final class AutoMountTests: XCTestCase {
             canFormat: true,
             capacity: nil
         )
-        var settings = AppSettings(autoMount: true)
+        var settings = AppSettings()
         AutoMount.markManualReadOnly(device, settings: &settings)
 
         // uuid 缺失时仍能靠 disk 挡住

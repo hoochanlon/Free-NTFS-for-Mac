@@ -17,14 +17,12 @@ enum SettingsStore {
             return settings
         }
         if let value = raw["savePassword"] as? Bool { settings.savePassword = value }
-        if let value = raw["autoMount"] as? Bool { settings.autoMount = value }
         if let value = raw["startupTab"] as? String {
             settings.startupTab = AppTab(rawValue: value) ?? .dependencies
         }
         if let value = raw["language"] as? String {
             settings.language = AppLanguage(rawValue: value) ?? .system
         }
-        if let value = raw["trayMode"] as? Bool { settings.trayMode = value }
         if let value = raw["autoStart"] as? Bool { settings.autoStart = value }
         if let value = raw["preventSleep"] as? Bool { settings.preventSleep = value }
         if let value = raw["keepAwake"] as? Bool { settings.keepAwake = value }
@@ -37,6 +35,7 @@ enum SettingsStore {
             settings.mountBackend = MountBackendPolicy.sanitize(parsed)
         }
         if let value = raw["themeIsLight"] as? Bool { settings.themeIsLight = value }
+        if let value = raw["showButtonHints"] as? Bool { settings.showButtonHints = value }
         return settings
     }
 

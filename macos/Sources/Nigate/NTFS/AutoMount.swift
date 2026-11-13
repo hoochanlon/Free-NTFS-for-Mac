@@ -10,7 +10,8 @@ enum AutoMount {
         now: Date = Date(),
         explicit: Bool
     ) -> [NTFSDevice] {
-        guard settings.autoMount else { return [] }
+        // 自动读写是固定产品行为：扫描后把已挂载只读 NTFS 改挂为读写。
+        // 仅排除本次连接的手动只读、冷却中、进行中，以及非 explicit 的已尝试项。
         return devices.filter { device in
             guard device.isMounted, device.isReadOnly, !device.isUnmounted else { return false }
             // 用户明确还原只读后，绝不能再被自动改挂为读写
