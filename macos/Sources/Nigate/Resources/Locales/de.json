@@ -390,7 +390,7 @@
   },
   "about": {
     "title": "Über",
-    "description": "Nigate ist ein kostenloses Tool zum Lesen und Schreiben von NTFS-formatierten Speichergeräten, basierend auf dem ntfs-3g-Treiber.",
+    "description": "Nigate ist ein kostenloses NTFS-Lese-/Schreibwerkzeug auf Basis der macFUSE-Userspace-Dateisystemschicht und des ntfs-3g-Treibers.",
     "softwareInfo": "Software-Informationen",
     "author": "Autor:",
     "version": "Version:",

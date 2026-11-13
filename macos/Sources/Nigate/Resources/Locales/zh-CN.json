@@ -390,7 +390,7 @@
   },
   "about": {
     "title": "关于",
-    "description": "Nigate 是基于 ntfs-3g 驱动制作的免费读写 NTFS 格式存储设备工具。",
+    "description": "Nigate 是基于 macFUSE 用户态文件系统与 ntfs-3g 驱动的免费 NTFS 读写工具。",
     "softwareInfo": "软件信息",
     "author": "作者：",
     "version": "软件版本：",

@@ -214,7 +214,7 @@ struct AboutSheet: View {
                     Text(L10n.t("about.softwareInfo")).font(.headline)
                     Text("\(L10n.t("about.author")) hoochanlon(胡成龙)")
                     Text("\(L10n.t("about.version")) \(appVersion)")
-                    Text("\(L10n.t("about.technology")) SwiftUI · DiskArbitration · ntfs-3g")
+                    Text("\(L10n.t("about.technology")) SwiftUI · DiskArbitration · macFUSE · ntfs-3g")
                 }
                 Spacer(minLength: 8)
                 if let authorAvatar {

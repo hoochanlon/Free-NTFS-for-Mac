@@ -390,7 +390,7 @@
   },
   "about": {
     "title": "について",
-    "description": "Nigate は ntfs-3g ドライバーに基づいて作成された、NTFS 形式のストレージデバイスを無料で読み書きするツールです。",
+    "description": "Nigate は macFUSE のユーザー空間ファイルシステムと ntfs-3g ドライバーに基づく、無料の NTFS 読み書きツールです。",
     "softwareInfo": "ソフトウェア情報",
     "author": "作者：",
     "version": "バージョン：",
