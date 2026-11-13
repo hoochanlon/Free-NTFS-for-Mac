@@ -36,7 +36,7 @@ Programmatic `FSClient.mountSingleVolume` needs a trusted signature with `com.ap
 
 ## Important notes
 
-> [!CAUTION]
+> [!important]
 > Stability depends on the storage device. Prefer reliable USB media.
 
 - Mounting needs administrator privileges.
