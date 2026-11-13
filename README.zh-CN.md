@@ -86,4 +86,10 @@ docs/README.md
 
 ## 致谢
 
+如果 Nigate 对你有帮助，欢迎扫码打赏：
+
+<p align="center">
+  <img src="buy%20coffee/zanshangma.jpg" alt="赞赏码" width="240">
+</p>
+
 感谢所有贡献者。详见 [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)。

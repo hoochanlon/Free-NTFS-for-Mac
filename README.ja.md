@@ -88,4 +88,10 @@ docs/README.md
 
 ## 謝辞
 
+Nigate が役に立ったら、チップで応援できます：
+
+<p align="center">
+  <img src="buy%20coffee/zanshangma.jpg" alt="チップ用QR" width="240">
+</p>
+
 貢献者の皆さまに感謝します。詳細は [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)。

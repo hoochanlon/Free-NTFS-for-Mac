@@ -296,9 +296,8 @@ private struct GitHubMark: View {
 struct SupportAuthorSheet: View {
     @EnvironmentObject private var model: AppModel
 
-    private static let qrMaxPixel = 640
-    private static let qrMaxWidth: CGFloat = 220
-    private static let qrMaxHeight: CGFloat = 300
+    private static let qrMaxPixel = 720
+    private static let qrSize: CGFloat = 280
 
     var body: some View {
         VStack(spacing: 16) {
@@ -313,9 +312,18 @@ struct SupportAuthorSheet: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
 
-            HStack(alignment: .top, spacing: 20) {
-                qrCard(named: "wexin-fukuanma", title: L10n.t("support.wechat"))
-                qrCard(named: "zhifubao-fukuanma", title: L10n.t("support.alipay"))
+            if let image = Self.tipImage {
+                Image(nsImage: image)
+                    .resizable()
+                    .interpolation(.high)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: Self.qrSize, height: Self.qrSize)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .stroke(Color.primary.opacity(0.08))
+                    )
+                    .accessibilityLabel(L10n.t("support.title"))
             }
 
             HStack {
@@ -325,32 +333,14 @@ struct SupportAuthorSheet: View {
             }
         }
         .padding(24)
-        .frame(width: 560)
+        .frame(width: 360)
     }
 
-    private func qrCard(named name: String, title: String) -> some View {
-        VStack(spacing: 8) {
-            Text(title).font(.headline)
-            if let image = Self.paymentImage(named: name) {
-                Image(nsImage: image)
-                    .resizable()
-                    .interpolation(.high)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: Self.qrMaxWidth, maxHeight: Self.qrMaxHeight)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .stroke(Color.primary.opacity(0.08))
-                    )
-                    .accessibilityLabel(title)
-            }
-        }
-        .frame(maxWidth: .infinity)
-    }
+    private static let tipImage: NSImage? = loadTipImage()
 
-    private static func paymentImage(named name: String) -> NSImage? {
-        let url = Bundle.module.url(forResource: name, withExtension: "jpg", subdirectory: "Support")
-            ?? Bundle.module.url(forResource: name, withExtension: "jpg")
+    private static func loadTipImage() -> NSImage? {
+        let url = Bundle.module.url(forResource: "zanshangma", withExtension: "jpg", subdirectory: "Support")
+            ?? Bundle.module.url(forResource: "zanshangma", withExtension: "jpg")
         guard let url else { return nil }
         let options: [CFString: Any] = [
             kCGImageSourceShouldCache: true,

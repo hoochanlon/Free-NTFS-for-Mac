@@ -410,9 +410,7 @@
   },
   "support": {
     "title": "Autor unterstützen",
-    "subtitle": "Mit WeChat oder Alipay scannen und dem Autor einen Kaffee spendieren",
-    "wechat": "WeChat Pay",
-    "alipay": "Alipay",
+    "subtitle": "Scannen und dem Autor einen Kaffee spendieren",
     "ok": "Schließen"
   }
 }

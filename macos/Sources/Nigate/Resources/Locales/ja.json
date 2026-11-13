@@ -410,9 +410,7 @@
   },
   "support": {
     "title": "作者を支援",
-    "subtitle": "WeChat または Alipay でスキャンして、作者にコーヒーをおごる",
-    "wechat": "WeChat Pay",
-    "alipay": "Alipay",
+    "subtitle": "スキャンしてチップを送り、作者にコーヒーをおごる",
     "ok": "閉じる"
   }
 }

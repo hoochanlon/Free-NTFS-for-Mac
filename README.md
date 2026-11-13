@@ -88,4 +88,10 @@ docs/README.md
 
 ## Acknowledgements
 
+If Nigate helps you, you can leave a tip:
+
+<p align="center">
+  <img src="buy%20coffee/zanshangma.jpg" alt="Tip QR code" width="240">
+</p>
+
 Thanks to everyone who contributed. See [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md).
