@@ -25,6 +25,10 @@ struct TitleChrome: View {
                     NSApp.terminate(nil)
                 }
 
+                iconButton("heart.fill", L10n.t("support.title"), active: true, tint: Palette.heart) {
+                    model.supportOpen = true
+                }
+
                 iconButton("info.circle", L10n.t("app.about"), active: false, tint: Palette.accent) {
                     model.aboutOpen = true
                 }

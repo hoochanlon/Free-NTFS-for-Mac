@@ -407,5 +407,12 @@
     "checkFailed": "アップデートを確認できませんでした。ネットワーク接続を確認してください。",
     "invalidRelease": "リリース情報には接続できましたが、バージョンを認識できませんでした。",
     "viewReleases": "リリースを表示"
+  },
+  "support": {
+    "title": "作者を支援",
+    "subtitle": "WeChat または Alipay でスキャンして、作者にコーヒーをおごる",
+    "wechat": "WeChat Pay",
+    "alipay": "Alipay",
+    "ok": "閉じる"
   }
 }

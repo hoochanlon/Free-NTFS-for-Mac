@@ -293,6 +293,86 @@ private struct GitHubMark: View {
     }
 }
 
+struct SupportAuthorSheet: View {
+    @EnvironmentObject private var model: AppModel
+
+    private static let qrMaxPixel = 640
+    private static let qrMaxWidth: CGFloat = 220
+    private static let qrMaxHeight: CGFloat = 300
+
+    var body: some View {
+        VStack(spacing: 16) {
+            HStack(spacing: 8) {
+                Image(systemName: "heart.fill")
+                    .foregroundStyle(Palette.heart)
+                Text(L10n.t("support.title"))
+                    .font(.title2.weight(.semibold))
+            }
+            Text(L10n.t("support.subtitle"))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+
+            HStack(alignment: .top, spacing: 20) {
+                qrCard(named: "wexin-fukuanma", title: L10n.t("support.wechat"))
+                qrCard(named: "zhifubao-fukuanma", title: L10n.t("support.alipay"))
+            }
+
+            HStack {
+                Spacer()
+                Button(L10n.t("support.ok")) { model.supportOpen = false }
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(24)
+        .frame(width: 560)
+    }
+
+    private func qrCard(named name: String, title: String) -> some View {
+        VStack(spacing: 8) {
+            Text(title).font(.headline)
+            if let image = Self.paymentImage(named: name) {
+                Image(nsImage: image)
+                    .resizable()
+                    .interpolation(.high)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: Self.qrMaxWidth, maxHeight: Self.qrMaxHeight)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(Color.primary.opacity(0.08))
+                    )
+                    .accessibilityLabel(title)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private static func paymentImage(named name: String) -> NSImage? {
+        let url = Bundle.module.url(forResource: name, withExtension: "jpg", subdirectory: "Support")
+            ?? Bundle.module.url(forResource: name, withExtension: "jpg")
+        guard let url else { return nil }
+        let options: [CFString: Any] = [
+            kCGImageSourceShouldCache: true,
+            kCGImageSourceThumbnailMaxPixelSize: qrMaxPixel,
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true
+        ]
+        if let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+           let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) {
+            let scale: CGFloat = 2
+            return NSImage(
+                cgImage: cgImage,
+                size: NSSize(
+                    width: CGFloat(cgImage.width) / scale,
+                    height: CGFloat(cgImage.height) / scale
+                )
+            )
+        }
+        return NSImage(contentsOf: url)
+    }
+}
+
 struct PasswordSheet: View {
     @EnvironmentObject private var model: AppModel
     let state: PasswordSheetState

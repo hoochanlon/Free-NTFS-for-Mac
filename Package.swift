@@ -68,6 +68,7 @@ let package = Package(
                 .copy("Resources/AppIcon.icns"),
                 .copy("Resources/AppIcon-white.icns"),
                 .copy("Resources/avatar.svg"),
+                .copy("Resources/Support"),
                 .copy("Resources/Locales"),
                 .copy("Resources/Help")
             ],

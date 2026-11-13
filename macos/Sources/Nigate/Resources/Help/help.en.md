@@ -22,7 +22,7 @@ After connecting an NTFS drive, Nigate scans it and lists recognized volumes on 
 ### Icon guide
 
 - **Navigation**: the puzzle piece opens Dependencies, the drive opens NTFS Devices, the question mark opens Help, and the gear opens Settings.
-- **Title bar**: the coffee cup cycles sleep-prevention modes; long-press the shield for 3 seconds to toggle status protection; the power symbol quits, the information symbol opens About, and the sun/moon switches appearance.
+- **Title bar**: the coffee cup cycles sleep-prevention modes; long-press the shield for 3 seconds to toggle status protection; the power symbol quits, the heart opens Support the Author, the information symbol opens About, and the sun/moon switches appearance.
 - **Status dot**: green means devices are recognized and none are read-only; orange means a core dependency is missing or at least one volume is read-only; gray means no NTFS device is recognized.
 - **Device actions**: the circular arrow refreshes; the pencil mounts read-write; the eye restores read-only; the eject symbol unmounts; the drive with an X ejects the device; the wrench and screwdriver repair; the text cursor renames; the internal drive formats; and the curved arrow resets. A device-card drive icon is green for read-write and orange for read-only. Action icons are accompanied by text labels.
 

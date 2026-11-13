@@ -407,5 +407,12 @@
     "checkFailed": "检查更新失败，请检查网络连接。",
     "invalidRelease": "已连接到发布页，但版本信息无法识别。",
     "viewReleases": "查看发布页"
+  },
+  "support": {
+    "title": "支持作者",
+    "subtitle": "微信或支付宝扫码，请作者喝杯咖啡",
+    "wechat": "微信支付",
+    "alipay": "支付宝",
+    "ok": "关闭"
   }
 }

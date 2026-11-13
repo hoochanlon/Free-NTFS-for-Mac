@@ -407,5 +407,12 @@
     "checkFailed": "Couldn't check for updates. Check your network connection.",
     "invalidRelease": "Connected to the release page, but its version could not be recognized.",
     "viewReleases": "View Releases"
+  },
+  "support": {
+    "title": "Support the Author",
+    "subtitle": "Scan with WeChat or Alipay to buy the author a coffee",
+    "wechat": "WeChat Pay",
+    "alipay": "Alipay",
+    "ok": "Close"
   }
 }

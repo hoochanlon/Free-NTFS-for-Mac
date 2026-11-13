@@ -6,7 +6,7 @@
 
 ![](https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/src/imgs/example/demo.gif)
 
-演示界面为 1.6.0 以下版本，界面随功能增强可能略有变化。
+演示界面为 1.6.1 以下版本，界面随功能增强可能略有变化。
 
 ## 功能
 
@@ -60,7 +60,7 @@ swift run Nigate
 
 ```sh
 ./macos/Scripts/build.sh          # → dist/Nigate.app（ad-hoc 签名）
-./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.0.dmg
+./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.1.dmg
 ```
 
 可选 Developer ID + 公证：

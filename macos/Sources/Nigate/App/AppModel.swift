@@ -16,6 +16,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var passwordValidationInProgress = false
     @Published var alert: AppAlert?
     @Published var aboutOpen = false
+    @Published var supportOpen = false
     @Published var renameDevice: NTFSDevice?
     @Published var toast: String?
     @Published var languageStamp = 0

@@ -8,7 +8,7 @@ Download the latest version from the [release tags](https://github.com/hoochanlo
 
 ![](https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/src/imgs/example/demo.gif)
 
-The demo shows a version older than 1.6.0. 
+The demo shows a version older than 1.6.1. 
 
 ## Features
 
@@ -62,7 +62,7 @@ swift run Nigate
 
 ```sh
 ./macos/Scripts/build.sh          # → dist/Nigate.app (ad-hoc signed)
-./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.0.dmg
+./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.1.dmg
 ```
 
 Optional Developer ID + notarization:

@@ -407,5 +407,12 @@
     "checkFailed": "Updates konnten nicht gesucht werden. Überprüfe deine Netzwerkverbindung.",
     "invalidRelease": "Die Release-Seite ist erreichbar, aber die Version konnte nicht erkannt werden.",
     "viewReleases": "Veröffentlichungen anzeigen"
+  },
+  "support": {
+    "title": "Autor unterstützen",
+    "subtitle": "Mit WeChat oder Alipay scannen und dem Autor einen Kaffee spendieren",
+    "wechat": "WeChat Pay",
+    "alipay": "Alipay",
+    "ok": "Schließen"
   }
 }

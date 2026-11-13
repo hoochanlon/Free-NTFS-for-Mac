@@ -22,7 +22,7 @@ Nach dem Anschließen eines NTFS-Laufwerks scannt Nigate die erkannten Volumes u
 ### Symbolübersicht
 
 - **Navigation**: Das Puzzleteil öffnet **Abhängigkeiten**, das Laufwerk **NTFS-Geräte**, das Fragezeichen die **Hilfe** und das Zahnrad die **Einstellungen**.
-- **Titelleiste**: Die Kaffeetasse wechselt den Ruhezustandsschutz. Halten Sie das Schild 3 Sekunden gedrückt, um den Statusschutz umzuschalten. Das Energiesymbol beendet die App, das Informationssymbol öffnet **Über die App**, und Sonne/Mond wechseln das Erscheinungsbild.
+- **Titelleiste**: Die Kaffeetasse wechselt den Ruhezustandsschutz. Halten Sie das Schild 3 Sekunden gedrückt, um den Statusschutz umzuschalten. Das Energiesymbol beendet die App, das Herz öffnet **Autor unterstützen**, das Informationssymbol öffnet **Über die App**, und Sonne/Mond wechseln das Erscheinungsbild.
 - **Statuspunkt**: Grün bedeutet, dass Geräte erkannt wurden und keines schreibgeschützt ist; Orange bedeutet, dass eine Kernabhängigkeit fehlt oder mindestens ein Volume schreibgeschützt ist; Grau bedeutet, dass kein NTFS-Gerät erkannt wurde.
 - **Geräteaktionen**: Der runde Pfeil aktualisiert; der Bleistift hängt mit Lese-/Schreibzugriff ein; das Auge stellt den Schreibschutz wieder her; das Auswurfsymbol hängt aus; das Laufwerk mit X wirft das Gerät aus; Schraubenschlüssel und Schraubendreher reparieren; der Textcursor benennt um; das interne Laufwerk formatiert; der gebogene Pfeil setzt zurück. Das Laufwerkssymbol auf einer Karte ist bei Lese-/Schreibzugriff grün und bei Schreibschutz orange. Neben den Aktionssymbolen stehen außerdem Textbezeichnungen.
 

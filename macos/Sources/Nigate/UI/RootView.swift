@@ -8,6 +8,7 @@ enum Palette {
     static let error = Color(red: 1, green: 0.23, blue: 0.19)
     static let coffee = Color(red: 0.55, green: 0.27, blue: 0.07)
     static let smart = Color(red: 0.10, green: 0.61, blue: 0.56)
+    static let heart = Color(red: 0.92, green: 0.28, blue: 0.40)
 }
 
 /// 按钮悬停提示：只在设置打开时挂 `.help`，默认关闭。
@@ -59,6 +60,9 @@ struct RootView: View {
         }
         .sheet(isPresented: $model.aboutOpen) {
             AboutSheet()
+        }
+        .sheet(isPresented: $model.supportOpen) {
+            SupportAuthorSheet()
         }
         .sheet(item: $model.renameDevice) { device in
             RenameSheet(device: device)

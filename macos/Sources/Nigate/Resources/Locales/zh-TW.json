@@ -407,5 +407,12 @@
     "checkFailed": "檢查更新失敗，請檢查網路連線。",
     "invalidRelease": "已連線到發布頁，但版本資訊無法識別。",
     "viewReleases": "查看發布頁"
+  },
+  "support": {
+    "title": "支持作者",
+    "subtitle": "微信或支付寶掃碼，請作者喝杯咖啡",
+    "wechat": "微信支付",
+    "alipay": "支付寶",
+    "ok": "關閉"
   }
 }

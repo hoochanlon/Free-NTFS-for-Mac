@@ -79,6 +79,10 @@ sips -s format png "$ASSET_DIR/dmg-background.svg" --out "$BACKGROUND_IMAGE" >/d
 rm -f "$STAGING_DIR/dmg-background.svg"
 ln -s /Applications "$STAGING_DIR/Applications"
 
+if [[ -d "/Volumes/$VOLUME_NAME" ]]; then
+  hdiutil detach "/Volumes/$VOLUME_NAME" >/dev/null 2>&1 || true
+fi
+
 rm -f "$DMG_PATH" "$RW_DMG_PATH"
 hdiutil create \
   -volname "$VOLUME_NAME" \
@@ -87,62 +91,89 @@ hdiutil create \
   -format UDRW \
   "$RW_DMG_PATH"
 
+# 不要 -nobrowse：Finder 看不到卷时，tell disk 会报 -1728。
 ATTACH_OUTPUT="$(hdiutil attach \
-  -nobrowse \
+  -noverify \
   -noautoopen \
   -readwrite \
   "$RW_DMG_PATH")"
-MOUNT_POINT="${ATTACH_OUTPUT##*$'\n'}"
-MOUNT_POINT="${MOUNT_POINT##*$'\t'}"
+MOUNT_POINT="$(printf '%s\n' "$ATTACH_OUTPUT" | awk -F '\t' '/\/Volumes\//{print $NF; exit}')"
+MOUNT_POINT="${MOUNT_POINT%"${MOUNT_POINT##*[![:space:]]}"}"
+if [[ -z "$MOUNT_POINT" ]]; then
+  MOUNT_POINT="/Volumes/$VOLUME_NAME"
+fi
 
-if [[ -z "$MOUNT_POINT" || ! -d "$MOUNT_POINT" ]]; then
+for _ in $(seq 1 50); do
+  if [[ -d "$MOUNT_POINT/Nigate.app" ]]; then
+    break
+  fi
+  sleep 0.1
+done
+
+if [[ ! -d "$MOUNT_POINT/Nigate.app" ]]; then
   echo "Unable to find mounted DMG volume: $MOUNT_POINT" >&2
   exit 1
 fi
 
-osascript <<APPLESCRIPT
- tell application "Finder"
-   tell disk "$VOLUME_NAME"
-     open
-     set theXOrigin to $WINDOW_X
-     set theYOrigin to $WINDOW_Y
-     set theWidth to $WINDOW_WIDTH
-     set theHeight to $WINDOW_HEIGHT
-     set theBottomRightX to (theXOrigin + theWidth)
-     set theBottomRightY to (theYOrigin + theHeight)
+WINDOW_RIGHT=$((WINDOW_X + WINDOW_WIDTH))
+WINDOW_BOTTOM=$((WINDOW_Y + WINDOW_HEIGHT))
 
-     tell container window
-       set current view to icon view
-       set toolbar visible to false
-       set sidebar width to 0
-       set statusbar visible to true
-       set bounds to {theXOrigin, theYOrigin, theBottomRightX, theBottomRightY}
-     end tell
-
-     set opts to the icon view options of container window
-     tell opts
-       set icon size to 96
-       set text size to 12
-       set arrangement to not arranged
-     end tell
-     set background picture of opts to file ".background:dmg-background.png"
-
-     set position of item "Nigate.app" to {192, 188}
-     set position of item "Applications" to {576, 188}
-     set position of item "README.md" to {192, 398}
-     set position of item "提示损坏？点我.command" to {576, 398}
-
-     close
-     open
-     delay 2
-     tell container window
-       set bounds to {theXOrigin, theYOrigin, theBottomRightX, theBottomRightY}
-     end tell
-   end tell
- end tell
+style_dmg_window() {
+  osascript <<APPLESCRIPT
+set mountAlias to POSIX file "$MOUNT_POINT" as alias
+set backgroundAlias to POSIX file "$MOUNT_POINT/.background/dmg-background.png" as alias
+tell application "Finder"
+  reopen
+  activate
+  open mountAlias
+  delay 1
+  set win to container window of mountAlias
+  tell win
+    set current view to icon view
+    set toolbar visible to false
+    set sidebar width to 0
+    set statusbar visible to true
+    set bounds to {$WINDOW_X, $WINDOW_Y, $WINDOW_RIGHT, $WINDOW_BOTTOM}
+  end tell
+  set opts to the icon view options of win
+  tell opts
+    set icon size to 96
+    set text size to 12
+    set arrangement to not arranged
+  end tell
+  set background picture of opts to backgroundAlias
+  set position of item "Nigate.app" of mountAlias to {192, 188}
+  set position of item "Applications" of mountAlias to {576, 188}
+  set position of item "README.md" of mountAlias to {192, 398}
+  set position of item "提示损坏？点我.command" of mountAlias to {576, 398}
+  close win
+  delay 0.4
+  open mountAlias
+  delay 2
+  set win to container window of mountAlias
+  set bounds of win to {$WINDOW_X, $WINDOW_Y, $WINDOW_RIGHT, $WINDOW_BOTTOM}
+  close win
+end tell
 APPLESCRIPT
+}
 
-hdiutil detach "$MOUNT_POINT" >/dev/null
+styled=0
+for attempt in 1 2 3 4 5 6; do
+  if style_dmg_window; then
+    styled=1
+    break
+  fi
+  echo "Finder not ready for DMG styling (attempt $attempt), retrying..." >&2
+  sleep 1
+done
+if [[ "$styled" -ne 1 ]]; then
+  echo "Finder could not style the DMG window for volume: $VOLUME_NAME" >&2
+  exit 1
+fi
+
+sync
+sleep 1
+hdiutil detach "$MOUNT_POINT" >/dev/null 2>&1 || hdiutil detach -force "$MOUNT_POINT" >/dev/null
 MOUNT_POINT=""
 hdiutil convert "$RW_DMG_PATH" \
   -format UDZO \
