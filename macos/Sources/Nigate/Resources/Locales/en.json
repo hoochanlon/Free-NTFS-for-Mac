@@ -200,7 +200,7 @@
         "title": "Title Bar Icons",
         "preventSleep": {
           "name": "Prevent Sleep Icon",
-          "description": "Off by default. Click to cycle: Off → Prevent Sleep (coffee brown, always on) → Smart Prevent Sleep (teal) → Off. Status protection locks this button."
+          "description": "Smart Prevent Sleep (teal) is on by default. Click to cycle: Off → Prevent Sleep (coffee brown, always on) → Smart Prevent Sleep → Off. Status protection locks this button."
         },
         "protect": {
           "name": "Status Protection Icon",
@@ -217,7 +217,7 @@
       },
       "preventSleepModes": {
         "title": "Prevent Sleep Modes",
-        "intro": "The title bar coffee icon is off by default. Click to cycle Off → Prevent Sleep → Smart Prevent Sleep → Off. Status protection locks this button.",
+        "intro": "The title bar coffee icon defaults to Smart Prevent Sleep. Click to cycle Off → Prevent Sleep → Smart Prevent Sleep → Off. Status protection locks this button.",
         "off": "Off: Sleep is not blocked. The icon is uncolored.",
         "always": "Prevent Sleep (coffee brown): Sleep stays blocked even when idle. Enter this mode only from the title bar icon; the Settings checkbox does not control it.",
         "smart": "Smart Prevent Sleep (teal): Watches currently mounted NTFS volumes only. Sleep is blocked while those volumes have read/write traffic, then allowed again about 20 seconds after traffic stops. With no mounted NTFS volume, or while idle, the Mac is not kept awake. The Settings checkbox syncs only with this mode.",
@@ -263,7 +263,7 @@
     "mountBackendDesc": "Default is ntfs-3g (Compatibility). FSKit is optional: needs macOS 15.4+ with the Nigate FSKit extension installed and enabled.",
     "mountBackendUnavailableDesc": "Default is ntfs-3g (Compatibility). FSKit cannot be selected until its extension is ready; enabling the extension alone may not be enough.",
     "preventSleep": "Smart Prevent Sleep",
-    "preventSleepDesc": "Watches mounted NTFS volumes only: sleep is blocked during transfers and allowed again about 20 seconds after idle. This checkbox turns on smart mode and matches the teal title-bar state; always-on (coffee brown) is title-bar only.",
+    "preventSleepDesc": "On by default. Watches mounted NTFS volumes only: sleep is blocked during transfers and allowed again about 20 seconds after idle. This checkbox turns on smart mode and matches the teal title-bar state; always-on (coffee brown) is title-bar only.",
     "enabled": "(Enabled)",
     "autoStart": "Launch at Login",
     "autoStartDesc": "When enabled, the app will automatically launch when the system starts",

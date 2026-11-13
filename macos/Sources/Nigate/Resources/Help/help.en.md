@@ -58,7 +58,7 @@ After you manually restore read-only mode or use **Reset**, the device is marked
 
 ## Sleep prevention and status protection
 
-Click the title-bar coffee-cup icon to cycle through **Off → Prevent Sleep → Smart Prevent Sleep → Off**. Status protection locks this control.
+Click the title-bar coffee-cup icon to cycle through **Off → Prevent Sleep → Smart Prevent Sleep → Off**. Smart Prevent Sleep is the default. Status protection locks this control.
 
 - **Off**: Nigate does not prevent system sleep.
 - **Prevent Sleep**: Continuously prevents idle sleep, including when the drive is idle. Use it for long-running work.

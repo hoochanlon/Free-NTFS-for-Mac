@@ -65,7 +65,7 @@ struct AppSettings: Codable, Sendable, Equatable {
     var startupTab: AppTab = .dependencies
     var language: AppLanguage = .system
     var autoStart: Bool = false
-    var preventSleep: Bool = false
+    var preventSleep: Bool = true
     var keepAwake: Bool = false
     var manuallyReadOnlyDevices: [String] = []
     var mountBackend: NigateMountBackend = .ntfs3gCompatibility

@@ -200,7 +200,7 @@
         "title": "Titelleisten-Symbole",
         "preventSleep": {
           "name": "Ruhezustand verhindern",
-          "description": "Standardmäßig aus. Klickzyklus: Aus → Ruhezustand verhindern (kaffeebraun, dauerhaft) → intelligenter Schutz (teal) → aus. Bei aktivem Statusschutz ist die Schaltfläche gesperrt."
+          "description": "Standardmäßig intelligenter Schutz (teal). Klickzyklus: Aus → Ruhezustand verhindern (kaffeebraun, dauerhaft) → intelligenter Schutz → aus. Bei aktivem Statusschutz ist die Schaltfläche gesperrt."
         },
         "protect": {
           "name": "Status-Schutz Symbol",
@@ -217,7 +217,7 @@
       },
       "preventSleepModes": {
         "title": "Arbeitsweisen des Ruhezustandsschutzes",
-        "intro": "Das Kaffee-Symbol in der Titelleiste ist standardmäßig aus. Klickzyklus: Aus → Ruhezustand verhindern → Intelligenter Schutz → Aus. Bei aktivem Statusschutz ist die Schaltfläche gesperrt.",
+        "intro": "Das Kaffee-Symbol in der Titelleiste steht standardmäßig auf intelligentem Schutz. Klickzyklus: Aus → Ruhezustand verhindern → Intelligenter Schutz → Aus. Bei aktivem Statusschutz ist die Schaltfläche gesperrt.",
         "off": "Aus: Der Ruhezustand wird nicht verhindert. Das Symbol bleibt ungefärbt.",
         "always": "Ruhezustand verhindern (kaffeebraun): Der Ruhezustand bleibt auch im Leerlauf blockiert. Nur über das Titelleisten-Symbol erreichbar; das Kontrollkästchen in den Einstellungen steuert diesen Modus nicht.",
         "smart": "Intelligenter Ruhezustandsschutz (teal): Überwacht nur derzeit eingehängte NTFS-Volumes. Bei Lese-/Schreibverkehr wird der Ruhezustand verhindert; etwa 20 Sekunden nach dem Ende der Übertragung wieder zugelassen. Ohne eingehängtes NTFS-Volume oder im Leerlauf bleibt der Mac nicht dauerhaft wach. Das Kontrollkästchen in den Einstellungen synchronisiert nur mit diesem Modus.",
@@ -262,7 +262,7 @@
     "ntfs3gCompatibilityBackend": "ntfs-3g (Kompatibilität)",
     "mountBackendDesc": "Standard ist ntfs-3g (Kompatibilität). FSKit ist optional und braucht macOS 15.4+ sowie die installierte/aktivierte Nigate-FSKit-Erweiterung.",
     "preventSleep": "Intelligenter Ruhezustandsschutz",
-    "preventSleepDesc": "Überwacht nur eingehängte NTFS-Volumes: Bei Übertragung wird der Ruhezustand verhindert, etwa 20 Sekunden nach dem Leerlauf wieder zugelassen. Dieses Kontrollkästchen schaltet nur den intelligenten Modus ein und entspricht dem teal-Zustand in der Titelleiste; Dauerhaft an (kaffeebraun) nur über das Titelleisten-Symbol.",
+    "preventSleepDesc": "Standardmäßig an. Überwacht nur eingehängte NTFS-Volumes: Bei Übertragung wird der Ruhezustand verhindert, etwa 20 Sekunden nach dem Leerlauf wieder zugelassen. Dieses Kontrollkästchen schaltet nur den intelligenten Modus ein und entspricht dem teal-Zustand in der Titelleiste; Dauerhaft an (kaffeebraun) nur über das Titelleisten-Symbol.",
     "enabled": "（Aktiviert）",
     "autoStart": "Beim Anmelden starten",
     "autoStartDesc": "Wenn aktiviert, startet die App automatisch beim Systemstart",

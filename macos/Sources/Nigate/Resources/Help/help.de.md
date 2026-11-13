@@ -58,7 +58,7 @@ Nach manuellem Wiederherstellen des Schreibschutzes oder **Zurücksetzen** wird 
 
 ## Ruhezustandsschutz und Statusschutz
 
-Klicken Sie auf das Kaffeetassen-Symbol in der Titelleiste, um zwischen **Aus → Ruhezustand verhindern → Intelligenter Ruhezustandsschutz → Aus** zu wechseln. Bei aktivem Statusschutz ist diese Steuerung gesperrt.
+Klicken Sie auf das Kaffeetassen-Symbol in der Titelleiste, um zwischen **Aus → Ruhezustand verhindern → Intelligenter Ruhezustandsschutz → Aus** zu wechseln. Der intelligente Schutz ist die Voreinstellung. Bei aktivem Statusschutz ist diese Steuerung gesperrt.
 
 - **Aus**: Nigate verhindert den Ruhezustand nicht.
 - **Ruhezustand verhindern**: Verhindert den Ruhezustand dauerhaft, auch wenn das Laufwerk gerade nicht verwendet wird. Geeignet für lange Aufgaben.
