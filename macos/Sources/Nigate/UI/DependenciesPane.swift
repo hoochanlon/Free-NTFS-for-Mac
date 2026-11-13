@@ -310,15 +310,7 @@ struct DependenciesPane: View {
                     .font(.system(.body, design: .monospaced))
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Button {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(command, forType: .string)
-                } label: {
-                    Image(systemName: "doc.on.doc")
-                        .frame(width: 28, height: 28)
-                }
-                .buttonStyle(.bordered)
-                .nigateHelp(L10n.t("dependencies.copyCommand"))
+                CopyCommandButton(command: command)
             }
             .padding(10)
             .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 7))
@@ -341,6 +333,42 @@ struct DependenciesPane: View {
         }
         .padding(12)
         .background(Color.primary.opacity(0.045), in: RoundedRectangle(cornerRadius: 7))
+    }
+}
+
+private struct CopyCommandButton: View {
+    let command: String
+    @State private var copied = false
+    @State private var copyToken = 0
+
+    var body: some View {
+        Button {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(command, forType: .string)
+            copyToken += 1
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.62)) {
+                copied = true
+            }
+        } label: {
+            Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                .fontWeight(.semibold)
+                .foregroundStyle(copied ? Palette.success : Color.primary)
+                .contentTransition(.symbolEffect(.replace))
+                .symbolEffect(.bounce, value: copyToken)
+                .frame(width: 28, height: 28)
+                .scaleEffect(copied ? 1.08 : 1)
+        }
+        .buttonStyle(.bordered)
+        .tint(copied ? Palette.success : nil)
+        .nigateHelp(L10n.t("dependencies.copyCommand"))
+        .task(id: copyToken) {
+            guard copyToken > 0 else { return }
+            try? await Task.sleep(for: .milliseconds(1300))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.2)) {
+                copied = false
+            }
+        }
     }
 }
 
