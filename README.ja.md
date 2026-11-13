@@ -1,6 +1,6 @@
 # Nigate
 
-**言語 / Language / 语言**: [日本語](README.ja.md) | [English](README.md) | [简体中文](README.zh-CN.md)
+**言語 / Language / 语言**: [日本語](README.ja.md) | [English](README.en.md) | [简体中文](README.md)
 
 Nigate は、NTFS ボリュームを読み書き可能な状態でマウントするための、macOS ネイティブアプリケーションです。
 

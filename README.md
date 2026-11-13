@@ -1,54 +1,52 @@
 # Nigate
 
-**Language / 言語 / 语言**: [English](README.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
+**语言 / Language / 言語**: [简体中文](README.md) | [English](README.en.md) | [日本語](README.ja.md)
 
-Nigate is a native macOS application for mounting NTFS volumes with read/write support.
-
-Download the latest version from the [release tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags).
+快速开始：从 [发布标签](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags) 下载并使用。
 
 ![](https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/src/imgs/example/demo.gif)
 
-The demo shows a version older than 1.6.1. 
+演示界面为 1.6.1 以下版本，界面随功能增强可能略有变化。
 
-## Features
+## 功能
 
-- SwiftUI app: live NTFS device detection, dependency checks, one-click mount, auto RW mount, status logs, sleep prevention, safety lock
-- Multilingual UI: Simplified/Traditional Chinese, Japanese, English, German, and more
-- **Dual mount backend**
-  - **ntfs-3g (default / compatibility)**: MacFUSE + `ntfs-3g`; primary path for most users and unsigned builds
-  - **FSKit (optional / native)**: Nigate FSKit extension with embedded NTFS engine; pick in **Settings → Mount Backend**
+- SwiftUI：实时检测 NTFS 设备、依赖检查、一键挂载、自动读写、状态日志、防止休眠、安全保护锁
+- 多语言界面：简体/繁体中文、日语、英语、德语等
+- **双挂载后端**
+  - **ntfs-3g（默认 / 兼容）**：MacFUSE + `ntfs-3g`，面向大多数用户与未签名构建的主路径
+  - **FSKit（可选 / 原生）**：内嵌 NTFS 引擎的 Nigate FSKit 扩展；在 **设置 → 挂载后端** 中切换
 
-## Mount backends
+## 挂载后端
 
-| Backend | Needs | Notes |
+| 后端 | 条件 | 说明 |
 | --- | --- | --- |
-| ntfs-3g | MacFUSE, `ntfs-3g` | Default. Works with ad-hoc / local builds. |
-| FSKit | macOS 15.4+, Nigate FSKit extension installed & enabled | Optional. No silent fallback to ntfs-3g on failure. |
+| ntfs-3g | MacFUSE、`ntfs-3g` | 默认。ad-hoc / 本地构建可用。 |
+| FSKit | macOS 15.4+，扩展已安装并启用 | 可选。失败时**不会**静默降级到 ntfs-3g。 |
 
-Enable FSKit:
+启用 FSKit：
 
-1. Build/install `Nigate.app` into `/Applications` (`./macos/Scripts/build.sh`); extension is under `Contents/Extensions`
-2. **Without an Apple code-signing identity**, System Settings → File System Extensions **usually will not list Nigate** (ad-hoc builds are filtered there even if `pluginkit` already registered them)
-3. Verify registration: `pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate`
-4. With Developer ID / Development Team signing, the Settings row can appear; then set **Mount Backend** to **FSKit (Native)** in the app
+1. 构建并安装 `Nigate.app` 到 `/Applications`（`./macos/Scripts/build.sh`），扩展位于 `Contents/Extensions`
+2. **无 Apple 代码签名证书时**，「系统设置 → 文件系统扩展」**通常不会列出 Nigate**（ad-hoc 会被设置页过滤；`pluginkit` 仍可能已注册）
+3. 确认注册：`pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate`
+4. 具备 Developer ID / Development Team 正式签名后，设置页才可能出现并可启用；应用内再将 **挂载后端** 设为 **FSKit（原生）**
 
-Programmatic `FSClient.mountSingleVolume` needs a trusted signature with `com.apple.developer.fskit.mount`. Without a signing identity, keep **ntfs-3g** as the primary path.
+程序化 `FSClient.mountSingleVolume` 需要带 `com.apple.developer.fskit.mount` 的可信签名。无签名身份时，请继续以 **ntfs-3g** 为主路径。
 
-## Important notes
+## 重要说明
 
 > [!important]
-> Stability depends on the storage device. Prefer reliable USB media.
+> 稳定性取决于存储设备，请使用可靠的 USB 介质。
 
-- Mounting needs administrator privileges.
-- Windows Fast Startup can block mounts — fully shut down Windows first.
-- Gatekeeper may block unsigned builds; allow the app in **Privacy & Security**, do not disable Gatekeeper globally.
-- Format is irreversible; `ntfsfix` is not a substitute for Windows `chkdsk`.
+- 挂载需要管理员权限。
+- Windows 快速启动可能导致挂载失败，请先在 Windows 完全关机。
+- 未签名应用可能被 Gatekeeper 拦截，请在 **隐私与安全性** 中按应用放行，勿全局关闭 Gatekeeper。
+- 格式化不可逆；`ntfsfix` 不能替代 Windows `chkdsk`。
 
-## Run & build
+## 运行与构建
 
-**Release app**: download from [tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags), move `Nigate.app` to Applications.
+**发布版**：从 [标签](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags) 下载，将 `Nigate.app` 移入「应用程序」。
 
-**From source** (macOS 14+, Swift 6 toolchain):
+**源码运行**（macOS 14+，Swift 6 工具链）：
 
 ```sh
 git clone https://github.com/hoochanlon/Free-NTFS-for-Mac.git
@@ -58,14 +56,14 @@ swift run Nigate
 ./dev.sh
 ```
 
-**App bundle / DMG**:
+**应用包 / DMG**：
 
 ```sh
-./macos/Scripts/build.sh          # → dist/Nigate.app (ad-hoc signed)
+./macos/Scripts/build.sh          # → dist/Nigate.app（ad-hoc 签名）
 ./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.1.dmg
 ```
 
-Optional Developer ID + notarization:
+可选 Developer ID + 公证：
 
 ```sh
 DEVELOPER_ID_APPLICATION="Developer ID Application: Example" \
@@ -74,24 +72,24 @@ NOTARIZE=1 \
 ./macos/Scripts/build.sh
 ```
 
-## Layout
+## 目录结构
 
 ```text
 Package.swift
-macos/Sources/Nigate/              App (Domain / Infra / NTFS / App / UI)
-macos/Sources/NigateFSKitCore/     Shared FSKit identity & mount-backend policy
-macos/Sources/NigateFSKitExtension/ FSKit data plane (appex)
-macos/Sources/NigateNTFSEngine/    Static-linked NTFS engine for the extension
+macos/Sources/Nigate/              主应用（Domain / Infra / NTFS / App / UI）
+macos/Sources/NigateFSKitCore/     FSKit 身份与挂载后端策略
+macos/Sources/NigateFSKitExtension/ FSKit 数据面（appex）
+macos/Sources/NigateNTFSEngine/    扩展内静态链接的 NTFS 引擎
 Tests/NigateTests/
 docs/README.md
 ```
 
-## Acknowledgements
+## 致谢
 
-If Nigate helps you, you can leave a tip:
+如果 Nigate 对你有帮助，欢迎扫码打赏：
 
 <p align="center">
-  <img src="buy%20coffee/zanshangma.jpg" alt="Tip QR code" width="240">
+  <img src="buy%20coffee/zanshangma.jpg" alt="赞赏码" width="240">
 </p>
 
-Thanks to everyone who contributed. See [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md).
+感谢所有贡献者。详见 [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)。
