@@ -1,4 +1,4 @@
-# Nigate 1.6.3
+# Nigate 1.6.4
 
 Compared with [v1.5.4](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/tag/v1.5.4).
 
@@ -13,7 +13,7 @@ Compared with [v1.5.4](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/
 
 ---
 
-# Nigate 1.6.3
+# Nigate 1.6.4
 
 相对 [v1.5.4](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/tag/v1.5.4)。
 
