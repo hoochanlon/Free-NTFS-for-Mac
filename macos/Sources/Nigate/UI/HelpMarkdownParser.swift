@@ -8,6 +8,7 @@ struct HelpBlock: Identifiable {
         case code(language: String, source: String)
         case callout(kind: HelpCalloutKind, text: String)
         case table([[String]])
+        case image(name: String, alt: String)
     }
 
     let id: Int
@@ -80,6 +81,9 @@ enum HelpMarkdownParser {
             } else if trimmed.hasPrefix(">") {
                 let callout = parseCallout(at: &index, lines: lines)
                 append(.callout(kind: callout.kind, text: callout.text))
+            } else if let image = parseImage(in: trimmed) {
+                append(.image(name: image.name, alt: image.alt))
+                index += 1
             } else if parseListItem(line) != nil {
                 let items = parseList(at: &index, lines: lines)
                 append(.list(items))
@@ -123,8 +127,68 @@ enum HelpMarkdownParser {
         return trimmed.hasPrefix("```")
             || heading(in: trimmed) != nil
             || trimmed.hasPrefix(">")
+            || parseImage(in: trimmed) != nil
             || parseListItem(lines[index]) != nil
             || isTableHeader(at: index, lines: lines)
+    }
+
+    private static func parseImage(in line: String) -> (name: String, alt: String)? {
+        if let markdown = parseMarkdownImage(in: line) { return markdown }
+        return parseHTMLImage(in: line)
+    }
+
+    private static func parseMarkdownImage(in line: String) -> (name: String, alt: String)? {
+        guard line.hasPrefix("!["),
+              let altEnd = line.firstIndex(of: "]"),
+              line[line.index(after: altEnd)...].hasPrefix("("),
+              line.hasSuffix(")") else { return nil }
+
+        let alt = String(line[line.index(line.startIndex, offsetBy: 2)..<altEnd])
+        let pathStart = line.index(altEnd, offsetBy: 2)
+        let pathEnd = line.index(before: line.endIndex)
+        guard pathStart < pathEnd else { return nil }
+
+        var name = String(line[pathStart..<pathEnd]).trimmingCharacters(in: .whitespaces)
+        if let space = name.firstIndex(where: { $0.isWhitespace }) {
+            name = String(name[..<space])
+        }
+        name = normalizeImageName(name)
+        guard !name.isEmpty else { return nil }
+        return (name, alt)
+    }
+
+    private static func parseHTMLImage(in line: String) -> (name: String, alt: String)? {
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        guard trimmed.lowercased().hasPrefix("<img") else { return nil }
+        guard let src = htmlAttribute("src", in: trimmed) else { return nil }
+        let name = normalizeImageName(src)
+        guard !name.isEmpty else { return nil }
+        return (name, htmlAttribute("alt", in: trimmed) ?? "")
+    }
+
+    private static func normalizeImageName(_ raw: String) -> String {
+        var name = raw.trimmingCharacters(in: .whitespaces)
+        name = name.trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
+        if name.hasPrefix("./") {
+            name.removeFirst(2)
+        }
+        return name
+    }
+
+    private static func htmlAttribute(_ name: String, in tag: String) -> String? {
+        guard let regex = try? NSRegularExpression(
+            pattern: "\(name)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+))",
+            options: .caseInsensitive
+        ) else { return nil }
+        let range = NSRange(tag.startIndex..., in: tag)
+        guard let match = regex.firstMatch(in: tag, range: range) else { return nil }
+        for index in 1...3 {
+            let captured = match.range(at: index)
+            if captured.location != NSNotFound, let swiftRange = Range(captured, in: tag) {
+                return String(tag[swiftRange])
+            }
+        }
+        return nil
     }
 
     private static func parseListItem(_ line: String) -> ParsedListItem? {
@@ -187,7 +251,10 @@ enum HelpMarkdownParser {
 
         var kind = HelpCalloutKind.note
         if let marker = quoteLines.first,
-           marker.range(of: #"^\[!(NOTE|TIP|IMPORTANT|WARNING|WARN|CAUTION)\]$"#, options: .regularExpression) != nil {
+           marker.range(
+            of: #"^\[!(NOTE|TIP|IMPORTANT|WARNING|WARN|CAUTION)\]$"#,
+            options: [.regularExpression, .caseInsensitive]
+           ) != nil {
             kind = HelpCalloutKind(marker: String(marker.dropFirst(2).dropLast()))
             quoteLines.removeFirst()
         }
@@ -232,12 +299,41 @@ struct HelpHeading: Identifiable {
     var id: Int { blockID }
 }
 
+struct HelpOutlineNode: Identifiable {
+    let heading: HelpHeading
+    let children: [HelpOutlineNode]
+
+    var id: Int { heading.blockID }
+}
+
 enum HelpMarkdownIndex {
     static func headings(in blocks: [HelpBlock]) -> [HelpHeading] {
         blocks.compactMap { block in
             guard case let .heading(level, title) = block.content, level >= 2 else { return nil }
             return HelpHeading(blockID: block.id, level: level, title: title)
         }
+    }
+
+    static func outline(in blocks: [HelpBlock]) -> [HelpOutlineNode] {
+        let headings = headings(in: blocks)
+        var index = 0
+        return nest(headings, parentLevel: 1, index: &index)
+    }
+
+    private static func nest(
+        _ headings: [HelpHeading],
+        parentLevel: Int,
+        index: inout Int
+    ) -> [HelpOutlineNode] {
+        var nodes: [HelpOutlineNode] = []
+        while index < headings.count {
+            let heading = headings[index]
+            guard heading.level > parentLevel else { break }
+            index += 1
+            let children = nest(headings, parentLevel: heading.level, index: &index)
+            nodes.append(HelpOutlineNode(heading: heading, children: children))
+        }
+        return nodes
     }
 
     static func matchingBlockIDs(query: String, in blocks: [HelpBlock]) -> [Int] {
@@ -253,6 +349,8 @@ enum HelpMarkdownIndex {
         switch content {
         case let .heading(_, text), let .paragraph(text), let .code(_, text), let .callout(_, text):
             text
+        case let .image(_, alt):
+            alt
         case let .list(items):
             items.map(\.text).joined(separator: "\n")
         case let .table(rows):

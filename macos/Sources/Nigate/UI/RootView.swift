@@ -50,9 +50,10 @@ struct RootView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(minWidth: 900, minHeight: 680)
-        .background(Color(nsColor: .windowBackgroundColor))
         .id(model.languageStamp)
+        .frame(minWidth: WindowLayout.width, maxWidth: WindowLayout.width, minHeight: WindowLayout.minHeight)
+        .background(Color(nsColor: .windowBackgroundColor))
+        .background(MainWindowLock())
         .sheet(item: $model.passwordSheet, onDismiss: {
             model.cancelPassword()
         }) { sheet in
@@ -79,7 +80,22 @@ struct RootView: View {
             Text(model.alert?.message ?? "")
         }
         .overlay(alignment: .bottom) {
-            if let toast = model.toast {
+            if let hint = model.progressHint {
+                HStack(alignment: .top, spacing: 10) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text(hint)
+                        .font(.callout)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .frame(maxWidth: 640, alignment: .leading)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .padding(.horizontal, 24)
+                .padding(.bottom, 18)
+            } else if let toast = model.toast {
                 Text(toast)
                     .font(.callout)
                     .padding(.horizontal, 14)
@@ -89,9 +105,9 @@ struct RootView: View {
             }
         }
         .onChange(of: model.toast) { _, toast in
-            guard let toast else { return }
+            guard let toast, model.progressHint == nil else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) {
-                if model.toast == toast { model.toast = nil }
+                if model.toast == toast, model.progressHint == nil { model.toast = nil }
             }
         }
         .preferredColorScheme(model.settings.themeIsLight ? .light : .dark)

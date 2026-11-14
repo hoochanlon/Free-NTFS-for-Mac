@@ -6,7 +6,7 @@ Nigate は、NTFS ボリュームを読み書き可能な状態でマウント�
 
 最新版は [リリースタグ](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags) からダウンロードできます。
 
-![](https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/src/imgs/example/demo.gif)
+![](./demo.gif)
 
 このデモは 1.6.1 より前のバージョンのものです。
 
@@ -62,7 +62,7 @@ swift run Nigate
 
 ```sh
 ./macos/Scripts/build.sh          # → dist/Nigate.app（ad-hoc 署名）
-./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.1.dmg
+./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.3.dmg
 ```
 
 任意の Developer ID + 公証：

@@ -19,6 +19,8 @@ final class AppModel: ObservableObject {
     @Published var supportOpen = false
     @Published var renameDevice: NTFSDevice?
     @Published var toast: String?
+    /// 长操作（格式化）期间停在窗口下方，不走 toast 的短时消失。
+    @Published var progressHint: String?
     @Published var languageStamp = 0
     /// 供 Settings / Dependencies 观察；MountBackendPolicy 同步持有同一快照。
     @Published private(set) var fsKitControlPlane = NigateFSKitControlPlaneState.unavailable
@@ -265,6 +267,7 @@ final class AppModel: ObservableObject {
         defer {
             // 兜底：任意提前退出都不会把整卡锁死在灰色。
             if !busyReleased { clearBusy(diskKey) }
+            progressHint = nil
         }
         let service = MountService(backend: resolvedMountBackend()) { [weak self] key, params in
             guard let self else { throw AppError.cancelled }
@@ -296,7 +299,10 @@ final class AppModel: ObservableObject {
             case .rename:
                 toast = try await service.rename(device, to: extra ?? device.volumeName)
             case .format:
-                toast = try await service.format(device)
+                progressHint = L10n.t("messages.formattingHint", ["name": device.volumeName])
+                let result = try await service.format(device)
+                progressHint = nil
+                toast = result
             case .eject:
                 toast = try await service.eject(device)
             }

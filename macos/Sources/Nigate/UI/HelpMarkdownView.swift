@@ -1,7 +1,20 @@
 import SwiftUI
+import AppKit
 
 enum HelpScrollTarget: Hashable {
     case block(Int)
+}
+
+private enum HelpImageLayout {
+    static let width: CGFloat = 520
+
+    static func size(for image: NSImage) -> CGSize {
+        let original = image.size
+        guard original.width > 0, original.height > 0 else {
+            return CGSize(width: width, height: 300)
+        }
+        return CGSize(width: width, height: width * original.height / original.width)
+    }
 }
 
 struct HelpMarkdownView: View {
@@ -61,6 +74,8 @@ struct HelpMarkdownView: View {
             callout(kind: kind, text: value)
         case let .table(rows):
             table(rows)
+        case let .image(name, alt):
+            imageBlock(name: name, alt: alt)
         }
     }
 
@@ -96,25 +111,32 @@ struct HelpMarkdownView: View {
     }
 
     private func codeBlock(language: String, source: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if !language.isEmpty {
-                Text(language.uppercased())
-                    .font(.caption.weight(.semibold))
-                    .tracking(0.5)
-                    .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 10) {
+                if !language.isEmpty {
+                    Text(language.uppercased())
+                        .font(.caption.weight(.semibold))
+                        .tracking(0.5)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 0)
+                CopyCommandButton(command: source)
             }
             ScrollView(.horizontal) {
                 Text(source)
-                    .font(.system(size: 12.5, design: .monospaced))
+                    .font(.system(.body, design: .monospaced))
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 2)
+                    .padding(.bottom, 16)
             }
+            .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
         }
-        .padding(13)
+        .padding(.horizontal, 10)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(nsColor: .textBackgroundColor).opacity(0.76), in: RoundedRectangle(cornerRadius: 9))
-        .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(.quaternary))
+        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 7))
+        .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color.primary.opacity(0.08)))
     }
 
     private func callout(kind: HelpCalloutKind, text: String) -> some View {
@@ -172,6 +194,47 @@ struct HelpMarkdownView: View {
         }
     }
 
+    @ViewBuilder
+    private func imageBlock(name: String, alt: String) -> some View {
+        if let url = helpImageURL(name), let nsImage = NSImage(contentsOf: url) {
+            let size = HelpImageLayout.size(for: nsImage)
+            Group {
+                if url.pathExtension.lowercased() == "gif" {
+                    HelpAnimatedImage(url: url, size: size)
+                } else {
+                    Image(nsImage: nsImage)
+                        .resizable()
+                        .interpolation(.high)
+                }
+            }
+            .frame(width: size.width, height: size.height)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(accessibilityAlt(alt))
+            .padding(.vertical, 4)
+        } else if showsCaption(alt) {
+            Text(alt)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .padding(.vertical, 4)
+        }
+    }
+
+    private func showsCaption(_ alt: String) -> Bool {
+        let trimmed = alt.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !trimmed.isEmpty && trimmed.compare("Image", options: .caseInsensitive) != .orderedSame
+    }
+
+    private func accessibilityAlt(_ alt: String) -> String {
+        showsCaption(alt) ? alt : ""
+    }
+
+    private func helpImageURL(_ name: String) -> URL? {
+        let file = URL(fileURLWithPath: name).lastPathComponent
+        return L10n.resource("Help/images/\(file)")
+            ?? L10n.resource("Help/\(name)")
+            ?? L10n.resource(name)
+    }
+
     private func inline(_ source: String) -> Text {
         let cleaned = source.replacingOccurrences(
             of: "<img\\b[^>]*>",
@@ -190,6 +253,42 @@ struct HelpMarkdownView: View {
         case let .numbered(number):
             "\(number)."
         }
+    }
+}
+
+private struct HelpAnimatedImage: NSViewRepresentable {
+    let url: URL
+    let size: CGSize
+
+    func makeNSView(context: Context) -> NSImageView {
+        let view = HelpGIFImageView()
+        view.imageScaling = .scaleAxesIndependently
+        view.animates = true
+        view.canDrawSubviewsIntoLayer = true
+        view.imageFrameStyle = .none
+        view.imageAlignment = .alignCenter
+        view.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        view.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+        view.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        view.setContentHuggingPriority(.defaultLow, for: .vertical)
+        view.image = NSImage(contentsOf: url)
+        return view
+    }
+
+    func updateNSView(_ nsView: NSImageView, context: Context) {
+        if nsView.image == nil {
+            nsView.image = NSImage(contentsOf: url)
+        }
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, nsView: NSImageView, context: Context) -> CGSize? {
+        size
+    }
+}
+
+private final class HelpGIFImageView: NSImageView {
+    override var intrinsicContentSize: NSSize {
+        NSSize(width: NSView.noIntrinsicMetric, height: NSView.noIntrinsicMetric)
     }
 }
 

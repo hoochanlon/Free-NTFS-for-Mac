@@ -4,7 +4,7 @@
 
 快速开始：从 [发布标签](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags) 下载并使用。
 
-![](https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/src/imgs/example/demo.gif)
+![](./demo.gif)
 
 演示界面为 1.6.1 以下版本，界面随功能增强可能略有变化。
 
@@ -60,7 +60,7 @@ swift run Nigate
 
 ```sh
 ./macos/Scripts/build.sh          # → dist/Nigate.app（ad-hoc 签名）
-./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.1.dmg
+./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.3.dmg
 ```
 
 可选 Developer ID + 公证：

@@ -52,6 +52,7 @@ struct MountService {
     private func mountWithNTFS3G(_ device: NTFSDevice, passwordOverride: String?) async throws -> String {
         guard let raw = await PathLookup.ntfs3g() else { throw AppError.ntfs3gMissing }
         let ntfs3g = try PathLookup.resolvedNTFS3G(raw)
+        let fuseEnv = try FuseLibrary.launchEnv()
         let mountPoint = device.volume.isEmpty
             ? "/Volumes/\(DiskSafety.sanitizeVolumeName(device.volumeName))"
             : device.volume
@@ -78,7 +79,7 @@ struct MountService {
             "-onoatime", device.devicePath, mountPoint
         ]
         do {
-            _ = try await run(args, password: &password, refreshKey: "messages.passwordDialog.mountDeviceRetry", name: device.volumeName, timeout: 10)
+            _ = try await run(args, password: &password, refreshKey: "messages.passwordDialog.mountDeviceRetry", name: device.volumeName, timeout: 10, extraEnv: fuseEnv)
         } catch AppError.timeout(_) {
             throw AppError.timeout("挂载操作超时（10秒），操作已取消以防止卡死。可能的原因：1) 文件系统处于脏状态（如果该 NTFS 设备之前在 Windows 电脑上使用过，且 Windows 启用了快速启动功能，请将设备插回 Windows 电脑并完全关闭后再试）；2) 设备被其他程序占用；3) 系统权限问题。")
         }
@@ -431,14 +432,15 @@ struct MountService {
         password: inout String,
         refreshKey: String,
         name: String,
-        timeout: TimeInterval = 30
+        timeout: TimeInterval = 30,
+        extraEnv: [String: String] = [:]
     ) async throws -> ShellResult {
         do {
-            return try await Privilege.sudo(args, password: password, timeout: timeout)
+            return try await Privilege.sudo(args, password: password, timeout: timeout, extraEnv: extraEnv)
         } catch AppError.incorrectPassword {
             KeychainStore.delete()
             password = try await askPassword(refreshKey, ["name": name])
-            return try await Privilege.sudo(args, password: password, timeout: timeout)
+            return try await Privilege.sudo(args, password: password, timeout: timeout, extraEnv: extraEnv)
         }
     }
 

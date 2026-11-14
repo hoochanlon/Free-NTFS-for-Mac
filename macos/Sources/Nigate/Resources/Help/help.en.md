@@ -13,7 +13,115 @@ The app does not disable Gatekeeper or change global security settings. When ins
 1. Open **Dependencies** and select **Check Dependencies** to review macOS, Xcode Command Line Tools, Homebrew, MacFUSE, `ntfs-3g`, and optional `fswatch`.
 2. Read-write mounting requires macOS 14 or later, MacFUSE, and `ntfs-3g`. The dependency list describes the purpose and requirement status of each other component.
 3. Use **One-click Install** to start the installation flow in Terminal, or expand a dependency to view and copy its command for manual installation. Approve system extensions only as prompted by macOS.
-4. After installation or approval, check dependencies again. NTFS read-write mounting and related actions are unavailable until MacFUSE and `ntfs-3g` are ready.
+4. After installation or approval, check dependencies again. NTFS read-write mounting and related actions are unavailable until MacFUSE and `ntfs-3g` are ready. If macOS says the app is damaged, or you need to enable file system extensions or approve a kernel extension, see the next sections.
+
+## Essential Mac Knowledge
+
+### Remove quarantine for one app vs disable Gatekeeper globally
+
+#### “The file is damaged, move it to the Trash”
+
+Because [Apple gates software that has been transferred](https://developer.apple.com/developer-id/), a downloaded app may show “this software is damaged and should be moved to the Trash”. Choose Cancel.
+
+![](images/1.png)
+
+In **App → Terminal**, run this command to remove the quarantine:
+
+```bash
+xattr -cr /Applications/nigate.app
+```
+
+![](images/2.png)
+
+Follow the screenshot.
+
+![](images/3.png)
+
+#### Allow apps from anywhere
+
+Disable Gatekeeper globally by running:
+
+```bash
+sudo spctl --master-disable
+```
+
+When you see `Globally disabling the assessment system needs to be confirmed in System Settings.`, follow the screenshot.
+
+![](images/4.png)
+
+#### Summary
+
+`xattr -cr`: scoped allow, precise and safer — it only unblocks this app. (⭐⭐⭐⭐⭐ preferred)
+
+`spctl --master-disable`: global off, high risk — it opens the Mac’s security gate completely. (⭐⭐⭐ not recommended, but usable for IT professionals)
+
+### Allow third-party kernel extensions
+
+When the System Extension Blocked dialog appears, open **Privacy & Security** in System Settings and allow the system extension from “Benjamin Fleischer”.
+
+![](images/bc-3.png)
+
+In the Security area of Privacy & Security, click to enable the system extension.
+
+![](images/bc-1.png)
+
+You are then asked to shut down and enter Recovery. Click **Shut Down**, then continue with the Disable SIP steps below.
+
+![](images/bc-2.png)
+
+### Disable SIP
+
+SIP stands for System Integrity Protection. It limits even the root account’s control of the system (also called Rootless). SIP is enabled by default. As shown below, it is clearly on.
+
+![](images/6.png)
+
+After shutting down, press and hold the power button until **Loading startup options** appears.
+
+![](images/7.gif)
+
+Keep holding the power button.
+
+![](images/8.png)
+
+You can release the power button now.
+
+![](images/9.png)
+
+Select an account, click **Next**, then enter the Mac password.
+
+![](images/10.png)
+
+Click **Options** and continue.
+
+![](images/11.png)
+
+From the menu bar, choose **Utilities → Startup Security Utility**.
+
+![](images/12.png)
+
+Alternatively, open Terminal and run `csrutil disable`, then restart (method 2).
+
+Continue with method 1: click **Security Policy**.
+
+![](images/13.png)
+
+Set the policy to **Reduced Security**, enable **Allow user management of kernel extensions from identified developers**, then confirm.
+
+![](images/14.png)
+
+In Terminal, run `csrutil status` to see whether SIP is disable or enable.
+
+![](images/15.png)
+
+### Enable file system extensions
+
+In **General** settings, open **Login Items & Extensions → Extensions → By Category → File System Extensions**. Then click the information icon for that item, or run the command below to jump there, and enable ntfs-3g (if present), macFUSE, and related options.
+
+```shell
+open "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointIdentifier=com.apple.fskit.fsmodule"
+```
+
+![](images/5.png)
 
 ## Devices and operations
 
@@ -92,7 +200,7 @@ Close Finder windows and apps using the volume, then select **Reset** on the dev
 
 ### MacFUSE is outdated or its extension is blocked after a macOS update
 
-Expand MacFUSE on the Dependencies page and follow the upgrade steps there. Approve the verified extension under **System Settings → Privacy & Security**. Labels vary by macOS release. Do not leave Gatekeeper disabled; if a documented step requires a temporary security change, follow its warning and restore the setting immediately afterward.
+Expand MacFUSE on the Dependencies page and follow the upgrade steps there. Approve the verified extension under **System Settings → Privacy & Security**. Labels vary by macOS release. Do not leave Gatekeeper disabled; if a documented step requires a temporary security change, follow its warning and restore the setting immediately afterward. If an Apple silicon Mac still cannot load the kernel extension, see **Disable SIP** above.
 
 ### Where is my device after unmounting?
 

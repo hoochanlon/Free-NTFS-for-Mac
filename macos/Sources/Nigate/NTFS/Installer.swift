@@ -45,7 +45,16 @@ enum Installer {
           read -r
           exit 1
         fi
-        "$BREW" install --cask macfuse || exit $?
+        FUSE_LIB="/usr/local/lib/libfuse.2.dylib"
+        FUSE_FS="/Library/Filesystems/macfuse.fs/Contents/Resources/mount_macfuse"
+        FUSE_LOAD="/Library/Filesystems/macfuse.fs/Contents/Resources/load_macfuse"
+        if [[ -e "$FUSE_LIB" && ( -e "$FUSE_FS" || -e "$FUSE_LOAD" ) ]]; then
+          echo "macFUSE already present."
+        elif "$BREW" list --cask macfuse >/dev/null 2>&1; then
+          "$BREW" reinstall --cask macfuse || exit $?
+        else
+          "$BREW" install --cask macfuse || exit $?
+        fi
         "$BREW" tap gromgit/homebrew-fuse || exit $?
         "$BREW" install gromgit/fuse/ntfs-3g-mac || "$BREW" install ntfs-3g || exit $?
         "$BREW" install fswatch || true

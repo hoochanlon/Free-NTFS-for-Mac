@@ -13,7 +13,115 @@ Nigate 是使用 Swift 和 SwiftUI 建立的原生 macOS 應用程式，需要 m
 1. 開啟「依賴」頁面並選擇「檢查依賴」，查看 macOS、Xcode Command Line Tools、Homebrew、MacFUSE、`ntfs-3g` 及選用的 `fswatch` 狀態。
 2. 讀寫掛載需要 macOS 14 或更新版本、MacFUSE 與 `ntfs-3g`。其他項目的用途與必要性會顯示在清單中。
 3. 可使用「一鍵安裝」在終端機啟動安裝流程，或展開依賴項目檢視及複製命令，手動安裝。系統延伸功能請依照 macOS 提示核准。
-4. 安裝或核准後，請重新檢查依賴。MacFUSE 與 `ntfs-3g` 尚未就緒前，無法使用 NTFS 讀寫掛載及相關操作。
+4. 安裝或核准後，請重新檢查依賴。MacFUSE 與 `ntfs-3g` 尚未就緒前，無法使用 NTFS 讀寫掛載及相關操作。若開啟應用程式時提示已損壞，或需要啟用檔案系統延伸功能、核准核心延伸功能，請見以下章節。
+
+## Mac 必知必會
+
+### 單獨移除隔離屬性 vs 全域關閉 Gatekeeper
+
+#### 「檔案損壞扔入垃圾桶」
+
+由於[蘋果對軟體遷移設有安裝門禁](https://developer.apple.com/cn/developer-id/)，所以軟體版在使用時，會出現「此軟體已損壞，扔入廢紙簍」的提示彈窗，點擊取消。
+
+![](images/1.png)
+
+在「App」->「終端機」使用該指令解除：
+
+```bash
+xattr -cr /Applications/nigate.app
+```
+
+![](images/2.png)
+
+如圖操作
+
+![](images/3.png)
+
+#### 允許任何來源
+
+全域關閉 Gatekeeper，執行如下程式碼
+
+```bash
+sudo spctl --master-disable
+```
+
+出現 `Globally disabling the assessment system needs to be confirmed in System Settings.` 提示後，如圖操作
+
+![](images/4.png)
+
+#### 小結
+
+`xattr -cr`：局部放行，精準安全，只解決眼前這個 App 的問題。（⭐⭐⭐⭐⭐ 首選）
+
+`spctl --master-disable`：全域關閉，風險極高，相當於把 Mac 的安全大門徹底敞開。（⭐⭐⭐ 不建議，但適合 IT 專業使用者）
+
+### 允許第三方核心延伸功能載入
+
+出現 System Extension Blocked 彈窗時，打開系統設定的「隱私權與安全性」，允許「Benjamin Fleischer」的系統延伸功能。
+
+![](images/bc-3.png)
+
+在隱私權與安全性中的安全性區域點擊啟用系統延伸功能
+
+![](images/bc-1.png)
+
+提示關機並進入復原模式，點擊關機，接著進入到關閉 SIP 操作內容。
+
+![](images/bc-2.png)
+
+### 關閉 SIP
+
+SIP 是 System Integrity Protection 的簡寫，譯為系統完整性保護。目的是限制 root 帳戶對系統的完全控制權，也叫 Rootless 保護機制。Mac 系統中 SIP 狀態預設是開啟的。如圖，該情況顯然是開啟的。
+
+![](images/6.png)
+
+關機後，按住電源鍵不放，直到出現正在載入啟動選項。
+
+![](images/7.gif)
+
+目前要繼續保持按住電源按鈕
+
+![](images/8.png)
+
+此時可以放開電源按鈕了
+
+![](images/9.png)
+
+選擇帳戶，然後點擊「下一步」，再輸入 Mac 電腦密碼。
+
+![](images/10.png)
+
+點擊選項然後繼續。
+
+![](images/11.png)
+
+在上方選單列選擇工具程式 -> 選擇啟動安全性工具程式
+
+![](images/12.png)
+
+或者選擇終端機輸入 `csrutil disable` 直接結束，重新啟動電腦（此為，方式二）
+
+我們繼續方式一，點擊安全性原則
+
+![](images/13.png)
+
+將安全性原則設為降低安全性，並勾選允許使用者管理來自受認可開發者的核心延伸功能→ 確定。
+
+![](images/14.png)
+
+終端機輸入 `csrutil status` 即可看到 SIP 的狀態是 disable 還是 enable。
+
+![](images/15.png)
+
+### 啟用檔案系統延伸功能
+
+在「一般」設定中，依序選擇「登入項目與延伸功能」>「延伸功能」>「依類別」>「檔案系統延伸功能」。隨後點擊該項對應的資訊圖示，或使用如下命令跳到「檔案系統延伸功能」，並啟用 ntfs-3g（如存在）及 macFUSE 等相關選項。
+
+```shell
+open "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointIdentifier=com.apple.fskit.fsmodule"
+```
+
+![](images/5.png)
 
 ## 裝置與操作
 
@@ -92,7 +200,7 @@ macOS 預設以唯讀方式掛載 NTFS。請先在「依賴」頁確認 MacFUSE 
 
 ### macOS 更新後 MacFUSE 過舊或延伸功能遭封鎖
 
-在「依賴」頁展開 MacFUSE，依照頁面提供的步驟更新官方版本，並在「系統設定 → 隱私權與安全性」核准已確認的延伸功能。設定名稱可能因 macOS 版本而異。請勿長期停用 Gatekeeper；若步驟要求暫時變更安全設定，請遵守警告並在完成後立即還原。
+在「依賴」頁展開 MacFUSE，依照頁面提供的步驟更新官方版本，並在「系統設定 → 隱私權與安全性」核准已確認的延伸功能。設定名稱可能因 macOS 版本而異。請勿長期停用 Gatekeeper；若步驟要求暫時變更安全設定，請遵守警告並在完成後立即還原。Apple 晶片若仍無法載入核心延伸功能，請見上文「關閉 SIP」。
 
 ### 卸載後在哪裡找到裝置？
 

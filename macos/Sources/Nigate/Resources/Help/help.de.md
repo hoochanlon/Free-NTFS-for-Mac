@@ -13,7 +13,115 @@ Die App deaktiviert Gatekeeper nicht und ändert keine globalen Sicherheitseinst
 1. Öffnen Sie **Abhängigkeiten** und wählen Sie **Abhängigkeiten prüfen**, um macOS, Xcode Command Line Tools, Homebrew, MacFUSE, `ntfs-3g` und das optionale `fswatch` zu überprüfen.
 2. Für NTFS-Lese-/Schreibzugriff sind macOS 14 oder neuer, MacFUSE und `ntfs-3g` erforderlich. Zweck und Status der weiteren Komponenten werden in der Liste angezeigt.
 3. Mit **Ein-Klick-Installation** starten Sie den Installationsablauf im Terminal. Alternativ können Sie einen Eintrag aufklappen, den Befehl anzeigen und kopieren und die Installation manuell ausführen. Bestätigen Sie Systemerweiterungen nur nach den macOS-Hinweisen.
-4. Prüfen Sie die Abhängigkeiten nach Installation und Freigabe erneut. NTFS-Lese-/Schreibzugriff und zugehörige Aktionen sind erst möglich, wenn MacFUSE und `ntfs-3g` bereit sind.
+4. Prüfen Sie die Abhängigkeiten nach Installation und Freigabe erneut. NTFS-Lese-/Schreibzugriff und zugehörige Aktionen sind erst möglich, wenn MacFUSE und `ntfs-3g` bereit sind. Wenn macOS die App als beschädigt blockiert oder Dateisystem- bzw. Kernel-Erweiterungen bestätigt werden müssen, lesen Sie die folgenden Abschnitte.
+
+## Unverzichtbares Mac-Wissen
+
+### Quarantäne nur für eine App entfernen vs Gatekeeper global deaktivieren
+
+#### „Die Datei ist beschädigt, in den Papierkorb legen“
+
+Weil [Apple übertragene Software hinter einem Installationsschutz hält](https://developer.apple.com/developer-id/), kann beim Start die Meldung erscheinen, die Software sei beschädigt und gehöre in den Papierkorb. Wählen Sie Abbrechen.
+
+![](images/1.png)
+
+Unter **App → Terminal** heben Sie die Quarantäne mit diesem Befehl auf:
+
+```bash
+xattr -cr /Applications/nigate.app
+```
+
+![](images/2.png)
+
+Gehen Sie wie im Screenshot vor.
+
+![](images/3.png)
+
+#### Beliebige Quellen erlauben
+
+Gatekeeper global deaktivieren:
+
+```bash
+sudo spctl --master-disable
+```
+
+Erscheint `Globally disabling the assessment system needs to be confirmed in System Settings.`, folgen Sie dem Screenshot.
+
+![](images/4.png)
+
+#### Kurzfassung
+
+`xattr -cr`: gezielt freigeben, präzise und sicherer — behebt nur das aktuelle App-Problem. (⭐⭐⭐⭐⭐ bevorzugt)
+
+`spctl --master-disable`: global aus, sehr hohes Risiko — das Sicherheitstor des Mac wird vollständig geöffnet. (⭐⭐⭐ nicht empfohlen, aber für IT-Fachleute nutzbar)
+
+### Kernel-Erweiterungen von Drittanbietern zulassen
+
+Wenn der Dialog **System Extension Blocked** erscheint, öffnen Sie in den Systemeinstellungen **Datenschutz & Sicherheit** und erlauben Sie die Systemerweiterung von „Benjamin Fleischer“.
+
+![](images/bc-3.png)
+
+Klicken Sie im Bereich Sicherheit unter Datenschutz & Sicherheit, um die Systemerweiterung zu aktivieren.
+
+![](images/bc-1.png)
+
+Anschließend werden Sie aufgefordert, den Mac auszuschalten und in den Wiederherstellungsmodus zu wechseln. Klicken Sie auf **Ausschalten** und fahren Sie mit dem Abschnitt **SIP deaktivieren** fort.
+
+![](images/bc-2.png)
+
+### SIP deaktivieren
+
+SIP steht für System Integrity Protection (Systemintegritätsschutz). Damit soll selbst das Root-Konto das System nicht vollständig kontrollieren können; das Verfahren heißt auch Rootless. SIP ist standardmäßig eingeschaltet. Wie im Screenshot zu sehen, ist das hier eindeutig der Fall.
+
+![](images/6.png)
+
+Halten Sie nach dem Herunterfahren die Ein/Aus-Taste gedrückt, bis **Startoptionen werden geladen** erscheint.
+
+![](images/7.gif)
+
+Halten Sie die Ein/Aus-Taste weiter gedrückt.
+
+![](images/8.png)
+
+Jetzt können Sie die Taste loslassen.
+
+![](images/9.png)
+
+Wählen Sie das Konto, klicken Sie auf **Weiter** und geben Sie das Mac-Passwort ein.
+
+![](images/10.png)
+
+Klicken Sie auf **Optionen** und fahren Sie fort.
+
+![](images/11.png)
+
+Wählen Sie in der Menüleiste **Dienstprogramme → Startsicherheitsdienstprogramm**.
+
+![](images/12.png)
+
+Alternativ können Sie im Terminal `csrutil disable` eingeben, den Vorgang beenden und den Mac neu starten (Methode 2).
+
+Wir bleiben bei Methode 1 und klicken auf **Sicherheitsrichtlinie**.
+
+![](images/13.png)
+
+Setzen Sie die Richtlinie auf **Reduzierte Sicherheit**, aktivieren Sie **Benutzerverwaltung von Kernel-Erweiterungen identifizierter Entwickler zulassen** und bestätigen Sie.
+
+![](images/14.png)
+
+Mit `csrutil status` im Terminal sehen Sie, ob SIP disable oder enable ist.
+
+![](images/15.png)
+
+### Dateisystemerweiterungen aktivieren
+
+Öffnen Sie in den **Allgemein**-Einstellungen nacheinander **Anmeldeobjekte & Erweiterungen** > **Erweiterungen** > **Nach Kategorie** > **Dateisystemerweiterungen**. Klicken Sie anschließend auf das Informationssymbol des Eintrags, oder springen Sie mit dem folgenden Befehl zu **Dateisystemerweiterungen**, und aktivieren Sie ntfs-3g (falls vorhanden), macFUSE und verwandte Optionen.
+
+```shell
+open "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointIdentifier=com.apple.fskit.fsmodule"
+```
+
+![](images/5.png)
 
 ## Geräte und Aktionen
 
@@ -92,7 +200,7 @@ Schließen Sie Finder-Fenster und Apps, die das Volume verwenden, und wählen Si
 
 ### MacFUSE ist nach einem macOS-Upgrade veraltet oder die Erweiterung wird blockiert
 
-Klappen Sie MacFUSE auf der Seite **Abhängigkeiten** auf und folgen Sie dort den Schritten zum Aktualisieren der offiziellen Version. Bestätigen Sie die verifizierte Erweiterung unter **Systemeinstellungen → Datenschutz & Sicherheit**. Die Bezeichnungen unterscheiden sich je nach macOS-Version. Lassen Sie Gatekeeper nicht dauerhaft deaktiviert. Falls die Anleitung eine vorübergehende Sicherheitsänderung verlangt, beachten Sie den Warnhinweis und stellen Sie die Einstellung sofort danach wieder her.
+Klappen Sie MacFUSE auf der Seite **Abhängigkeiten** auf und folgen Sie dort den Schritten zum Aktualisieren der offiziellen Version. Bestätigen Sie die verifizierte Erweiterung unter **Systemeinstellungen → Datenschutz & Sicherheit**. Die Bezeichnungen unterscheiden sich je nach macOS-Version. Lassen Sie Gatekeeper nicht dauerhaft deaktiviert. Falls die Anleitung eine vorübergehende Sicherheitsänderung verlangt, beachten Sie den Warnhinweis und stellen Sie die Einstellung sofort danach wieder her. Kann ein Mac mit Apple-Chip die Kernel-Erweiterung weiterhin nicht laden, siehe **SIP deaktivieren** oben.
 
 ### Wo finde ich das Gerät nach dem Aushängen?
 

@@ -10,12 +10,13 @@ struct NigateApp: App {
         Window("Nigate", id: "main") {
             RootView()
                 .environmentObject(model)
+                .nigateDisableFullScreen()
                 .task {
                     appDelegate.model = model
                     await model.bootstrap()
                 }
         }
-        .defaultSize(width: 900, height: 680)
+        .defaultSize(width: WindowLayout.width, height: WindowLayout.minHeight)
         .windowResizability(.contentMinSize)
         .windowStyle(.hiddenTitleBar)
         .commands {

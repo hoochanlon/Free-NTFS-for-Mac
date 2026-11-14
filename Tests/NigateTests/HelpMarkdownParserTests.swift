@@ -83,6 +83,24 @@ final class HelpMarkdownParserTests: XCTestCase {
         XCTAssertEqual(headings.map(\.blockID), [1, 2, 3, 5])
     }
 
+    func testNestsOutlineFromHeadingLevels() {
+        let markdown = """
+        # Guide
+        ## Parent
+        ### Child A
+        #### Grandchild
+        ### Child B
+        ## Sibling
+        """
+
+        let outline = HelpMarkdownIndex.outline(in: HelpMarkdownParser.parse(markdown))
+
+        XCTAssertEqual(outline.map(\.heading.title), ["Parent", "Sibling"])
+        XCTAssertEqual(outline[0].children.map(\.heading.title), ["Child A", "Child B"])
+        XCTAssertEqual(outline[0].children[0].children.map(\.heading.title), ["Grandchild"])
+        XCTAssertTrue(outline[1].children.isEmpty)
+    }
+
     func testSearchesAcrossParagraphsListsCalloutsTablesAndCode() {
         let markdown = """
         # Guide
@@ -132,6 +150,15 @@ final class HelpMarkdownParserTests: XCTestCase {
                     .contains(firstHeading.blockID),
                 language.rawValue
             )
+
+            let outline = HelpMarkdownIndex.outline(in: blocks)
+            XCTAssertFalse(outline.isEmpty, language.rawValue)
+            XCTAssertNotNil(
+                outline.first { node in
+                    node.children.count >= 3 && node.children.contains { !$0.children.isEmpty }
+                },
+                language.rawValue
+            )
         }
     }
 
@@ -140,5 +167,79 @@ final class HelpMarkdownParserTests: XCTestCase {
 
         XCTAssertTrue(HelpMarkdownIndex.matchingBlockIDs(query: "   ", in: blocks).isEmpty)
         XCTAssertTrue(HelpMarkdownIndex.matchingBlockIDs(query: "missing", in: blocks).isEmpty)
+    }
+
+    func testParsesStandaloneMarkdownImagesAndIndexesAltText() {
+        let markdown = """
+        # Guide
+
+        ![Damaged app](images/1.png)
+
+        Continue with text.
+        """
+
+        let blocks = HelpMarkdownParser.parse(markdown)
+
+        XCTAssertEqual(blocks.count, 3)
+        guard case let .image(name, alt) = blocks[1].content else {
+            return XCTFail("Expected an image block")
+        }
+        XCTAssertEqual(name, "images/1.png")
+        XCTAssertEqual(alt, "Damaged app")
+        XCTAssertEqual(HelpMarkdownIndex.matchingBlockIDs(query: "damaged", in: blocks), [1])
+    }
+
+    func testParsesHTMLImagesAndLowercaseCallouts() {
+        let markdown = """
+        # Guide
+
+        <img width="auto" height="350" alt="Image" src="./7.gif" />
+
+        > [!important]
+        > Source notes
+        """
+
+        let blocks = HelpMarkdownParser.parse(markdown)
+
+        XCTAssertEqual(blocks.count, 3)
+        guard case let .image(name, alt) = blocks[1].content else {
+            return XCTFail("Expected an HTML image block")
+        }
+        XCTAssertEqual(name, "7.gif")
+        XCTAssertEqual(alt, "Image")
+
+        guard case let .callout(kind, text) = blocks[2].content else {
+            return XCTFail("Expected a lowercase important callout")
+        }
+        XCTAssertEqual(kind, .important)
+        XCTAssertEqual(text, "Source notes")
+    }
+
+    func testLocalizedGuidesShareTheSameHelpImages() {
+        let previousLanguage = L10n.language
+        defer { L10n.apply(previousLanguage) }
+
+        let expected = Set([
+            "1.png", "2.png", "3.png", "4.png", "5.png",
+            "6.png", "7.gif", "8.png", "9.png", "10.png",
+            "11.png", "12.png", "13.png", "14.png", "15.png",
+            "bc-1.png", "bc-2.png", "bc-3.png"
+        ])
+
+        for language in [AppLanguage.zhCN, .zhTW, .en, .ja, .de] {
+            L10n.apply(language)
+            let names = Set(HelpMarkdownParser.parse(L10n.helpMarkdown()).compactMap { block -> String? in
+                if case let .image(name, _) = block.content {
+                    return URL(fileURLWithPath: name).lastPathComponent
+                }
+                return nil
+            })
+            XCTAssertEqual(names, expected, language.rawValue)
+        }
+
+        for name in expected {
+            let file = URL(fileURLWithPath: name).lastPathComponent
+            XCTAssertNotNil(L10n.resource("Help/images/\(file)"), file)
+        }
     }
 }

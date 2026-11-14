@@ -2,16 +2,32 @@ import Foundation
 import Darwin
 
 enum Privilege {
-    static func sudo(_ args: [String], password: String, timeout: TimeInterval = 30) async throws -> ShellResult {
+    private static let extraEnvAllowlist: Set<String> = [
+        "DYLD_LIBRARY_PATH",
+        "DYLD_FALLBACK_LIBRARY_PATH"
+    ]
+
+    /// 这些命令的子进程不应看到 Homebrew sbin（其中的 mount_ntfs 会强制走 ntfs-3g）。
+    private static let systemPathCommands: Set<String> = [
+        "diskutil", "umount", "mount", "mkdir", "rmdir", "gpt"
+    ]
+
+    static func sudo(
+        _ args: [String],
+        password: String,
+        timeout: TimeInterval = 30,
+        extraEnv: [String: String] = [:]
+    ) async throws -> ShellResult {
         if password.isEmpty { throw AppError.emptyPassword }
         let executable = Shell.trustedExecutable("/usr/bin/sudo") ?? "/usr/bin/sudo"
         let arguments = try validatedArguments(args)
+        let wrapped = try wrap(arguments, extraEnv: extraEnv)
 
         return try await withCheckedThrowingContinuation { continuation in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: executable)
-            process.arguments = ["-S"] + arguments
-            process.environment = Shell.environment
+            process.arguments = ["-S"] + wrapped
+            process.environment = environment(for: arguments.first ?? "")
             let out = Pipe()
             let err = Pipe()
             let input = Pipe()
@@ -59,6 +75,32 @@ enum Privilege {
         }
         return [executable] + args.dropFirst()
     }
+
+    /// sudo 会丢掉 DYLD_*；用 /usr/bin/env 在提权后再注入。
+    private static func wrap(_ arguments: [String], extraEnv: [String: String]) throws -> [String] {
+        guard !extraEnv.isEmpty else { return arguments }
+        var assignments: [String] = []
+        for (key, value) in extraEnv {
+            guard extraEnvAllowlist.contains(key) else {
+                throw AppError.failed("不受信任的环境变量: \(key)")
+            }
+            guard value.hasPrefix("/"), !value.contains("\0"), !value.contains("\n") else {
+                throw AppError.failed("不受信任的库路径")
+            }
+            assignments.append("\(key)=\(value)")
+        }
+        let env = Shell.trustedExecutable("/usr/bin/env") ?? "/usr/bin/env"
+        return [env] + assignments + arguments
+    }
+
+    private static func environment(for executable: String) -> [String: String] {
+        var env = Shell.environment
+        let name = URL(fileURLWithPath: executable).lastPathComponent
+        if systemPathCommands.contains(name) {
+            env["PATH"] = Shell.systemPath.joined(separator: ":")
+        }
+        return env
+    }
 }
 
 private final class SudoBox: @unchecked Sendable {
@@ -82,6 +124,8 @@ private final class SudoBox: @unchecked Sendable {
         let combined = (stderr + " " + stdout)
         if PasswordError.isIncorrect(combined) || (status == 1 && combined.lowercased().contains("password")) {
             item.resume(throwing: AppError.incorrectPassword)
+        } else if FuseLibrary.isMissingLibraryError(combined) {
+            item.resume(throwing: AppError.macfuseMissing)
         } else {
             let message = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
             item.resume(throwing: AppError.failed(message.isEmpty ? "退出码 \(status)" : message))

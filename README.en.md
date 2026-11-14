@@ -6,7 +6,7 @@ Nigate is a native macOS application for mounting NTFS volumes with read/write s
 
 Download the latest version from the [release tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags).
 
-![](https://cdn.jsdelivr.net/gh/hoochanlon/Free-NTFS-for-Mac@main/src/imgs/example/demo.gif)
+![](./demo.gif)
 
 The demo shows a version older than 1.6.1.
 
@@ -62,7 +62,7 @@ swift run Nigate
 
 ```sh
 ./macos/Scripts/build.sh          # → dist/Nigate.app (ad-hoc signed)
-./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.1.dmg
+./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.3.dmg
 ```
 
 Optional Developer ID + notarization:

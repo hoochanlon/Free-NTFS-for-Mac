@@ -13,7 +13,115 @@ Nigate 是使用 Swift 和 SwiftUI 构建的原生 macOS 应用，最低支持 m
 1. 打开“依赖”页，点击“检查依赖”查看 macOS 版本、Xcode Command Line Tools、Homebrew、MacFUSE、`ntfs-3g` 和可选 `fswatch` 的状态。
 2. 读写挂载需要 macOS 14 或更新版本、MacFUSE 与 `ntfs-3g`。其他组件的用途和是否必需会显示在依赖列表中。
 3. 可使用“一键安装”在终端启动安装流程，也可展开依赖项目，查看命令、复制命令并手动安装。按页面提示完成系统扩展批准。
-4. 安装或批准扩展后，返回应用重新检查依赖。MacFUSE 与 `ntfs-3g` 未就绪时，NTFS 读写挂载和相关操作无法使用。
+4. 安装或批准扩展后，返回应用重新检查依赖。MacFUSE 与 `ntfs-3g` 未就绪时，NTFS 读写挂载和相关操作无法使用。打开应用若提示已损坏，或需要启用文件系统扩展、批准内核扩展，见下面几节。
+
+## Mac 必知必会
+
+### 单独移除隔离属性 vs 全局关闭 Gatekeeper
+
+#### “文件损坏扔入废纸篓”
+
+由于[苹果对软件迁移有安装门禁的原因](https://developer.apple.com/cn/developer-id/)，所以软件版在使用时，会有“此软件已损坏，扔入废纸篓”的提示弹窗，点击取消。
+
+![](images/1.png)
+
+在“App” -> “终端”使用该指令解除：
+
+```bash
+xattr -cr /Applications/nigate.app
+```
+
+![](images/2.png)
+
+如图操作
+
+![](images/3.png)
+
+#### 允许任何来源
+
+全局关闭 Gatekeeper，运行如下代码
+
+```bash
+sudo spctl --master-disable
+```
+
+出现 `Globally disabling the assessment system needs to be confirmed in System Settings.` 提示后，如图操作
+
+![](images/4.png)
+
+#### 小结
+
+`xattr -cr`：局部放行，精准安全，只解决眼前这个 App 的问题。（⭐⭐⭐⭐⭐ 首选）
+
+`spctl --master-disable`：全局关闭，风险极高，相当于把 Mac 的安全大门彻底敞开。（⭐⭐⭐ 不推荐，但适合IT专业用户）
+
+### 允许第三方内核扩展加载
+
+出现 System Extension Blocked 弹窗时，打开系统设置的“隐私与安全性”，允许“Benjamin Fleischer”的系统扩展。
+
+![](images/bc-3.png)
+
+在隐私与安全性中的安全性区域点击启用系统扩展
+
+![](images/bc-1.png)
+
+提示关机并进入恢复模式, 点击关机，接着进入到关闭SIP操作内容。
+
+![](images/bc-2.png)
+
+### 关闭SIP
+
+SIP 是 System Integrity Protection 的简写，译为系统完整性保护。目的是为了限制 root 账户对系统的完全控制权，也叫 Rootless 保护机制。Mac 系统中 SIP 状态默认是开启的。 如图，该情况显然是开启的。
+
+![](images/6.png)
+
+关机后，按住电源键不放，直到出现正在载入启动选项。
+
+![](images/7.gif)
+
+当前要继续保持按住电源按钮
+
+![](images/8.png)
+
+此时可以松开电源按钮了
+
+![](images/9.png)
+
+选择账户，然后点击"下一步"，再输入Mac电脑密码。
+
+![](images/10.png)
+
+点击选项然后继续。
+
+![](images/11.png)
+
+在上方菜单栏选择实用工具 -> 选择启动安全性实用工具
+
+![](images/12.png)
+
+或者选择终端输入 `csrutil disable` 直接结束，重启电脑（此为，方式二）
+
+我们继续方式一，点击安全策略
+
+![](images/13.png)
+
+将安全策略设置为降低安全性，并勾选允许用户管理来自被认可开发者的内核扩展→ 确定。
+
+![](images/14.png)
+
+终端输入 `csrutil status` 即可看到 SIP 的状态是 disable 还是 enable 。
+
+![](images/15.png)
+
+### 开启文件系统扩展
+
+在“通用”设置中，依次选择“登录项与扩展” > “扩展” > “按类别” > “文件系统扩展”。随后点击该项对应的信息图标，或使用如下命令跳转到“文件系统扩展”，并启用 ntfs-3g（如存在）及 macFUSE 等相关选项。
+
+```shell
+open "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointIdentifier=com.apple.fskit.fsmodule"
+```
+
+![](images/5.png)
 
 ## 设备列表与操作
 
@@ -92,7 +200,7 @@ macOS 默认以只读方式挂载 NTFS。确认依赖页中的 MacFUSE 与 `ntfs
 
 ### MacFUSE 在 macOS 更新后提示版本过旧或扩展被阻止？
 
-在“依赖”页展开 MacFUSE，按页面给出的升级步骤更新官方版本，并在“系统设置 → 隐私与安全性”中批准经确认的扩展。不同 macOS 版本的设置名称可能不同。不要为了安装而长期关闭 Gatekeeper；如流程要求临时调整系统安全设置，请遵照页面警告并在完成后立即恢复。
+在“依赖”页展开 MacFUSE，按页面给出的升级步骤更新官方版本，并在“系统设置 → 隐私与安全性”中批准经确认的扩展。不同 macOS 版本的设置名称可能不同。不要为了安装而长期关闭 Gatekeeper；如流程要求临时调整系统安全设置，请遵照页面警告并在完成后立即恢复。Apple 芯片若仍无法加载内核扩展，见上文「关闭SIP」。
 
 ### 卸载后在哪里找到设备？
 

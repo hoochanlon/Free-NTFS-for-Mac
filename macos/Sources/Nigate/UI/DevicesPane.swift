@@ -31,9 +31,20 @@ struct DevicesPane: View {
             if model.devices.isEmpty {
                 VStack(spacing: 8) {
                     Spacer()
-                    Image(systemName: "externaldrive.badge.questionmark").font(.system(size: 42)).foregroundStyle(.secondary)
-                    Text(L10n.t("devices.emptyState")).font(.headline)
-                    Text(L10n.t("devices.emptyHint")).foregroundStyle(.secondary)
+                    if let hint = model.progressHint {
+                        ProgressView()
+                            .controlSize(.regular)
+                            .padding(.bottom, 4)
+                        Text(hint)
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                    } else {
+                        Image(systemName: "externaldrive.badge.questionmark").font(.system(size: 42)).foregroundStyle(.secondary)
+                        Text(L10n.t("devices.emptyState")).font(.headline)
+                        Text(L10n.t("devices.emptyHint")).foregroundStyle(.secondary)
+                    }
                     Spacer()
                 }
                 .frame(maxWidth: .infinity)

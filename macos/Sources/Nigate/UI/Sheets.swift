@@ -14,8 +14,8 @@ struct HelpPane: View {
         _blocks = State(initialValue: HelpMarkdownParser.parse(L10n.helpMarkdown()))
     }
 
-    private var headings: [HelpHeading] {
-        HelpMarkdownIndex.headings(in: blocks)
+    private var outline: [HelpOutlineNode] {
+        HelpMarkdownIndex.outline(in: blocks)
     }
 
     private var searchMatches: [Int] {
@@ -114,30 +114,20 @@ struct HelpPane: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(L10n.t("help.toc"))
-                                .font(.headline)
+                                .font(.title3.weight(.semibold))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
 
-                            ForEach(headings) { heading in
-                                Button {
-                                    requestedHeadingID = heading.blockID
+                            ForEach(outline) { node in
+                                HelpOutlineRow(node: node) { blockID in
+                                    requestedHeadingID = blockID
                                     navigationRequest = UUID()
-                                } label: {
-                                    Text(heading.title)
-                                        .font(.subheadline)
-                                        .lineLimit(2)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .padding(.leading, CGFloat(heading.level - 2) * 12 + 10)
-                                        .padding(.trailing, 8)
-                                        .padding(.vertical, 5)
                                 }
-                                .buttonStyle(.plain)
-                                .contentShape(Rectangle())
                             }
                         }
                         .padding(.vertical, 8)
                     }
-                    .frame(width: 230)
+                    .frame(width: 252)
                     .background(Color(nsColor: .controlBackgroundColor).opacity(0.55))
                     Divider()
                 }
@@ -164,15 +154,86 @@ struct HelpPane: View {
     }
 }
 
-struct AboutSheet: View {
-    @EnvironmentObject private var model: AppModel
+private struct HelpOutlineRow: View {
+    let node: HelpOutlineNode
+    var depth: Int = 0
+    let onSelect: (Int) -> Void
 
-    private var appIcon: NSImage? {
-        guard let url = Bundle.module.url(forResource: "AppIcon", withExtension: "icns") else { return nil }
-        return NSImage(contentsOf: url)
+    @State private var isExpanded: Bool
+
+    init(node: HelpOutlineNode, depth: Int = 0, onSelect: @escaping (Int) -> Void) {
+        self.node = node
+        self.depth = depth
+        self.onSelect = onSelect
+        _isExpanded = State(initialValue: Self.expandsByDefault(node, depth: depth))
     }
 
-    private var authorAvatar: NSImage? {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .center, spacing: 2) {
+                if node.children.isEmpty {
+                    Color.clear
+                        .frame(width: 16, height: 18)
+                } else {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.16)) {
+                            isExpanded.toggle()
+                        }
+                    } label: {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(.secondary)
+                            .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                            .frame(width: 16, height: 20)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(isExpanded ? L10n.t("help.tocCollapse") : L10n.t("help.tocExpand"))
+                }
+
+                Button {
+                    onSelect(node.heading.blockID)
+                } label: {
+                    Text(node.heading.title)
+                        .font(depth == 0 ? .body.weight(.medium) : .body)
+                        .foregroundStyle(depth == 0 ? Color.primary : Color.secondary)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 6)
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+            }
+            .padding(.leading, CGFloat(depth) * 12 + 8)
+            .padding(.trailing, 8)
+
+            if isExpanded {
+                ForEach(node.children) { child in
+                    HelpOutlineRow(node: child, depth: depth + 1, onSelect: onSelect)
+                }
+            }
+        }
+    }
+
+    private static func expandsByDefault(_ node: HelpOutlineNode, depth: Int) -> Bool {
+        depth == 0 && !node.children.isEmpty && node.children.allSatisfy(\.children.isEmpty)
+    }
+}
+
+struct AboutSheet: View {
+    @EnvironmentObject private var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+
+    private static let appIcon: NSImage? = {
+        guard let url = Bundle.module.url(forResource: "AppIcon", withExtension: "icns") else { return nil }
+        return NSImage(contentsOf: url)
+    }()
+
+    private static let authorAvatar: NSImage? = loadAuthorAvatar()
+    private static let technologies = "SwiftUI · DiskArbitration · macFUSE · ntfs-3g"
+
+    private static func loadAuthorAvatar() -> NSImage? {
         guard let url = Bundle.module.url(forResource: "avatar", withExtension: "svg") else { return nil }
         let pixelSize = 176
         let options: [CFString: Any] = [
@@ -191,7 +252,7 @@ struct AboutSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 10) {
-                if let appIcon {
+                if let appIcon = Self.appIcon {
                     Image(nsImage: appIcon)
                         .resizable()
                         .interpolation(.high)
@@ -209,24 +270,27 @@ struct AboutSheet: View {
                 }
             }
             Text(L10n.t("about.description"))
-            HStack(alignment: .center, spacing: 16) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(L10n.t("about.softwareInfo")).font(.headline)
-                    Text("\(L10n.t("about.author")) hoochanlon(胡成龙)")
-                    Text("\(L10n.t("about.version")) \(appVersion)")
-                    Text("\(L10n.t("about.technology")) SwiftUI · DiskArbitration · macFUSE · ntfs-3g")
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .center, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(L10n.t("about.softwareInfo")).font(.headline)
+                        Text("\(L10n.t("about.author")) hoochanlon(胡成龙)")
+                        Text("\(L10n.t("about.version")) \(appVersion)")
+                        Text("\(L10n.t("about.requirement")) macOS 14+")
+                    }
+                    Spacer(minLength: 8)
+                    if let authorAvatar = Self.authorAvatar {
+                        Image(nsImage: authorAvatar)
+                            .resizable()
+                            .interpolation(.high)
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 88, height: 88)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.primary.opacity(0.08), lineWidth: 1))
+                            .accessibilityLabel("hoochanlon")
+                    }
                 }
-                Spacer(minLength: 8)
-                if let authorAvatar {
-                    Image(nsImage: authorAvatar)
-                        .resizable()
-                        .interpolation(.high)
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 88, height: 88)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.primary.opacity(0.08), lineWidth: 1))
-                        .accessibilityLabel("hoochanlon")
-                }
+                technologyLine
             }
             VStack(alignment: .leading, spacing: 10) {
                 aboutLink(
@@ -256,12 +320,28 @@ struct AboutSheet: View {
                     Task { await model.checkUpdates() }
                 }
                 Spacer()
-                Button(L10n.t("about.ok")) { model.aboutOpen = false }
+                Button(L10n.t("about.ok")) { dismiss() }
                     .keyboardShortcut(.defaultAction)
             }
         }
         .padding(24)
         .frame(width: 520)
+    }
+
+    /// 一行能放下就保持「标签 + 技术栈」；否则整串技术名换到下一行，避免最后一项孤行。
+    private var technologyLine: some View {
+        let label = L10n.t("about.technology")
+        return ViewThatFits(in: .horizontal) {
+            Text("\(label) \(Self.technologies)")
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                Text(Self.technologies)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(label) \(Self.technologies)")
     }
 
     private func aboutLink<Content: View>(
@@ -294,7 +374,7 @@ private struct GitHubMark: View {
 }
 
 struct SupportAuthorSheet: View {
-    @EnvironmentObject private var model: AppModel
+    @Environment(\.dismiss) private var dismiss
 
     private static let qrMaxPixel = 720
     private static let qrSize: CGFloat = 280
@@ -328,7 +408,7 @@ struct SupportAuthorSheet: View {
 
             HStack {
                 Spacer()
-                Button(L10n.t("support.ok")) { model.supportOpen = false }
+                Button(L10n.t("support.ok")) { dismiss() }
                     .keyboardShortcut(.defaultAction)
             }
         }

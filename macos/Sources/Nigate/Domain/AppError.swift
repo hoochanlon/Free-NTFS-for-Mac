@@ -7,6 +7,7 @@ enum AppError: Error, Sendable {
     case passwordRequestInProgress
     case timeout(String)
     case missingTool(String)
+    case macfuseMissing
     case ntfs3gMissing
     case fsKitRequiresMacOS15_4
     case fsKitUnavailable
@@ -32,6 +33,7 @@ extension AppError: LocalizedError {
         case .passwordRequestInProgress: return "已有密码验证请求正在等待处理"
         case .timeout(let message): return message
         case .missingTool(let name): return name
+        case .macfuseMissing: return L10n.t("messages.macfuseMissing")
         case .ntfs3gMissing: return "未找到 ntfs-3g，请先安装依赖"
         case .fsKitRequiresMacOS15_4: return "FSKit 数据面需要 macOS 15.4 或更高版本；当前系统不会自动降级到 ntfs-3g"
         case .fsKitUnavailable: return "FSKit 数据面当前不可用（扩展未安装或未启用）；如需兼容挂载，请在设置中明确选择 ntfs-3g 兼容后端"

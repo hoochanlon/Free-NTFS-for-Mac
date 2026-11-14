@@ -16,10 +16,14 @@ struct ShellResult: Sendable {
 
 enum Shell {
     // Privileged and dependency commands must not inherit PATH or loader settings from the user shell.
-    static let trustedPath = [
-        "/opt/homebrew/bin", "/opt/homebrew/sbin",
-        "/usr/local/bin", "/usr/local/sbin",
+    /// diskutil / mount 子进程只应看到系统路径，避免命中 Homebrew 的 mount_ntfs（会再调 ntfs-3g）。
+    static let systemPath = [
         "/usr/bin", "/bin", "/usr/sbin", "/sbin"
+    ]
+
+    static let trustedPath = systemPath + [
+        "/opt/homebrew/bin", "/opt/homebrew/sbin",
+        "/usr/local/bin", "/usr/local/sbin"
     ]
 
     private static let trustedRoots = [

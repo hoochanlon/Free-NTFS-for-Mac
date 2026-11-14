@@ -72,10 +72,19 @@ enum L10n {
             return url
         }
         let parts = relative.split(separator: "/").map(String.init)
-        if parts.count == 2 {
-            return Bundle.module.url(forResource: parts[1].replacingOccurrences(of: ".json", with: "").replacingOccurrences(of: ".md", with: ""),
-                                     withExtension: parts[1].contains(".json") ? "json" : "md",
-                                     subdirectory: parts[0])
+        guard let filename = parts.last else {
+            return Bundle.main.url(forResource: relative, withExtension: nil)
+        }
+        let directory = parts.dropLast().joined(separator: "/")
+        let ext = (filename as NSString).pathExtension
+        let stem = (filename as NSString).deletingPathExtension
+        if !directory.isEmpty,
+           let url = Bundle.module.url(
+            forResource: stem,
+            withExtension: ext.isEmpty ? nil : ext,
+            subdirectory: directory
+           ) {
+            return url
         }
         return Bundle.main.url(forResource: relative, withExtension: nil)
     }
