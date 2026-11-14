@@ -34,13 +34,43 @@ Enable FSKit:
 
 Programmatic `FSClient.mountSingleVolume` needs a trusted signature with `com.apple.developer.fskit.mount`. Without a signing identity, keep **ntfs-3g** as the primary path.
 
+## Other FSKit-based NTFS software
+
+More apps in this category will look similar; the differences are mostly UI and workflow. Snapshot from [#68](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/68); the list is not kept exhaustive.
+
+| Name | Price | Link |
+| --- | --- | --- |
+| xntfs | App Store ¥8 | https://github.com/HuanchuanTech/xntfs |
+| NTFS Explorer Pro | App Store ¥68 | https://appagg.com/macos/utilities/ntfs-explorer-pro-43459914.html |
+| ttntfs | Free | https://github.com/dr-kbadawi/ttntfs |
+| LightNTFS Beta | Free | https://macadmin.hu/#apps |
+| volisle | Free | https://github.com/qsw745/volisle |
+| ntfskit | Build from source, free & open source | https://github.com/whereteam/ntfskit |
+
+There is also a VM-passthrough approach: [anylinuxfs](https://github.com/nohajc/anylinuxfs), plus GUI wrappers [anylinuxfs-gui](https://github.com/fenio/anylinuxfs-gui) and [ntfsmac](https://github.com/khr898/ntfsmac).
+
+## Technical comparison
+
+From [#68](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/68). Nigate defaults to the first-generation compatibility path; FSKit (third generation) is optional on macOS 15.4+.
+
+| | 1st gen (FUSE + NTFS-3G) | 2nd gen (commercial kext) | 3rd gen (userspace FSKit) |
+| --- | --- | --- | --- |
+| Speed | Lower | Very high | High (closing on 2nd gen) |
+| Stability | Weaker | Very high | High (better future compatibility) |
+| Safety | Medium | Medium–low (high privilege) | Very high |
+| Setup | Higher (needs FUSE) | Medium (manual extension allow) | Very low (install and use) |
+| macOS compatibility | Poor | Good (needs timely updates) | Excellent (Apple’s recommended model) |
+| Large-file copies | Easy to interrupt | Stable | Stable |
+| Examples | NTFS-3G, some free tools | Paragon, Tuxera, Chiyou NTFS | xntfs, ttntfs, Chiyou NTFS |
+
 ## Important notes
 
 > [!important]
 > Stability depends on the storage device. Prefer reliable USB media.
 
 - Mounting needs administrator privileges.
-- Windows Fast Startup can block mounts — fully shut down Windows first.
+- Windows Fast Startup or hibernation leaves NTFS inconsistent. When `ntfs-3g` sees the hibernation flag, it **forces read-only** so Windows cannot overwrite later writes with stale cache and damage the volume. **Fully shut down** Windows first (no hibernate / Fast Startup), then plug the drive into the Mac. See [#68](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/68).
+- FUSE + `ntfs-3g` runs in userspace, so it is usually slower than in-kernel drivers and large copies may interrupt more easily. It is still the long-lived default because it would rather go read-only than corrupt the volume. On macOS 15.4+ you can switch to FSKit in Settings.
 - Gatekeeper may block unsigned builds; allow the app in **Privacy & Security**, do not disable Gatekeeper globally.
 - Format is irreversible; `ntfsfix` is not a substitute for Windows `chkdsk`.
 

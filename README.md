@@ -32,13 +32,43 @@
 
 程序化 `FSClient.mountSingleVolume` 需要带 `com.apple.developer.fskit.mount` 的可信签名。无签名身份时，请继续以 **ntfs-3g** 为主路径。
 
+## 其他基于 FSKit 的 NTFS 软件
+
+同类软件会越来越多，差别主要在 UI 和体验。清单整理自 [#68](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/68)，后续不再逐一录入。
+
+| 名称 | 价格 | 链接 |
+| --- | --- | --- |
+| xntfs | App Store 8 元 | https://github.com/HuanchuanTech/xntfs |
+| NTFS Explorer Pro | App Store 68 元 | https://appagg.com/macos/utilities/ntfs-explorer-pro-43459914.html |
+| ttntfs | 免费 | https://github.com/dr-kbadawi/ttntfs |
+| LightNTFS Beta | 免费 | https://macadmin.hu/#apps |
+| 盘屿 (volisle) | 免费 | https://github.com/qsw745/volisle |
+| ntfskit | 需编译，免费开源 | https://github.com/whereteam/ntfskit |
+
+另有一条虚拟机中转路径：[anylinuxfs](https://github.com/nohajc/anylinuxfs)，以及它的 GUI 封装 [anylinuxfs-gui](https://github.com/fenio/anylinuxfs-gui)、[ntfsmac](https://github.com/khr898/ntfsmac)。
+
+## 技术对比
+
+整理自 [#68](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/68)。Nigate 默认走第一代兼容路径，macOS 15.4+ 可选用第三代 FSKit。
+
+| 对比维度 | 第一代（FUSE + NTFS-3G） | 第二代（商用内核驱动 kext） | 第三代（用户态 FSKit） |
+| --- | --- | --- | --- |
+| 性能速度 | 较低 | 极高 | 高（接近第二代，差距持续缩小） |
+| 稳定性 | 较差 | 极高 | 高（未来兼容性更优） |
+| 安全性 | 中等 | 中低（权限过高） | 极高 |
+| 安装门槛 | 较高（需安装 FUSE） | 中等（需手动允许扩展） | 极低（即装即用） |
+| macOS 兼容性 | 差 | 良好（需及时适配） | 优秀（苹果推荐架构） |
+| 大文件传输 | 易中断 | 稳定 | 稳定 |
+| 代表软件 / 技术 | NTFS-3G、部分免费软件 | Paragon、Tuxera、赤友 NTFS 助手 | xntfs、ttntfs、赤友 NTFS 助手 |
+
 ## 重要说明
 
 > [!important]
 > 稳定性取决于存储设备，请使用可靠的 USB 介质。
 
 - 挂载需要管理员权限。
-- Windows 快速启动可能导致挂载失败，请先在 Windows 完全关机。
+- Windows 快速启动或休眠会把 NTFS 留在未完成状态。`ntfs-3g` 检测到休眠标记后会**强制只读**，避免 Windows 恢复时用过时缓存覆盖写入、损坏分区。请先在 Windows 上**完全关机**（不要休眠 / 快速启动），再接入 Mac。说明见 [#68](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/68)。
+- FUSE + `ntfs-3g` 走用户态，读写通常慢于内核方案，大文件也可能更容易中断；它被长期使用，主要是宁可只读、也不把卷写坏。默认后端走这条兼容路径；macOS 15.4+ 可在设置中改用 FSKit。
 - 未签名应用可能被 Gatekeeper 拦截，请在 **隐私与安全性** 中按应用放行，勿全局关闭 Gatekeeper。
 - 格式化不可逆；`ntfsfix` 不能替代 Windows `chkdsk`。
 

@@ -34,13 +34,43 @@ FSKit を有効にする手順：
 
 `FSClient.mountSingleVolume` には `com.apple.developer.fskit.mount` 付きの信頼できる署名が必要です。署名 ID が無い場合は **ntfs-3g** を主経路にしてください。
 
+## その他の FSKit ベース NTFS ソフト
+
+同類ソフトは今後も増えます。違いは主に UI と使い勝手です。一覧は [#68](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/68) 時点の記録で、以後は逐一追加しません。
+
+| 名前 | 価格 | リンク |
+| --- | --- | --- |
+| xntfs | App Store 8 元 | https://github.com/HuanchuanTech/xntfs |
+| NTFS Explorer Pro | App Store 68 元 | https://appagg.com/macos/utilities/ntfs-explorer-pro-43459914.html |
+| ttntfs | 無料 | https://github.com/dr-kbadawi/ttntfs |
+| LightNTFS Beta | 無料 | https://macadmin.hu/#apps |
+| 盘屿 (volisle) | 無料 | https://github.com/qsw745/volisle |
+| ntfskit | ビルドが必要、無料オープンソース | https://github.com/whereteam/ntfskit |
+
+仮想マシン経由の経路もあります：[anylinuxfs](https://github.com/nohajc/anylinuxfs)、および GUI 版の [anylinuxfs-gui](https://github.com/fenio/anylinuxfs-gui)、[ntfsmac](https://github.com/khr898/ntfsmac)。
+
+## 技術比較
+
+[#68](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/68) より。Nigate のデフォルトは第1世代の互換経路で、macOS 15.4+ では第3世代の FSKit を選べます。
+
+| 比較項目 | 第1世代（FUSE + NTFS-3G） | 第2世代（商用カーネル kext） | 第3世代（ユーザー空間 FSKit） |
+| --- | --- | --- | --- |
+| 速度 | 低め | 非常に高い | 高い（第2世代に接近中） |
+| 安定性 | 弱め | 非常に高い | 高い（将来の互換性に有利） |
+| 安全性 | 中 | 中低（権限が高い） | 非常に高い |
+| 導入の手間 | 高め（FUSE が必要） | 中（拡張の許可が必要） | 非常に低い（入れてすぐ使える） |
+| macOS 互換性 | 悪い | 良好（都度の対応が必要） | 優秀（Apple 推奨アーキテクチャ） |
+| 大容量ファイル転送 | 切れやすい | 安定 | 安定 |
+| 代表例 | NTFS-3G、一部の無料ソフト | Paragon、Tuxera、赤友 NTFS | xntfs、ttntfs、赤友 NTFS |
+
 ## 注意事項
 
 > [!important]
 > 安定性はストレージ性能に依存します。信頼性の高い USB メディアを使用してください。
 
 - マウントには管理者権限が必要です。
-- Windows の高速スタートアップはマウント失敗の原因になります。完全シャットダウンしてください。
+- Windows の高速スタートアップや休止状態は、NTFS を未完了のまま残します。`ntfs-3g` が休止フラグを検出すると**強制的に読み取り専用**になり、Windows 復帰時の古いキャッシュで書き込みが上書きされてボリュームが壊れるのを防ぎます。先に Windows を**完全シャットダウン**し（休止 / 高速スタートアップは使わない）、その後 Mac に接続してください。説明は [#68](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/68)。
+- FUSE + `ntfs-3g` はユーザー空間経由のため、カーネルドライバより遅く、大きなファイル転送も切れやすいことがあります。長期的に使われているのは、読み取り専用になってもボリュームを壊さない方針だからです。macOS 15.4+ では設定から FSKit に切り替えできます。
 - 未署名ビルドは Gatekeeper にブロックされる場合があります。**プライバシーとセキュリティ**で個別に許可し、Gatekeeper を全体無効にしないでください。
 - フォーマットは不可逆です。`ntfsfix` は Windows の `chkdsk` の代替ではありません。
 
