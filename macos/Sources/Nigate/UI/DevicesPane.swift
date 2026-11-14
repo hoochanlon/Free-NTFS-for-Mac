@@ -51,10 +51,11 @@ struct DevicesPane: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 10) {
-                        ForEach(model.devices) { device in
+                        ForEach(model.devices, id: \.devicePath) { device in
                             DeviceCard(device: device)
                         }
                     }
+                    .animation(nil, value: model.devices.map(\.devicePath))
                     .padding(.bottom, 12)
                 }
             }

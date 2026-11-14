@@ -34,6 +34,9 @@ final class AppModel: ObservableObject {
     private var scanning = false
     private var rescanRequested = false
     private var knownNTFSDevices: [String: NTFSDevice] = [:]
+    /// 只读↔读写期间钉住卡片。DiskMonitor 在卸载瞬间会扫到空表，不能让列表跟着空。
+    private var switchPins: [String: DeviceListPin.Pin] = [:]
+    private var pinReleaseSeq: [String: UInt64] = [:]
     /// 用于 persist 差分：避免每次切换休眠都 unregister 登录项 / 重建整棵 UI。
     private var lastPersistedSettings: AppSettings?
 
@@ -154,7 +157,7 @@ final class AppModel: ObservableObject {
         }
         await scanDevicesLocked()
         // autoMount 必须在 scanning 锁外：其内部 run → refreshDevicesAfterAction 还会再等 scanning。
-        if applyAutoMount {
+        if applyAutoMount, busyDisks.isEmpty, switchPins.isEmpty {
             await self.applyAutoMount(explicit: false)
         }
     }
@@ -166,7 +169,8 @@ final class AppModel: ObservableObject {
         repeat {
             rescanRequested = false
             let knownDevices = Array(knownNTFSDevices.values) + devices
-            devices = await DeviceScanner.scan(knownDevices: knownDevices)
+            let scanned = await DeviceScanner.scan(knownDevices: knownDevices)
+            devices = pinnedDuringTransition(scanned)
             rememberNTFSDevices(devices)
             sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
             updateStatus()
@@ -263,11 +267,16 @@ final class AppModel: ObservableObject {
         guard !busyDisks.contains(diskKey) else { return }
         // 赋值新 Set，保证 @Published 一定发通知（in-place mutate 在部分路径上 UI 不刷新）。
         markBusy(diskKey)
+        pinSwitch(device, action)
         var busyReleased = false
         defer {
             // 兜底：任意提前退出都不会把整卡锁死在灰色。
             if !busyReleased { clearBusy(diskKey) }
             progressHint = nil
+            // 钉不能在动作结束瞬间摘掉：迟到的卸载通知还会再扫一次空表。
+            if switchPins[diskKey] != nil {
+                schedulePinRelease(diskKey)
+            }
         }
         let service = MountService(backend: resolvedMountBackend()) { [weak self] key, params in
             guard let self else { throw AppError.cancelled }
@@ -316,11 +325,13 @@ final class AppModel: ObservableObject {
         } catch AppError.cancelled {
             clearBusy(diskKey)
             busyReleased = true
+            dropSwitchPin(diskKey)
             toast = L10n.t("messages.cancelled")
             await refreshDevices(applyAutoMount: false)
         } catch {
             clearBusy(diskKey)
             busyReleased = true
+            dropSwitchPin(diskKey)
             alert = AppAlert(title: L10n.t("dialog.error"), message: mapError(error, action: action, device: device), kind: .error)
             await refreshDevices(applyAutoMount: false)
         }
@@ -344,6 +355,37 @@ final class AppModel: ObservableObject {
         var next = busyDisks
         next.insert(diskKey)
         busyDisks = next
+    }
+
+    private func pinSwitch(_ device: NTFSDevice, _ action: DeviceAction) {
+        let key = device.parentDisk
+        pinReleaseSeq[key, default: 0] += 1
+        switch action {
+        case .eject, .format:
+            switchPins.removeValue(forKey: key)
+        default:
+            switchPins[key] = DeviceListPin.Pin(
+                devicePath: device.devicePath,
+                parentDisk: key,
+                action: action
+            )
+        }
+    }
+
+    private func dropSwitchPin(_ diskKey: String) {
+        pinReleaseSeq[diskKey, default: 0] += 1
+        switchPins.removeValue(forKey: diskKey)
+    }
+
+    /// 动作已经结束，再留一小段钉，挡住 DiskMonitor 排队过来的卸载空扫描。
+    private func schedulePinRelease(_ diskKey: String, after seconds: Double = 3) {
+        let seq = (pinReleaseSeq[diskKey] ?? 0) + 1
+        pinReleaseSeq[diskKey] = seq
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+            guard pinReleaseSeq[diskKey] == seq else { return }
+            switchPins.removeValue(forKey: diskKey)
+        }
     }
 
     private func clearBusy(_ diskKey: String) {
@@ -379,6 +421,7 @@ final class AppModel: ObservableObject {
                 knownNTFSDevices[devices[idx].devicePath] = devices[idx]
             }
         case .eject, .format:
+            dropSwitchPin(device.parentDisk)
             devices.removeAll(where: match)
             knownNTFSDevices.removeValue(forKey: device.devicePath)
         default:
@@ -387,6 +430,11 @@ final class AppModel: ObservableObject {
         rememberNTFSDevices(devices)
         updateStatus()
         TrayController.shared.syncAfterAction()
+    }
+
+    /// 卸载/重挂瞬间扫描常会漏掉分区或扫到未挂载态；未收敛前钉住当前卡片。
+    private func pinnedDuringTransition(_ scanned: [NTFSDevice]) -> [NTFSDevice] {
+        DeviceListPin.merge(scanned: scanned, held: devices, pins: Array(switchPins.values))
     }
 
     /// 挂载表偶发滞后：短重试直到状态与操作预期一致，再交给常规刷新。
@@ -444,17 +492,10 @@ final class AppModel: ObservableObject {
         for attempt in 0..<10 {
             let knownDevices = Array(knownNTFSDevices.values) + devices
             let scanned = await DeviceScanner.scan(knownDevices: knownDevices)
-            if matches(scanned) {
-                devices = scanned
-                rememberNTFSDevices(scanned)
-                sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
-                updateStatus()
-                TrayController.shared.syncAfterAction()
-                break
-            }
-            if attempt == 9 {
-                devices = scanned
-                rememberNTFSDevices(scanned)
+            let merged = pinnedDuringTransition(scanned)
+            if matches(scanned) || attempt == 9 {
+                devices = merged
+                rememberNTFSDevices(merged)
                 sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
                 updateStatus()
                 TrayController.shared.syncAfterAction()

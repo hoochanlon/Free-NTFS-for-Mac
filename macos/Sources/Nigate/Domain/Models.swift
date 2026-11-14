@@ -33,7 +33,8 @@ struct NTFSDevice: Sendable, Equatable, Identifiable {
     var canFormat: Bool
     var capacity: Capacity?
 
-    var id: String { volumeUuid ?? partitionUuid ?? disk }
+    /// 列表身份跟分区走，不跟后到的 UUID 走，避免只读↔读写时卡片被拆掉再插一次。
+    var id: String { devicePath }
     var identity: String { volumeUuid ?? partitionUuid ?? disk }
     var parentDisk: String { DiskSafety.parentDiskId(disk) }
     var isReadWrite: Bool { isMounted && !isReadOnly && !isUnmounted }
