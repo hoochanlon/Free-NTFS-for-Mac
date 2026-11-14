@@ -45,7 +45,7 @@
 | 盘屿 (volisle) | 免费 | https://github.com/qsw745/volisle |
 | ntfskit | 需编译，免费开源 | https://github.com/whereteam/ntfskit |
 
-另有一条虚拟机中转路径：[anylinuxfs](https://github.com/nohajc/anylinuxfs)，以及它的 GUI 封装 [anylinuxfs-gui](https://github.com/fenio/anylinuxfs-gui)、[ntfsmac](https://github.com/khr898/ntfsmac)。
+另有一条虚拟机中转路径，机制不同，见下文 [anylinuxfs](#anylinuxfs)。
 
 ## 技术对比
 
@@ -71,6 +71,87 @@
 - FUSE + `ntfs-3g` 走用户态，读写通常慢于内核方案，大文件也可能更容易中断；它被长期使用，主要是宁可只读、也不把卷写坏。默认后端走这条兼容路径；macOS 15.4+ 可在设置中改用 FSKit。
 - 未签名应用可能被 Gatekeeper 拦截，请在 **隐私与安全性** 中按应用放行，勿全局关闭 Gatekeeper。
 - 格式化不可逆；`ntfsfix` 不能替代 Windows `chkdsk`。
+
+## APFS 基础知识
+
+[#77](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/77) 这类反馈里，设备在 Mac 上进不了 Nigate、在 Windows（含 Parallels 里的 Windows）却能打开，先看**格式**，不要先当成挂载失败。Nigate 只处理 NTFS；Mac 自己的默认文件系统是 APFS。
+
+**APFS（Apple File System）** 从 macOS High Sierra（2017）起就是苹果设备的默认格式，也用于 iOS / iPadOS。和 NTFS 的分工：
+
+| | APFS | NTFS |
+| --- | --- | --- |
+| 谁设计的 | Apple | Microsoft |
+| 默认出现在 | Mac、苹果设备、Time Machine | Windows、多数「Windows / Mac 两用」移动硬盘 |
+| macOS | 系统原生读写 | 原生多为只读；要写才需要 Nigate |
+| Windows | 不能原生识别 | 系统原生读写 |
+
+APFS 不是「一块盘一个分区」那么简单：
+
+- **容器（Container）**：占一整段分区，里面的卷**共用剩余空间**
+- **卷（Volume）**：系统、数据、预启动等可以同住一个容器；外置盘上往往只看到一个用户卷
+- **快照 / 克隆**：拷贝几乎不占空间，直到内容被改写（copy-on-write）
+- 「磁盘工具」抹掉外置盘时，方案经常默认成 **APFS**。Finder 能打开、卷名也像普通 U 盘，但 Nigate 的设备列表不会出现它
+
+怎么确认：
+
+1. 「磁盘工具」选中卷，看格式是 APFS / APFS（加密），还是 NTFS / ExFAT
+2. 终端：`diskutil info diskXsY`，`File System Personality` 为 `APFS` 就不是 Nigate 的目标
+3. 若这块盘要在 Windows 和 Mac **都写**：外置盘用 **ExFAT**（两边原生）；或格式化为 **NTFS**，Mac 上再用 Nigate 写
+
+Nigate **不会挂载 APFS**。Mac 读写 APFS 不需要本应用。
+
+### 在 Windows 上打开 APFS
+
+反过来：Mac 格式化的 APFS U 盘插到 Windows，资源管理器通常什么也看不到。开源方案：[APFS Explorer](https://github.com/enesilhaydin/apfs-explorer)（GPL-3.0）。
+
+- 通过 [WinFsp](https://winfsp.dev/) 在 Windows 10/11 把 APFS 卷挂成盘符
+- 从 [Releases](https://github.com/enesilhaydin/apfs-explorer/releases) 下载 `apfs-explorer-setup.exe`，管理员运行；安装包会尝试附带 WinFsp
+- **默认只读**。写支持仍是实验性，可能损坏卷；重要数据先备份，不要把它当成唯一副本
+- 不支持 FileVault 加密卷、密封系统卷、Fusion Drive
+
+和 Nigate 是镜像关系：Nigate 让 Mac 写 NTFS；APFS Explorer 让 Windows 读 APFS。
+
+## anylinuxfs
+
+[anylinuxfs/issues/86](https://github.com/nohajc/anylinuxfs/issues/86) 写过：它和 Nigate **不是同一条挂载路径**，所以不会并进 Nigate 的设备卡片。
+
+[anylinuxfs](https://github.com/nohajc/anylinuxfs) 在 **Apple Silicon** 上用 [libkrun](https://github.com/containers/libkrun) 微型虚拟机 + NFS，把 Linux 能挂的文件系统转给 macOS。不装内核扩展，也不用降低 SIP。
+
+数据走法：
+
+```text
+物理分区 / 磁盘映像
+        ↓ 交给 Linux 微虚拟机（用真实 Linux 驱动）
+虚拟机里挂上 ext4 / btrfs / xfs / NTFS / …
+        ↓ NFS 导出到本机
+macOS 看到的是 localhost 网络盘（像 NFS / WebDAV）
+        不是 /dev/disk 那种本地宗卷
+```
+
+Nigate 认的是 DiskArbitration 和本地挂载表：一张卡对应一块本地 NTFS。anylinuxfs 的挂载点更像网络路径，列表、忙状态、只读↔读写切换都对不上，GUI 不能直接包它。独立界面见 [anylinuxfs-gui](https://github.com/fenio/anylinuxfs-gui)、[ntfsmac](https://github.com/khr898/ntfsmac)。
+
+适合：
+
+- 在 Mac 上读写 **ext4 / btrfs / xfs / ZFS**，以及 LVM、Linux RAID、LUKS、BitLocker（NTFS / FAT32）
+- 外置盘、内置盘、raw / qcow2 映像
+- 多盘可以同时挂（每挂一个卷会起一台微虚拟机；默认内存上限 512 MB，实际大约 256 MB）
+
+限制：
+
+- **仅 Apple Silicon**
+- Finder 里是网络磁盘；Microsoft Word 不能直接在上面改文件
+- 默认用虚拟机里的 `ntfs-3g` 跑 NTFS，长时间拷大量文件可能出现 I/O 错误（可改 `-t ntfs3`，说明见其 [NTFS 备注](https://github.com/nohajc/anylinuxfs/blob/main/docs/important-notes.md#ntfs)）
+- 休眠盘、脏卷等仍由 Linux 侧驱动处理，不能替代 Nigate 在本机这条 NTFS 路径
+
+安装：
+
+```sh
+brew tap nohajc/anylinuxfs
+brew trust nohajc/anylinuxfs
+brew install anylinuxfs
+```
+
+常用：`anylinuxfs list`、`anylinuxfs mount /dev/diskXsY`；在 Finder 推出，或 `anylinuxfs unmount`。
 
 ## 运行与构建
 
