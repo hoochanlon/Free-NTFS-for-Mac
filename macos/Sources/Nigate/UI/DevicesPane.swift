@@ -72,6 +72,34 @@ struct DevicesPane: View {
     }
 }
 
+/// 不用系统 ProgressView。切换 NSApp.appearance 会清掉它的 tint，而且不会再设回来。
+private struct CapacityBar: View {
+    let capacity: Capacity
+
+    var body: some View {
+        let fraction = min(1, max(0, Double(capacity.used) / Double(max(capacity.total, 1))))
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.primary.opacity(0.12))
+                Capsule()
+                    .fill(fill)
+                    .frame(width: geo.size.width * fraction)
+            }
+        }
+        .frame(height: 4)
+        .accessibilityElement()
+        .accessibilityValue(Text("\(Int((fraction * 100).rounded()))%"))
+    }
+
+    private var fill: Color {
+        switch capacity.fillLevel {
+        case .normal: Palette.accent
+        case .warning: Palette.warning
+        case .critical: Palette.error
+        }
+    }
+}
+
 struct DeviceCard: View {
     @EnvironmentObject private var model: AppModel
     let device: NTFSDevice
@@ -98,8 +126,7 @@ struct DeviceCard: View {
                 }
                 if let capacity = device.capacity {
                     VStack(alignment: .leading, spacing: 4) {
-                        ProgressView(value: Double(capacity.used), total: Double(max(capacity.total, 1)))
-                            .tint(capacityTint(capacity))
+                        CapacityBar(capacity: capacity)
                         Text("\(L10n.t("devices.available")) \(byteText(capacity.available))  ·  \(L10n.t("devices.total")) \(byteText(capacity.total))")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -155,14 +182,6 @@ struct DeviceCard: View {
     }
 
     private var statusColor: Color { device.isReadWrite ? Palette.success : Palette.warning }
-
-    private func capacityTint(_ capacity: Capacity) -> Color {
-        switch capacity.fillLevel {
-        case .normal: Palette.accent
-        case .warning: Palette.warning
-        case .critical: Palette.error
-        }
-    }
 
     private func labeled(_ title: String, _ value: String) -> some View {
         HStack(spacing: 4) {
