@@ -37,6 +37,14 @@ swift build -c "$CONFIGURATION" --product Nigate
 BIN_DIR="$(swift build --show-bin-path -c "$CONFIGURATION")"
 APP_BINARY="$BIN_DIR/Nigate"
 
+APP_SOURCE_PLIST="$MACOS_ROOT/Info.plist"
+MARKETING_VERSION="$(plutil -extract CFBundleShortVersionString raw -o - "$APP_SOURCE_PLIST")"
+CURRENT_PROJECT_VERSION="$(plutil -extract CFBundleVersion raw -o - "$APP_SOURCE_PLIST")"
+if [[ -z "$MARKETING_VERSION" || -z "$CURRENT_PROJECT_VERSION" || "$MARKETING_VERSION" == *'$('* || "$CURRENT_PROJECT_VERSION" == *'$('* ]]; then
+  printf 'macos/Info.plist needs concrete CFBundleShortVersionString and CFBundleVersion\n' >&2
+  exit 1
+fi
+
 XCODE_CONFIGURATION="$(tr '[:lower:]' '[:upper:]' <<< "${CONFIGURATION:0:1}")${CONFIGURATION:1}"
 XCODE_BUILD_ROOT="$PROJECT_ROOT/.build/xcode-${CONFIGURATION}"
 XCODE_PRODUCT_DIR="$XCODE_BUILD_ROOT/Build/Products/$XCODE_CONFIGURATION"
@@ -48,6 +56,8 @@ xcodebuild \
   OBJROOT="$XCODE_BUILD_ROOT/Build/Intermediates" \
   SYMROOT="$XCODE_BUILD_ROOT/Build/Products" \
   CONFIGURATION_BUILD_DIR="$XCODE_PRODUCT_DIR" \
+  MARKETING_VERSION="$MARKETING_VERSION" \
+  CURRENT_PROJECT_VERSION="$CURRENT_PROJECT_VERSION" \
   CODE_SIGNING_ALLOWED=NO \
   CODE_SIGNING_REQUIRED=NO \
   build
@@ -132,6 +142,10 @@ validate_plist_value "$EXTENSION_PLIST" \
   "EXAppExtensionAttributes.EXExtensionPointIdentifier" "com.apple.fskit.fsmodule"
 validate_plist_value "$EXTENSION_PLIST" \
   "EXAppExtensionAttributes.FSSupportsBlockResources" "true"
+validate_plist_value "$APP_PLIST" "CFBundleShortVersionString" "$MARKETING_VERSION"
+validate_plist_value "$APP_PLIST" "CFBundleVersion" "$CURRENT_PROJECT_VERSION"
+validate_plist_value "$EXTENSION_PLIST" "CFBundleShortVersionString" "$MARKETING_VERSION"
+validate_plist_value "$EXTENSION_PLIST" "CFBundleVersion" "$CURRENT_PROJECT_VERSION"
 
 sign_bundle() {
   local target="$1"

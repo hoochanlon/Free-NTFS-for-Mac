@@ -8,6 +8,9 @@
 
 演示界面为 1.6.1 以下版本，界面随功能增强可能略有变化。
 
+> [!WARNING]
+> Intel：macFUSE / `ntfs-3g` 经 Homebrew 安装时，官方 bottle 已于 **2026 年 9 月**停止；**2027 年 9 月**起 Homebrew 不再在 Intel 上运行。Intel 机型最高只到 macOS 26；**macOS 28 不适用 Intel**。Rosetta 2 通用翻译支持到 **macOS 27**，**macOS 28** 起停止对普通 Intel 应用的支持（仅保留部分旧游戏）。
+
 ## 功能
 
 - SwiftUI：实时检测 NTFS 设备、依赖检查、一键挂载、自动读写、状态日志、防止休眠、安全保护锁
@@ -171,7 +174,7 @@ swift run Nigate
 
 ```sh
 ./macos/Scripts/build.sh          # → dist/Nigate.app（ad-hoc 签名）
-./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.7.dmg
+./macos/Scripts/package-dmg.sh    # → dist/Nigate-<版本>.dmg
 ```
 
 可选 Developer ID + 公证：

@@ -10,6 +10,9 @@ Download the latest version from the [release tags](https://github.com/hoochanlo
 
 The demo shows a version older than 1.6.1.
 
+> [!WARNING]
+> Intel: Homebrew stopped publishing official bottles in **September 2026**, and will stop running on Intel in or after **September 2027**, so macFUSE / `ntfs-3g` can no longer be installed that way. Intel Macs stop at macOS 26; **macOS 28 does not apply to Intel**. Rosetta 2 remains a general translator through **macOS 27**; from **macOS 28** it no longer runs ordinary Intel apps (legacy games only).
+
 ## Features
 
 - SwiftUI app: live NTFS device detection, dependency checks, one-click mount, auto RW mount, status logs, sleep prevention, safety lock
@@ -173,7 +176,7 @@ swift run Nigate
 
 ```sh
 ./macos/Scripts/build.sh          # → dist/Nigate.app (ad-hoc signed)
-./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.7.dmg
+./macos/Scripts/package-dmg.sh    # → dist/Nigate-<version>.dmg
 ```
 
 Optional Developer ID + notarization:

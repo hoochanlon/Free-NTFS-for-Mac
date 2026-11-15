@@ -10,6 +10,9 @@ Nigate は、NTFS ボリュームを読み書き可能な状態でマウント�
 
 このデモは 1.6.1 より前のバージョンのものです。
 
+> [!WARNING]
+> Intel：macFUSE / `ntfs-3g` を Homebrew で入れる場合、公式 bottle は **2026 年 9 月**に停止し、**2027 年 9 月以降** Homebrew は Intel 上で動作しません。Intel Mac は macOS 26 が最後です。**macOS 28 は Intel には適用されません**。Rosetta 2 の一般向け翻訳は **macOS 27** までで、**macOS 28** 以降は通常の Intel アプリを実行しません（一部の旧ゲームのみ）。
+
 ## 機能
 
 - SwiftUI：NTFS デバイスの自動検出、依存関係チェック、ワンクリックマウント、自動読み書き、状態ログ、スリープ防止、保護ロック
@@ -173,7 +176,7 @@ swift run Nigate
 
 ```sh
 ./macos/Scripts/build.sh          # → dist/Nigate.app（ad-hoc 署名）
-./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.7.dmg
+./macos/Scripts/package-dmg.sh    # → dist/Nigate-<version>.dmg
 ```
 
 任意の Developer ID + 公証：
