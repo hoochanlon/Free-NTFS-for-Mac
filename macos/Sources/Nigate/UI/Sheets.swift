@@ -410,6 +410,35 @@ private struct AboutGlyph: View {
     }
 }
 
+struct QuitConfirmSheet: View {
+    @EnvironmentObject private var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: "power.circle")
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(Palette.error)
+                Text(L10n.t("tray.quitConfirmTitle"))
+                    .font(.title2.weight(.semibold))
+            }
+            Text(L10n.t("tray.quitConfirmMessage"))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack {
+                Spacer()
+                Button(L10n.t("dialog.cancel")) { dismiss() }
+                    .keyboardShortcut(.cancelAction)
+                Button(L10n.t("tray.quit")) { model.confirmQuit() }
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(24)
+        .frame(width: 420)
+    }
+}
+
 struct SupportAuthorSheet: View {
     @Environment(\.dismiss) private var dismiss
 

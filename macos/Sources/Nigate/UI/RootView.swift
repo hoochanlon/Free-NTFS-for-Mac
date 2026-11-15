@@ -3,6 +3,8 @@ import AppKit
 
 enum Palette {
     static let accent = Color(red: 0, green: 0.48, blue: 1)
+    /// 关于图标：浅一点的信息蓝，不要海军深蓝。
+    static let about = Color(red: 0.29, green: 0.64, blue: 1)
     static let success = Color(red: 0.20, green: 0.78, blue: 0.35)
     static let warning = Color(red: 1, green: 0.58, blue: 0)
     static let error = Color(red: 1, green: 0.23, blue: 0.19)
@@ -142,6 +144,9 @@ struct RootView: View {
         }
         .sheet(isPresented: $model.supportOpen) {
             SupportAuthorSheet()
+        }
+        .sheet(isPresented: $model.quitConfirmOpen) {
+            QuitConfirmSheet()
         }
         .sheet(item: $model.renameDevice) { device in
             RenameSheet(device: device)

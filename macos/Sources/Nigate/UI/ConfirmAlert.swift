@@ -12,6 +12,7 @@ enum ConfirmAlert {
         var continueTitle: String
         var cancelTitle: String
         var minContentWidth: CGFloat = 440
+        var iconColor: NSColor? = nil
     }
 
     @discardableResult
@@ -247,7 +248,7 @@ private final class ContentView: NSView {
         self.onFinish = onFinish
         super.init(frame: .zero)
 
-        let iconColor: NSColor = {
+        let iconColor: NSColor = presentation.iconColor ?? {
             switch presentation.style {
             case .critical: return .systemRed
             case .warning: return .systemOrange

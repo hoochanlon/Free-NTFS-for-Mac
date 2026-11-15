@@ -21,15 +21,15 @@ struct TitleChrome: View {
 
                 protectButton
 
-                iconButton("power", L10n.t("menu.quit"), active: false, tint: Palette.error) {
+                iconButton("power", L10n.t("menu.quit"), active: model.quitConfirmOpen, tint: Palette.error) {
                     NSApp.terminate(nil)
                 }
 
-                iconButton("heart.fill", L10n.t("support.title"), active: true, tint: Palette.heart) {
+                iconButton("heart.fill", L10n.t("support.title"), active: model.supportOpen, tint: Palette.heart) {
                     model.supportOpen = true
                 }
 
-                iconButton("info.circle", L10n.t("app.about"), active: false, tint: Palette.accent) {
+                iconButton("info.circle", L10n.t("app.about"), active: model.aboutOpen, tint: Palette.about) {
                     model.aboutOpen = true
                 }
 

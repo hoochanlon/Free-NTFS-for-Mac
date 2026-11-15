@@ -17,6 +17,8 @@ final class AppModel: ObservableObject {
     @Published var alert: AppAlert?
     @Published var aboutOpen = false
     @Published var supportOpen = false
+    @Published var quitConfirmOpen = false
+    private(set) var quitConfirmed = false
     @Published var renameDevice: NTFSDevice?
     @Published var toast: String?
     /// 长操作（格式化）期间停在窗口下方，不走 toast 的短时消失。
@@ -111,6 +113,25 @@ final class AppModel: ObservableObject {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         NSApp.windows.first?.makeKeyAndOrderFront(nil)
+    }
+
+    /// 退出确认用 SwiftUI sheet，附着主窗口并压暗背景，避免独立浮层把窗口拖走。
+    func presentQuitConfirm() {
+        guard !quitConfirmed else { return }
+        aboutOpen = false
+        supportOpen = false
+        passwordSheet = nil
+        renameDevice = nil
+        alert = nil
+        revealMainWindow()
+        quitConfirmOpen = true
+    }
+
+    func confirmQuit() {
+        guard !quitConfirmed else { return }
+        quitConfirmed = true
+        quitConfirmOpen = false
+        NSApp.terminate(nil)
     }
 
     func withdrawToTray() {
