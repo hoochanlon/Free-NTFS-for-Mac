@@ -320,6 +320,36 @@ enum HelpMarkdownIndex {
         return nest(headings, parentLevel: 1, index: &index)
     }
 
+    /// 视口顶部阅读线。章节切换以越过这条线为准，而不是 Lazy 窗口里最靠上的块。
+    static let readingPin: CGFloat = 24
+
+    /// 当前可见块所属章节：取文档中最后一个 blockID ≤ 该块的标题。
+    static func headingID(covering blockID: Int, in blocks: [HelpBlock]) -> Int? {
+        headings(in: blocks).last { $0.blockID <= blockID }?.blockID
+    }
+
+    /// Lazy 窗口会保留视口上方很负的 minY。当前章节取刚越过阅读线的块。
+    static func headingID(
+        covering offsets: [Int: CGFloat],
+        pin: CGFloat = readingPin,
+        in blocks: [HelpBlock]
+    ) -> Int? {
+        guard let blockID = readingBlockID(in: offsets, pin: pin) else { return nil }
+        return headingID(covering: blockID, in: blocks)
+    }
+
+    /// 已越过阅读线的块里，取最靠近阅读线的那一块；若都还在下方，取即将进入的第一块。
+    static func readingBlockID(in offsets: [Int: CGFloat], pin: CGFloat = readingPin) -> Int? {
+        let passed = offsets.filter { $0.value.isFinite && $0.value <= pin }
+        if let current = passed.max(by: { $0.value < $1.value })?.key {
+            return current
+        }
+        return offsets
+            .filter { $0.value.isFinite }
+            .min(by: { $0.value < $1.value })?
+            .key
+    }
+
     private static func nest(
         _ headings: [HelpHeading],
         parentLevel: Int,

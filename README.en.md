@@ -173,7 +173,7 @@ swift run Nigate
 
 ```sh
 ./macos/Scripts/build.sh          # → dist/Nigate.app (ad-hoc signed)
-./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.5.dmg
+./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.6.dmg
 ```
 
 Optional Developer ID + notarization:

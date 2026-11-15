@@ -18,7 +18,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard let model else { return .terminateNow }
-        if model.quitConfirmed { return .terminateNow }
+        if model.quitConfirmed {
+            for window in NSApp.windows {
+                if let sheet = window.attachedSheet {
+                    window.endSheet(sheet)
+                }
+            }
+            return .terminateNow
+        }
         if !model.quitConfirmOpen {
             model.presentQuitConfirm()
         }

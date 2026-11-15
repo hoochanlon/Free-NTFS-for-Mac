@@ -101,6 +101,69 @@ final class HelpMarkdownParserTests: XCTestCase {
         XCTAssertTrue(outline[1].children.isEmpty)
     }
 
+    func testHeadingIDCoversNearestPrecedingSection() {
+        let markdown = """
+        # Guide
+        intro
+        ## Parent
+        body
+        ### Child
+        nested
+        ## Sibling
+        after
+        """
+
+        let blocks = HelpMarkdownParser.parse(markdown)
+        XCTAssertEqual(HelpMarkdownIndex.headingID(covering: 0, in: blocks), nil)
+        XCTAssertEqual(HelpMarkdownIndex.headingID(covering: 1, in: blocks), nil)
+        XCTAssertEqual(HelpMarkdownIndex.headingID(covering: 2, in: blocks), 2)
+        XCTAssertEqual(HelpMarkdownIndex.headingID(covering: 3, in: blocks), 2)
+        XCTAssertEqual(HelpMarkdownIndex.headingID(covering: 4, in: blocks), 4)
+        XCTAssertEqual(HelpMarkdownIndex.headingID(covering: 5, in: blocks), 4)
+        XCTAssertEqual(HelpMarkdownIndex.headingID(covering: 6, in: blocks), 6)
+        XCTAssertEqual(HelpMarkdownIndex.headingID(covering: 7, in: blocks), 6)
+    }
+
+    func testHeadingIDUsesReadingLineNotHighestVisibleBlock() {
+        let markdown = """
+        # Guide
+        intro
+        ## Parent
+        body
+        ### Child
+        nested
+        ## Sibling
+        after
+        """
+        let blocks = HelpMarkdownParser.parse(markdown)
+        let pin = HelpMarkdownIndex.readingPin
+
+        XCTAssertEqual(HelpMarkdownIndex.readingBlockID(in: [2: -720, 3: -480, 4: -8, 5: 90], pin: pin), 4)
+        XCTAssertEqual(
+            HelpMarkdownIndex.headingID(covering: [2: -720, 3: -480, 4: -8, 5: 90], pin: pin, in: blocks),
+            4
+        )
+
+        XCTAssertEqual(
+            HelpMarkdownIndex.headingID(covering: [4: -40, 5: 20, 6: 80], pin: pin, in: blocks),
+            4
+        )
+
+        XCTAssertEqual(
+            HelpMarkdownIndex.headingID(covering: [5: -30, 6: 10, 7: 70], pin: pin, in: blocks),
+            6
+        )
+
+        XCTAssertEqual(
+            HelpMarkdownIndex.headingID(covering: [0: 40, 1: 90], pin: pin, in: blocks),
+            nil
+        )
+        XCTAssertEqual(
+            HelpMarkdownIndex.headingID(covering: [2: 40, 3: 90], pin: pin, in: blocks),
+            2
+        )
+    }
+
     func testSearchesAcrossParagraphsListsCalloutsTablesAndCode() {
         let markdown = """
         # Guide

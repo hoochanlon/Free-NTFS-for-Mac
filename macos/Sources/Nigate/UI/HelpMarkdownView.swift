@@ -5,6 +5,19 @@ enum HelpScrollTarget: Hashable {
     case block(Int)
 }
 
+enum HelpScrollSpace {
+    static let name = "help-scroll"
+}
+
+/// Lazy 容器只上报窗口内的块；章节由阅读线（刚越过视口顶部的块）反推，不能取 minY 最小的旧块。
+enum HelpVisibleBlockKey: PreferenceKey {
+    static let defaultValue: [Int: CGFloat] = [:]
+
+    static func reduce(value: inout [Int: CGFloat], nextValue: () -> [Int: CGFloat]) {
+        value.merge(nextValue(), uniquingKeysWith: { $1 })
+    }
+}
+
 private enum HelpImageLayout {
     static let width: CGFloat = 520
 
@@ -31,6 +44,14 @@ struct HelpMarkdownView: View {
                         if block.id == activeSearchBlockID {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color.accentColor.opacity(0.13))
+                        }
+                    }
+                    .background {
+                        GeometryReader { geo in
+                            Color.clear.preference(
+                                key: HelpVisibleBlockKey.self,
+                                value: [block.id: geo.frame(in: .named(HelpScrollSpace.name)).minY]
+                            )
                         }
                     }
                     .id(HelpScrollTarget.block(block.id))

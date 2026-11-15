@@ -115,7 +115,7 @@ final class AppModel: ObservableObject {
         NSApp.windows.first?.makeKeyAndOrderFront(nil)
     }
 
-    /// 退出确认用 SwiftUI sheet，附着主窗口并压暗背景，避免独立浮层把窗口拖走。
+    /// 退出确认画在主窗口内，避免独立浮层把窗口拖走，也不走 AppKit sheet（会拖慢 terminate）。
     func presentQuitConfirm() {
         guard !quitConfirmed else { return }
         aboutOpen = false
@@ -130,7 +130,6 @@ final class AppModel: ObservableObject {
     func confirmQuit() {
         guard !quitConfirmed else { return }
         quitConfirmed = true
-        quitConfirmOpen = false
         NSApp.terminate(nil)
     }
 

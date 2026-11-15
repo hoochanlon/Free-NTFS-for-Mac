@@ -145,9 +145,6 @@ struct RootView: View {
         .sheet(isPresented: $model.supportOpen) {
             SupportAuthorSheet()
         }
-        .sheet(isPresented: $model.quitConfirmOpen) {
-            QuitConfirmSheet()
-        }
         .sheet(item: $model.renameDevice) { device in
             RenameSheet(device: device)
         }
@@ -185,6 +182,16 @@ struct RootView: View {
                     .padding(.vertical, 8)
                     .background(.ultraThinMaterial, in: Capsule())
                     .padding(.bottom, 18)
+            }
+        }
+        .overlay {
+            if model.quitConfirmOpen {
+                ZStack {
+                    Color.black.opacity(0.32)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .contentShape(Rectangle())
+                    QuitConfirmSheet()
+                }
             }
         }
         .onChange(of: model.toast) { _, toast in

@@ -8,6 +8,7 @@ struct HelpPane: View {
     @State private var searchText = ""
     @State private var selectedMatch = 0
     @State private var requestedHeadingID: Int?
+    @State private var activeHeadingID: Int?
     @State private var navigationRequest = UUID()
 
     init() {
@@ -111,21 +112,30 @@ struct HelpPane: View {
 
             HStack(spacing: 0) {
                 if isContentsVisible {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(L10n.t("help.toc"))
-                                .font(.title3.weight(.semibold))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
+                    ScrollViewReader { tocProxy in
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(L10n.t("help.toc"))
+                                    .font(.title3.weight(.semibold))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
 
-                            ForEach(outline) { node in
-                                HelpOutlineRow(node: node) { blockID in
-                                    requestedHeadingID = blockID
-                                    navigationRequest = UUID()
+                                ForEach(outline) { node in
+                                    HelpOutlineRow(node: node, activeHeadingID: activeHeadingID) { blockID in
+                                        activeHeadingID = blockID
+                                        requestedHeadingID = blockID
+                                        navigationRequest = UUID()
+                                    }
                                 }
                             }
+                            .padding(.vertical, 8)
                         }
-                        .padding(.vertical, 8)
+                        .onChange(of: activeHeadingID) { _, blockID in
+                            guard let blockID else { return }
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                tocProxy.scrollTo(blockID, anchor: .center)
+                            }
+                        }
                     }
                     .frame(width: 252)
                     .background(Color(nsColor: .controlBackgroundColor).opacity(0.55))
@@ -135,6 +145,15 @@ struct HelpPane: View {
                 ScrollViewReader { proxy in
                     ScrollView {
                         HelpMarkdownView(blocks: blocks, activeSearchBlockID: activeMatch)
+                    }
+                    .coordinateSpace(name: HelpScrollSpace.name)
+                    .onPreferenceChange(HelpVisibleBlockKey.self) { offsets in
+                        let headingID = HelpMarkdownIndex.headingID(covering: offsets, in: blocks)
+                        DispatchQueue.main.async {
+                            if headingID != activeHeadingID {
+                                activeHeadingID = headingID
+                            }
+                        }
                     }
                     .onChange(of: navigationRequest) { _, _ in
                         guard let requestedHeadingID else { return }
@@ -157,15 +176,22 @@ struct HelpPane: View {
 private struct HelpOutlineRow: View {
     let node: HelpOutlineNode
     var depth: Int = 0
+    var activeHeadingID: Int?
     let onSelect: (Int) -> Void
 
     @State private var isExpanded: Bool
 
-    init(node: HelpOutlineNode, depth: Int = 0, onSelect: @escaping (Int) -> Void) {
+    init(node: HelpOutlineNode, depth: Int = 0, activeHeadingID: Int? = nil, onSelect: @escaping (Int) -> Void) {
         self.node = node
         self.depth = depth
+        self.activeHeadingID = activeHeadingID
         self.onSelect = onSelect
-        _isExpanded = State(initialValue: Self.expandsByDefault(node, depth: depth))
+        _isExpanded = State(initialValue: Self.expandsByDefault(node, depth: depth)
+            || Self.containsDescendant(node, headingID: activeHeadingID))
+    }
+
+    private var isActive: Bool {
+        node.heading.blockID == activeHeadingID
     }
 
     var body: some View {
@@ -196,28 +222,55 @@ private struct HelpOutlineRow: View {
                 } label: {
                     Text(node.heading.title)
                         .font(depth == 0 ? .body.weight(.medium) : .body)
-                        .foregroundStyle(depth == 0 ? Color.primary : Color.secondary)
+                        .foregroundStyle(isActive ? Color.accentColor : (depth == 0 ? Color.primary : Color.secondary))
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.vertical, 6)
+                        .padding(.horizontal, 8)
+                        .background {
+                            if isActive {
+                                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                    .fill(Color.accentColor.opacity(0.16))
+                            }
+                        }
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
             }
             .padding(.leading, CGFloat(depth) * 12 + 8)
             .padding(.trailing, 8)
+            .id(node.heading.blockID)
 
             if isExpanded {
                 ForEach(node.children) { child in
-                    HelpOutlineRow(node: child, depth: depth + 1, onSelect: onSelect)
+                    HelpOutlineRow(
+                        node: child,
+                        depth: depth + 1,
+                        activeHeadingID: activeHeadingID,
+                        onSelect: onSelect
+                    )
                 }
             }
         }
+        .onAppear { expandIfNeeded() }
+        .onChange(of: activeHeadingID) { _, _ in expandIfNeeded() }
+    }
+
+    private func expandIfNeeded() {
+        guard Self.containsDescendant(node, headingID: activeHeadingID), !isExpanded else { return }
+        isExpanded = true
     }
 
     private static func expandsByDefault(_ node: HelpOutlineNode, depth: Int) -> Bool {
         depth == 0 && !node.children.isEmpty && node.children.allSatisfy(\.children.isEmpty)
+    }
+
+    private static func containsDescendant(_ node: HelpOutlineNode, headingID: Int?) -> Bool {
+        guard let headingID else { return false }
+        return node.children.contains { child in
+            child.heading.blockID == headingID || containsDescendant(child, headingID: headingID)
+        }
     }
 }
 
@@ -412,7 +465,6 @@ private struct AboutGlyph: View {
 
 struct QuitConfirmSheet: View {
     @EnvironmentObject private var model: AppModel
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -428,7 +480,7 @@ struct QuitConfirmSheet: View {
                 .fixedSize(horizontal: false, vertical: true)
             HStack {
                 Spacer()
-                Button(L10n.t("dialog.cancel")) { dismiss() }
+                Button(L10n.t("dialog.cancel")) { model.quitConfirmOpen = false }
                     .keyboardShortcut(.cancelAction)
                 Button(L10n.t("tray.quit")) { model.confirmQuit() }
                     .keyboardShortcut(.defaultAction)
@@ -436,6 +488,12 @@ struct QuitConfirmSheet: View {
         }
         .padding(24)
         .frame(width: 420)
+        .background(Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.08))
+        )
+        .shadow(color: .black.opacity(0.28), radius: 24, y: 10)
     }
 }
 
