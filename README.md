@@ -171,7 +171,7 @@ swift run Nigate
 
 ```sh
 ./macos/Scripts/build.sh          # → dist/Nigate.app（ad-hoc 签名）
-./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.4.dmg
+./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.5.dmg
 ```
 
 可选 Developer ID + 公证：
@@ -200,7 +200,7 @@ docs/README.md
 如果 Nigate 对你有帮助，欢迎扫码打赏：
 
 <p align="center">
-  <img src="buy%20coffee/zanshangma.jpg" alt="赞赏码" width="240">
+  <img src="assets/imgs/buy%20coffee/zanshangma.jpg" alt="赞赏码" width="240">
 </p>
 
 感谢所有贡献者。详见 [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)。

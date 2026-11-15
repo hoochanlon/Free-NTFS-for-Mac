@@ -231,6 +231,9 @@ struct AboutSheet: View {
     }()
 
     private static let authorAvatar: NSImage? = loadAuthorAvatar()
+    private static let githubGlyph = AboutGlyph.loadSVG("github")
+    private static let blogGlyph = AboutGlyph.loadSVG("blog")
+    private static let mailGlyph = AboutGlyph.loadSVG("email")
     private static let technologies = "SwiftUI · DiskArbitration · macFUSE · ntfs-3g"
 
     private static func loadAuthorAvatar() -> NSImage? {
@@ -293,28 +296,32 @@ struct AboutSheet: View {
                 technologyLine
             }
             VStack(alignment: .leading, spacing: 10) {
-                aboutLink(
-                    destination: URL(string: githubRepo)!,
-                    accessibilityLabel: L10n.t("about.projectLink")
-                ) {
-                    GitHubMark()
-                        .frame(width: 16, height: 16)
-                    Text(githubRepo)
-                        .textSelection(.enabled)
-                }
-                aboutLink(
+                aboutContact(
+                    destination: URL(string: authorBlog)!,
+                    tint: Palette.blog,
+                    icon: Self.blogGlyph,
+                    fallback: "globe",
+                    label: L10n.t("about.blog"),
+                    value: authorBlog
+                )
+                aboutContact(
                     destination: URL(string: "mailto:\(authorEmail)")!,
-                    accessibilityLabel: L10n.t("about.email")
-                ) {
-                    Image(systemName: "envelope.fill")
-                        .font(.system(size: 13))
-                        .frame(width: 16, height: 16)
-                    Text(authorEmail)
-                        .textSelection(.enabled)
-                }
+                    tint: Palette.mail,
+                    icon: Self.mailGlyph,
+                    fallback: "envelope.fill",
+                    label: L10n.t("about.email"),
+                    value: authorEmail
+                )
+                aboutContact(
+                    destination: URL(string: githubRepo)!,
+                    tint: Palette.github,
+                    icon: Self.githubGlyph,
+                    fallback: "chevron.left.forwardslash.chevron.right",
+                    label: L10n.t("about.projectLink"),
+                    value: githubRepo
+                )
             }
             .font(.body)
-            .foregroundStyle(Palette.accent)
             HStack {
                 Button(L10n.t("about.checkUpdates")) {
                     Task { await model.checkUpdates() }
@@ -344,32 +351,62 @@ struct AboutSheet: View {
         .accessibilityLabel("\(label) \(Self.technologies)")
     }
 
-    private func aboutLink<Content: View>(
+    private func aboutContact(
         destination: URL,
-        accessibilityLabel: String,
-        @ViewBuilder content: () -> Content
+        tint: Color,
+        icon: NSImage?,
+        fallback: String,
+        label: String,
+        value: String
     ) -> some View {
-        Link(destination: destination) {
+        Button {
+            NSWorkspace.shared.open(destination)
+        } label: {
             HStack(alignment: .center, spacing: 8) {
-                content()
+                AboutGlyph(image: icon, fallback: fallback)
+                    .foregroundStyle(tint)
+                (Text(label).foregroundStyle(.primary) + Text(value).underline().foregroundStyle(tint))
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
+            .linkPointer()
         }
-        .accessibilityLabel(accessibilityLabel)
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(label)\(value)")
     }
 }
 
-/// 仓库入口图标：圆底 + 代码括号（SF 无官方 GitHub logo）。
-private struct GitHubMark: View {
+/// 关于页品牌图标：优先 bundle 内 SVG（模板色跟随链接），缺失时回退 SF Symbol。
+private struct AboutGlyph: View {
+    let image: NSImage?
+    let fallback: String
+
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(Palette.accent)
-            Image(systemName: "chevron.left.forwardslash.chevron.right")
-                .font(.system(size: 8, weight: .bold))
-                .foregroundStyle(.white)
+        Group {
+            if let image {
+                Image(nsImage: image)
+                    .resizable()
+                    .renderingMode(.template)
+                    .interpolation(.high)
+                    .aspectRatio(contentMode: .fit)
+            } else {
+                Image(systemName: fallback)
+                    .font(.system(size: 13))
+            }
         }
+        .frame(width: 16, height: 16)
         .accessibilityHidden(true)
+    }
+
+    static func loadSVG(_ name: String) -> NSImage? {
+        let url = Bundle.module.url(forResource: name, withExtension: "svg", subdirectory: "svg")
+            ?? Bundle.module.url(forResource: name, withExtension: "svg")
+        guard let url, let image = NSImage(contentsOf: url) else { return nil }
+        image.isTemplate = true
+        image.size = NSSize(width: 16, height: 16)
+        return image
     }
 }
 

@@ -173,7 +173,7 @@ swift run Nigate
 
 ```sh
 ./macos/Scripts/build.sh          # → dist/Nigate.app (ad-hoc signed)
-./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.4.dmg
+./macos/Scripts/package-dmg.sh    # → dist/Nigate-1.6.5.dmg
 ```
 
 Optional Developer ID + notarization:
@@ -202,7 +202,7 @@ docs/README.md
 If Nigate helps you, you can leave a tip:
 
 <p align="center">
-  <img src="buy%20coffee/zanshangma.jpg" alt="Tip QR code" width="240">
+  <img src="assets/imgs/buy%20coffee/zanshangma.jpg" alt="Tip QR code" width="240">
 </p>
 
 Thanks to everyone who contributed. See [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md).

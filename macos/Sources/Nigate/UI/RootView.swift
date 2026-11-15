@@ -9,6 +9,12 @@ enum Palette {
     static let coffee = Color(red: 0.55, green: 0.27, blue: 0.07)
     static let smart = Color(red: 0.10, green: 0.61, blue: 0.56)
     static let heart = Color(red: 0.92, green: 0.28, blue: 0.40)
+    /// GitHub 常用紫（图标与项目地址同色）。
+    static let github = Color(red: 0.51, green: 0.31, blue: 0.87)
+    /// 博客 / RSS 常用橙。
+    static let blog = Color(red: 0.95, green: 0.40, blue: 0.13)
+    /// 邮箱常用红，避免三条联系方式都落成链接蓝。
+    static let mail = Color(red: 0.91, green: 0.26, blue: 0.21)
 }
 
 /// 按钮悬停提示：只在设置打开时挂 `.help`，默认关闭。
@@ -26,9 +32,81 @@ private struct NigateHelpModifier: ViewModifier {
     }
 }
 
+private struct LinkPointerModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .overlay {
+                LinkCursorProbe()
+                    .allowsHitTesting(false)
+            }
+            .onHover { hovering in
+                // SwiftUI 会在同一轮把光标改回箭头/I 形，推迟一拍才能稳住手形。
+                DispatchQueue.main.async {
+                    if hovering {
+                        NSCursor.pointingHand.set()
+                    } else {
+                        NSCursor.arrow.set()
+                    }
+                }
+            }
+    }
+}
+
+private struct LinkCursorProbe: NSViewRepresentable {
+    func makeNSView(context: Context) -> LinkCursorView {
+        LinkCursorView()
+    }
+
+    func updateNSView(_ nsView: LinkCursorView, context: Context) {}
+}
+
+/// 点击穿透，只用跟踪区域把手形钉在链接上。
+private final class LinkCursorView: NSView {
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach(removeTrackingArea)
+        addTrackingArea(
+            NSTrackingArea(
+                rect: .zero,
+                options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect, .cursorUpdate],
+                owner: self,
+                userInfo: nil
+            )
+        )
+    }
+
+    override func cursorUpdate(with event: NSEvent) {
+        NSCursor.pointingHand.set()
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        NSCursor.pointingHand.set()
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        NSCursor.arrow.set()
+    }
+
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        nil
+    }
+}
+
 extension View {
     func nigateHelp(_ text: String) -> some View {
         modifier(NigateHelpModifier(text: text))
+    }
+
+    func linkPointer() -> some View {
+        modifier(LinkPointerModifier())
     }
 }
 

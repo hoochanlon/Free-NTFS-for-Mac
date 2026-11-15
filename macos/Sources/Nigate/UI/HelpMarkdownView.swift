@@ -37,7 +37,6 @@ struct HelpMarkdownView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .textSelection(.enabled)
         .padding(.horizontal, 24)
         .padding(.vertical, 20)
     }
@@ -48,10 +47,7 @@ struct HelpMarkdownView: View {
         case let .heading(level, value):
             heading(value, level: level)
         case let .paragraph(value):
-            inline(value)
-                .font(.body)
-                .lineSpacing(5)
-                .fixedSize(horizontal: false, vertical: true)
+            inline(value, font: .preferredFont(forTextStyle: .body), lineSpacing: 5)
                 .frame(maxWidth: .infinity, alignment: .leading)
         case let .list(items):
             VStack(alignment: .leading, spacing: 9) {
@@ -61,7 +57,7 @@ struct HelpMarkdownView: View {
                             .font(.body.monospacedDigit())
                             .foregroundStyle(.secondary)
                             .frame(width: 25, alignment: .trailing)
-                        inline(item.text)
+                        inline(item.text, font: .preferredFont(forTextStyle: .body))
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.leading, CGFloat(item.depth) * 18)
@@ -83,8 +79,7 @@ struct HelpMarkdownView: View {
     private func heading(_ value: String, level: Int) -> some View {
         switch level {
         case 1:
-            inline(value)
-                .font(.system(size: 27, weight: .bold))
+            inline(value, font: .systemFont(ofSize: 27, weight: .bold))
                 .padding(.top, 3)
                 .padding(.bottom, 10)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -94,18 +89,14 @@ struct HelpMarkdownView: View {
                         .frame(height: 1)
                 }
         case 2:
-            inline(value)
-                .font(.title2.weight(.semibold))
+            inline(value, font: Self.semibold(.title2))
                 .padding(.top, 15)
                 .padding(.bottom, 1)
         case 3:
-            inline(value)
-                .font(.headline)
+            inline(value, font: .preferredFont(forTextStyle: .headline))
                 .padding(.top, 8)
         default:
-            inline(value)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.secondary)
+            inline(value, font: Self.semibold(.subheadline), color: .secondaryLabelColor)
                 .padding(.top, 5)
         }
     }
@@ -150,7 +141,7 @@ struct HelpMarkdownView: View {
                     .font(.caption.weight(.bold))
                     .tracking(0.5)
                     .foregroundStyle(kind.tint)
-                inline(text)
+                inline(text, font: .preferredFont(forTextStyle: .body))
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
@@ -171,8 +162,10 @@ struct HelpMarkdownView: View {
                 ForEach(rows.indices, id: \.self) { rowIndex in
                     HStack(alignment: .top, spacing: 0) {
                         ForEach(rows[rowIndex].indices, id: \.self) { columnIndex in
-                            inline(rows[rowIndex][columnIndex])
-                                .font(rowIndex == 0 ? .subheadline.weight(.semibold) : .body)
+                            inline(
+                                rows[rowIndex][columnIndex],
+                                font: rowIndex == 0 ? Self.semibold(.subheadline) : .preferredFont(forTextStyle: .body)
+                            )
                                 .frame(minWidth: 120, maxWidth: 260, alignment: .leading)
                                 .padding(10)
                                 .frame(maxHeight: .infinity, alignment: .topLeading)
@@ -235,15 +228,26 @@ struct HelpMarkdownView: View {
             ?? L10n.resource(name)
     }
 
-    private func inline(_ source: String) -> Text {
-        let cleaned = source.replacingOccurrences(
+    private func inline(
+        _ source: String,
+        font: NSFont,
+        color: NSColor = .labelColor,
+        lineSpacing: CGFloat = 0
+    ) -> some View {
+        HelpMarkdownText(source: stripInlineImages(source), font: font, color: color, lineSpacing: lineSpacing)
+    }
+
+    private func stripInlineImages(_ source: String) -> String {
+        source.replacingOccurrences(
             of: "<img\\b[^>]*>",
             with: "",
             options: .regularExpression
         )
-        let value = (try? AttributedString(markdown: cleaned, options: .init(interpretedSyntax: .full)))
-            ?? AttributedString(cleaned)
-        return Text(value)
+    }
+
+    private static func semibold(_ style: NSFont.TextStyle) -> NSFont {
+        let size = NSFont.preferredFont(forTextStyle: style).pointSize
+        return .systemFont(ofSize: size, weight: .semibold)
     }
 
     private func marker(for marker: HelpListItem.Marker) -> String {
@@ -252,6 +256,131 @@ struct HelpMarkdownView: View {
             "•"
         case let .numbered(number):
             "\(number)."
+        }
+    }
+}
+
+/// AppKit 文本：SwiftUI `Text` 的 markdown 链接在 macOS 上不会出手形。
+private struct HelpMarkdownText: NSViewRepresentable {
+    let source: String
+    let font: NSFont
+    var color: NSColor = .labelColor
+    var lineSpacing: CGFloat = 0
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    final class Coordinator {
+        var source = ""
+        var fontSize: CGFloat = 0
+        var lineSpacing: CGFloat = -1
+    }
+
+    func makeNSView(context: Context) -> HelpLinkTextView {
+        let view = HelpLinkTextView()
+        view.drawsBackground = false
+        view.backgroundColor = .clear
+        view.isEditable = false
+        view.isSelectable = true
+        view.isRichText = true
+        view.isVerticallyResizable = false
+        view.isHorizontallyResizable = false
+        view.textContainerInset = .zero
+        view.textContainer?.lineFragmentPadding = 0
+        view.textContainer?.widthTracksTextView = true
+        view.textContainer?.heightTracksTextView = false
+        view.displaysLinkToolTips = true
+        view.isAutomaticLinkDetectionEnabled = false
+        view.focusRingType = .none
+        view.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        view.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        view.linkTextAttributes = [
+            .foregroundColor: NSColor.linkColor,
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .cursor: NSCursor.pointingHand
+        ]
+        return view
+    }
+
+    func updateNSView(_ view: HelpLinkTextView, context: Context) {
+        view.font = font
+        view.textColor = color
+        let changed = context.coordinator.source != source
+            || context.coordinator.fontSize != font.pointSize
+            || context.coordinator.lineSpacing != lineSpacing
+        if changed {
+            view.textStorage?.setAttributedString(
+                Self.attributed(source, font: font, color: color, lineSpacing: lineSpacing)
+            )
+            context.coordinator.source = source
+            context.coordinator.fontSize = font.pointSize
+            context.coordinator.lineSpacing = lineSpacing
+            view.window?.invalidateCursorRects(for: view)
+        }
+        view.invalidateIntrinsicContentSize()
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, nsView: HelpLinkTextView, context: Context) -> CGSize? {
+        let proposed = proposal.width ?? nsView.bounds.width
+        let width = (proposed.isFinite && proposed > 0) ? proposed : HelpImageLayout.width
+        guard let container = nsView.textContainer, let layout = nsView.layoutManager else {
+            return CGSize(width: width, height: font.pointSize)
+        }
+        container.containerSize = NSSize(width: width, height: .greatestFiniteMagnitude)
+        layout.ensureLayout(for: container)
+        let used = layout.usedRect(for: container)
+        let minHeight = ceil(font.ascender - font.descender + font.leading + lineSpacing)
+        return CGSize(width: width, height: max(ceil(used.height), minHeight))
+    }
+
+    private static func attributed(
+        _ source: String,
+        font: NSFont,
+        color: NSColor,
+        lineSpacing: CGFloat
+    ) -> NSAttributedString {
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.lineSpacing = lineSpacing
+        let parsed = (try? NSAttributedString(
+            markdown: Data(source.utf8),
+            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        )) ?? NSAttributedString(string: source)
+        let result = NSMutableAttributedString(attributedString: parsed)
+        let range = NSRange(location: 0, length: result.length)
+        guard range.length > 0 else { return result }
+        result.addAttribute(.paragraphStyle, value: paragraph, range: range)
+        result.enumerateAttributes(in: range, options: []) { attrs, subrange, _ in
+            if attrs[.font] == nil {
+                result.addAttribute(.font, value: font, range: subrange)
+            }
+            if attrs[.link] == nil, attrs[.foregroundColor] == nil {
+                result.addAttribute(.foregroundColor, value: color, range: subrange)
+            }
+        }
+        return result
+    }
+}
+
+private final class HelpLinkTextView: NSTextView {
+    override func scrollWheel(with event: NSEvent) {
+        nextResponder?.scrollWheel(with: event)
+    }
+
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        guard let storage = textStorage, let layout = layoutManager, let container = textContainer else { return }
+        let full = NSRange(location: 0, length: storage.length)
+        storage.enumerateAttribute(.link, in: full) { value, range, _ in
+            guard value != nil else { return }
+            let glyphs = layout.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+            layout.enumerateEnclosingRects(
+                forGlyphRange: glyphs,
+                withinSelectedGlyphRange: NSRange(location: NSNotFound, length: 0),
+                in: container
+            ) { rect, _ in
+                self.addCursorRect(rect, cursor: .pointingHand)
+            }
         }
     }
 }
