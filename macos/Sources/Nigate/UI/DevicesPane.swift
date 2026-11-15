@@ -12,6 +12,7 @@ struct DevicesPane: View {
                 batch("arrow.clockwise", L10n.t("devices.refreshDevices")) {
                     Task { await model.refreshDevices() }
                 }
+                .disabled(model.isScanningDevices)
                 if model.devices.contains(where: \.needsMount) {
                     batch("externaldrive", L10n.t("devices.mountAllDevices")) { model.runBatch(.mount) }
                 }
@@ -31,7 +32,16 @@ struct DevicesPane: View {
             if model.devices.isEmpty {
                 VStack(spacing: 8) {
                     Spacer()
-                    if let hint = model.progressHint {
+                    if model.isScanningDevices || !model.didFinishDeviceScan {
+                        ProgressView()
+                            .controlSize(.regular)
+                            .padding(.bottom, 4)
+                        Text(L10n.t("devices.scanningState")).font(.headline)
+                        Text(L10n.t("devices.scanningHint"))
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                    } else if let hint = model.progressHint {
                         ProgressView()
                             .controlSize(.regular)
                             .padding(.bottom, 4)

@@ -23,6 +23,8 @@ final class AppModel: ObservableObject {
     @Published var toast: String?
     /// 长操作（格式化）期间停在窗口下方，不走 toast 的短时消失。
     @Published var progressHint: String?
+    @Published private(set) var isScanningDevices = false
+    @Published private(set) var didFinishDeviceScan = false
     @Published var languageStamp = 0
     /// 供 Settings / Dependencies 观察；MountBackendPolicy 同步持有同一快照。
     @Published private(set) var fsKitControlPlane = NigateFSKitControlPlaneState.unavailable
@@ -33,7 +35,6 @@ final class AppModel: ObservableObject {
     private var cooldown: [String: Date] = [:]
     private var inProgress = Set<String>()
     private var passwordContinuation: CheckedContinuation<String, Error>?
-    private var scanning = false
     private var rescanRequested = false
     private var knownNTFSDevices: [String: NTFSDevice] = [:]
     /// 只读↔读写期间钉住卡片。DiskMonitor 在卸载瞬间会扫到空表，不能让列表跟着空。
@@ -100,7 +101,7 @@ final class AppModel: ObservableObject {
     }
 
     private func refreshLiveCapacity() {
-        guard !scanning else { return }
+        guard !isScanningDevices else { return }
         var samples: [String: Capacity] = [:]
         for device in devices where device.isMounted && !device.isUnmounted && !device.volume.isEmpty {
             if let capacity = VolumeStat.capacity(
@@ -205,7 +206,7 @@ final class AppModel: ObservableObject {
     }
 
     func refreshDevices(applyAutoMount: Bool = true) async {
-        if scanning {
+        if isScanningDevices {
             rescanRequested = true
             return
         }
@@ -218,8 +219,15 @@ final class AppModel: ObservableObject {
 
     /// 只做挂载表扫描；调用方保证不在 autoMount / run 的嵌套路径里重入。
     private func scanDevicesLocked() async {
-        scanning = true
-        defer { scanning = false }
+        isScanningDevices = true
+        updateStatus()
+        TrayController.shared.reload()
+        defer {
+            isScanningDevices = false
+            didFinishDeviceScan = true
+            updateStatus()
+            TrayController.shared.reload()
+        }
         repeat {
             rescanRequested = false
             let knownDevices = Array(knownNTFSDevices.values) + devices
@@ -534,12 +542,12 @@ final class AppModel: ObservableObject {
         // 占用 scanning，合并期间 DiskMonitor 触发的刷新，避免旧结果盖住乐观态。
         // 等既有扫描结束；若对方卡在旧死锁路径，最多等 ~2s 后抢锁，避免按钮永久灰。
         var waited = 0
-        while scanning, waited < 40 {
+        while isScanningDevices, waited < 40 {
             rescanRequested = true
             try? await Task.sleep(nanoseconds: 50_000_000)
             waited += 1
         }
-        scanning = true
+        isScanningDevices = true
         var pendingRescan = false
 
         // 最多约 1.5s。未收敛前不覆盖乐观状态，避免托盘绿/橙来回跳。
@@ -560,7 +568,7 @@ final class AppModel: ObservableObject {
 
         pendingRescan = rescanRequested
         rescanRequested = false
-        scanning = false
+        isScanningDevices = false
 
         // autoMount / 追加 refresh 必须在释放 scanning 之后，否则嵌套 run 会再等 scanning → 死锁。
         if pendingRescan {
@@ -635,6 +643,10 @@ final class AppModel: ObservableObject {
     private func updateStatus() {
         if dependencies.missingCore {
             statusText = L10n.t("status.missingDeps")
+            return
+        }
+        if isScanningDevices || !didFinishDeviceScan {
+            statusText = L10n.t("status.scanningDevices")
             return
         }
         if devices.isEmpty {
