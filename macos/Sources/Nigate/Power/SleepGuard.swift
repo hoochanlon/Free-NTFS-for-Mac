@@ -45,6 +45,8 @@ final class SleepGuard {
     private var skipBootstrapSample = true
     private var busyStreak = 0
     private var stoppingIostat = false
+    /// stop() 之后禁止再拉起 iostat / 断言。退出时扫描回调还会再调 setMode。
+    private var retired = false
     private let idleHold: TimeInterval = 20
     private let assertionName = "Nigate Prevent Sleep" as CFString
 
@@ -73,6 +75,7 @@ final class SleepGuard {
     var isActive: Bool { wantHold && (hasDisplayAssertion || hasSystemAssertion || caffeinate?.isRunning == true) }
 
     func setMode(_ mode: SleepMode, disks: [String]) {
+        if retired { return }
         let previous = self.mode
         let previousDisks = self.disks
         self.mode = mode
@@ -105,6 +108,7 @@ final class SleepGuard {
     }
 
     func stop() {
+        retired = true
         mode = .off
         holdIdle(false)
         stopIostat()
@@ -200,10 +204,7 @@ final class SleepGuard {
         activity = ProcessInfo.processInfo.beginActivity(
             options: [
                 .idleDisplaySleepDisabled,
-                .idleSystemSleepDisabled,
-                .suddenTerminationDisabled,
-                .automaticTerminationDisabled,
-                .userInitiated
+                .idleSystemSleepDisabled
             ],
             reason: "Nigate prevent sleep"
         )
@@ -227,7 +228,7 @@ final class SleepGuard {
         proc.qualityOfService = .userInitiated
         proc.terminationHandler = { [weak self] _ in
             Task { @MainActor [weak self] in
-                guard let self else { return }
+                guard let self, !self.retired else { return }
                 self.caffeinate = nil
                 guard self.wantHold, !self.hasDisplayAssertion else { return }
                 self.startCaffeinate()
@@ -244,10 +245,7 @@ final class SleepGuard {
     private func stopCaffeinate() {
         guard let proc = caffeinate else { return }
         caffeinate = nil
-        proc.terminationHandler = nil
-        if proc.isRunning {
-            proc.terminate()
-        }
+        end(proc)
     }
 
     private func startIostat() {
@@ -275,7 +273,7 @@ final class SleepGuard {
         }
         proc.terminationHandler = { [weak self] _ in
             Task { @MainActor [weak self] in
-                guard let self, !self.stoppingIostat, self.mode == .smart, !self.disks.isEmpty else { return }
+                guard let self, !self.retired, !self.stoppingIostat, self.mode == .smart, !self.disks.isEmpty else { return }
                 self.iostat = nil
                 self.iostatOutput = nil
                 self.startIostat()
@@ -299,11 +297,19 @@ final class SleepGuard {
         iostatOutput = nil
         iostat = nil
         handle?.readabilityHandler = nil
-        proc?.terminationHandler = nil
-        if let proc, proc.isRunning {
-            proc.terminate()
-        }
+        try? handle?.close()
+        if let proc { end(proc) }
         stoppingIostat = false
+    }
+
+    /// SIGTERM 之后立刻 SIGKILL。iostat / caffeinate 若还活着，退出会被系统收成后台运行。
+    private func end(_ proc: Process) {
+        proc.terminationHandler = nil
+        guard proc.isRunning else { return }
+        proc.terminate()
+        if proc.isRunning {
+            Darwin.kill(proc.processIdentifier, SIGKILL)
+        }
     }
 
     private func ingest(_ text: String) {

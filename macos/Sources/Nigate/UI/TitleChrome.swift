@@ -22,7 +22,7 @@ struct TitleChrome: View {
                 protectButton
 
                 iconButton("power", L10n.t("menu.quit"), active: model.quitConfirmOpen, tint: Palette.error) {
-                    NSApp.terminate(nil)
+                    model.requestQuit()
                 }
 
                 iconButton("heart.fill", L10n.t("support.title"), active: model.supportOpen, tint: Palette.heart) {

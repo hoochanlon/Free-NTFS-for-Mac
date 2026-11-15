@@ -218,6 +218,17 @@ final class WindowLockDelegate: NSObject, NSWindowDelegate {
         forwarding?.windowShouldZoom?(window, toFrame: newFrame) ?? true
     }
 
+    /// 退出确认期间不能让主窗口关掉。SwiftUI 在 terminate 被取消后仍会关窗口，
+    /// 进程就变成 Dock 里的「停止在后台运行」。
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        let phase = (NSApp.delegate as? AppDelegate)?.model?.quitPhase
+        if phase == .confirming { return false }
+        if let forwarding, (forwarding as AnyObject).responds(to: #selector(windowShouldClose(_:))) {
+            return forwarding.windowShouldClose?(sender) ?? true
+        }
+        return true
+    }
+
     override func forwardingTarget(for aSelector: Selector!) -> Any? {
         forwarding
     }

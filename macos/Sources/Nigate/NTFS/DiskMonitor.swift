@@ -41,11 +41,15 @@ final class DiskMonitor: @unchecked Sendable {
     }
 
     func stop() {
-        session = nil
+        debounce?.cancel()
+        debounce = nil
+        onChange = nil
+        if let session {
+            DASessionSetDispatchQueue(session, nil)
+            self.session = nil
+        }
         workspaceObservers.forEach { NSWorkspace.shared.notificationCenter.removeObserver($0) }
         workspaceObservers.removeAll()
-        debounce?.cancel()
-        onChange = nil
     }
 
     private static func ping(_ ctx: UnsafeMutableRawPointer?) {

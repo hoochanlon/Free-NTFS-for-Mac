@@ -17,6 +17,13 @@ final class CapacityFillTests: XCTestCase {
         XCTAssertEqual(fill(used: 100, total: 100).fillLevel, .critical)
     }
 
+    func testUsedPercentMatchesTheBar() {
+        XCTAssertEqual(fill(used: 0, total: 100).usedPercentLabel, "0%")
+        XCTAssertEqual(fill(used: 1, total: 1000).usedPercentLabel, "<1%")
+        XCTAssertEqual(fill(used: 88, total: 100).usedPercentLabel, "88%")
+        XCTAssertEqual(fill(used: 150, total: 100).usedPercentLabel, "100%")
+    }
+
     func testScreenshotNearlyFullDiskIsCritical() {
         let total: Int64 = 30_550_000_000
         let available: Int64 = 3_020_000_000

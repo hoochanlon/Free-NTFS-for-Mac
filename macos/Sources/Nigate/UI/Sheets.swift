@@ -480,7 +480,7 @@ struct QuitConfirmSheet: View {
                 .fixedSize(horizontal: false, vertical: true)
             HStack {
                 Spacer()
-                Button(L10n.t("dialog.cancel")) { model.quitConfirmOpen = false }
+                Button(L10n.t("dialog.cancel")) { model.cancelQuit() }
                     .keyboardShortcut(.cancelAction)
                 Button(L10n.t("tray.quit")) { model.confirmQuit() }
                     .keyboardShortcut(.defaultAction)

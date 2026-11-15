@@ -19,10 +19,49 @@ enum AutoMount {
             let id = device.identity
             if (cooldown[id] ?? .distantPast) > now { return false }
             if (cooldown[device.disk] ?? .distantPast) > now { return false }
-            if inProgress.contains(id) || inProgress.contains(device.disk) { return false }
-            if !explicit && (attempted.contains(id) || attempted.contains(device.disk)) { return false }
+            if isRecorded(device, in: inProgress) { return false }
+            if !explicit && isRecorded(device, in: attempted) { return false }
             return true
         }
+    }
+
+    /// 同一轮扫描里同一卷只留一条，避免连续插第二块盘时挂载成功提示响两次。
+    static func targets(
+        devices: [NTFSDevice],
+        settings: AppSettings,
+        attempted: Set<String>,
+        cooldown: [String: Date],
+        inProgress: Set<String>,
+        now: Date = Date(),
+        explicit: Bool
+    ) -> [NTFSDevice] {
+        var picked: [NTFSDevice] = []
+        for device in candidates(
+            devices: devices,
+            settings: settings,
+            attempted: attempted,
+            cooldown: cooldown,
+            inProgress: inProgress,
+            now: now,
+            explicit: explicit
+        ) {
+            if picked.contains(where: { $0.sameMount(as: device) }) { continue }
+            picked.append(device)
+        }
+        return picked
+    }
+
+    /// 身份、盘号、节点、挂载点、UUID 都记入尝试集，换一种写法扫出来也不能再挂一次。
+    static func recordKeys(_ device: NTFSDevice) -> [String] {
+        var keys = [device.identity, device.disk, device.devicePath]
+        if !device.volume.isEmpty { keys.append("mount:" + device.volume) }
+        if let uuid = device.volumeUuid, !uuid.isEmpty { keys.append("vu:" + uuid) }
+        if let uuid = device.partitionUuid, !uuid.isEmpty { keys.append("pu:" + uuid) }
+        return keys
+    }
+
+    static func isRecorded(_ device: NTFSDevice, in records: Set<String>) -> Bool {
+        recordKeys(device).contains { records.contains($0) }
     }
 
     /// 是否被用户标记为保持只读（identity / uuid / disk 任一命中）。

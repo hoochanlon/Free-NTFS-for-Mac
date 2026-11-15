@@ -4,6 +4,7 @@ import AppKit
 @main
 struct NigateApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @Environment(\.openWindow) private var openWindow
     @StateObject private var model = AppModel()
 
     var body: some Scene {
@@ -13,6 +14,7 @@ struct NigateApp: App {
                 .nigateDisableFullScreen()
                 .task {
                     appDelegate.model = model
+                    model.bindOpenMainWindow { openWindow(id: "main") }
                     await model.bootstrap()
                 }
         }
@@ -22,6 +24,10 @@ struct NigateApp: App {
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button(L10n.t("app.about")) { model.aboutOpen = true }
+            }
+            CommandGroup(replacing: .appTermination) {
+                Button(L10n.t("menu.quit")) { model.requestQuit() }
+                    .keyboardShortcut("q")
             }
             CommandGroup(replacing: .help) {
                 Button(L10n.t("menu.guide")) { model.setTab(.help) }

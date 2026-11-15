@@ -3,6 +3,18 @@ import AppKit
 import ServiceManagement
 import NigateFSKitCore
 
+enum AppQuitPhase: Equatable {
+    case idle
+    case confirming
+    case exiting
+}
+
+private struct CapacityProbe: Sendable {
+    var devicePath: String
+    var volume: String
+    var previous: Capacity?
+}
+
 @MainActor
 final class AppModel: ObservableObject {
     @Published var settings: AppSettings
@@ -18,9 +30,13 @@ final class AppModel: ObservableObject {
     @Published var aboutOpen = false
     @Published var supportOpen = false
     @Published var quitConfirmOpen = false
-    private(set) var quitConfirmed = false
+    /// 退出一旦离开 idle，就不能再收进菜单栏。确认前关窗口会被系统当成「留在后台」。
+    private(set) var quitPhase: AppQuitPhase = .idle
+    var openMainWindow: (@MainActor () -> Void)?
     @Published var renameDevice: NTFSDevice?
     @Published var toast: String?
+    /// 同一句成功提示短时间内只出现一次。连续插盘时第二次挂载不会把底部再弹一遍。
+    private var recentToasts: [String: Date] = [:]
     /// 长操作（格式化）期间停在窗口下方，不走 toast 的短时消失。
     @Published var progressHint: String?
     @Published private(set) var isScanningDevices = false
@@ -41,7 +57,9 @@ final class AppModel: ObservableObject {
     private var switchPins: [String: DeviceListPin.Pin] = [:]
     private var pinReleaseSeq: [String: UInt64] = [:]
     /// 占用不跟挂载事件走。拷文件时每秒读一次 statfs，数字没变就不发布。
+    /// statfs 在后台线程做：FUSE 卡住时不能堵住主线程，否则退出关了窗口却走不到进程结束。
     private var capacityTimer: Timer?
+    private var capacityRefreshInFlight = false
     /// 用于 persist 差分：避免每次切换休眠都 unregister 登录项 / 重建整棵 UI。
     private var lastPersistedSettings: AppSettings?
 
@@ -81,8 +99,10 @@ final class AppModel: ObservableObject {
     }
 
     func shutdown() {
+        if quitPhase != .exiting { quitPhase = .exiting }
         capacityTimer?.invalidate()
         capacityTimer = nil
+        capacityRefreshInFlight = false
         monitor.stop()
         sleepGuard.stop()
         TrayController.shared.tearDown()
@@ -101,17 +121,31 @@ final class AppModel: ObservableObject {
     }
 
     private func refreshLiveCapacity() {
-        guard !isScanningDevices else { return }
-        var samples: [String: Capacity] = [:]
-        for device in devices where device.isMounted && !device.isUnmounted && !device.volume.isEmpty {
-            if let capacity = VolumeStat.capacity(
-                volume: device.volume,
-                devicePath: device.devicePath,
-                previous: device.capacity
-            ) {
-                samples[device.devicePath] = capacity
-            }
+        guard quitPhase == .idle, !capacityRefreshInFlight, !isScanningDevices else { return }
+        let probes = devices.compactMap { device -> CapacityProbe? in
+            guard device.isMounted, !device.isUnmounted, !device.volume.isEmpty else { return nil }
+            return CapacityProbe(devicePath: device.devicePath, volume: device.volume, previous: device.capacity)
         }
+        guard !probes.isEmpty else { return }
+        capacityRefreshInFlight = true
+        Task.detached { [weak self] in
+            var samples: [String: Capacity] = [:]
+            for probe in probes {
+                if let capacity = VolumeStat.capacity(
+                    volume: probe.volume,
+                    devicePath: probe.devicePath,
+                    previous: probe.previous
+                ) {
+                    samples[probe.devicePath] = capacity
+                }
+            }
+            await self?.applyLiveCapacity(samples)
+        }
+    }
+
+    private func applyLiveCapacity(_ samples: [String: Capacity]) {
+        capacityRefreshInFlight = false
+        guard quitPhase == .idle else { return }
         guard let next = CapacityRefresh.applying(devices, samples: samples) else { return }
         devices = next
         rememberNTFSDevices(next)
@@ -146,13 +180,44 @@ final class AppModel: ObservableObject {
 
     func revealMainWindow() {
         NSApp.setActivationPolicy(.regular)
+        if let window = Self.mainWindow() {
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+        openMainWindow?()
         NSApp.activate(ignoringOtherApps: true)
-        NSApp.windows.first?.makeKeyAndOrderFront(nil)
+        DispatchQueue.main.async {
+            Self.mainWindow()?.makeKeyAndOrderFront(nil)
+        }
+    }
+
+    func bindOpenMainWindow(_ opener: @escaping @MainActor () -> Void) {
+        openMainWindow = opener
+    }
+
+    /// 关红灯应收进菜单栏。退出确认或正在退出时不要切 accessory，否则 Dock 会留下「正在后台运行」。
+    var suppressesTrayWithdraw: Bool { quitPhase != .idle }
+
+    func armQuitConfirm() {
+        guard quitPhase == .idle else { return }
+        quitPhase = .confirming
+    }
+
+    /// 标题栏、托盘、Cmd+Q 都走这里。先出确认，不要先 terminate：
+    /// SwiftUI 会在 terminate 被取消后仍关掉窗口，进程却还在。
+    func requestQuit() {
+        if quitPhase == .exiting {
+            finishQuit()
+            return
+        }
+        presentQuitConfirm()
     }
 
     /// 退出确认画在主窗口内，避免独立浮层把窗口拖走，也不走 AppKit sheet（会拖慢 terminate）。
     func presentQuitConfirm() {
-        guard !quitConfirmed else { return }
+        guard quitPhase != .exiting else { return }
+        quitPhase = .confirming
         aboutOpen = false
         supportOpen = false
         passwordSheet = nil
@@ -162,14 +227,41 @@ final class AppModel: ObservableObject {
         quitConfirmOpen = true
     }
 
+    func cancelQuit() {
+        guard quitPhase != .exiting else { return }
+        quitConfirmOpen = false
+        quitPhase = .idle
+    }
+
     func confirmQuit() {
-        guard !quitConfirmed else { return }
-        quitConfirmed = true
+        guard quitPhase != .exiting else { return }
+        quitPhase = .exiting
+        quitConfirmOpen = false
+        finishQuit()
+    }
+
+    /// 先拆掉会把进程留在后台的东西，再 terminate。
+    /// 用过一段时间后，扫描回调和状态栏图标会在 terminate 期间被装回去，
+    /// AppKit 就改成「停止在后台运行」并且不再返回。后台线程负责把进程结束掉。
+    private func finishQuit() {
+        quitPhase = .exiting
+        shutdown()
+        NSApp.setActivationPolicy(.regular)
+        if NSApp.modalWindow != nil { NSApp.stopModal() }
+        DispatchQueue.global().asyncAfter(deadline: .now() + 0.3) { exit(0) }
         NSApp.terminate(nil)
+        exit(0)
     }
 
     func withdrawToTray() {
         NSApp.setActivationPolicy(.accessory)
+    }
+
+    private static func mainWindow() -> NSWindow? {
+        let candidates = NSApp.windows.filter { window in
+            window.title == "Nigate" || window.identifier?.rawValue == "main"
+        }
+        return candidates.first(where: \.isVisible) ?? candidates.first
     }
 
     func cycleSleep() {
@@ -189,7 +281,7 @@ final class AppModel: ObservableObject {
 
     func toggleProtect() {
         protectLocked.toggle()
-        toast = protectLocked ? L10n.t("app.protectLocked") : L10n.t("app.protectUnlocked")
+        showToast(protectLocked ? L10n.t("app.protectLocked") : L10n.t("app.protectUnlocked"))
     }
 
     func toggleTheme() {
@@ -206,11 +298,13 @@ final class AppModel: ObservableObject {
     }
 
     func refreshDevices(applyAutoMount: Bool = true) async {
+        guard quitPhase == .idle else { return }
         if isScanningDevices {
             rescanRequested = true
             return
         }
         await scanDevicesLocked()
+        guard quitPhase == .idle else { return }
         // autoMount 必须在 scanning 锁外：其内部 run → refreshDevicesAfterAction 还会再等 scanning。
         if applyAutoMount, busyDisks.isEmpty, switchPins.isEmpty {
             await self.applyAutoMount(explicit: false)
@@ -229,15 +323,18 @@ final class AppModel: ObservableObject {
             TrayController.shared.reload()
         }
         repeat {
+            guard quitPhase == .idle else { return }
             rescanRequested = false
             let knownDevices = Array(knownNTFSDevices.values) + devices
             let scanned = await DeviceScanner.scan(knownDevices: knownDevices)
+            // 退出后这次扫描才回来：不能再拉起防休眠，也不能把刚拆掉的状态栏装回去。
+            guard quitPhase == .idle else { return }
             devices = pinnedDuringTransition(scanned)
             rememberNTFSDevices(devices)
             sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
             updateStatus()
             TrayController.shared.reload()
-        } while rescanRequested
+        } while rescanRequested && quitPhase == .idle
     }
 
     func perform(_ action: DeviceAction, on device: NTFSDevice, extra: String? = nil) {
@@ -292,35 +389,35 @@ final class AppModel: ObservableObject {
 
     func deleteSavedPassword() {
         KeychainStore.delete()
-        toast = L10n.t("settings.deletePasswordSuccess")
+        showToast(L10n.t("settings.deletePasswordSuccess"))
     }
 
     func openInstaller() {
         do {
             try Installer.openTerminal(language: settings.language)
-            toast = L10n.t("dependencies.autoInstallOpened")
+            showToast(L10n.t("dependencies.autoInstallOpened"))
         } catch {
             alert = AppAlert(title: L10n.t("dialog.error"), message: L10n.t("dependencies.autoInstallFailed", ["error": error.localizedDescription]), kind: .error)
         }
     }
 
     func checkUpdates() async {
-        toast = L10n.t("about.checkingUpdates")
+        showToast(L10n.t("about.checkingUpdates"))
         guard let url = URL(string: "https://api.github.com/repos/hoochanlon/Free-NTFS-for-Mac/releases/latest") else { return }
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
             let tag = (json?["tag_name"] as? String)?.trimmingCharacters(in: CharacterSet(charactersIn: "v")) ?? ""
             if tag.isEmpty {
-                toast = L10n.t("about.invalidRelease")
+                showToast(L10n.t("about.invalidRelease"))
             } else if tag == appVersion {
-                toast = L10n.t("about.upToDate", ["version": appVersion])
+                showToast(L10n.t("about.upToDate", ["version": appVersion]))
             } else {
-                toast = L10n.t("about.updateAvailable", ["version": tag])
+                showToast(L10n.t("about.updateAvailable", ["version": tag]))
                 if let page = URL(string: githubReleases) { NSWorkspace.shared.open(page) }
             }
         } catch {
-            toast = L10n.t("about.checkFailed")
+            showToast(L10n.t("about.checkFailed"))
         }
     }
 
@@ -350,32 +447,32 @@ final class AppModel: ObservableObject {
             case .mount:
                 AutoMount.clearManualReadOnly(device, settings: &settings)
                 persist()
-                toast = try await service.mount(device)
+                showToast(try await service.mount(device))
             case .unmount:
-                toast = try await service.unmount(device)
+                showToast(try await service.unmount(device))
             case .restore:
                 AutoMount.markManualReadOnly(device, settings: &settings)
                 cooldown[device.identity] = Date().addingTimeInterval(90)
                 cooldown[device.disk] = Date().addingTimeInterval(90)
                 persist()
-                toast = try await service.restore(device)
+                showToast(try await service.restore(device))
             case .reset:
                 AutoMount.markManualReadOnly(device, settings: &settings)
                 cooldown[device.identity] = Date().addingTimeInterval(90)
                 cooldown[device.disk] = Date().addingTimeInterval(90)
                 persist()
-                toast = try await service.reset(device)
+                showToast(try await service.reset(device))
             case .repair:
-                toast = try await service.repair(device)
+                showToast(try await service.repair(device))
             case .rename:
-                toast = try await service.rename(device, to: extra ?? device.volumeName)
+                showToast(try await service.rename(device, to: extra ?? device.volumeName))
             case .format:
                 progressHint = L10n.t("messages.formattingHint", ["name": device.volumeName])
                 let result = try await service.format(device)
                 progressHint = nil
-                toast = result
+                showToast(result)
             case .eject:
-                toast = try await service.eject(device)
+                showToast(try await service.eject(device))
             }
             clearBusy(diskKey)
             busyReleased = true
@@ -388,7 +485,7 @@ final class AppModel: ObservableObject {
             clearBusy(diskKey)
             busyReleased = true
             dropSwitchPin(diskKey)
-            toast = L10n.t("messages.cancelled")
+            showToast(L10n.t("messages.cancelled"))
             await refreshDevices(applyAutoMount: false)
         } catch {
             clearBusy(diskKey)
@@ -554,6 +651,7 @@ final class AppModel: ObservableObject {
         for attempt in 0..<10 {
             let knownDevices = Array(knownNTFSDevices.values) + devices
             let scanned = await DeviceScanner.scan(knownDevices: knownDevices)
+            if quitPhase != .idle { break }
             let merged = pinnedDuringTransition(scanned)
             if matches(scanned) || attempt == 9 {
                 devices = merged
@@ -569,6 +667,7 @@ final class AppModel: ObservableObject {
         pendingRescan = rescanRequested
         rescanRequested = false
         isScanningDevices = false
+        guard quitPhase == .idle else { return }
 
         // autoMount / 追加 refresh 必须在释放 scanning 之后，否则嵌套 run 会再等 scanning → 死锁。
         if pendingRescan {
@@ -579,7 +678,8 @@ final class AppModel: ObservableObject {
     }
 
     private func applyAutoMount(explicit: Bool) async {
-        let targets = AutoMount.candidates(
+        guard quitPhase == .idle else { return }
+        let targets = AutoMount.targets(
             devices: devices,
             settings: settings,
             attempted: attempted,
@@ -588,13 +688,31 @@ final class AppModel: ObservableObject {
             explicit: explicit
         )
         for device in targets {
-            let id = device.identity
-            attempted.insert(id)
-            attempted.insert(device.disk)
-            inProgress.insert(id)
-            defer { inProgress.remove(id) }
+            let keys = Set(
+                devices
+                    .filter { $0.sameMount(as: device) }
+                    .flatMap(AutoMount.recordKeys)
+                    + AutoMount.recordKeys(device)
+            )
+            if !explicit && keys.contains(where: { attempted.contains($0) || inProgress.contains($0) }) {
+                continue
+            }
+            for key in keys {
+                attempted.insert(key)
+                inProgress.insert(key)
+            }
+            defer {
+                for key in keys { inProgress.remove(key) }
+            }
+            guard quitPhase == .idle else { return }
             await run(.mount, device)
         }
+    }
+
+    private func showToast(_ message: String, now: Date = Date()) {
+        guard ToastDedup.shouldPresent(message, recent: recentToasts, now: now) else { return }
+        recentToasts[message] = now
+        toast = message
     }
 
     private func askPassword(_ key: String, _ params: [String: String]) async throws -> String {
@@ -716,4 +834,14 @@ struct PasswordSheetState: Identifiable {
     let id = UUID()
     var title: String
     var savePassword: Bool
+}
+
+enum ToastDedup {
+    /// 一次挂载要几秒。窗口盖住「挂完一条又挂同一卷」的第二声，不盖住下一次真正的插拔。
+    static let window: TimeInterval = 15
+
+    static func shouldPresent(_ message: String, recent: [String: Date], now: Date) -> Bool {
+        guard let seen = recent[message] else { return true }
+        return now.timeIntervalSince(seen) >= window
+    }
 }

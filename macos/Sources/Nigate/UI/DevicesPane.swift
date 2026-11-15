@@ -98,7 +98,7 @@ private struct CapacityBar: View {
         }
         .frame(height: 4)
         .accessibilityElement()
-        .accessibilityValue(Text("\(Int((fraction * 100).rounded()))%"))
+        .accessibilityValue(Text(capacity.usedPercentLabel))
     }
 
     private var fill: Color {
@@ -137,7 +137,7 @@ struct DeviceCard: View {
                 if let capacity = device.capacity {
                     VStack(alignment: .leading, spacing: 4) {
                         CapacityBar(capacity: capacity)
-                        Text("\(L10n.t("devices.available")) \(byteText(capacity.available))  ·  \(L10n.t("devices.total")) \(byteText(capacity.total))")
+                        Text("\(L10n.t("devices.available")) \(byteText(capacity.available))  ·  \(L10n.t("devices.total")) \(byteText(capacity.total))  ·  \(L10n.t("devices.usageRate")) \(capacity.usedPercentLabel)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

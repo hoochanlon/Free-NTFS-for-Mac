@@ -81,7 +81,35 @@ enum DeviceScanner {
             )
             filled.append(device)
         }
-        return filled.sorted { $0.disk < $1.disk }
+        return collapsingDuplicates(filled).sorted { $0.disk < $1.disk }
+    }
+
+    /// 挂载表把同一节点打两行时，列表和自动挂载都只能看见一条。
+    /// 读写优先于只读，避免残留的只读行把已经挂上的卷再挂一次。
+    static func collapsingDuplicates(_ devices: [NTFSDevice]) -> [NTFSDevice] {
+        var ordered: [NTFSDevice] = []
+        for device in devices {
+            guard let index = ordered.firstIndex(where: { $0.sameMount(as: device) }) else {
+                ordered.append(device)
+                continue
+            }
+            if device.isReadWrite && !ordered[index].isReadWrite {
+                ordered[index] = merging(device, fallback: ordered[index])
+            } else {
+                ordered[index] = merging(ordered[index], fallback: device)
+            }
+        }
+        return ordered
+    }
+
+    /// 保留主记录的读写状态，把另一行才有的 UUID / 挂载点补上。
+    private static func merging(_ primary: NTFSDevice, fallback: NTFSDevice) -> NTFSDevice {
+        var device = primary
+        if device.volumeUuid?.isEmpty != false { device.volumeUuid = fallback.volumeUuid }
+        if device.partitionUuid?.isEmpty != false { device.partitionUuid = fallback.partitionUuid }
+        if device.volume.isEmpty { device.volume = fallback.volume }
+        if device.capacity == nil { device.capacity = fallback.capacity }
+        return device
     }
 
     /// 将一条挂载记录转成 NTFS 设备；非 NTFS / 未确认的 fuse 返回 nil。

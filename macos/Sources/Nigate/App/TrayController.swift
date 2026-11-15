@@ -27,6 +27,8 @@ final class TrayController: NSObject, NSMenuDelegate {
     private var item: NSStatusItem?
     private weak var model: AppModel?
     private let menu = NSMenu()
+    /// tearDown 之后禁止再把状态栏图标装回去。扫描回调晚到一步就会让退出变成后台驻留。
+    private var tornDown = false
     private lazy var trayLogo: NSImage? = {
         guard let url = Bundle.module.url(forResource: "AppIcon-white", withExtension: "icns") else { return nil }
         return NSImage(contentsOf: url)
@@ -42,10 +44,12 @@ final class TrayController: NSObject, NSMenuDelegate {
 
     func attach(_ model: AppModel) {
         self.model = model
+        tornDown = false
         reload()
     }
 
     func tearDown() {
+        tornDown = true
         if let item { NSStatusBar.system.removeStatusItem(item) }
         item = nil
         menuIsOpen = false
@@ -56,7 +60,7 @@ final class TrayController: NSObject, NSMenuDelegate {
     /// - 状态栏图标：始终更新
     /// - 菜单结构：仅在关闭时 rebuild；打开时只改已有行的颜色，避免子菜单消失
     func reload() {
-        guard let model else { return }
+        guard !tornDown, let model else { return }
         ensureStatusItem()
         item?.button?.toolTip = L10n.t("tray.tooltip")
         // 图标始终跟 model，不依赖是否打开主窗口。
@@ -145,7 +149,7 @@ final class TrayController: NSObject, NSMenuDelegate {
             menu.addItem(action(L10n.t("devices.ejectAll")) { model.runBatch(.eject) })
         }
         menu.addItem(.separator())
-        menu.addItem(action(L10n.t("tray.quit")) { NSApp.terminate(nil) })
+        menu.addItem(action(L10n.t("tray.quit")) { model.requestQuit() })
     }
 
     private func deviceRow(_ device: NTFSDevice, model: AppModel) -> NSMenuItem {

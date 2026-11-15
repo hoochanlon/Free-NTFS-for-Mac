@@ -29,6 +29,15 @@ struct Capacity: Sendable, Equatable {
         if used * 5 >= total * 4 { return .warning }
         return .normal
     }
+
+    /// 与进度条同一口径。不足 1% 但不为 0 时不显示成 0%，避免细条和「使用率 0%」矛盾。
+    var usedPercentLabel: String {
+        guard total > 0 else { return "0%" }
+        let ratio = min(1, max(0, Double(used) / Double(total)))
+        let percent = Int((ratio * 100).rounded())
+        if percent == 0, used > 0 { return "<1%" }
+        return "\(percent)%"
+    }
 }
 
 struct NTFSDevice: Sendable, Equatable, Identifiable {
@@ -49,6 +58,16 @@ struct NTFSDevice: Sendable, Equatable, Identifiable {
     var id: String { devicePath }
     var identity: String { volumeUuid ?? partitionUuid ?? disk }
     var parentDisk: String { DiskSafety.parentDiskId(disk) }
+
+    /// 挂载表同一分区可能打出两行，diskutil 也可能再给一个节点。
+    /// 路径、盘号、挂载点或 UUID 任一相同，就视为同一卷。
+    func sameMount(as other: NTFSDevice) -> Bool {
+        if devicePath == other.devicePath || disk == other.disk { return true }
+        if !volume.isEmpty, volume == other.volume { return true }
+        if let volumeUuid, !volumeUuid.isEmpty, volumeUuid == other.volumeUuid { return true }
+        if let partitionUuid, !partitionUuid.isEmpty, partitionUuid == other.partitionUuid { return true }
+        return false
+    }
     var isReadWrite: Bool { isMounted && !isReadOnly && !isUnmounted }
     var needsMount: Bool { isUnmounted || !isMounted }
 }

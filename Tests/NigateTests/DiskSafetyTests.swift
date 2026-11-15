@@ -593,6 +593,119 @@ final class AutoMountTests: XCTestCase {
         AutoMount.clearManualReadOnly(device, settings: &settings)
         XCTAssertFalse(AutoMount.isManuallyReadOnly(device, settings: settings))
     }
+
+    func testDuplicateMountRowsCollapseToOneTarget() {
+        let first = readOnlyDevice(disk: "disk5s1", name: "Samsung USB", uuid: nil)
+        var second = readOnlyDevice(disk: "disk5s1", name: "Samsung USB", uuid: "vol-samsung")
+        second.volumeUuid = "vol-samsung"
+        let sandisk = readOnlyDevice(disk: "disk4s2", name: "SanDisk 32G", uuid: "vol-sandisk")
+        var sandiskRW = sandisk
+        sandiskRW.isReadOnly = false
+
+        let targets = AutoMount.targets(
+            devices: [sandiskRW, first, second],
+            settings: AppSettings(),
+            attempted: [],
+            cooldown: [:],
+            inProgress: [],
+            explicit: false
+        )
+        XCTAssertEqual(targets.map(\.disk), ["disk5s1"])
+    }
+
+    func testSiblingDiskIdStaysBlockedAfterTheVolumeIsClaimed() {
+        let mounted = readOnlyDevice(disk: "disk5s1", name: "Samsung USB", uuid: "vol-samsung")
+        var alias = readOnlyDevice(disk: "disk6s1", name: "Samsung USB", uuid: "vol-samsung")
+        alias.volume = "/Volumes/Samsung USB 1"
+        alias.volumeUuid = "vol-samsung"
+        let attempted = Set(AutoMount.recordKeys(mounted))
+
+        XCTAssertTrue(alias.sameMount(as: mounted))
+        XCTAssertTrue(AutoMount.candidates(
+            devices: [alias],
+            settings: AppSettings(),
+            attempted: attempted,
+            cooldown: [:],
+            inProgress: [],
+            explicit: false
+        ).isEmpty)
+    }
+
+    func testDistinctVolumesBothStayCandidates() {
+        let samsung = readOnlyDevice(disk: "disk5s1", name: "Samsung USB", uuid: "vol-samsung")
+        let sandisk = readOnlyDevice(disk: "disk4s2", name: "SanDisk 32G", uuid: "vol-sandisk")
+        let targets = AutoMount.targets(
+            devices: [sandisk, samsung],
+            settings: AppSettings(),
+            attempted: [],
+            cooldown: [:],
+            inProgress: [],
+            explicit: false
+        )
+        XCTAssertEqual(Set(targets.map(\.volumeName)), ["Samsung USB", "SanDisk 32G"])
+    }
+
+    private func readOnlyDevice(disk: String, name: String, uuid: String?) -> NTFSDevice {
+        NTFSDevice(
+            disk: disk,
+            devicePath: "/dev/\(disk)",
+            volume: "/Volumes/\(name)",
+            volumeName: name,
+            volumeUuid: uuid,
+            isReadOnly: true,
+            options: "read-only",
+            isMounted: true,
+            isUnmounted: false,
+            canFormat: true,
+            capacity: nil
+        )
+    }
+}
+
+final class MountIdentityTests: XCTestCase {
+    func testDuplicateMountLinesCollapseAndKeepReadWrite() {
+        let readOnly = sample(disk: "disk5s1", name: "Samsung USB", readOnly: true, uuid: nil)
+        var readWrite = sample(disk: "disk5s1", name: "Samsung USB", readOnly: false, uuid: "vol-samsung")
+        readWrite.volumeUuid = "vol-samsung"
+        let sandisk = sample(disk: "disk4s2", name: "SanDisk 32G", readOnly: false, uuid: "vol-sandisk")
+
+        let collapsed = DeviceScanner.collapsingDuplicates([sandisk, readOnly, readWrite])
+        XCTAssertEqual(collapsed.map(\.disk).sorted(), ["disk4s2", "disk5s1"])
+        let samsung = collapsed.first { $0.disk == "disk5s1" }
+        XCTAssertEqual(samsung?.isReadWrite, true)
+        XCTAssertEqual(samsung?.volumeUuid, "vol-samsung")
+    }
+
+    func testRepeatedSuccessToastIsSuppressed() {
+        let now = Date()
+        var recent: [String: Date] = [:]
+        let message = "设备 Samsung USB 已成功挂载为读写模式"
+        XCTAssertTrue(ToastDedup.shouldPresent(message, recent: recent, now: now))
+        recent[message] = now
+        XCTAssertFalse(ToastDedup.shouldPresent(message, recent: recent, now: now.addingTimeInterval(3)))
+        XCTAssertTrue(ToastDedup.shouldPresent(
+            "设备 SanDisk 32G 已成功挂载为读写模式",
+            recent: recent,
+            now: now.addingTimeInterval(3)
+        ))
+        XCTAssertTrue(ToastDedup.shouldPresent(message, recent: recent, now: now.addingTimeInterval(ToastDedup.window)))
+    }
+
+    private func sample(disk: String, name: String, readOnly: Bool, uuid: String?) -> NTFSDevice {
+        NTFSDevice(
+            disk: disk,
+            devicePath: "/dev/\(disk)",
+            volume: "/Volumes/\(name)",
+            volumeName: name,
+            volumeUuid: uuid,
+            isReadOnly: readOnly,
+            options: readOnly ? "read-only" : "local",
+            isMounted: true,
+            isUnmounted: false,
+            canFormat: true,
+            capacity: nil
+        )
+    }
 }
 
 final class MountBackendPolicyTests: XCTestCase {
