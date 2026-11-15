@@ -39,6 +39,8 @@ final class AppModel: ObservableObject {
     /// 只读↔读写期间钉住卡片。DiskMonitor 在卸载瞬间会扫到空表，不能让列表跟着空。
     private var switchPins: [String: DeviceListPin.Pin] = [:]
     private var pinReleaseSeq: [String: UInt64] = [:]
+    /// 占用不跟挂载事件走。拷文件时每秒读一次 statfs，数字没变就不发布。
+    private var capacityTimer: Timer?
     /// 用于 persist 差分：避免每次切换休眠都 unregister 登录项 / 重建整棵 UI。
     private var lastPersistedSettings: AppSettings?
 
@@ -65,6 +67,7 @@ final class AppModel: ObservableObject {
         }
         await refreshDependencies()
         await refreshDevices()
+        startCapacityRefresh()
         TrayController.shared.attach(self)
     }
 
@@ -77,9 +80,40 @@ final class AppModel: ObservableObject {
     }
 
     func shutdown() {
+        capacityTimer?.invalidate()
+        capacityTimer = nil
         monitor.stop()
         sleepGuard.stop()
         TrayController.shared.tearDown()
+    }
+
+    private func startCapacityRefresh() {
+        capacityTimer?.invalidate()
+        let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.refreshLiveCapacity()
+            }
+        }
+        timer.tolerance = 0.2
+        RunLoop.main.add(timer, forMode: .common)
+        capacityTimer = timer
+    }
+
+    private func refreshLiveCapacity() {
+        guard !scanning else { return }
+        var samples: [String: Capacity] = [:]
+        for device in devices where device.isMounted && !device.isUnmounted && !device.volume.isEmpty {
+            if let capacity = VolumeStat.capacity(
+                volume: device.volume,
+                devicePath: device.devicePath,
+                previous: device.capacity
+            ) {
+                samples[device.devicePath] = capacity
+            }
+        }
+        guard let next = CapacityRefresh.applying(devices, samples: samples) else { return }
+        devices = next
+        rememberNTFSDevices(next)
     }
 
     func persist() {

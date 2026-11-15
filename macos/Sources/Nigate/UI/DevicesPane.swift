@@ -99,6 +99,7 @@ struct DeviceCard: View {
                 if let capacity = device.capacity {
                     VStack(alignment: .leading, spacing: 4) {
                         ProgressView(value: Double(capacity.used), total: Double(max(capacity.total, 1)))
+                            .tint(capacityTint(capacity))
                         Text("\(L10n.t("devices.available")) \(byteText(capacity.available))  ·  \(L10n.t("devices.total")) \(byteText(capacity.total))")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -154,6 +155,14 @@ struct DeviceCard: View {
     }
 
     private var statusColor: Color { device.isReadWrite ? Palette.success : Palette.warning }
+
+    private func capacityTint(_ capacity: Capacity) -> Color {
+        switch capacity.fillLevel {
+        case .normal: Palette.accent
+        case .warning: Palette.warning
+        case .critical: Palette.error
+        }
+    }
 
     private func labeled(_ title: String, _ value: String) -> some View {
         HStack(spacing: 4) {

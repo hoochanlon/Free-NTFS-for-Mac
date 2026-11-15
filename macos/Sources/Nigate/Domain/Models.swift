@@ -17,6 +17,18 @@ struct Capacity: Sendable, Equatable {
     var total: Int64
     var used: Int64
     var available: Int64
+
+    /// 进度条告警：80% 起注意，90% 起危险。低于 80% 保持默认。
+    enum FillLevel: Equatable, Sendable {
+        case normal, warning, critical
+    }
+
+    var fillLevel: FillLevel {
+        guard total > 0, used > 0 else { return .normal }
+        if used * 10 >= total * 9 { return .critical }
+        if used * 5 >= total * 4 { return .warning }
+        return .normal
+    }
 }
 
 struct NTFSDevice: Sendable, Equatable, Identifiable {
