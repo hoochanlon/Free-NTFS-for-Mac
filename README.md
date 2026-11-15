@@ -9,7 +9,11 @@
 演示界面为 1.6.1 以下版本，界面随功能增强可能略有变化。
 
 > [!WARNING]
-> Intel：macFUSE / `ntfs-3g` 经 Homebrew 安装时，官方 bottle 已于 **2026 年 9 月**停止；**2027 年 9 月**起 Homebrew 不再在 Intel 上运行。Intel 机型最高只到 macOS 26；**macOS 28 不适用 Intel**。Rosetta 2 通用翻译支持到 **macOS 27**，**macOS 28** 起停止对普通 Intel 应用的支持（仅保留部分旧游戏）。
+> Intel Mac 注意事项：
+> * macFUSE / `ntfs-3g` 经 Homebrew 安装时，官方 bottle 已于 **2026 年 9 月**停止
+> * **2027 年 9 月** 起 Homebrew 不再在 Intel 上运行
+> * Intel 机型最高只到 macOS 26；**macOS 28 不适用 Intel**
+> * Rosetta 2 通用翻译支持到 **macOS 27**，**macOS 28** 起停止对普通 Intel 应用的支持（仅保留部分旧游戏）。
 
 ## 功能
 
@@ -206,4 +210,4 @@ docs/README.md
   <img src="assets/imgs/buy%20coffee/zanshangma.jpg" alt="赞赏码" width="240">
 </p>
 
-感谢所有贡献者。详见 [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)。
+感谢所有自愿者。详见 [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)。

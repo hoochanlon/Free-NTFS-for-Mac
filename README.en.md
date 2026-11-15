@@ -11,7 +11,11 @@ Download the latest version from the [release tags](https://github.com/hoochanlo
 The demo shows a version older than 1.6.1.
 
 > [!WARNING]
-> Intel: Homebrew stopped publishing official bottles in **September 2026**, and will stop running on Intel in or after **September 2027**, so macFUSE / `ntfs-3g` can no longer be installed that way. Intel Macs stop at macOS 26; **macOS 28 does not apply to Intel**. Rosetta 2 remains a general translator through **macOS 27**; from **macOS 28** it no longer runs ordinary Intel apps (legacy games only).
+> Notes for Intel Macs:
+> * Homebrew stopped publishing official bottles for macFUSE / `ntfs-3g` in **September 2026**
+> * Homebrew will stop running on Intel in or after **September 2027**
+> * Intel Macs stop at macOS 26; **macOS 28 does not apply to Intel**
+> * Rosetta 2 remains a general translator through **macOS 27**; from **macOS 28** it no longer runs ordinary Intel apps (legacy games only).
 
 ## Features
 
@@ -208,4 +212,4 @@ If Nigate helps you, you can leave a tip:
   <img src="assets/imgs/buy%20coffee/zanshangma.jpg" alt="Tip QR code" width="240">
 </p>
 
-Thanks to everyone who contributed. See [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md).
+Thanks to all the volunteers. See [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md).

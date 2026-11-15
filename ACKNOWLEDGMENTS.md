@@ -17,7 +17,7 @@
 - [Whys8182](https://github.com/Whys8182) - 反馈其他读写工具存在依赖冲突，以及相关的文件改写限制
 
 
-### 测试贡献者
+### 测试自愿者
 
 - [拾光壁纸](https://gallery.timeline.ink/) - 提供U盘识别测试帮助
 

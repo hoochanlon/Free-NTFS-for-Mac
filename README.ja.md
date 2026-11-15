@@ -11,7 +11,11 @@ Nigate は、NTFS ボリュームを読み書き可能な状態でマウント�
 このデモは 1.6.1 より前のバージョンのものです。
 
 > [!WARNING]
-> Intel：macFUSE / `ntfs-3g` を Homebrew で入れる場合、公式 bottle は **2026 年 9 月**に停止し、**2027 年 9 月以降** Homebrew は Intel 上で動作しません。Intel Mac は macOS 26 が最後です。**macOS 28 は Intel には適用されません**。Rosetta 2 の一般向け翻訳は **macOS 27** までで、**macOS 28** 以降は通常の Intel アプリを実行しません（一部の旧ゲームのみ）。
+> Intel Mac 向け注意：
+> * macFUSE / `ntfs-3g` を Homebrew で入れる場合、公式 bottle は **2026 年 9 月**に停止
+> * **2027 年 9 月以降** Homebrew は Intel 上で動作しません
+> * Intel Mac は macOS 26 が最後です。**macOS 28 は Intel には適用されません**
+> * Rosetta 2 の一般向け翻訳は **macOS 27** までで、**macOS 28** 以降は通常の Intel アプリを実行しません（一部の旧ゲームのみ）。
 
 ## 機能
 
@@ -208,4 +212,4 @@ Nigate が役に立ったら、チップで応援できます：
   <img src="assets/imgs/buy%20coffee/zanshangma.jpg" alt="チップ用QR" width="240">
 </p>
 
-貢献者の皆さまに感謝します。詳細は [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)。
+ボランティアの皆さまに感謝します。詳細は [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)。
