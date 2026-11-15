@@ -74,9 +74,11 @@ enum DeviceScanner {
             if device.volumeName == device.disk, let known {
                 device.volumeName = known.volumeName
             }
-            if device.capacity == nil {
-                device.capacity = await capacity(volume: device.volume, devicePath: device.devicePath) ?? known?.capacity
-            }
+            device.capacity = await capacity(
+                volume: device.volume,
+                devicePath: device.devicePath,
+                previous: known?.capacity
+            )
             filled.append(device)
         }
         return filled.sorted { $0.disk < $1.disk }
@@ -173,39 +175,27 @@ enum DeviceScanner {
         )
     }
 
-    private static func capacity(volume: String, devicePath: String) async -> Capacity? {
-        if !volume.isEmpty, let fromDf = await dfCapacity(volume) { return fromDf }
-        return await diskutilCapacity(devicePath)
+    private static func capacity(volume: String, devicePath: String, previous: Capacity?) async -> Capacity? {
+        async let partitionTask = diskutilCapacity(devicePath)
+        async let dfRowTask = dfRow(volume: volume)
+        let partition = await partitionTask
+        let df = VolumeCapacity.trustedDf(
+            await dfRowTask,
+            devicePath: devicePath,
+            volume: volume,
+            partitionTotal: partition?.total
+        )
+        return VolumeCapacity.resolve(df: df, partition: partition, previous: previous)
     }
 
-    private static func dfCapacity(_ volume: String) async -> Capacity? {
-        let result = await Shell.runQuiet("/bin/df", ["-k", volume], timeout: 1.5)
-        let lines = result.stdout.split(whereSeparator: \.isNewline).map(String.init)
-        guard lines.count >= 2 else { return nil }
-        let data = lines.reversed().first { $0.contains("/dev/") || $0.contains(volume) } ?? lines.last ?? ""
-        let parts = data.split(whereSeparator: \.isWhitespace).map(String.init)
-        guard parts.count >= 4, let total = Int64(parts[1]), let used = Int64(parts[2]), let avail = Int64(parts[3]), total > 0 else {
-            return nil
-        }
-        return Capacity(total: total * 1024, used: used * 1024, available: avail * 1024)
+    private static func dfRow(volume: String) async -> VolumeCapacity.DfRow? {
+        guard !volume.isEmpty else { return nil }
+        let result = await Shell.runQuiet("/bin/df", ["-Pk", volume], timeout: 1.5)
+        return VolumeCapacity.parseDf(result.stdout)
     }
 
     private static func diskutilCapacity(_ path: String) async -> Capacity? {
         let info = await Shell.runQuiet("/usr/sbin/diskutil", ["info", path], timeout: 1.5).stdout
-        func bytes(_ label: String) -> Int64? {
-            let pattern = label + #"\s*[\d.]+ [KMGT]?B\s*\((\d+)\s+Bytes\)"#
-            guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) else { return nil }
-            let range = NSRange(info.startIndex..., in: info)
-            guard let match = regex.firstMatch(in: info, range: range),
-                  let capture = Range(match.range(at: 1), in: info) else { return nil }
-            return Int64(info[capture])
-        }
-        guard let total = bytes("Total Size:") ?? bytes("Disk Size:") else { return nil }
-        var used = bytes("Volume Used Space:") ?? 0
-        var available = bytes("Volume Free Space:") ?? 0
-        if available > 0 && used == 0 { used = total - available }
-        if used > 0 && available == 0 { available = total - used }
-        if used == 0 && available == 0 { available = total }
-        return Capacity(total: total, used: max(0, used), available: max(0, available))
+        return VolumeCapacity.parseDiskutil(info)
     }
 }
