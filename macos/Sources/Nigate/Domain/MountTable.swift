@@ -37,6 +37,20 @@ enum MountTable {
         output.split(whereSeparator: \.isNewline).compactMap { parseLine(String($0)) }
     }
 
+    static func rows(for devicePath: String, in mounts: [MountedVolume]) -> [MountedVolume] {
+        mounts.filter { $0.devicePath == devicePath }
+    }
+
+    /// 同一节点可能同时有只读原生行和 ntfs-3g 读写行。有任何读写行都不能算还原成功。
+    static func isReadOnlyOnly(devicePath: String, mounts: [MountedVolume]) -> Bool {
+        let rows = rows(for: devicePath, in: mounts)
+        return !rows.isEmpty && rows.allSatisfy(\.isReadOnly)
+    }
+
+    static func hasReadWrite(devicePath: String, mounts: [MountedVolume]) -> Bool {
+        rows(for: devicePath, in: mounts).contains { !$0.isReadOnly }
+    }
+
     static func parseLine(_ line: String) -> MountedVolume? {
         guard let on = line.range(of: " on ") else { return nil }
         let devicePath = String(line[..<on.lowerBound]).trimmingCharacters(in: .whitespaces)

@@ -77,4 +77,14 @@ final class VolumeMountPointTests: XCTestCase {
         ]
         XCTAssertEqual(VolumeMountPoint.allocate(for: device, mounts: mounts), "/Volumes/新加卷 1")
     }
+
+    func testSuffixVolumeNameDoesNotDoubleIndex() {
+        let path = VolumeMountPoint.allocate(
+            name: "新加卷 1",
+            disk: "disk5s2",
+            preferred: "/Volumes/新加卷 1",
+            occupied: ["/Volumes/新加卷"]
+        )
+        XCTAssertEqual(path, "/Volumes/新加卷 1")
+    }
 }

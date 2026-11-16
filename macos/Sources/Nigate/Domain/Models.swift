@@ -76,10 +76,10 @@ struct NTFSDevice: Sendable, Equatable, Identifiable {
         return false
     }
 
-    /// 两块不同的 diskNsM，即使都叫「新加卷」也不是同一张卡。
+    /// 两个不同的可挂载节点，即使都叫「新加卷」也不是同一张卡。
     func isDistinctPartition(from other: NTFSDevice) -> Bool {
-        DiskSafety.isPartition(devicePath)
-            && DiskSafety.isPartition(other.devicePath)
+        DiskSafety.isMountableNode(devicePath)
+            && DiskSafety.isMountableNode(other.devicePath)
             && devicePath != other.devicePath
     }
     var isReadWrite: Bool { isMounted && !isReadOnly && !isUnmounted }

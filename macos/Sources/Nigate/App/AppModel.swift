@@ -114,7 +114,7 @@ final class AppModel: ObservableObject {
     @Published var toast: String?
     /// 同一句成功提示短时间内只出现一次。连续插盘时第二次挂载不会把底部再弹一遍。
     private var recentToasts: [String: Date] = [:]
-    /// 长操作（格式化、只读转读写）期间停在窗口下方，不走 toast 的短时消失。
+    /// 长操作（格式化、只读转读写、读写转只读）期间停在窗口下方，不走 toast 的短时消失。
     @Published var progressHint: String?
     /// 底部提示的会话。多块盘同时转读写时叠在一起，结束一块不能把另一块清掉。
     private var bottomProgress = BottomProgress.Session()
@@ -661,8 +661,18 @@ final class AppModel: ObservableObject {
             case .eject: targets = devices
             default: targets = []
             }
-            if action == .mount {
+            switch action {
+            case .mount:
                 noteRemounting(targets)
+                noteMounting(targets)
+            case .restore:
+                noteRestoring(targets)
+            case .unmount:
+                noteUnmounting(targets)
+            case .eject:
+                noteEjecting(targets)
+            default:
+                break
             }
             for device in targets { await run(action, device) }
         }
@@ -739,13 +749,54 @@ final class AppModel: ObservableObject {
     }
 
     private func run(_ action: DeviceAction, _ device: NTFSDevice, extra: String? = nil) async {
-        let busyKey = busyKey(for: action, device: device)
-        guard !isDeviceBusy(device) else {
-            if action == .mount {
+        var device = device
+        if isDeviceBusy(device) {
+            switch action {
+            case .mount:
                 clearRemountProgress(device)
+                clearMountProgress(device)
+                return
+            case .restore:
+                // 全读写还没放下忙锁时，全只读不能把这张卡从会话里丢掉。
+                guard await waitUntilFree(device) else {
+                    clearRestoreProgress(device)
+                    return
+                }
+                if let live = devices.first(where: { $0.devicePath == device.devicePath }) {
+                    device = live
+                }
+                guard device.isReadWrite else {
+                    clearRestoreProgress(device)
+                    return
+                }
+            case .unmount:
+                guard await waitUntilFree(device) else {
+                    clearUnmountProgress(device)
+                    return
+                }
+                if let live = devices.first(where: { $0.devicePath == device.devicePath }) {
+                    device = live
+                }
+                guard !device.needsMount else {
+                    clearUnmountProgress(device)
+                    return
+                }
+            case .eject:
+                guard await waitUntilFree(device) else {
+                    clearEjectProgress(device)
+                    return
+                }
+                if let live = devices.first(where: { $0.devicePath == device.devicePath || $0.disk == device.disk }) {
+                    device = live
+                } else {
+                    clearEjectProgress(device)
+                    return
+                }
+            default:
+                return
             }
-            return
         }
+        let busyKey = busyKey(for: action, device: device)
         // 赋值新 Set，保证 @Published 一定发通知（in-place mutate 在部分路径上 UI 不刷新）。
         markBusy(busyKey)
         pinSwitch(device, action)
@@ -756,6 +807,13 @@ final class AppModel: ObservableObject {
             switch action {
             case .mount:
                 clearRemountProgress(device)
+                clearMountProgress(device)
+            case .restore:
+                clearRestoreProgress(device)
+            case .unmount:
+                clearUnmountProgress(device)
+            case .eject:
+                clearEjectProgress(device)
             case .format:
                 clearFormatProgress(device)
             default:
@@ -775,19 +833,25 @@ final class AppModel: ObservableObject {
             switch action {
             case .mount:
                 noteRemounting([device])
+                noteMounting([device])
                 AutoMount.clearManualReadOnly(device, settings: &settings)
                 persist()
                 let mounted = try await service.mount(device)
                 clearRemountProgress(device)
+                clearMountProgress(device)
                 showToast(mounted)
             case .unmount:
+                noteUnmounting([device])
                 showToast(try await service.unmount(device))
+                clearUnmountProgress(device)
             case .restore:
+                noteRestoring([device])
                 AutoMount.markManualReadOnly(device, settings: &settings)
                 cooldown[device.identity] = Date().addingTimeInterval(90)
                 cooldown[device.disk] = Date().addingTimeInterval(90)
                 persist()
                 showToast(try await service.restore(device))
+                clearRestoreProgress(device)
             case .reset:
                 AutoMount.markManualReadOnly(device, settings: &settings)
                 cooldown[device.identity] = Date().addingTimeInterval(90)
@@ -804,7 +868,9 @@ final class AppModel: ObservableObject {
                 clearFormatProgress(device)
                 showToast(result)
             case .eject:
+                noteEjecting([device])
                 showToast(try await service.eject(device))
+                clearEjectProgress(device)
             }
             clearBusy(busyKey)
             busyReleased = true
@@ -922,6 +988,9 @@ final class AppModel: ObservableObject {
                 devices[idx].isMounted = true
                 devices[idx].isUnmounted = false
             }
+            if action == .restore {
+                bottomProgress = BottomProgress.removingRestore(bottomProgress, id: device.devicePath)
+            }
         case .unmount:
             if let idx = devices.firstIndex(where: match) {
                 devices[idx].isMounted = false
@@ -930,10 +999,14 @@ final class AppModel: ObservableObject {
                 devices[idx].volume = ""
                 knownNTFSDevices[devices[idx].devicePath] = devices[idx]
             }
+            bottomProgress = BottomProgress.removingUnmount(bottomProgress, id: device.devicePath)
         case .eject, .format:
             dropPins(onParent: device.parentDisk)
             devices.removeAll(where: match)
             knownNTFSDevices.removeValue(forKey: device.devicePath)
+            if action == .eject {
+                bottomProgress = BottomProgress.removingEject(bottomProgress, id: device.devicePath)
+            }
         case .rename:
             let trimmed = renamedTo?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             guard !trimmed.isEmpty, trimmed != device.volumeName,
@@ -952,6 +1025,7 @@ final class AppModel: ObservableObject {
         TrayController.shared.syncAfterAction()
         if action == .mount {
             bottomProgress = BottomProgress.removingRemount(bottomProgress, id: device.devicePath)
+            bottomProgress = BottomProgress.removingMount(bottomProgress, id: device.devicePath)
         }
         publishBottomProgress()
     }
@@ -1121,6 +1195,34 @@ final class AppModel: ObservableObject {
         publishBottomProgress()
     }
 
+    private func noteRestoring(_ devices: [NTFSDevice]) {
+        let items = BottomProgress.restoreItems(from: devices)
+        guard !items.isEmpty else { return }
+        bottomProgress = BottomProgress.insertingRestores(bottomProgress, items)
+        publishBottomProgress()
+    }
+
+    private func noteMounting(_ devices: [NTFSDevice]) {
+        let items = BottomProgress.mountItems(from: devices)
+        guard !items.isEmpty else { return }
+        bottomProgress = BottomProgress.insertingMounts(bottomProgress, items)
+        publishBottomProgress()
+    }
+
+    private func noteUnmounting(_ devices: [NTFSDevice]) {
+        let items = BottomProgress.unmountItems(from: devices)
+        guard !items.isEmpty else { return }
+        bottomProgress = BottomProgress.insertingUnmounts(bottomProgress, items)
+        publishBottomProgress()
+    }
+
+    private func noteEjecting(_ devices: [NTFSDevice]) {
+        let items = BottomProgress.ejectItems(from: devices)
+        guard !items.isEmpty else { return }
+        bottomProgress = BottomProgress.insertingEjects(bottomProgress, items)
+        publishBottomProgress()
+    }
+
     private func noteFormatting(_ device: NTFSDevice) {
         let name = device.volumeName.isEmpty ? device.disk : device.volumeName
         bottomProgress = BottomProgress.insertingFormat(bottomProgress, id: device.devicePath, name: name)
@@ -1132,6 +1234,26 @@ final class AppModel: ObservableObject {
         publishBottomProgress()
     }
 
+    private func clearRestoreProgress(_ device: NTFSDevice) {
+        bottomProgress = BottomProgress.removingRestore(bottomProgress, id: device.devicePath)
+        publishBottomProgress()
+    }
+
+    private func clearMountProgress(_ device: NTFSDevice) {
+        bottomProgress = BottomProgress.removingMount(bottomProgress, id: device.devicePath)
+        publishBottomProgress()
+    }
+
+    private func clearUnmountProgress(_ device: NTFSDevice) {
+        bottomProgress = BottomProgress.removingUnmount(bottomProgress, id: device.devicePath)
+        publishBottomProgress()
+    }
+
+    private func clearEjectProgress(_ device: NTFSDevice) {
+        bottomProgress = BottomProgress.removingEject(bottomProgress, id: device.devicePath)
+        publishBottomProgress()
+    }
+
     private func clearFormatProgress(_ device: NTFSDevice) {
         bottomProgress = BottomProgress.removingFormat(bottomProgress, id: device.devicePath)
         publishBottomProgress()
@@ -1139,9 +1261,23 @@ final class AppModel: ObservableObject {
 
     private func publishBottomProgress() {
         bottomProgress = BottomProgress.droppingFinishedRemounts(bottomProgress, devices: devices)
+        bottomProgress = BottomProgress.droppingFinishedRestores(bottomProgress, devices: devices)
+        bottomProgress = BottomProgress.droppingFinishedMounts(bottomProgress, devices: devices)
+        bottomProgress = BottomProgress.droppingFinishedUnmounts(bottomProgress, devices: devices)
+        bottomProgress = BottomProgress.droppingFinishedEjects(bottomProgress, devices: devices)
         progressHint = BottomProgress.text(BottomProgress.kind(bottomProgress)) { key, params in
             L10n.t(key, params)
         }
+    }
+
+    /// 全只读撞上正在转读写的同一分区时，等忙锁放下再还原，不能直接跳过。
+    private func waitUntilFree(_ device: NTFSDevice, tries: Int = 200) async -> Bool {
+        var waited = 0
+        while isDeviceBusy(device), waited < tries {
+            try? await Task.sleep(nanoseconds: 150_000_000)
+            waited += 1
+        }
+        return !isDeviceBusy(device)
     }
 
     private func askPassword(_ key: String, _ params: [String: String]) async throws -> String {

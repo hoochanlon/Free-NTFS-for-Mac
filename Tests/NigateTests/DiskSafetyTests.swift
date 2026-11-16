@@ -8,7 +8,47 @@ final class DiskSafetyTests: XCTestCase {
         XCTAssertFalse(DiskSafety.isPartition("/dev/disk4"))
         XCTAssertTrue(DiskSafety.isWholeDisk("/dev/disk4"))
         XCTAssertFalse(DiskSafety.isWholeDisk("/dev/disk4s2"))
+        XCTAssertTrue(DiskSafety.isMountableNode("/dev/disk4s2"))
+        XCTAssertTrue(DiskSafety.isMountableNode("/dev/disk8"))
+        XCTAssertFalse(DiskSafety.isMountableNode("/dev/rdisk8"))
+        XCTAssertFalse(DiskSafety.isMountableNode("/dev/disk8s1s1"))
         XCTAssertEqual(DiskSafety.parentDiskPath("/dev/disk4s2"), "/dev/disk4")
+        XCTAssertEqual(DiskSafety.parentDiskPath("/dev/disk8"), "/dev/disk8")
+    }
+
+    func testWholeDiskVolumeIdentifierFromDiskutilList() {
+        XCTAssertEqual(
+            DiskSafety.wholeDiskVolumeIdentifier(
+                inListRow: "0:               Windows_NTFS 移动临时存储            *32.0 GB    disk8"
+            ),
+            "disk8"
+        )
+        XCTAssertEqual(
+            DiskSafety.wholeDiskVolumeIdentifier(
+                inListRow: "0:      NTFS                     Untitled             16.0 GB    disk12"
+            ),
+            "disk12"
+        )
+        XCTAssertNil(
+            DiskSafety.wholeDiskVolumeIdentifier(
+                inListRow: "0:     FDisk_partition_scheme                        *32.0 GB    disk8"
+            )
+        )
+        XCTAssertNil(
+            DiskSafety.wholeDiskVolumeIdentifier(
+                inListRow: "0:      GUID_partition_scheme                        *500.1 GB   disk0"
+            )
+        )
+        XCTAssertNil(
+            DiskSafety.wholeDiskVolumeIdentifier(
+                inListRow: "1:               Windows_NTFS SanDisk 32G            32.0 GB    disk4s2"
+            )
+        )
+        XCTAssertNil(
+            DiskSafety.wholeDiskVolumeIdentifier(
+                inListRow: "2:                 Apple_APFS Container disk3         500 GB     disk0s2"
+            )
+        )
     }
 
     func testNTFSFilesystemRecognizesFilesystemIdentityWithoutPartitionTypeFalsePositives() {
@@ -20,6 +60,8 @@ final class DiskSafetyTests: XCTestCase {
         XCTAssertTrue(DiskSafety.isNTFSFilesystem("Type (Bundle): ntfs-3g"))
         XCTAssertTrue(DiskSafety.isNTFSFilesystem("Format: NTFS-3g (macFUSE)"))
         XCTAssertTrue(DiskSafety.isNTFSFilesystem("/dev/disk4s2 on /Volumes/Backup (xntfs, local, read-only)"))
+        XCTAssertTrue(DiskSafety.isNTFSFilesystem("/dev/disk8 on /Volumes/移动临时存储 (ntfs, local, read-only)"))
+        XCTAssertTrue(DiskSafety.isNTFSFilesystem("/dev/disk8 on /Volumes/移动临时存储 (xntfs, local, read-only)"))
         XCTAssertFalse(DiskSafety.isNTFSFilesystem("Partition Type: Windows_NTFS"))
         XCTAssertFalse(DiskSafety.isNTFSFilesystem("Volume Name: Unknown (xntfs)"))
         XCTAssertFalse(DiskSafety.isNTFSFilesystem("卷名: 未知 (xntfs)"))
@@ -262,6 +304,20 @@ final class DiskSafetyTests: XCTestCase {
         XCTAssertFalse(spaced?.isReadOnly ?? true)
     }
 
+    func testMountTableReadOnlyOnlyRejectsSiblingReadWriteRow() {
+        let mounts = MountTable.parse("""
+        /dev/disk5s2 on /Volumes/新加卷 1 (xntfs, local, nodev, nosuid, read-only, noowners)
+        /dev/disk5s2 on /Volumes/新加卷 1 (macfuse, local, nodev, synchronous, noatime, allow_other)
+        /dev/disk5s1 on /Volumes/新加卷 (xntfs, local, nodev, nosuid, read-only, noowners)
+        """)
+        XCTAssertEqual(MountTable.rows(for: "/dev/disk5s2", in: mounts).count, 2)
+        XCTAssertFalse(MountTable.isReadOnlyOnly(devicePath: "/dev/disk5s2", mounts: mounts))
+        XCTAssertTrue(MountTable.hasReadWrite(devicePath: "/dev/disk5s2", mounts: mounts))
+        XCTAssertTrue(MountTable.isReadOnlyOnly(devicePath: "/dev/disk5s1", mounts: mounts))
+        XCTAssertFalse(MountTable.hasReadWrite(devicePath: "/dev/disk5s1", mounts: mounts))
+        XCTAssertFalse(MountTable.isReadOnlyOnly(devicePath: "/dev/disk9s1", mounts: mounts))
+    }
+
     func testMountedXNTFSRequiresExactDeviceAndMountPoint() {
         let mountOutput = "/dev/disk5s2 on /Volumes/Backup (xntfs, local, nodev, nosuid, read-only, noowners)"
 
@@ -294,6 +350,21 @@ final class DiskSafetyTests: XCTestCase {
             mountOutput,
             devicePath: "/dev/disk5",
             mountPoint: "/Volumes/Backup"
+        ))
+        XCTAssertTrue(DiskSafety.isMountedXNTFSFilesystem(
+            "/dev/disk8 on /Volumes/移动临时存储 (xntfs, local, nodev, nosuid, read-only, noowners)",
+            devicePath: "/dev/disk8",
+            mountPoint: "/Volumes/移动临时存储"
+        ))
+        XCTAssertTrue(DiskSafety.isConfirmedNTFSFuseMount(
+            "/dev/disk8 on /Volumes/移动临时存储 (ntfs-3g, local, allow_other)",
+            deviceInfo: """
+            Device Identifier:        disk8
+            File System Personality:  NTFS
+            Whole:                    Yes
+            """,
+            devicePath: "/dev/disk8",
+            mountPoint: "/Volumes/移动临时存储"
         ))
     }
 
@@ -793,6 +864,15 @@ final class MountIdentityTests: XCTestCase {
         XCTAssertTrue(first.isDistinctPartition(from: second))
         let collapsed = DeviceScanner.collapsingDuplicates([first, second])
         XCTAssertEqual(collapsed.map(\.disk).sorted(), ["disk8s1", "disk8s2"])
+    }
+
+    func testWholeDiskSuperfloppyDoesNotCollapseWithPartition() {
+        let whole = sample(disk: "disk8", name: "移动临时存储", readOnly: true, uuid: nil)
+        let part = sample(disk: "disk5s1", name: "移动临时存储", readOnly: true, uuid: nil)
+        XCTAssertTrue(whole.isDistinctPartition(from: part))
+        XCTAssertFalse(whole.sameMount(as: part))
+        let collapsed = DeviceScanner.collapsingDuplicates([whole, part])
+        XCTAssertEqual(Set(collapsed.map(\.disk)), ["disk5s1", "disk8"])
     }
 
     func testRepeatedSuccessToastIsSuppressed() {

@@ -10,11 +10,34 @@ enum DiskSafety {
         path.range(of: #"^/dev/disk\d+$"#, options: .regularExpression) != nil
     }
 
+    /// 可挂载节点：普通 `diskNsM`，或无分区表、文件系统直接落在整盘上的 U 盘。
+    static func isMountableNode(_ path: String) -> Bool {
+        isPartition(path) || isWholeDisk(path)
+    }
+
+    /// `diskutil list` 里文件系统直接标在整盘 identifier 上。分区方案行不能当成卷。
+    static func wholeDiskVolumeIdentifier(inListRow line: String) -> String? {
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        guard trimmed.range(
+            of: #"\b(Windows_NTFS|x?NTFS)\b"#,
+            options: [.regularExpression, .caseInsensitive]
+        ) != nil else { return nil }
+        guard trimmed.range(
+            of: #"partition[_\s-]?scheme"#,
+            options: [.regularExpression, .caseInsensitive]
+        ) == nil else { return nil }
+        guard trimmed.range(of: #"\bdisk\d+s\d+$"#, options: .regularExpression) == nil,
+              let match = trimmed.range(of: #"\bdisk\d+$"#, options: .regularExpression) else {
+            return nil
+        }
+        return String(trimmed[match])
+    }
+
     static func isNTFSFilesystem(_ description: String) -> Bool {
         let patterns = [
             #"(?im)^\s*(?:File System Personality|File System Type|Type \(Bundle\)|Format|格式):\s*(?:(?:xntfs|ntfs(?:-[\w-]+)?)(?:\s+\(macfuse\))?|(?:Unknown|未知)\s+\((?:xntfs|ntfs(?:-[\w-]+)?)\))\s*$"#,
             #"(?im)^\s*\d+:\s*(?:xntfs|ntfs(?:-[\w-]+)?)\b"#,
-            #"(?im)^/dev/disk\d+s\d+\s+on\s+/Volumes/.*\s+\((?:xntfs|ntfs(?:-[\w-]+)?)\b[^)]*\)\s*$"#
+            #"(?im)^/dev/disk\d+(?:s\d+)?\s+on\s+/Volumes/.*\s+\((?:xntfs|ntfs(?:-[\w-]+)?)\b[^)]*\)\s*$"#
         ]
         return patterns.contains { pattern in
             description.range(of: pattern, options: .regularExpression) != nil
@@ -52,7 +75,7 @@ enum DiskSafety {
         devicePath: String,
         mountPoint: String
     ) -> Bool {
-        guard isPartition(devicePath),
+        guard isMountableNode(devicePath),
               mountPoint.hasPrefix("/Volumes/"),
               mountPoint != "/Volumes/",
               let mounted = fuseMount(
@@ -168,7 +191,7 @@ enum DiskSafety {
     }
 
     static func isMountedXNTFSFilesystem(_ mountOutput: String, devicePath: String, mountPoint: String) -> Bool {
-        guard isPartition(devicePath),
+        guard isMountableNode(devicePath),
               mountPoint.hasPrefix("/Volumes/"),
               mountPoint != "/Volumes/" else { return false }
         let device = NSRegularExpression.escapedPattern(for: devicePath)

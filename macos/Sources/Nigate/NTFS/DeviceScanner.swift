@@ -19,8 +19,8 @@ enum DeviceScanner {
             devices.append(device)
         }
 
-        // 2) diskutil list 只提供候选分区；TYPE 可能把 ExFAT 也标成 Windows_NTFS，
-        //    必须再用 diskutil info 的实际文件系统字段确认，不能直接相信列表行。
+        // 2) diskutil list 提供候选：普通分区，或无分区表的整盘 NTFS。
+        //    TYPE 可能把 ExFAT 也标成 Windows_NTFS，必须再用 diskutil info 确认。
         var currentDisk = ""
         for rawLine in listOut.split(whereSeparator: \.isNewline).map(String.init) {
             let line = rawLine.trimmingCharacters(in: .whitespaces)
@@ -28,14 +28,21 @@ enum DeviceScanner {
                 currentDisk = String(line[match]).replacingOccurrences(of: "/dev/", with: "")
                 continue
             }
-            guard !currentDisk.isEmpty,
-                  let part = line.range(of: #"\bdisk\d+s\d+$"#, options: .regularExpression) else { continue }
-            let partition = String(line[part])
-            let path = "/dev/\(partition)"
-            guard DiskSafety.isPartition(path), !seen.contains(path) else { continue }
+            guard !currentDisk.isEmpty else { continue }
+            let identifier: String
+            if let part = line.range(of: #"\bdisk\d+s\d+$"#, options: .regularExpression) {
+                identifier = String(line[part])
+            } else if let whole = DiskSafety.wholeDiskVolumeIdentifier(inListRow: line),
+                      whole == currentDisk {
+                identifier = whole
+            } else {
+                continue
+            }
+            let path = "/dev/\(identifier)"
+            guard DiskSafety.isMountableNode(path), !seen.contains(path) else { continue }
             guard let extra = await infoDevice(
                 path: path,
-                disk: partition,
+                disk: identifier,
                 tags: tags,
                 knownDevice: knownDevices.first { $0.devicePath == path }
             ) else { continue }
@@ -43,10 +50,10 @@ enum DeviceScanner {
             devices.append(extra)
         }
 
-        // diskutil list can briefly omit a connected partition during unmount propagation.
+        // diskutil list can briefly omit a connected volume during unmount propagation.
         // Revalidate known devices directly; only the same confirmed volume is retained.
         for known in knownDevices where !seen.contains(known.devicePath) {
-            guard DiskSafety.isPartition(known.devicePath),
+            guard DiskSafety.isMountableNode(known.devicePath),
                   let extra = await infoDevice(
                     path: known.devicePath,
                     disk: known.disk,
