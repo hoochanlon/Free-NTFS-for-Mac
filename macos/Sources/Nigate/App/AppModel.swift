@@ -30,6 +30,8 @@ final class AppModel: ObservableObject {
     @Published var aboutOpen = false
     @Published var supportOpen = false
     @Published var quitConfirmOpen = false
+    /// 删除密码、修复、格式化、推出。画在主窗口里，避免独立浮层被拖出窗口、也避免毛玻璃贴着底色失去对比。
+    @Published var windowConfirm: WindowConfirm?
     /// 退出一旦离开 idle，就不能再收进菜单栏。确认前关窗口会被系统当成「留在后台」。
     private(set) var quitPhase: AppQuitPhase = .idle
     var openMainWindow: (@MainActor () -> Void)?
@@ -225,6 +227,7 @@ final class AppModel: ObservableObject {
         passwordSheet = nil
         renameDevice = nil
         alert = nil
+        windowConfirm = nil
         revealMainWindow()
         quitConfirmOpen = true
         quitWatchSeq += 1
@@ -235,6 +238,41 @@ final class AppModel: ObservableObject {
                 self.quitImmediately()
             }
         }
+    }
+
+    func presentWindowConfirm(
+        title: String,
+        message: String = "",
+        symbol: String,
+        critical: Bool = false,
+        confirmTitle: String,
+        action: @escaping @MainActor () -> Void
+    ) {
+        guard quitPhase == .idle else { return }
+        aboutOpen = false
+        supportOpen = false
+        passwordSheet = nil
+        renameDevice = nil
+        alert = nil
+        revealMainWindow()
+        windowConfirm = WindowConfirm(
+            title: title,
+            message: message,
+            symbol: symbol,
+            critical: critical,
+            confirmTitle: confirmTitle,
+            action: action
+        )
+    }
+
+    func cancelWindowConfirm() {
+        windowConfirm = nil
+    }
+
+    func acceptWindowConfirm() {
+        let action = windowConfirm?.action
+        windowConfirm = nil
+        action?()
     }
 
     func cancelQuit() {

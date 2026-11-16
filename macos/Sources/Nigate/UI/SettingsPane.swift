@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 import NigateFSKitCore
 
 struct SettingsPane: View {
@@ -16,20 +15,13 @@ struct SettingsPane: View {
             Section(L10n.t("settings.title")) {
                 Toggle(L10n.t("settings.savePassword"), isOn: bind(\.savePassword))
                 Text(L10n.t("settings.savePasswordDesc")).font(.callout).foregroundStyle(.secondary)
-                Button(L10n.t("settings.deletePassword")) {
-                    let confirmed = ConfirmAlert.run(
-                        .init(
-                            title: L10n.t("settings.deletePasswordConfirm"),
-                            message: "",
-                            symbolName: "key.slash",
-                            style: .warning,
-                            continueTitle: L10n.t("dialog.confirm"),
-                            cancelTitle: L10n.t("dialog.cancel"),
-                            minContentWidth: 400
-                        )
-                    )
-                    if confirmed {
-                        model.deleteSavedPassword()
+                Button(L10n.t("settings.deletePassword")) { [model] in
+                    model.presentWindowConfirm(
+                        title: L10n.t("settings.deletePasswordConfirm"),
+                        symbol: "key.slash",
+                        confirmTitle: L10n.t("dialog.confirm")
+                    ) { [weak model] in
+                        model?.deleteSavedPassword()
                     }
                 }
                 Picker(L10n.t("settings.mountBackend"), selection: mountBackendBinding) {

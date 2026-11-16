@@ -463,6 +463,48 @@ private struct AboutGlyph: View {
     }
 }
 
+struct WindowConfirm: Identifiable {
+    let id = UUID()
+    var title: String
+    var message: String
+    var symbol: String
+    var critical: Bool
+    var confirmTitle: String
+    var action: @MainActor () -> Void
+}
+
+struct WindowConfirmCard: View {
+    @EnvironmentObject private var model: AppModel
+    let confirm: WindowConfirm
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Image(systemName: confirm.symbol)
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(confirm.critical ? Palette.error : Palette.warning)
+                Text(confirm.title)
+                    .font(.title2.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if !confirm.message.isEmpty {
+                Text(confirm.message)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            HStack {
+                Spacer()
+                Button(L10n.t("dialog.cancel")) { model.cancelWindowConfirm() }
+                    .keyboardShortcut(.cancelAction)
+                Button(confirm.confirmTitle) { model.acceptWindowConfirm() }
+                    .keyboardShortcut(.defaultAction)
+                    .tint(confirm.critical ? Palette.error : Palette.accent)
+            }
+        }
+        .windowConfirmChrome()
+    }
+}
+
 struct QuitConfirmSheet: View {
     @EnvironmentObject private var model: AppModel
 
@@ -486,14 +528,24 @@ struct QuitConfirmSheet: View {
                     .keyboardShortcut(.defaultAction)
             }
         }
-        .padding(24)
-        .frame(width: 420)
-        .background(Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.08))
-        )
-        .shadow(color: .black.opacity(0.28), radius: 24, y: 10)
+        .windowConfirmChrome()
+    }
+}
+
+private extension View {
+    /// 不跟窗口底色走。windowBackground 贴在同一层窗口上几乎没有边界。
+    func windowConfirmChrome() -> some View {
+        padding(24)
+            .frame(width: 420)
+            .background {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(nsColor: .controlBackgroundColor))
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.18), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.38), radius: 28, y: 12)
     }
 }
 

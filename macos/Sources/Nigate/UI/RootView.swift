@@ -185,14 +185,22 @@ struct RootView: View {
             }
         }
         .overlay {
-            if model.quitConfirmOpen {
-                ZStack {
-                    Color.black.opacity(0.32)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .contentShape(Rectangle())
-                    QuitConfirmSheet()
+            // 条件分支的理想尺寸是卡片本身，遮罩会跟着缩成卡片大小，窗口其余部分仍可拖走。
+            // GeometryReader 拿到的是整窗尺寸，遮罩必须按这个尺寸铺满。
+            GeometryReader { proxy in
+                if model.quitConfirmOpen || model.windowConfirm != nil {
+                    windowModal(size: proxy.size) {
+                        if model.quitConfirmOpen {
+                            QuitConfirmSheet()
+                        } else if let confirm = model.windowConfirm {
+                            WindowConfirmCard(confirm: confirm)
+                        }
+                    }
                 }
             }
+        }
+        .background {
+            WindowDragLock(locked: model.quitConfirmOpen || model.windowConfirm != nil)
         }
         .onChange(of: model.toast) { _, toast in
             guard let toast, model.progressHint == nil else { return }
@@ -201,6 +209,16 @@ struct RootView: View {
             }
         }
         .preferredColorScheme(model.settings.themeIsLight ? .light : .dark)
+    }
+
+    private func windowModal<Content: View>(size: CGSize, @ViewBuilder content: () -> Content) -> some View {
+        ZStack {
+            Color.black.opacity(0.46)
+                .contentShape(Rectangle())
+                .onTapGesture {}
+            content()
+        }
+        .frame(width: size.width, height: size.height)
     }
 
     private var tabBar: some View {
@@ -231,5 +249,34 @@ struct RootView: View {
             .foregroundStyle(model.tab == tab ? Color.accentColor : Color.primary.opacity(0.75))
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// 确认层画在主窗口里。hiddenTitleBar 仍能拖窗口，确认期间直接禁止移动，避免窗口离开弹层。
+private struct WindowDragLock: NSViewRepresentable {
+    var locked: Bool
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView(frame: .zero)
+        view.isHidden = true
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        context.coordinator.locked = locked
+        DispatchQueue.main.async {
+            nsView.window?.isMovable = !context.coordinator.locked
+        }
+    }
+
+    static func dismantleNSView(_ nsView: NSView, coordinator: Coordinator) {
+        coordinator.locked = false
+        nsView.window?.isMovable = true
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    final class Coordinator {
+        var locked = false
     }
 }
