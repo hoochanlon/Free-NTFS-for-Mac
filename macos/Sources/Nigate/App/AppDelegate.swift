@@ -1,9 +1,38 @@
 import AppKit
+import Darwin
 import SwiftUI
+
+extension Notification.Name {
+    static let nigateReveal = Notification.Name("io.hoochanlon.github.reveal")
+}
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     var model: AppModel?
+
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        // 第二次双击不能再留一个无窗口进程。锁失败就唤醒已有实例然后立刻结束。
+        guard InstanceLock.acquire() else {
+            let bundleID = Bundle.main.bundleIdentifier ?? "io.hoochanlon.github"
+            NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
+                .first { $0.processIdentifier != ProcessInfo.processInfo.processIdentifier }?
+                .activate(options: [.activateAllWindows])
+            DistributedNotificationCenter.default().postNotificationName(
+                .nigateReveal,
+                object: nil,
+                userInfo: nil,
+                deliverImmediately: true
+            )
+            Darwin._exit(0)
+        }
+        DistributedNotificationCenter.default().addObserver(
+            self,
+            selector: #selector(revealFromSecondLaunch),
+            name: .nigateReveal,
+            object: nil
+        )
+        NSApp.setActivationPolicy(.regular)
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
@@ -19,20 +48,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        // 状态栏窗口还在时，系统不会把这次关闭当成「最后一个窗口」，所以这里经常进不来。
-        // 真正收进菜单栏的逻辑在 mainWindowWillClose。
-        guard let model, !model.suppressesTrayWithdraw else { return false }
+        // 退出过程中如果还返回 false，进程会以无窗口的 regular 应用留在 Dock，文案就是「正在后台运行」。
+        guard let model else {
+            Darwin._exit(0)
+        }
+        if model.quitPhase != .idle {
+            model.quitImmediately()
+            return true
+        }
         model.withdrawToTray()
         return false
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        // Dock / 系统退出不能再取消。取消一次后窗口没了，后面每次退出都还是取消，
-        // Dock 就一直显示「正在后台运行」。
+        // 不能取消。取消一次后，系统后续退出不再回调，Dock 只剩「正在后台运行」。
         if let model {
             model.quitImmediately()
         }
-        exit(0)
+        Darwin._exit(0)
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -51,9 +84,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let isMain = window.title == "Nigate" || window.identifier?.rawValue == "main"
         guard isMain else { return }
         guard let model else { return }
-        if model.quitPhase == .confirming {
-            // 终止被取消时 SwiftUI 仍可能关掉主窗口。拉回来，否则进程会以「后台运行」留在 Dock。
-            DispatchQueue.main.async { model.presentQuitConfirm() }
+        if model.quitPhase != .idle {
+            // 确认框依附主窗口。窗口没了还去拉起，只会把 Dock 图标带回来，进程继续活着。
+            let closing = window
+            DispatchQueue.main.async {
+                let stillVisible = NSApp.windows.contains {
+                    $0 !== closing && $0.isVisible && ($0.title == "Nigate" || $0.identifier?.rawValue == "main")
+                }
+                if stillVisible {
+                    model.presentQuitConfirm()
+                } else {
+                    model.quitImmediately()
+                }
+            }
             return
         }
         guard !model.suppressesTrayWithdraw else { return }
@@ -63,5 +106,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if !mainStillVisible {
             model.withdrawToTray()
         }
+    }
+
+    @objc private func revealFromSecondLaunch() {
+        model?.revealMainWindow()
+    }
+}
+
+/// 同一用户只能留一个 Nigate。文件锁随进程结束释放，不依赖窗口或 Dock 状态。
+@MainActor
+enum InstanceLock {
+    private static var fd: Int32 = -1
+
+    static func acquire() -> Bool {
+        let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+        let directory = (root ?? URL(fileURLWithPath: NSTemporaryDirectory()))
+            .appendingPathComponent("Nigate", isDirectory: true)
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let path = directory.appendingPathComponent("instance.lock").path
+        let opened = open(path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)
+        guard opened >= 0 else { return true }
+        if flock(opened, LOCK_EX | LOCK_NB) != 0 {
+            close(opened)
+            return false
+        }
+        fd = opened
+        return true
     }
 }

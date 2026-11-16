@@ -62,6 +62,11 @@ final class AppModel: ObservableObject {
     private var capacityRefreshInFlight = false
     /// 用于 persist 差分：避免每次切换休眠都 unregister 登录项 / 重建整棵 UI。
     private var lastPersistedSettings: AppSettings?
+    /// 关窗口后的收起序号。退出或再次打开主窗口时，迟到的 accessory 切换必须作废。
+    private var withdrawSeq: UInt64 = 0
+    /// 确认框还没画出来就消失时，用序号丢掉过期的检查。
+    private var quitWatchSeq: UInt64 = 0
+    private var didHardExit = false
 
     init() {
         let loaded = SettingsStore.load()
@@ -179,16 +184,18 @@ final class AppModel: ObservableObject {
     }
 
     func revealMainWindow() {
+        guard quitPhase != .exiting else { return }
+        withdrawSeq += 1
         NSApp.setActivationPolicy(.regular)
-        if let window = Self.mainWindow() {
+        if let window = Self.visibleMainWindow() ?? Self.mainWindow() {
             window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
-            return
+            if Self.visibleMainWindow() != nil { return }
         }
         openMainWindow?()
         NSApp.activate(ignoringOtherApps: true)
         DispatchQueue.main.async {
-            Self.mainWindow()?.makeKeyAndOrderFront(nil)
+            (Self.visibleMainWindow() ?? Self.mainWindow())?.makeKeyAndOrderFront(nil)
         }
     }
 
@@ -209,7 +216,7 @@ final class AppModel: ObservableObject {
         presentQuitConfirm()
     }
 
-    /// 退出确认画在主窗口内。窗口已经没了就直接结束，避免确认框没处显示、进程却还在。
+    /// 退出确认画在主窗口内。窗口最终没出现就直接结束，不能留成无窗口的 Dock 项。
     func presentQuitConfirm() {
         guard quitPhase != .exiting else { return }
         quitPhase = .confirming
@@ -218,13 +225,13 @@ final class AppModel: ObservableObject {
         passwordSheet = nil
         renameDevice = nil
         alert = nil
-        let hadWindow = Self.mainWindow()?.isVisible == true
         revealMainWindow()
         quitConfirmOpen = true
-        guard !hadWindow else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
-            guard let self, self.quitPhase == .confirming else { return }
-            if Self.mainWindow()?.isVisible != true {
+        quitWatchSeq += 1
+        let watch = quitWatchSeq
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+            guard let self, self.quitPhase == .confirming, self.quitWatchSeq == watch else { return }
+            if Self.visibleMainWindow() == nil {
                 self.quitImmediately()
             }
         }
@@ -241,29 +248,61 @@ final class AppModel: ObservableObject {
         quitImmediately()
     }
 
-    /// 不走 NSApp.terminate。取消过一次之后，系统会把后续退出改成「正在后台运行」并且不再返回。
+    /// 不走 NSApp.terminate，也不走 exit()。atexit 里若还有 iostat / 窗口回调，系统会把进程收成「正在后台运行」。
     func quitImmediately() {
+        if didHardExit { return }
+        didHardExit = true
         quitPhase = .exiting
+        quitConfirmOpen = false
         shutdown()
         if NSApp.modalWindow != nil { NSApp.stopModal() }
-        exit(0)
+        Darwin._exit(0)
     }
 
     func withdrawToTray() {
-        // 窗口还在关闭时切 accessory，Dock 图标不会消失，只会变成「正在后台运行」。
+        guard quitPhase == .idle else { return }
+        withdrawSeq += 1
+        let seq = withdrawSeq
         DispatchQueue.main.async { [weak self] in
-            guard let self, self.quitPhase == .idle else { return }
-            NSApp.setActivationPolicy(.accessory)
-            var psn = ProcessSerialNumber(highLongOfPSN: 0, lowLongOfPSN: UInt32(kCurrentProcess))
-            TransformProcessType(&psn, ProcessApplicationTransformState(kProcessTransformToUIElementApplication))
+            self?.finishWithdraw(seq, attempt: 0)
         }
     }
 
-    private static func mainWindow() -> NSWindow? {
-        let candidates = NSApp.windows.filter { window in
-            window.title == "Nigate" || window.identifier?.rawValue == "main"
+    /// 等主窗口真正离开屏幕再改激活策略。窗口还在关闭时切 accessory，Dock 不会拿掉图标，只会写成「正在后台运行」。
+    private func finishWithdraw(_ seq: UInt64, attempt: Int) {
+        guard quitPhase == .idle, withdrawSeq == seq else { return }
+        let visible = Self.mainWindows().filter(\.isVisible)
+        if !visible.isEmpty {
+            if attempt < 20 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                    self?.finishWithdraw(seq, attempt: attempt + 1)
+                }
+            }
+            return
         }
-        return candidates.first(where: \.isVisible) ?? candidates.first
+        NSApp.setActivationPolicy(.accessory)
+    }
+
+    private static func isMainWindow(_ window: NSWindow) -> Bool {
+        window.title == "Nigate" || window.identifier?.rawValue == "main"
+    }
+
+    private static func visibleMainWindow() -> NSWindow? {
+        NSApp.windows.first { window in
+            isMainWindow(window)
+                && window.isVisible
+                && !window.isMiniaturized
+                && window.frame.width > 200
+                && window.frame.height > 200
+        }
+    }
+
+    private static func mainWindows() -> [NSWindow] {
+        NSApp.windows.filter(isMainWindow)
+    }
+
+    private static func mainWindow() -> NSWindow? {
+        visibleMainWindow() ?? mainWindows().first
     }
 
     func cycleSleep() {
