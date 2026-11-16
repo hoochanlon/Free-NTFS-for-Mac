@@ -9,6 +9,29 @@ enum AppQuitPhase: Equatable {
     case exiting
 }
 
+enum DockPresence {
+    enum Action: Equatable {
+        case show
+        case hide
+        case exit
+        case leave
+    }
+
+    /// regular 只许和看得见的主窗口同时存在。
+    /// 确认框还没挂上窗口时，禁止为了画确认框把 Dock 图标装回去。
+    static func action(phase: AppQuitPhase, windowVisible: Bool, policyIsRegular: Bool) -> Action {
+        switch phase {
+        case .exiting:
+            return .leave
+        case .confirming:
+            return windowVisible ? .leave : .exit
+        case .idle:
+            if windowVisible { return policyIsRegular ? .leave : .show }
+            return policyIsRegular ? .hide : .leave
+        }
+    }
+}
+
 private struct CapacityProbe: Sendable {
     var devicePath: String
     var volume: String
@@ -83,7 +106,9 @@ final class AppModel: ObservableObject {
         await refreshFSKitControlPlane()
         normalizeMountBackendIfNeeded()
         applyAppearance()
-        applyLoginItem()
+        // register/unregister 会同步卡住主线程。放在首帧之后，
+        // 否则启动期间的退出点击和看门狗都进不了 run loop。
+        scheduleLoginItemRegistration()
         sleepGuard.setMode(settings.sleepMode, disks: [])
         lastPersistedSettings = settings
         monitor.start { [weak self] in
@@ -186,19 +211,37 @@ final class AppModel: ObservableObject {
     }
 
     func revealMainWindow() {
-        guard quitPhase != .exiting else { return }
+        guard quitPhase == .idle else {
+            // 退出过程中再打开窗口，只会把已经摘掉的 Dock 图标装回来。
+            if quitPhase == .confirming, Self.visibleMainWindow() == nil {
+                quitImmediately()
+            }
+            return
+        }
         withdrawSeq += 1
-        NSApp.setActivationPolicy(.regular)
+        let seq = withdrawSeq
         if let window = Self.visibleMainWindow() ?? Self.mainWindow() {
             window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
-            if Self.visibleMainWindow() != nil { return }
+            if Self.visibleMainWindow() != nil {
+                applyDockPresence()
+                return
+            }
+        } else {
+            openMainWindow?()
+            NSApp.activate(ignoringOtherApps: true)
         }
-        openMainWindow?()
-        NSApp.activate(ignoringOtherApps: true)
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.quitPhase == .idle, self.withdrawSeq == seq else { return }
             (Self.visibleMainWindow() ?? Self.mainWindow())?.makeKeyAndOrderFront(nil)
+            self.promoteDock(seq, attempt: 0)
         }
+    }
+
+    /// 主窗口真正出现之后才升为 regular。启动阶段提前占 Dock，慢启动会停在「正在后台运行」。
+    func noteMainWindowOnScreen() {
+        guard quitPhase == .idle else { return }
+        promoteDock(withdrawSeq, attempt: 0)
     }
 
     func bindOpenMainWindow(_ opener: @escaping @MainActor () -> Void) {
@@ -210,17 +253,26 @@ final class AppModel: ObservableObject {
 
     /// 标题栏、托盘、Cmd+Q 都走这里。确认之前不调用 terminate：
     /// 一旦取消，SwiftUI 会关掉窗口，之后每次退出都还是取消，进程就留在 Dock。
+    /// 没有可见主窗口时直接结束。为了确认框去打开窗口，会把 Dock 图标重新装上。
     func requestQuit() {
-        if quitPhase == .exiting {
+        if quitPhase == .exiting || didHardExit {
+            quitImmediately()
+            return
+        }
+        guard Self.visibleMainWindow() != nil else {
             quitImmediately()
             return
         }
         presentQuitConfirm()
     }
 
-    /// 退出确认画在主窗口内。窗口最终没出现就直接结束，不能留成无窗口的 Dock 项。
+    /// 退出确认只画在已经可见的主窗口里。窗口不在就结束，不再把激活策略升回 regular。
     func presentQuitConfirm() {
-        guard quitPhase != .exiting else { return }
+        guard quitPhase != .exiting, !didHardExit else { return }
+        guard Self.visibleMainWindow() != nil else {
+            quitImmediately()
+            return
+        }
         quitPhase = .confirming
         aboutOpen = false
         supportOpen = false
@@ -228,13 +280,12 @@ final class AppModel: ObservableObject {
         renameDevice = nil
         alert = nil
         windowConfirm = nil
-        revealMainWindow()
         quitConfirmOpen = true
         quitWatchSeq += 1
         let watch = quitWatchSeq
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
             guard let self, self.quitPhase == .confirming, self.quitWatchSeq == watch else { return }
-            if Self.visibleMainWindow() == nil {
+            if Self.visibleMainWindow() == nil || !self.quitConfirmOpen {
                 self.quitImmediately()
             }
         }
@@ -307,22 +358,67 @@ final class AppModel: ObservableObject {
     }
 
     /// 等主窗口真正离开屏幕再改激活策略。窗口还在关闭时切 accessory，Dock 不会拿掉图标，只会写成「正在后台运行」。
+    /// 慢启动时窗口可能超过 1 秒还不走。不能就此放弃，否则策略停在 regular，Dock 只剩后台项。
     private func finishWithdraw(_ seq: UInt64, attempt: Int) {
         guard quitPhase == .idle, withdrawSeq == seq else { return }
         let visible = Self.mainWindows().filter(\.isVisible)
         if !visible.isEmpty {
-            if attempt < 20 {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
-                    self?.finishWithdraw(seq, attempt: attempt + 1)
-                }
+            if attempt == 20 || attempt >= 40 {
+                visible.forEach { $0.orderOut(nil) }
+            }
+            let delay: TimeInterval = attempt < 40 ? 0.05 : 0.5
+            let next = attempt < 40 ? attempt + 1 : attempt
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                self?.finishWithdraw(seq, attempt: next)
             }
             return
         }
-        NSApp.setActivationPolicy(.accessory)
+        if NSApp.activationPolicy() != .accessory {
+            NSApp.setActivationPolicy(.accessory)
+        }
+    }
+
+    private func promoteDock(_ seq: UInt64, attempt: Int) {
+        guard quitPhase == .idle, withdrawSeq == seq else { return }
+        if Self.visibleMainWindow() != nil {
+            let shouldActivate = NSApp.activationPolicy() != .regular
+            applyDockPresence()
+            if shouldActivate {
+                NSApp.activate(ignoringOtherApps: true)
+                Self.visibleMainWindow()?.makeKeyAndOrderFront(nil)
+            }
+            return
+        }
+        // 慢启动时窗口可能晚好几秒才变成可见主窗口。在那之前保持菜单栏代理，不要抢先占 Dock。
+        let delay: TimeInterval = attempt < 30 ? 0.05 : 0.5
+        let next = attempt < 30 ? attempt + 1 : attempt
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            self?.promoteDock(seq, attempt: next)
+        }
+    }
+
+    private func applyDockPresence() {
+        switch DockPresence.action(
+            phase: quitPhase,
+            windowVisible: Self.visibleMainWindow() != nil,
+            policyIsRegular: NSApp.activationPolicy() == .regular
+        ) {
+        case .show:
+            NSApp.setActivationPolicy(.regular)
+        case .hide:
+            NSApp.setActivationPolicy(.accessory)
+        case .exit:
+            quitImmediately()
+        case .leave:
+            break
+        }
     }
 
     private static func isMainWindow(_ window: NSWindow) -> Bool {
-        window.title == "Nigate" || window.identifier?.rawValue == "main"
+        if window is NSPanel { return false }
+        if window.title == "Nigate" || window.identifier?.rawValue == "main" { return true }
+        // SwiftUI 写上 title / identifier 之前的那一帧。漏判会让 Dock 图标一直不出现。
+        return window.level == .normal && window.frame.width > 200 && window.frame.height > 200
     }
 
     private static func visibleMainWindow() -> NSWindow? {
@@ -884,6 +980,14 @@ final class AppModel: ObservableObject {
 
     private func applyAppearance() {
         NSApp.appearance = NSAppearance(named: settings.themeIsLight ? .aqua : .darkAqua)
+    }
+
+    private func scheduleLoginItemRegistration() {
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            guard quitPhase != .exiting else { return }
+            applyLoginItem()
+        }
     }
 
     private func applyLoginItem() {

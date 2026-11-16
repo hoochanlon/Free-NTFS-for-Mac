@@ -15,6 +15,7 @@ struct NigateApp: App {
                 .task {
                     appDelegate.model = model
                     model.bindOpenMainWindow { openWindow(id: "main") }
+                    model.noteMainWindowOnScreen()
                     await model.bootstrap()
                 }
         }

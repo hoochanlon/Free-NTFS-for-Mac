@@ -31,11 +31,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             name: .nigateReveal,
             object: nil
         )
-        NSApp.setActivationPolicy(.regular)
+        // 保持 Info.plist 的菜单栏代理。窗口还没出现就升成 regular，
+        // 慢启动时 Dock 会先写出「正在后台运行」，退出也摘不掉。
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApp.setActivationPolicy(.regular)
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(mainWindowWillClose(_:)),
@@ -91,9 +91,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 let stillVisible = NSApp.windows.contains {
                     $0 !== closing && $0.isVisible && ($0.title == "Nigate" || $0.identifier?.rawValue == "main")
                 }
-                if stillVisible {
-                    model.presentQuitConfirm()
-                } else {
+                if !stillVisible {
                     model.quitImmediately()
                 }
             }

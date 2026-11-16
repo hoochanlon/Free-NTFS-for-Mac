@@ -75,6 +75,7 @@ final class WindowLockView: NSView {
         }
         applyLock()
         DispatchQueue.main.async { [weak self] in self?.applyLock() }
+        (NSApp.delegate as? AppDelegate)?.model?.noteMainWindowOnScreen()
     }
 
     deinit {
