@@ -116,7 +116,14 @@ struct AppSettings: Codable, Sendable, Equatable {
     var manuallyReadOnlyDevices: [String] = []
     var mountBackend: NigateMountBackend = .ntfs3gCompatibility
     var themeIsLight: Bool = true
-    var showButtonHints: Bool = false
+    var showButtonHints: Bool = true
+
+    enum CodingKeys: String, CodingKey {
+        case savePassword, startupTab, language, autoStart, preventSleep, keepAwake
+        case manuallyReadOnlyDevices, mountBackend, themeIsLight
+        /// 旧键 showButtonHints 曾以默认关闭被整表写入，不能再当用户选择。
+        case showButtonHints = "showHoverIconButtonHints"
+    }
 
     var sleepMode: SleepMode {
         if keepAwake { return .always }

@@ -35,7 +35,10 @@ enum SettingsStore {
             settings.mountBackend = MountBackendPolicy.sanitize(parsed)
         }
         if let value = raw["themeIsLight"] as? Bool { settings.themeIsLight = value }
-        if let value = raw["showButtonHints"] as? Bool { settings.showButtonHints = value }
+        // 只认新键。旧 showButtonHints:false 是上一版默认值被整表写入，不是用户关掉的。
+        if let value = raw["showHoverIconButtonHints"] as? Bool {
+            settings.showButtonHints = value
+        }
         return settings
     }
 

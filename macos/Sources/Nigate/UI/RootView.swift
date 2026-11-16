@@ -19,7 +19,7 @@ enum Palette {
     static let mail = Color(red: 0.91, green: 0.26, blue: 0.21)
 }
 
-/// 按钮悬停提示：只在设置打开时挂 `.help`，默认关闭。
+/// 悬停图标按钮提示：只在设置打开时挂 `.help`，默认开启。
 private struct NigateHelpModifier: ViewModifier {
     @EnvironmentObject private var model: AppModel
     let text: String
