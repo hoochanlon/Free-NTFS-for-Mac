@@ -12,7 +12,7 @@ The app does not disable Gatekeeper or change global security settings. When ins
 
 1. Open **Dependencies** and select **Check Dependencies** to review macOS, Xcode Command Line Tools, Homebrew, MacFUSE, `ntfs-3g`, and optional `fswatch`.
 2. Read-write mounting requires macOS 14 or later, MacFUSE, and `ntfs-3g`. The dependency list describes the purpose and requirement status of each other component.
-3. Use **One-click Install** to start the installation flow in Terminal, or expand a dependency to view and copy its command for manual installation. Approve system extensions only as prompted by macOS.
+3. **One-click Install** only installs MacFUSE, `ntfs-3g`, and optional `fswatch` through Homebrew you already have. It does not install Xcode Command Line Tools or Homebrew. If those are missing, expand the row, copy the command, install them, then run One-click Install again. Approve the MacFUSE system extension only as prompted by macOS.
 4. After installation or approval, check dependencies again. NTFS read-write mounting and related actions are unavailable until MacFUSE and `ntfs-3g` are ready. If macOS says the app is damaged, or you need to enable file system extensions or approve a kernel extension, see the next sections.
 
 ## Essential Mac Knowledge
@@ -176,7 +176,7 @@ Sleep prevention stops when the app quits. Long-press the title-bar shield for 3
 
 ## Settings
 
-The **Settings** page controls whether the administrator password is saved in macOS Keychain, launch at login, the startup page, interface language, appearance, and button hover hints. Hover hints are off by default. The administrator password is stored in Keychain only when password saving is enabled. You can turn this off or delete the saved password at any time.
+The **Settings** page controls whether the administrator password is remembered until you quit, launch at login, the startup page, interface language, appearance, and button hover hints. Hover hints are off by default. The password stays in memory for this session only and is not stored in Keychain. You can turn this off or forget the password at any time.
 
 Closing the window keeps Nigate in the menu bar instead of quitting. Use the menu-bar icon to reopen the window or manage NTFS devices. Language and appearance choices are saved automatically. Sleep prevention can also be controlled from the title bar.
 

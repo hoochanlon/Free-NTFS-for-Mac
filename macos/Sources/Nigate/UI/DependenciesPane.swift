@@ -39,6 +39,7 @@ struct DependenciesPane: View {
                 } label: {
                     Label(L10n.t("dependencies.autoInstall"), systemImage: "terminal")
                 }
+                .nigateHelp(L10n.t("dependencies.autoInstallTitle"))
                 Button {
                     Task { await model.refreshDependencies() }
                 } label: {

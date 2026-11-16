@@ -12,7 +12,7 @@ Die App deaktiviert Gatekeeper nicht und ändert keine globalen Sicherheitseinst
 
 1. Öffnen Sie **Abhängigkeiten** und wählen Sie **Abhängigkeiten prüfen**, um macOS, Xcode Command Line Tools, Homebrew, MacFUSE, `ntfs-3g` und das optionale `fswatch` zu überprüfen.
 2. Für NTFS-Lese-/Schreibzugriff sind macOS 14 oder neuer, MacFUSE und `ntfs-3g` erforderlich. Zweck und Status der weiteren Komponenten werden in der Liste angezeigt.
-3. Mit **Ein-Klick-Installation** starten Sie den Installationsablauf im Terminal. Alternativ können Sie einen Eintrag aufklappen, den Befehl anzeigen und kopieren und die Installation manuell ausführen. Bestätigen Sie Systemerweiterungen nur nach den macOS-Hinweisen.
+3. Die **Ein-Klick-Installation** richtet nur MacFUSE, `ntfs-3g` und optional `fswatch` über vorhandenes Homebrew ein. Xcode Command Line Tools und Homebrew werden nicht installiert. Fehlen diese, klappen Sie den Eintrag auf, führen Sie den Befehl aus und starten Sie danach erneut. Die MacFUSE-Systemerweiterung nur nach den macOS-Hinweisen freigeben.
 4. Prüfen Sie die Abhängigkeiten nach Installation und Freigabe erneut. NTFS-Lese-/Schreibzugriff und zugehörige Aktionen sind erst möglich, wenn MacFUSE und `ntfs-3g` bereit sind. Wenn macOS die App als beschädigt blockiert oder Dateisystem- bzw. Kernel-Erweiterungen bestätigt werden müssen, lesen Sie die folgenden Abschnitte.
 
 ## Unverzichtbares Mac-Wissen
@@ -176,7 +176,7 @@ Beim Beenden der App wird der Ruhezustandsschutz beendet. Halten Sie das Schilds
 
 ## Einstellungen
 
-Unter **Einstellungen** können Sie festlegen, ob das Administratorkennwort im macOS-Schlüsselbund gespeichert wird, ob die App bei der Anmeldung startet, welche Seite beim Start geöffnet wird sowie Sprache, Darstellung und Schaltflächenhinweise. Hinweise sind standardmäßig aus. Das Kennwort wird nur bei aktivierter Speicherung im Schlüsselbund abgelegt. Sie können die Option jederzeit deaktivieren oder das gespeicherte Kennwort löschen.
+Unter **Einstellungen** können Sie festlegen, ob das Administratorkennwort bis zum Beenden gemerkt wird, ob die App bei der Anmeldung startet, welche Seite beim Start geöffnet wird sowie Sprache, Darstellung und Schaltflächenhinweise. Hinweise sind standardmäßig aus. Das Kennwort bleibt nur im Speicher und wird nicht im Schlüsselbund abgelegt. Sie können die Option jederzeit deaktivieren oder das Kennwort vergessen.
 
 Beim Schließen des Fensters bleibt Nigate in der Menüleiste und wird nicht beendet. Über das Menüleisten-Symbol können Sie das Fenster wieder öffnen oder NTFS-Geräte verwalten. Sprache und Darstellung werden automatisch gespeichert. Der Ruhezustandsschutz lässt sich auch in der Titelleiste steuern.
 

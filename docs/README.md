@@ -28,7 +28,7 @@ swift build
 
 ```text
 Domain        纯数据模型与磁盘安全策略
-Infra         Shell、提权、路径、Keychain、设置等系统适配
+Infra         Shell、提权、路径、会话密码、设置等系统适配
 NTFS          扫描、监控、挂载、修复、格式化与依赖服务
 App           SwiftUI 应用状态、生命周期与菜单栏协调
 UI            SwiftUI 页面、弹窗和交互

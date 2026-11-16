@@ -75,6 +75,18 @@ From [#68](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/68). Nigate de
 > [!important]
 > Stability depends on the storage device. Prefer reliable USB media.
 
+> [!important]
+> Without a stable Developer ID, Touch ID should not be used for privilege escalation.
+>
+> Touch ID can prove that the Mac’s owner is present. It cannot produce the administrator password. Mount, repair, and format go through `sudo -S`, which needs the password in clear text.
+>
+> Common workarounds are unstable:
+> - The system authorization dialog: success only yields an “authorized” token, not a password, so it cannot feed `sudo -S`
+> - Storing the password in a Touch ID–gated Keychain item: that is disk persistence again; without a developer signature the app identity will not match after a rebuild or update, and prompts return
+> - A privileged helper: the helper identity is also bound to the signature, so every ad-hoc build would need to be re-authorized
+>
+> Remembering the password for this session only (in memory, gone on quit) is the most reliable path today. After a stable signing identity exists, switching to system authorization or a privileged helper is the point where Touch ID becomes a system feature instead of something the app has to fake.
+
 - Mounting needs administrator privileges.
 - Windows Fast Startup or hibernation leaves NTFS inconsistent. When `ntfs-3g` sees the hibernation flag, it **forces read-only** so Windows cannot overwrite later writes with stale cache and damage the volume. **Fully shut down** Windows first (no hibernate / Fast Startup), then plug the drive into the Mac. See [#68](https://github.com/hoochanlon/Free-NTFS-for-Mac/issues/68).
 - FUSE + `ntfs-3g` runs in userspace, so it is usually slower than in-kernel drivers and large copies may interrupt more easily. It is still the long-lived default because it would rather go read-only than corrupt the volume. On macOS 15.4+ you can switch to FSKit in Settings.

@@ -12,7 +12,7 @@ Nigate 是使用 Swift 和 SwiftUI 建立的原生 macOS 應用程式，需要 m
 
 1. 開啟「依賴」頁面並選擇「檢查依賴」，查看 macOS、Xcode Command Line Tools、Homebrew、MacFUSE、`ntfs-3g` 及選用的 `fswatch` 狀態。
 2. 讀寫掛載需要 macOS 14 或更新版本、MacFUSE 與 `ntfs-3g`。其他項目的用途與必要性會顯示在清單中。
-3. 可使用「一鍵安裝」在終端機啟動安裝流程，或展開依賴項目檢視及複製命令，手動安裝。系統延伸功能請依照 macOS 提示核准。
+3. 「一鍵安裝」只透過既有的 Homebrew 安裝 MacFUSE、`ntfs-3g` 和選用的 `fswatch`，不會安裝 Xcode Command Line Tools 或 Homebrew。缺少這兩項時請展開對應項目，複製命令手動安裝，裝好後再點一鍵安裝。MacFUSE 的系統延伸功能請依照 macOS 提示核准。
 4. 安裝或核准後，請重新檢查依賴。MacFUSE 與 `ntfs-3g` 尚未就緒前，無法使用 NTFS 讀寫掛載及相關操作。若開啟應用程式時提示已損壞，或需要啟用檔案系統延伸功能、核准核心延伸功能，請見以下章節。
 
 ## Mac 必知必會
@@ -176,7 +176,7 @@ open "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointId
 
 ## 設定
 
-「設定」頁可選擇是否將管理員密碼儲存於 macOS Keychain、登入時啟動、啟動時顯示的頁面、介面語言、外觀，以及是否顯示按鈕懸停提示。懸停提示預設關閉。只有啟用密碼儲存時，密碼才會存入 Keychain；可隨時關閉此選項或刪除已儲存的密碼。
+「設定」頁可選擇是否在本次執行中記住管理員密碼、登入時啟動、啟動時顯示的頁面、介面語言、外觀，以及是否顯示按鈕懸停提示。懸停提示預設關閉。記住密碼只保留到結束，不會寫入鑰匙圈；關閉選項或忘記密碼後，下一次操作會重新詢問。
 
 關閉視窗時應用程式會留在選單列，不會結束。可透過選單列圖示開啟主視窗或管理 NTFS 裝置。語言與外觀設定會自動儲存。防止睡眠也可由標題列控制。
 

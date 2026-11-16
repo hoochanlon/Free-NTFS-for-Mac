@@ -241,6 +241,9 @@ final class AppModel: ObservableObject {
         let previous = lastPersistedSettings
         SettingsStore.save(settings)
         lastPersistedSettings = settings
+        if previous?.savePassword == true, settings.savePassword == false {
+            AdminPassword.forget()
+        }
 
         // 只在语言真正变化时重建整棵 UI；每次点防止休眠都 stamp++ 会打断交互。
         if previous?.language != settings.language {
@@ -661,10 +664,14 @@ final class AppModel: ObservableObject {
                 if value.isEmpty { throw AppError.emptyPassword }
                 _ = try? await Shell.run("/usr/bin/sudo", ["-K"], timeout: 3)
                 _ = try await Privilege.sudo(["-v"], password: value, timeout: 8)
-                if save { try? KeychainStore.save(value) }
+                if save {
+                    AdminPassword.remember(value)
+                } else {
+                    AdminPassword.forget()
+                }
                 finishPassword(.success(value))
             } catch AppError.incorrectPassword {
-                KeychainStore.delete()
+                AdminPassword.forget()
                 finishPassword(.failure(AppError.incorrectPassword))
             } catch {
                 finishPassword(.failure(error))
@@ -682,7 +689,7 @@ final class AppModel: ObservableObject {
     }
 
     func deleteSavedPassword() {
-        KeychainStore.delete()
+        AdminPassword.forget()
         showToast(L10n.t("settings.deletePasswordSuccess"))
     }
 
@@ -1043,8 +1050,11 @@ final class AppModel: ObservableObject {
     }
 
     private func askPassword(_ key: String, _ params: [String: String]) async throws -> String {
-        if settings.savePassword, let saved = KeychainStore.read(), !saved.isEmpty {
+        switch PasswordAskPolicy.decide(savePassword: settings.savePassword, remembered: AdminPassword.remembered()) {
+        case .useRemembered(let saved):
             return saved
+        case .prompt:
+            break
         }
         guard passwordContinuation == nil else {
             throw AppError.passwordRequestInProgress

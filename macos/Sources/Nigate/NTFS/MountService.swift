@@ -438,7 +438,7 @@ struct MountService {
         do {
             return try await Privilege.sudo(args, password: password, timeout: timeout, extraEnv: extraEnv)
         } catch AppError.incorrectPassword {
-            KeychainStore.delete()
+            AdminPassword.forget()
             password = try await askPassword(refreshKey, ["name": name])
             return try await Privilege.sudo(args, password: password, timeout: timeout, extraEnv: extraEnv)
         }
@@ -557,7 +557,7 @@ struct MountService {
         do {
             result = try await Privilege.sudo([probe, "--readonly", device.devicePath], password: password, timeout: 8)
         } catch AppError.incorrectPassword {
-            KeychainStore.delete()
+            AdminPassword.forget()
             password = try await askPassword("messages.passwordDialog.mountDevice", ["name": device.volumeName])
             result = try await Privilege.sudo([probe, "--readonly", device.devicePath], password: password, timeout: 8)
         }

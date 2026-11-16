@@ -12,7 +12,7 @@ Nigate 是使用 Swift 和 SwiftUI 构建的原生 macOS 应用，最低支持 m
 
 1. 打开“依赖”页，点击“检查依赖”查看 macOS 版本、Xcode Command Line Tools、Homebrew、MacFUSE、`ntfs-3g` 和可选 `fswatch` 的状态。
 2. 读写挂载需要 macOS 14 或更新版本、MacFUSE 与 `ntfs-3g`。其他组件的用途和是否必需会显示在依赖列表中。
-3. 可使用“一键安装”在终端启动安装流程，也可展开依赖项目，查看命令、复制命令并手动安装。按页面提示完成系统扩展批准。
+3. “一键安装”只通过已有的 Homebrew 安装 MacFUSE、`ntfs-3g` 和可选 `fswatch`，不会安装 Xcode Command Line Tools 或 Homebrew。缺这两项时请展开对应条目，复制命令手动安装，装好后再点一键安装。MacFUSE 的系统扩展按 macOS 提示批准。
 4. 安装或批准扩展后，返回应用重新检查依赖。MacFUSE 与 `ntfs-3g` 未就绪时，NTFS 读写挂载和相关操作无法使用。打开应用若提示已损坏，或需要启用文件系统扩展、批准内核扩展，见下面几节。
 
 ## Mac 必知必会
@@ -176,7 +176,7 @@ open "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointId
 
 ## 设置
 
-“设置”页可配置管理员密码是否保存到 macOS Keychain、登录时启动、启动时默认页、界面语言、主题，以及是否显示按钮悬停提示。悬停提示默认关闭。只有启用密码保存时，管理员密码才会写入 Keychain；可随时关闭此选项或删除已保存密码。
+“设置”页可选择是否在本次运行中记住管理员密码、登录时启动、启动时默认页、界面语言、主题，以及是否显示按钮悬停提示。悬停提示默认关闭。记住密码只保留到退出，不会写入钥匙串；关闭选项或忘记密码后，下一次操作会重新询问。
 
 关闭窗口时应用会留在菜单栏，不会退出。可通过菜单栏图标打开主窗口或管理 NTFS 设备。语言或主题设置会自动保存。防止休眠也可从标题栏开关控制。
 
