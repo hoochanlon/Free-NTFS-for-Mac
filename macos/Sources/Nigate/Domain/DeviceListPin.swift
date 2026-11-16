@@ -7,11 +7,13 @@ enum DeviceListPin {
         var devicePath: String
         var parentDisk: String
         var action: DeviceAction
+        /// 重命名成功后的目标卷标。扫描还停在旧名字时，不能拿它覆盖乐观态。
+        var expectedVolumeName: String? = nil
     }
 
     /// 扫描结果已经和这次操作的目标态一致，才允许替换钉住的卡片。
-    static func isSettled(_ device: NTFSDevice, action: DeviceAction) -> Bool {
-        switch action {
+    static func isSettled(_ device: NTFSDevice, pin: Pin) -> Bool {
+        switch pin.action {
         case .mount:
             return device.isReadWrite
         case .restore, .reset:
@@ -20,7 +22,11 @@ enum DeviceListPin {
             return device.isUnmounted || !device.isMounted
         case .eject, .format:
             return false
-        default:
+        case .rename:
+            guard device.isMounted, !device.isUnmounted else { return false }
+            guard let expected = pin.expectedVolumeName, !expected.isEmpty else { return true }
+            return device.volumeName == expected
+        case .repair:
             return device.isMounted && !device.isUnmounted
         }
     }
@@ -34,7 +40,7 @@ enum DeviceListPin {
             guard let pin = pins.first(where: {
                 $0.parentDisk == item.parentDisk || $0.devicePath == item.devicePath
             }) else { continue }
-            if let live = byPath[item.devicePath], isSettled(live, action: pin.action) {
+            if let live = byPath[item.devicePath], isSettled(live, pin: pin) {
                 continue
             }
             byPath[item.devicePath] = item

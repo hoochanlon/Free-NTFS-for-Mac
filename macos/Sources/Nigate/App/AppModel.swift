@@ -479,7 +479,7 @@ final class AppModel: ObservableObject {
             clearBusy(diskKey)
             busyReleased = true
             // 先乐观改本地列表 + 托盘，避免等 mount 表收敛前托盘仍显示旧橙/绿。
-            applyOptimisticDeviceState(action, device)
+            applyOptimisticDeviceState(action, device, renamedTo: action == .rename ? extra : nil)
             // 还原/重置只读后禁止立刻 autoMount，否则会把刚挂上的只读又改成读写
             let skipAuto = action == .restore || action == .reset
             await refreshDevicesAfterAction(action, device: device, applyAutoMount: !skipAuto)
@@ -556,7 +556,7 @@ final class AppModel: ObservableObject {
     }
 
     /// 操作成功后立刻改 devices，托盘图标无需等 diskutil/mount 回读。
-    private func applyOptimisticDeviceState(_ action: DeviceAction, _ device: NTFSDevice) {
+    private func applyOptimisticDeviceState(_ action: DeviceAction, _ device: NTFSDevice, renamedTo: String? = nil) {
         let match: (NTFSDevice) -> Bool = {
             $0.identity == device.identity || $0.disk == device.disk || $0.devicePath == device.devicePath
         }
@@ -585,7 +585,20 @@ final class AppModel: ObservableObject {
             dropSwitchPin(device.parentDisk)
             devices.removeAll(where: match)
             knownNTFSDevices.removeValue(forKey: device.devicePath)
-        default:
+        case .rename:
+            let trimmed = renamedTo?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            guard !trimmed.isEmpty, trimmed != device.volumeName,
+                  let idx = devices.firstIndex(where: match) else { break }
+            devices[idx].volumeName = trimmed
+            if devices[idx].volume.hasPrefix("/Volumes/") {
+                devices[idx].volume = "/Volumes/\(trimmed)"
+            }
+            knownNTFSDevices[devices[idx].devicePath] = devices[idx]
+            if var pin = switchPins[device.parentDisk], pin.devicePath == device.devicePath {
+                pin.expectedVolumeName = trimmed
+                switchPins[device.parentDisk] = pin
+            }
+        case .repair:
             break
         }
         rememberNTFSDevices(devices)
@@ -624,14 +637,21 @@ final class AppModel: ObservableObject {
                 return found.isMounted && found.isReadOnly
             case .unmount:
                 return found.isUnmounted || !found.isMounted
+            case .rename:
+                guard found.isMounted, !found.isUnmounted else { return false }
+                guard let expected = switchPins[device.parentDisk]?.expectedVolumeName, !expected.isEmpty else {
+                    return true
+                }
+                return found.volumeName == expected
             default:
                 return true
             }
         }
 
-        // 对 rename/repair 等无明确瞬时预期的操作，走一次常规刷新即可。
+        // repair 没有可对照的瞬时目标。rename 的目标卷标已经写进乐观态，
+        // 扫描对上之前不能把旧挂载表盖回去。
         switch action {
-        case .mount, .restore, .reset, .unmount, .eject, .format:
+        case .mount, .restore, .reset, .unmount, .eject, .format, .rename:
             break
         default:
             await refreshDevices(applyAutoMount: shouldAutoMount)

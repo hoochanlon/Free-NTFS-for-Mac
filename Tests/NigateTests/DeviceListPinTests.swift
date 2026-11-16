@@ -86,6 +86,41 @@ final class DeviceListPinTests: XCTestCase {
         XCTAssertEqual(merged.map(\.devicePath), [kept.devicePath])
     }
 
+    func testStaleNameDuringRenameKeepsOptimisticLabel() {
+        var held = sample(disk: "disk4s2", mounted: true, readOnly: false)
+        held.volumeName = "SanDisk 32"
+        held.volume = "/Volumes/SanDisk 32"
+        let stale = sample(disk: "disk4s2", mounted: true, readOnly: false)
+        var renamePin = pin(held, .rename)
+        renamePin.expectedVolumeName = "SanDisk 32"
+        let merged = DeviceListPin.merge(
+            scanned: [stale],
+            held: [held],
+            pins: [renamePin]
+        )
+        XCTAssertEqual(merged.map(\.devicePath), [held.devicePath])
+        XCTAssertEqual(merged[0].volumeName, "SanDisk 32")
+        XCTAssertEqual(merged[0].volume, "/Volumes/SanDisk 32")
+    }
+
+    func testSettledRenameReplacesHeldInPlace() {
+        var held = sample(disk: "disk4s2", mounted: true, readOnly: false)
+        held.volumeName = "SanDisk 32"
+        held.volume = "/Volumes/SanDisk 32"
+        var live = held
+        live.capacity = Capacity(total: 100, used: 90, available: 10)
+        var renamePin = pin(held, .rename)
+        renamePin.expectedVolumeName = "SanDisk 32"
+        let merged = DeviceListPin.merge(
+            scanned: [live],
+            held: [held],
+            pins: [renamePin]
+        )
+        XCTAssertEqual(merged.map(\.id), [held.id])
+        XCTAssertEqual(merged[0].volumeName, "SanDisk 32")
+        XCTAssertEqual(merged[0].capacity?.used, 90)
+    }
+
     func testNoPinsReturnsScannedEvenIfEmpty() {
         let held = sample(disk: "disk4s1", mounted: true, readOnly: true)
         let merged = DeviceListPin.merge(scanned: [], held: [held], pins: [])
