@@ -121,9 +121,9 @@ final class TrayController: NSObject, NSMenuDelegate {
         })
         menu.addItem(.separator())
         if model.devices.isEmpty {
-            let title = (model.isScanningDevices || !model.didFinishDeviceScan)
-                ? L10n.t("devices.scanningState")
-                : L10n.t("devices.emptyState")
+            let title = model.deviceListAppearance == .empty
+                ? L10n.t("devices.emptyState")
+                : L10n.t("devices.scanningState")
             let empty = NSMenuItem(title: title, action: nil, keyEquivalent: "")
             empty.isEnabled = false
             menu.addItem(empty)

@@ -3,6 +3,8 @@ import DiskArbitration
 import AppKit
 
 final class DiskMonitor: @unchecked Sendable {
+    /// 不能挂在 main 上。退出时若在 session 自己的队列里 SetDispatchQueue(nil)，主线程会死锁，进程就留在 Dock。
+    private let sessionQueue = DispatchQueue(label: "io.hoochanlon.github.disk-monitor")
     private var session: DASession?
     private var onChange: (@Sendable () -> Void)?
     private var workspaceObservers: [NSObjectProtocol] = []
@@ -24,7 +26,7 @@ final class DiskMonitor: @unchecked Sendable {
         DARegisterDiskDescriptionChangedCallback(session, nil, nil, { _, _, ctx in
             DiskMonitor.ping(ctx)
         }, ctx)
-        DASessionSetDispatchQueue(session, DispatchQueue.main)
+        DASessionSetDispatchQueue(session, sessionQueue)
 
         let center = NSWorkspace.shared.notificationCenter
         let names: [NSNotification.Name] = [

@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import Darwin
 import ServiceManagement
 import NigateFSKitCore
 
@@ -9,12 +10,57 @@ enum AppQuitPhase: Equatable {
     case exiting
 }
 
+/// 退出确认只是挡住界面。扫描结果仍要落到设备列表。
+/// 只有进程真的在退出时才丢掉这次扫描。
+enum DeviceScanCommit: Equatable {
+    case publish
+    case publishWithoutSideEffects
+    case drop
+
+    static func decide(_ phase: AppQuitPhase) -> DeviceScanCommit {
+        switch phase {
+        case .idle: return .publish
+        case .confirming: return .publishWithoutSideEffects
+        case .exiting: return .drop
+        }
+    }
+
+    var allowsScan: Bool { self != .drop }
+}
+
+/// 确认框把启动扫描推迟时，不能把「还没扫完」画成「没有设备」。
+enum DeviceListAppearance: Equatable {
+    case cards
+    case scanning
+    case empty
+
+    static func decide(
+        deviceCount: Int,
+        isScanning: Bool,
+        didFinish: Bool,
+        rescanPending: Bool,
+        quitPhase: AppQuitPhase
+    ) -> DeviceListAppearance {
+        if deviceCount > 0 { return .cards }
+        if isScanning || !didFinish || rescanPending { return .scanning }
+        if quitPhase == .confirming { return .scanning }
+        return .empty
+    }
+}
+
 enum DockPresence {
     enum Action: Equatable {
         case show
         case hide
         case exit
         case leave
+    }
+
+    /// 杀进程前先让 Dock 摘图标。窗口还在就改 accessory，图标会留成「正在后台运行」。
+    enum ExitPrep: Equatable {
+        case hideWindowsThenDrop
+        case drop
+        case none
     }
 
     /// regular 只许和看得见的主窗口同时存在。
@@ -29,6 +75,12 @@ enum DockPresence {
             if windowVisible { return policyIsRegular ? .leave : .show }
             return policyIsRegular ? .hide : .leave
         }
+    }
+
+    static func exitPrep(windowVisible: Bool, policyIsRegular: Bool) -> ExitPrep {
+        if windowVisible { return .hideWindowsThenDrop }
+        if policyIsRegular { return .drop }
+        return .none
     }
 }
 
@@ -53,7 +105,7 @@ final class AppModel: ObservableObject {
     @Published var aboutOpen = false
     @Published var supportOpen = false
     @Published var quitConfirmOpen = false
-    /// 删除密码、修复、格式化、推出。画在主窗口里，避免独立浮层被拖出窗口、也避免毛玻璃贴着底色失去对比。
+    /// 删除密码、修复、格式化、推出、重置。和关于、重命名一样走系统 sheet。退出确认不在这里。
     @Published var windowConfirm: WindowConfirm?
     /// 退出一旦离开 idle，就不能再收进菜单栏。确认前关窗口会被系统当成「留在后台」。
     private(set) var quitPhase: AppQuitPhase = .idle
@@ -103,8 +155,6 @@ final class AppModel: ObservableObject {
     }
 
     func bootstrap() async {
-        await refreshFSKitControlPlane()
-        normalizeMountBackendIfNeeded()
         applyAppearance()
         // register/unregister 会同步卡住主线程。放在首帧之后，
         // 否则启动期间的退出点击和看门狗都进不了 run loop。
@@ -116,6 +166,10 @@ final class AppModel: ObservableObject {
                 await self?.refreshDevices()
             }
         }
+        // 设备卡片不依赖依赖检查。先扫，立刻点退出才挡得住「没有设备」。
+        await refreshDevices(applyAutoMount: false)
+        await refreshFSKitControlPlane()
+        normalizeMountBackendIfNeeded()
         await refreshDependencies()
         await refreshDevices()
         startCapacityRefresh()
@@ -251,6 +305,16 @@ final class AppModel: ObservableObject {
     /// 关红灯应收进菜单栏。退出确认或正在退出时不要切 accessory，否则 Dock 会留下「正在后台运行」。
     var suppressesTrayWithdraw: Bool { quitPhase != .idle }
 
+    var deviceListAppearance: DeviceListAppearance {
+        .decide(
+            deviceCount: devices.count,
+            isScanning: isScanningDevices,
+            didFinish: didFinishDeviceScan,
+            rescanPending: rescanRequested,
+            quitPhase: quitPhase
+        )
+    }
+
     /// 标题栏、托盘、Cmd+Q 都走这里。确认之前不调用 terminate：
     /// 一旦取消，SwiftUI 会关掉窗口，之后每次退出都还是取消，进程就留在 Dock。
     /// 没有可见主窗口时直接结束。为了确认框去打开窗口，会把 Dock 图标重新装上。
@@ -328,8 +392,11 @@ final class AppModel: ObservableObject {
 
     func cancelQuit() {
         guard quitPhase != .exiting else { return }
+        let resumeScan = rescanRequested || !didFinishDeviceScan || devices.isEmpty
         quitConfirmOpen = false
         quitPhase = .idle
+        guard resumeScan else { return }
+        Task { await refreshDevices() }
     }
 
     func confirmQuit() {
@@ -338,11 +405,19 @@ final class AppModel: ObservableObject {
     }
 
     /// 不走 NSApp.terminate，也不走 exit()。atexit 里若还有 iostat / 窗口回调，系统会把进程收成「正在后台运行」。
+    /// 重入也必须杀掉：第一次若卡在清理，第二次不能变成空操作。
     func quitImmediately() {
-        if didHardExit { return }
+        if didHardExit {
+            Darwin._exit(0)
+        }
         didHardExit = true
         quitPhase = .exiting
         quitConfirmOpen = false
+        let pid = ProcessInfo.processInfo.processIdentifier
+        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 0.2) {
+            Darwin.kill(pid, SIGKILL)
+        }
+        dropDockIcon()
         shutdown()
         if NSApp.modalWindow != nil { NSApp.stopModal() }
         Darwin._exit(0)
@@ -376,6 +451,12 @@ final class AppModel: ObservableObject {
         if NSApp.activationPolicy() != .accessory {
             NSApp.setActivationPolicy(.accessory)
         }
+        // 窗口没了但策略还停在 regular：Dock 会写成「正在后台运行」。继续摘，不要放弃。
+        if NSApp.activationPolicy() == .regular, attempt < 60 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                self?.finishWithdraw(seq, attempt: attempt + 1)
+            }
+        }
     }
 
     private func promoteDock(_ seq: UInt64, attempt: Int) {
@@ -394,6 +475,20 @@ final class AppModel: ObservableObject {
         let next = attempt < 30 ? attempt + 1 : attempt
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             self?.promoteDock(seq, attempt: next)
+        }
+    }
+
+    /// 先藏窗口再降成 accessory。只改策略、窗口还在，Dock 会变成「正在后台运行」。
+    private func dropDockIcon() {
+        let prep = DockPresence.exitPrep(
+            windowVisible: Self.visibleMainWindow() != nil,
+            policyIsRegular: NSApp.activationPolicy() == .regular
+        )
+        guard prep != .none else { return }
+        let windows = NSApp.windows
+        windows.forEach { $0.orderOut(nil) }
+        if NSApp.activationPolicy() != .accessory {
+            NSApp.setActivationPolicy(.accessory)
         }
     }
 
@@ -473,13 +568,22 @@ final class AppModel: ObservableObject {
     }
 
     func refreshDevices(applyAutoMount: Bool = true) async {
-        guard quitPhase == .idle else { return }
+        guard DeviceScanCommit.decide(quitPhase).allowsScan else { return }
         if isScanningDevices {
             rescanRequested = true
             return
         }
         await scanDevicesLocked()
-        guard quitPhase == .idle else { return }
+        switch DeviceScanCommit.decide(quitPhase) {
+        case .drop:
+            return
+        case .publishWithoutSideEffects:
+            // 卡片已经写上。自动挂载会弹密码，等用户取消退出再做。
+            rescanRequested = true
+            return
+        case .publish:
+            break
+        }
         // autoMount 必须在 scanning 锁外：其内部 run → refreshDevicesAfterAction 还会再等 scanning。
         if applyAutoMount, busyDisks.isEmpty, switchPins.isEmpty {
             await self.applyAutoMount(explicit: false)
@@ -489,27 +593,42 @@ final class AppModel: ObservableObject {
     /// 只做挂载表扫描；调用方保证不在 autoMount / run 的嵌套路径里重入。
     private func scanDevicesLocked() async {
         isScanningDevices = true
+        var published = false
         updateStatus()
         TrayController.shared.reload()
         defer {
             isScanningDevices = false
-            didFinishDeviceScan = true
+            if published { didFinishDeviceScan = true }
             updateStatus()
             TrayController.shared.reload()
         }
         repeat {
-            guard quitPhase == .idle else { return }
+            if DeviceScanCommit.decide(quitPhase) == .drop { return }
             rescanRequested = false
             let knownDevices = Array(knownNTFSDevices.values) + devices
             let scanned = await DeviceScanner.scan(knownDevices: knownDevices)
-            // 退出后这次扫描才回来：不能再拉起防休眠，也不能把刚拆掉的状态栏装回去。
-            guard quitPhase == .idle else { return }
-            devices = pinnedDuringTransition(scanned)
-            rememberNTFSDevices(devices)
-            sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
-            updateStatus()
-            TrayController.shared.reload()
-        } while rescanRequested && quitPhase == .idle
+            if Task.isCancelled {
+                rescanRequested = true
+                return
+            }
+            switch DeviceScanCommit.decide(quitPhase) {
+            case .drop:
+                // 进程正在退出：不能再拉起防休眠，也不能把刚拆掉的状态栏装回去。
+                return
+            case .publish, .publishWithoutSideEffects:
+                // 确认框还在时也要出卡片。丢掉结果会把「还在扫描」记成「没有设备」。
+                devices = pinnedDuringTransition(scanned)
+                rememberNTFSDevices(devices)
+                published = true
+                updateStatus()
+                TrayController.shared.reload()
+                if DeviceScanCommit.decide(quitPhase) == .publish {
+                    sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
+                } else {
+                    rescanRequested = true
+                }
+            }
+        } while rescanRequested && DeviceScanCommit.decide(quitPhase) == .publish
     }
 
     func perform(_ action: DeviceAction, on device: NTFSDevice, extra: String? = nil) {
@@ -846,14 +965,19 @@ final class AppModel: ObservableObject {
         for attempt in 0..<10 {
             let knownDevices = Array(knownNTFSDevices.values) + devices
             let scanned = await DeviceScanner.scan(knownDevices: knownDevices)
-            if quitPhase != .idle { break }
+            if DeviceScanCommit.decide(quitPhase) == .drop { break }
             let merged = pinnedDuringTransition(scanned)
             if matches(scanned) || attempt == 9 {
                 devices = merged
                 rememberNTFSDevices(merged)
-                sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
                 updateStatus()
-                TrayController.shared.syncAfterAction()
+                if DeviceScanCommit.decide(quitPhase) == .publish {
+                    sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
+                    TrayController.shared.syncAfterAction()
+                } else {
+                    TrayController.shared.reload()
+                    rescanRequested = true
+                }
                 break
             }
             try? await Task.sleep(nanoseconds: 150_000_000)
@@ -862,7 +986,15 @@ final class AppModel: ObservableObject {
         pendingRescan = rescanRequested
         rescanRequested = false
         isScanningDevices = false
-        guard quitPhase == .idle else { return }
+        switch DeviceScanCommit.decide(quitPhase) {
+        case .drop:
+            return
+        case .publishWithoutSideEffects:
+            rescanRequested = true
+            return
+        case .publish:
+            break
+        }
 
         // autoMount / 追加 refresh 必须在释放 scanning 之后，否则嵌套 run 会再等 scanning → 死锁。
         if pendingRescan {
@@ -958,13 +1090,15 @@ final class AppModel: ObservableObject {
             statusText = L10n.t("status.missingDeps")
             return
         }
-        if isScanningDevices || !didFinishDeviceScan {
+        switch deviceListAppearance {
+        case .scanning:
             statusText = L10n.t("status.scanningDevices")
             return
-        }
-        if devices.isEmpty {
+        case .empty:
             statusText = L10n.t("status.waitingDevices")
             return
+        case .cards:
+            break
         }
         let readOnly = devices.filter(\.isReadOnly).count
         if readOnly == 0 {

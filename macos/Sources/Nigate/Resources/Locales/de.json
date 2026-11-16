@@ -134,6 +134,8 @@
     "remount": "Einhängen",
     "reset": "Zurücksetzen",
     "resetTooltip": "Gerät zurücksetzen (aushängen und reparieren, zur Behebung von Resource busy Fehlern)",
+    "resetConfirm": "{name} zurücksetzen?",
+    "resetConfirmNote": "Zurücksetzen hängt das Volume aus, führt ntfsfix aus und hängt es danach nur lesend wieder ein.\n1. Laufende Dateiübertragungen werden unterbrochen\n2. Der aktuelle Schreibzugriff endet; das Volume kommt nur lesend zurück\n3. ntfsfix ersetzt nicht chkdsk von Windows und stellt gelöschte Dateien nicht wieder her. In seltenen Fällen können Daten beschädigt werden\n4. Ein Administratorpasswort ist erforderlich\n5. Es wird nicht formatiert. Vorhandene Dateien bleiben auf der Partition",
     "repair": "Reparieren",
     "repairTooltip": "Reparieren",
     "repairConfirm": "NTFS-Partition reparieren?",

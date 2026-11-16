@@ -478,17 +478,13 @@ struct WindowConfirmCard: View {
     let confirm: WindowConfirm
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Image(systemName: confirm.symbol)
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(confirm.critical ? Palette.error : Palette.warning)
-                Text(confirm.title)
-                    .font(.title2.weight(.semibold))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+        VStack(alignment: .leading, spacing: 12) {
+            Text(confirm.title)
+                .font(.headline)
+                .fixedSize(horizontal: false, vertical: true)
             if !confirm.message.isEmpty {
                 Text(confirm.message)
+                    .font(.body)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -498,10 +494,11 @@ struct WindowConfirmCard: View {
                     .keyboardShortcut(.cancelAction)
                 Button(confirm.confirmTitle) { model.acceptWindowConfirm() }
                     .keyboardShortcut(.defaultAction)
-                    .tint(confirm.critical ? Palette.error : Palette.accent)
+                    .tint(confirm.critical ? Palette.error : nil)
             }
         }
-        .windowConfirmChrome()
+        .padding(20)
+        .frame(width: 420)
     }
 }
 

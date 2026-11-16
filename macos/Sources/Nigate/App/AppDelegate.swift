@@ -54,7 +54,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         if model.quitPhase != .idle {
             model.quitImmediately()
-            return true
+            Darwin._exit(0)
         }
         model.withdrawToTray()
         return false

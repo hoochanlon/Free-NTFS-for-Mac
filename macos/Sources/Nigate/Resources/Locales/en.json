@@ -134,6 +134,8 @@
     "remount": "Mount",
     "reset": "Reset",
     "resetTooltip": "Reset device (unmount and fix, for resolving Resource busy errors)",
+    "resetConfirm": "Reset {name}?",
+    "resetConfirmNote": "Reset unmounts the volume, runs ntfsfix, then mounts it read-only again.\n1. File transfers in progress will be interrupted\n2. The current read-write mount is dropped; the volume comes back read-only\n3. ntfsfix is not a substitute for Windows chkdsk and will not recover deleted files. In rare cases it can damage data\n4. An administrator password is required\n5. This does not format the disk. Existing files stay on the partition",
     "repair": "Repair",
     "repairTooltip": "Repair",
     "repairConfirm": "Repair NTFS partition?",

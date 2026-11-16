@@ -32,7 +32,8 @@ struct DevicesPane: View {
             if model.devices.isEmpty {
                 VStack(spacing: 8) {
                     Spacer()
-                    if model.isScanningDevices || !model.didFinishDeviceScan {
+                    switch model.deviceListAppearance {
+                    case .scanning, .cards:
                         ProgressView()
                             .controlSize(.regular)
                             .padding(.bottom, 4)
@@ -41,19 +42,21 @@ struct DevicesPane: View {
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 24)
-                    } else if let hint = model.progressHint {
-                        ProgressView()
-                            .controlSize(.regular)
-                            .padding(.bottom, 4)
-                        Text(hint)
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 24)
-                    } else {
-                        Image(systemName: "externaldrive.badge.questionmark").font(.system(size: 42)).foregroundStyle(.secondary)
-                        Text(L10n.t("devices.emptyState")).font(.headline)
-                        Text(L10n.t("devices.emptyHint")).foregroundStyle(.secondary)
+                    case .empty:
+                        if let hint = model.progressHint {
+                            ProgressView()
+                                .controlSize(.regular)
+                                .padding(.bottom, 4)
+                            Text(hint)
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 24)
+                        } else {
+                            Image(systemName: "externaldrive.badge.questionmark").font(.system(size: 42)).foregroundStyle(.secondary)
+                            Text(L10n.t("devices.emptyState")).font(.headline)
+                            Text(L10n.t("devices.emptyHint")).foregroundStyle(.secondary)
+                        }
                     }
                     Spacer()
                 }
@@ -166,7 +169,7 @@ struct DeviceCard: View {
                     if device.canFormat {
                         action(L10n.t("devices.format"), "internaldrive") { confirm(.format) }
                     }
-                    action(L10n.t("devices.reset"), "arrow.counterclockwise") { model.perform(.reset, on: device) }
+                    action(L10n.t("devices.reset"), "arrow.counterclockwise") { confirm(.reset) }
                 }
             }
             .disabled(model.busyDisks.contains(device.parentDisk))
@@ -230,6 +233,11 @@ struct DeviceCard: View {
             message = L10n.t("devices.formatConfirmNote")
             symbol = "exclamationmark.triangle.fill"
             critical = true
+        case .reset:
+            title = L10n.t("devices.resetConfirm", ["name": device.volumeName])
+            message = L10n.t("devices.resetConfirmNote")
+            symbol = "arrow.counterclockwise"
+            critical = false
         default:
             return
         }
@@ -258,7 +266,10 @@ struct RenameSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(L10n.t("devices.renameTitle")).font(.headline)
-            Text(L10n.t("devices.renameNote")).font(.caption).foregroundStyle(.secondary)
+            Text(L10n.t("devices.renameNote"))
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             TextField(L10n.t("devices.renamePlaceholder"), text: $name)
                 .textFieldStyle(.roundedBorder)
             HStack {

@@ -134,6 +134,8 @@
     "remount": "掛載",
     "reset": "重置",
     "resetTooltip": "重置設備（卸載並修復，用於解決 Resource busy 錯誤）",
+    "resetConfirm": "重置 {name}？",
+    "resetConfirmNote": "重置會先卸載該卷，再用 ntfsfix 做基礎修復，然後重新掛載為唯讀。\n1. 正在讀寫的檔案會被中斷\n2. 目前的讀寫掛載會取消，卷會回到唯讀\n3. ntfsfix 不能代替 Windows 的 chkdsk，也不能找回已刪除的檔案，極端情況下可能損傷資料\n4. 需要管理者密碼\n5. 不會格式化，分割區裡的檔案會保留",
     "repair": "修復",
     "repairTooltip": "修復",
     "repairConfirm": "修復 NTFS 分割區？",

@@ -55,4 +55,26 @@ final class DockPresenceTests: XCTestCase {
             .leave
         )
     }
+
+    func testExitPrepHidesWindowBeforeDroppingDock() {
+        XCTAssertEqual(
+            DockPresence.exitPrep(windowVisible: true, policyIsRegular: true),
+            .hideWindowsThenDrop
+        )
+        XCTAssertEqual(
+            DockPresence.exitPrep(windowVisible: true, policyIsRegular: false),
+            .hideWindowsThenDrop
+        )
+    }
+
+    func testExitPrepDropsStaleDockIconWithoutWindow() {
+        XCTAssertEqual(
+            DockPresence.exitPrep(windowVisible: false, policyIsRegular: true),
+            .drop
+        )
+        XCTAssertEqual(
+            DockPresence.exitPrep(windowVisible: false, policyIsRegular: false),
+            .none
+        )
+    }
 }
