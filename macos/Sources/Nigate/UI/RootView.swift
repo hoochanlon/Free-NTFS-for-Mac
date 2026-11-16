@@ -163,29 +163,18 @@ struct RootView: View {
             Text(model.alert?.message ?? "")
         }
         .overlay(alignment: .bottom) {
-            if let hint = model.progressHint {
-                HStack(alignment: .top, spacing: 10) {
-                    ProgressView()
-                        .controlSize(.small)
-                    Text(hint)
-                        .font(.callout)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
+            // overlay 会给出整窗宽度。系统 ProgressView 会把多出来的宽度吃掉，
+            // 转圈和文字就被撕到两端。芯片自己按内容收拢，再在窗口里居中。
+            VStack {
+                if let hint = model.progressHint {
+                    bottomChip(hint, spinning: true)
+                } else if let toast = model.toast {
+                    bottomChip(toast, spinning: false)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .frame(maxWidth: 640, alignment: .leading)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .padding(.horizontal, 24)
-                .padding(.bottom, 18)
-            } else if let toast = model.toast {
-                Text(toast)
-                    .font(.callout)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .padding(.bottom, 18)
             }
+            .frame(maxWidth: .infinity)
+            .padding(.bottom, 18)
+            .allowsHitTesting(false)
         }
         .overlay {
             // 条件分支的理想尺寸是卡片本身，遮罩会跟着缩成卡片大小，窗口其余部分仍可拖走。
@@ -199,12 +188,47 @@ struct RootView: View {
             }
         }
         .onChange(of: model.toast) { _, toast in
-            guard let toast, model.progressHint == nil else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) {
-                if model.toast == toast, model.progressHint == nil { model.toast = nil }
-            }
+            scheduleToastDismiss(toast)
+        }
+        .onChange(of: model.progressHint) { _, hint in
+            // 转读写的长提示挡着 toast 写入时，关掉提示后要补一次消失计时。
+            guard hint == nil else { return }
+            scheduleToastDismiss(model.toast)
         }
         .preferredColorScheme(model.settings.themeIsLight ? .light : .dark)
+    }
+
+    private func scheduleToastDismiss(_ toast: String?) {
+        guard let toast, model.progressHint == nil else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) {
+            if model.toast == toast, model.progressHint == nil { model.toast = nil }
+        }
+    }
+
+    private func bottomChip(_ text: String, spinning: Bool) -> some View {
+        HStack(alignment: .center, spacing: 6) {
+            if spinning {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .controlSize(.small)
+                    .labelsHidden()
+                    .fixedSize()
+                    .scaleEffect(0.85)
+                    .frame(width: 14, height: 14)
+            }
+            Text(text)
+                .font(.callout)
+                .multilineTextAlignment(.leading)
+                .lineLimit(3)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(
+            .ultraThinMaterial,
+            in: RoundedRectangle(cornerRadius: spinning ? 12 : 20, style: .continuous)
+        )
+        .fixedSize()
+        .padding(.horizontal, 24)
     }
 
     private func windowModal<Content: View>(size: CGSize, @ViewBuilder content: () -> Content) -> some View {
