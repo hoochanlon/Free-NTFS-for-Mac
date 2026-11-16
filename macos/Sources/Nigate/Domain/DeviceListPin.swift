@@ -33,17 +33,23 @@ enum DeviceListPin {
 
     /// `scanned` 缺了正在切换的分区，或还停在卸载中间态时，沿用 `held`。
     /// 身份始终是 devicePath：同一张卡原地改状态，不拆不插。
+    /// 同盘另一分区只在空扫描里消失时留卡，不能拿这次操作的目标态去冻它。
     static func merge(scanned: [NTFSDevice], held: [NTFSDevice], pins: [Pin]) -> [NTFSDevice] {
         guard !pins.isEmpty else { return scanned }
         var byPath = Dictionary(scanned.map { ($0.devicePath, $0) }, uniquingKeysWith: { _, last in last })
         for item in held {
             guard let pin = pins.first(where: {
-                $0.parentDisk == item.parentDisk || $0.devicePath == item.devicePath
+                $0.devicePath == item.devicePath || $0.parentDisk == item.parentDisk
             }) else { continue }
-            if let live = byPath[item.devicePath], isSettled(live, pin: pin) {
-                continue
+            let isTarget = pin.devicePath == item.devicePath
+            if isTarget {
+                if let live = byPath[item.devicePath], isSettled(live, pin: pin) {
+                    continue
+                }
+                byPath[item.devicePath] = item
+            } else if byPath[item.devicePath] == nil {
+                byPath[item.devicePath] = item
             }
-            byPath[item.devicePath] = item
         }
         return byPath.values.sorted { $0.disk < $1.disk }
     }

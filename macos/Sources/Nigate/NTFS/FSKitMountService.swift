@@ -60,7 +60,10 @@ enum FSKitMountService {
             )
         } catch {
             let fallback = await Shell.runQuiet("/usr/sbin/diskutil", ["unmount", "force", device.devicePath], timeout: 8)
-            if !fallback.ok {
+            if fallback.ok { return }
+            let stillMounted = MountTable.parse(await Shell.runQuiet("/sbin/mount", timeout: 3).stdout)
+                .contains { $0.devicePath == device.devicePath }
+            if stillMounted {
                 throw AppError.failed("卸载失败: \(error.localizedDescription)")
             }
         }
@@ -121,9 +124,8 @@ enum FSKitMountService {
         run: (_ args: [String], _ password: inout String, _ refreshKey: String, _ name: String, _ timeout: TimeInterval) async throws -> ShellResult,
         password: inout String
     ) async throws {
-        let mountPoint = device.volume.isEmpty
-            ? "/Volumes/\(DiskSafety.sanitizeVolumeName(device.volumeName))"
-            : device.volume
+        let mounts = MountTable.parse(await Shell.runQuiet("/sbin/mount", timeout: 3).stdout)
+        let mountPoint = VolumeMountPoint.allocate(for: device, mounts: mounts)
         guard DiskSafety.isSafeMountPoint(mountPoint) else {
             throw AppError.invalidPath
         }

@@ -127,6 +127,34 @@ final class DeviceListPinTests: XCTestCase {
         XCTAssertTrue(merged.isEmpty)
     }
 
+    func testSiblingOnSameDiskIsNotFrozenToMountTarget() {
+        let target = sample(disk: "disk8s1", mounted: true, readOnly: true)
+        var sibling = sample(disk: "disk8s2", mounted: true, readOnly: true)
+        sibling.volume = "/Volumes/新加卷 1"
+        var liveTarget = target
+        liveTarget.isReadOnly = false
+        let merged = DeviceListPin.merge(
+            scanned: [liveTarget, sibling],
+            held: [target, sibling],
+            pins: [pin(target, .mount)]
+        )
+        XCTAssertEqual(Set(merged.map(\.disk)), ["disk8s1", "disk8s2"])
+        XCTAssertEqual(merged.first { $0.disk == "disk8s1" }?.isReadWrite, true)
+        XCTAssertEqual(merged.first { $0.disk == "disk8s2" }?.isReadOnly, true)
+        XCTAssertEqual(merged.first { $0.disk == "disk8s2" }?.volume, "/Volumes/新加卷 1")
+    }
+
+    func testEmptyScanKeepsSiblingOnPinnedDisk() {
+        let target = sample(disk: "disk8s1", mounted: true, readOnly: true)
+        let sibling = sample(disk: "disk8s2", mounted: true, readOnly: true)
+        let merged = DeviceListPin.merge(
+            scanned: [],
+            held: [target, sibling],
+            pins: [pin(target, .mount)]
+        )
+        XCTAssertEqual(Set(merged.map(\.disk)), ["disk8s1", "disk8s2"])
+    }
+
     private func pin(_ device: NTFSDevice, _ action: DeviceAction) -> DeviceListPin.Pin {
         DeviceListPin.Pin(devicePath: device.devicePath, parentDisk: device.parentDisk, action: action)
     }

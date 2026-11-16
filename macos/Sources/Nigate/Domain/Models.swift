@@ -56,17 +56,31 @@ struct NTFSDevice: Sendable, Equatable, Identifiable {
 
     /// 列表身份跟分区走，不跟后到的 UUID 走，避免只读↔读写时卡片被拆掉再插一次。
     var id: String { devicePath }
-    var identity: String { volumeUuid ?? partitionUuid ?? disk }
+    /// MBR NTFS 常常没有 Volume UUID。空字符串不能当身份，否则两块「新加卷」会撞成同一条已尝试记录。
+    var identity: String {
+        if let volumeUuid, !volumeUuid.isEmpty { return volumeUuid }
+        if let partitionUuid, !partitionUuid.isEmpty { return partitionUuid }
+        return disk
+    }
     var parentDisk: String { DiskSafety.parentDiskId(disk) }
 
     /// 挂载表同一分区可能打出两行，diskutil 也可能再给一个节点。
-    /// 路径、盘号、挂载点或 UUID 任一相同，就视为同一卷。
+    /// 路径、盘号或 UUID 对上才是同一卷。挂载点相同但 diskNsM 不同，只是卷标撞车。
     func sameMount(as other: NTFSDevice) -> Bool {
         if devicePath == other.devicePath || disk == other.disk { return true }
-        if !volume.isEmpty, volume == other.volume { return true }
         if let volumeUuid, !volumeUuid.isEmpty, volumeUuid == other.volumeUuid { return true }
         if let partitionUuid, !partitionUuid.isEmpty, partitionUuid == other.partitionUuid { return true }
+        if !volume.isEmpty, volume == other.volume, !isDistinctPartition(from: other) {
+            return true
+        }
         return false
+    }
+
+    /// 两块不同的 diskNsM，即使都叫「新加卷」也不是同一张卡。
+    func isDistinctPartition(from other: NTFSDevice) -> Bool {
+        DiskSafety.isPartition(devicePath)
+            && DiskSafety.isPartition(other.devicePath)
+            && devicePath != other.devicePath
     }
     var isReadWrite: Bool { isMounted && !isReadOnly && !isUnmounted }
     var needsMount: Bool { isUnmounted || !isMounted }

@@ -71,14 +71,18 @@ struct HelpMarkdownView: View {
             inline(value, font: .preferredFont(forTextStyle: .body), lineSpacing: 5)
                 .frame(maxWidth: .infinity, alignment: .leading)
         case let .list(items):
+            let listFont = NSFont.preferredFont(forTextStyle: .body)
             VStack(alignment: .leading, spacing: 9) {
                 ForEach(items) { item in
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text(marker(for: item.marker))
-                            .font(.body.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                            .frame(width: 25, alignment: .trailing)
-                        inline(item.text, font: .preferredFont(forTextStyle: .body))
+                    HStack(alignment: .top, spacing: 8) {
+                        inline(
+                            marker(for: item.marker),
+                            font: listFont,
+                            color: .secondaryLabelColor,
+                            alignment: .right
+                        )
+                        .frame(width: 25, alignment: .top)
+                        inline(item.text, font: listFont)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.leading, CGFloat(item.depth) * 18)
@@ -253,9 +257,16 @@ struct HelpMarkdownView: View {
         _ source: String,
         font: NSFont,
         color: NSColor = .labelColor,
-        lineSpacing: CGFloat = 0
+        lineSpacing: CGFloat = 0,
+        alignment: NSTextAlignment = .left
     ) -> some View {
-        HelpMarkdownText(source: stripInlineImages(source), font: font, color: color, lineSpacing: lineSpacing)
+        HelpMarkdownText(
+            source: stripInlineImages(source),
+            font: font,
+            color: color,
+            lineSpacing: lineSpacing,
+            alignment: alignment
+        )
     }
 
     private func stripInlineImages(_ source: String) -> String {
@@ -287,6 +298,7 @@ private struct HelpMarkdownText: NSViewRepresentable {
     let font: NSFont
     var color: NSColor = .labelColor
     var lineSpacing: CGFloat = 0
+    var alignment: NSTextAlignment = .left
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -296,6 +308,7 @@ private struct HelpMarkdownText: NSViewRepresentable {
         var source = ""
         var fontSize: CGFloat = 0
         var lineSpacing: CGFloat = -1
+        var alignment: NSTextAlignment = .natural
     }
 
     func makeNSView(context: Context) -> HelpLinkTextView {
@@ -330,13 +343,15 @@ private struct HelpMarkdownText: NSViewRepresentable {
         let changed = context.coordinator.source != source
             || context.coordinator.fontSize != font.pointSize
             || context.coordinator.lineSpacing != lineSpacing
+            || context.coordinator.alignment != alignment
         if changed {
             view.textStorage?.setAttributedString(
-                Self.attributed(source, font: font, color: color, lineSpacing: lineSpacing)
+                Self.attributed(source, font: font, color: color, lineSpacing: lineSpacing, alignment: alignment)
             )
             context.coordinator.source = source
             context.coordinator.fontSize = font.pointSize
             context.coordinator.lineSpacing = lineSpacing
+            context.coordinator.alignment = alignment
             view.window?.invalidateCursorRects(for: view)
         }
         view.invalidateIntrinsicContentSize()
@@ -352,17 +367,21 @@ private struct HelpMarkdownText: NSViewRepresentable {
         layout.ensureLayout(for: container)
         let used = layout.usedRect(for: container)
         let minHeight = ceil(font.ascender - font.descender + font.leading + lineSpacing)
-        return CGSize(width: width, height: max(ceil(used.height), minHeight))
+        return CGSize(width: width, height: max(ceil(used.maxY), minHeight))
     }
 
     private static func attributed(
         _ source: String,
         font: NSFont,
         color: NSColor,
-        lineSpacing: CGFloat
+        lineSpacing: CGFloat,
+        alignment: NSTextAlignment
     ) -> NSAttributedString {
         let paragraph = NSMutableParagraphStyle()
         paragraph.lineSpacing = lineSpacing
+        paragraph.alignment = alignment
+        paragraph.paragraphSpacing = 0
+        paragraph.paragraphSpacingBefore = 0
         let parsed = (try? NSAttributedString(
             markdown: Data(source.utf8),
             options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)

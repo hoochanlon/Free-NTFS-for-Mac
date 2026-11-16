@@ -645,6 +645,116 @@ final class AutoMountTests: XCTestCase {
         XCTAssertEqual(Set(targets.map(\.volumeName)), ["Samsung USB", "SanDisk 32G"])
     }
 
+    func testSameLabelDifferentPartitionsBothStayCandidates() {
+        let first = readOnlyDevice(disk: "disk8s1", name: "新加卷", uuid: "vol-a")
+        let second = readOnlyDevice(disk: "disk8s2", name: "新加卷", uuid: "vol-b")
+        let attempted = Set(AutoMount.recordKeys(first))
+        XCTAssertFalse(AutoMount.isRecorded(second, in: attempted))
+        let targets = AutoMount.targets(
+            devices: [first, second],
+            settings: AppSettings(),
+            attempted: attempted,
+            cooldown: [:],
+            inProgress: [],
+            explicit: false
+        )
+        XCTAssertEqual(Set(targets.map(\.disk)), ["disk8s2"])
+        XCTAssertEqual(
+            Set(AutoMount.targets(
+                devices: [first, second],
+                settings: AppSettings(),
+                attempted: [],
+                cooldown: [:],
+                inProgress: [],
+                explicit: false
+            ).map(\.disk)),
+            ["disk8s1", "disk8s2"]
+        )
+    }
+
+    func testEmptyVolumeUUIDDoesNotAliasDistinctPartitions() {
+        let first = readOnlyDevice(disk: "disk8s1", name: "新加卷", uuid: "")
+        let second = readOnlyDevice(disk: "disk8s2", name: "新加卷", uuid: "")
+        XCTAssertEqual(first.identity, "disk8s1")
+        XCTAssertEqual(second.identity, "disk8s2")
+        XCTAssertFalse(first.sameMount(as: second))
+        XCTAssertFalse(AutoMount.isRecorded(second, in: Set(AutoMount.recordKeys(first))))
+        XCTAssertEqual(
+            Set(AutoMount.targets(
+                devices: [first, second],
+                settings: AppSettings(),
+                attempted: [],
+                cooldown: [:],
+                inProgress: [],
+                explicit: false
+            ).map(\.disk)),
+            ["disk8s1", "disk8s2"]
+        )
+    }
+
+    func testMBRSameLabelPartitionsBothStayCandidates() {
+        let first = readOnlyDevice(disk: "disk8s1", name: "新加卷", uuid: nil)
+        var second = readOnlyDevice(disk: "disk8s2", name: "新加卷", uuid: nil)
+        second.volume = "/Volumes/新加卷 1"
+        XCTAssertEqual(first.identity, "disk8s1")
+        XCTAssertFalse(AutoMount.isRecorded(second, in: Set(AutoMount.recordKeys(first))))
+        XCTAssertEqual(
+            Set(AutoMount.targets(
+                devices: [first, second],
+                settings: AppSettings(),
+                attempted: [],
+                cooldown: [:],
+                inProgress: [],
+                explicit: false
+            ).map(\.disk)),
+            ["disk8s1", "disk8s2"]
+        )
+    }
+
+    func testPruningStaleDropsUnpluggedVolumeButKeepsLiveFailure() {
+        let first = readOnlyDevice(disk: "disk8s1", name: "新加卷", uuid: nil)
+        let second = readOnlyDevice(disk: "disk8s2", name: "新加卷", uuid: nil)
+        var attempted = Set(AutoMount.recordKeys(first) + AutoMount.recordKeys(second))
+        attempted = AutoMount.pruningStale(attempted, devices: [second])
+        XCTAssertFalse(AutoMount.isRecorded(first, in: attempted))
+        XCTAssertTrue(AutoMount.isRecorded(second, in: attempted))
+        XCTAssertEqual(
+            AutoMount.candidates(
+                devices: [first, second],
+                settings: AppSettings(),
+                attempted: attempted,
+                cooldown: [:],
+                inProgress: [],
+                explicit: false
+            ).map(\.disk),
+            ["disk8s1"]
+        )
+    }
+
+    func testReinsertAfterUnplugIsACandidateAgain() {
+        let first = readOnlyDevice(disk: "disk8s1", name: "新加卷", uuid: nil)
+        var attempted = Set(AutoMount.recordKeys(first))
+        attempted = AutoMount.pruningStale(attempted, devices: [])
+        XCTAssertTrue(attempted.isEmpty)
+        XCTAssertEqual(
+            AutoMount.candidates(
+                devices: [first],
+                settings: AppSettings(),
+                attempted: attempted,
+                cooldown: [:],
+                inProgress: [],
+                explicit: false
+            ).map(\.disk),
+            ["disk8s1"]
+        )
+    }
+
+    func testCoalescedScanStillAppliesAutoMount() {
+        XCTAssertTrue(AutoMount.shouldApply(scanRequestedAuto: false, coalescedAuto: true))
+        XCTAssertTrue(AutoMount.shouldApply(scanRequestedAuto: true, coalescedAuto: false))
+        XCTAssertFalse(AutoMount.shouldApply(scanRequestedAuto: false, coalescedAuto: false))
+    }
+
     private func readOnlyDevice(disk: String, name: String, uuid: String?) -> NTFSDevice {
         NTFSDevice(
             disk: disk,
@@ -674,6 +784,15 @@ final class MountIdentityTests: XCTestCase {
         let samsung = collapsed.first { $0.disk == "disk5s1" }
         XCTAssertEqual(samsung?.isReadWrite, true)
         XCTAssertEqual(samsung?.volumeUuid, "vol-samsung")
+    }
+
+    func testSameLabelDifferentPartitionsDoNotCollapse() {
+        let first = sample(disk: "disk8s1", name: "新加卷", readOnly: true, uuid: "vol-a")
+        let second = sample(disk: "disk8s2", name: "新加卷", readOnly: true, uuid: "vol-b")
+        XCTAssertFalse(first.sameMount(as: second))
+        XCTAssertTrue(first.isDistinctPartition(from: second))
+        let collapsed = DeviceScanner.collapsingDuplicates([first, second])
+        XCTAssertEqual(collapsed.map(\.disk).sorted(), ["disk8s1", "disk8s2"])
     }
 
     func testRepeatedSuccessToastIsSuppressed() {

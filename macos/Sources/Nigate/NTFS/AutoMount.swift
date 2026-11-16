@@ -51,17 +51,26 @@ enum AutoMount {
         return picked
     }
 
-    /// 身份、盘号、节点、挂载点、UUID 都记入尝试集，换一种写法扫出来也不能再挂一次。
+    /// 身份、盘号、节点、UUID 记入尝试集。挂载点不能当身份：两块「新加卷」会暂时撞同一路径。
     static func recordKeys(_ device: NTFSDevice) -> [String] {
         var keys = [device.identity, device.disk, device.devicePath]
-        if !device.volume.isEmpty { keys.append("mount:" + device.volume) }
         if let uuid = device.volumeUuid, !uuid.isEmpty { keys.append("vu:" + uuid) }
         if let uuid = device.partitionUuid, !uuid.isEmpty { keys.append("pu:" + uuid) }
-        return keys
+        return keys.filter { !$0.isEmpty }
     }
 
     static func isRecorded(_ device: NTFSDevice, in records: Set<String>) -> Bool {
         recordKeys(device).contains { records.contains($0) }
+    }
+
+    /// 还插着的卷保留已尝试记录，避免 DiskMonitor 连打失败重试。拔掉的卷必须清掉，否则盘号复用后不会再自动转读写。
+    static func pruningStale(_ attempted: Set<String>, devices: [NTFSDevice]) -> Set<String> {
+        attempted.intersection(Set(devices.flatMap(recordKeys)))
+    }
+
+    /// 一次「只刷新」的扫描正在进行时，插盘带来的自动转读写请求不能被丢掉。
+    static func shouldApply(scanRequestedAuto: Bool, coalescedAuto: Bool) -> Bool {
+        scanRequestedAuto || coalescedAuto
     }
 
     /// 是否被用户标记为保持只读（identity / uuid / disk 任一命中）。

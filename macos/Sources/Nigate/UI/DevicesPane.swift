@@ -69,8 +69,10 @@ struct DevicesPane: View {
                         }
                     }
                     .animation(nil, value: model.devices.map(\.devicePath))
+                    .padding(.horizontal, 18)
                     .padding(.bottom, 12)
                 }
+                .padding(.horizontal, -18)
             }
         }
         .padding(18)
@@ -172,7 +174,7 @@ struct DeviceCard: View {
                     action(L10n.t("devices.reset"), "arrow.counterclockwise") { confirm(.reset) }
                 }
             }
-            .disabled(model.busyDisks.contains(device.parentDisk))
+            .disabled(model.isDeviceBusy(device))
         }
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color(nsColor: .controlBackgroundColor)))

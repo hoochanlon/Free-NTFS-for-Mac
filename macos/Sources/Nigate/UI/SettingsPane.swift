@@ -65,7 +65,7 @@ struct SettingsPane: View {
             }
         }
         .formStyle(.grouped)
-        .padding(8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
     private var fsKitLabel: String {

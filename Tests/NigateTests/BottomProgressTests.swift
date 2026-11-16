@@ -111,6 +111,18 @@ final class BottomProgressTests: XCTestCase {
         XCTAssertEqual(BottomProgress.kind(session), .remountReadWrite(names: ["Samsung USB"]))
     }
 
+    func testDoesNotDropOtherRemountWhenDuplicateNames() {
+        var session = BottomProgress.Session()
+        session = BottomProgress.insertingRemounts(session, [
+            item("新加卷", "/dev/disk8s1"),
+            item("新加卷", "/dev/disk8s2")
+        ])
+        let firstRW = sample(disk: "disk8s1", name: "新加卷", mounted: true, readOnly: false)
+        let secondRO = sample(disk: "disk8s2", name: "新加卷", mounted: true, readOnly: true)
+        session = BottomProgress.droppingFinishedRemounts(session, devices: [firstRW, secondRO])
+        XCTAssertEqual(BottomProgress.kind(session), .remountReadWrite(names: ["新加卷"]))
+    }
+
     private func item(_ name: String, _ id: String) -> BottomProgress.Item {
         BottomProgress.Item(id: id, name: name)
     }

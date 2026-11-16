@@ -86,6 +86,7 @@ enum DeviceScanner {
 
     /// 挂载表把同一节点打两行时，列表和自动挂载都只能看见一条。
     /// 读写优先于只读，避免残留的只读行把已经挂上的卷再挂一次。
+    /// 同名不同分区（disk8s1 / disk8s2 都叫「新加卷」）不是重复，必须留两张卡。
     static func collapsingDuplicates(_ devices: [NTFSDevice]) -> [NTFSDevice] {
         var ordered: [NTFSDevice] = []
         for device in devices {

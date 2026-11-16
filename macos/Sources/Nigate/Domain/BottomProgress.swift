@@ -90,18 +90,19 @@ enum BottomProgress {
         var session = session
         session.remountRW.removeAll { item in
             devices.contains { live in
-                live.isReadWrite && isSameRemountTarget(item, live)
+                live.isReadWrite && isSameRemountTarget(item, live, devices: devices)
             }
         }
         return session
     }
 
-    /// 转读写过程中节点写法可能和会话里记下的不一致，路径、盘号、卷名任一能对上即可。
-    private static func isSameRemountTarget(_ item: Item, _ device: NTFSDevice) -> Bool {
-        device.devicePath == item.id
-            || device.disk == item.id
-            || "/dev/\(device.disk)" == item.id
-            || device.volumeName == item.name
+    /// 转读写过程中节点写法可能和会话里记下的不一致；卷名只在全表唯一时才用来对。
+    private static func isSameRemountTarget(_ item: Item, _ device: NTFSDevice, devices: [NTFSDevice]) -> Bool {
+        if device.devicePath == item.id || device.disk == item.id || "/dev/\(device.disk)" == item.id {
+            return true
+        }
+        guard device.volumeName == item.name else { return false }
+        return devices.filter { $0.volumeName == item.name }.count == 1
     }
 
     /// 同一 id 保持先到的位置，后到的同 id 不插第二份。

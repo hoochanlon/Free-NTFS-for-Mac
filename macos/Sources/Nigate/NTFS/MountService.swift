@@ -53,12 +53,6 @@ struct MountService {
         guard let raw = await PathLookup.ntfs3g() else { throw AppError.ntfs3gMissing }
         let ntfs3g = try PathLookup.resolvedNTFS3G(raw)
         let fuseEnv = try FuseLibrary.launchEnv()
-        let mountPoint = device.volume.isEmpty
-            ? "/Volumes/\(DiskSafety.sanitizeVolumeName(device.volumeName))"
-            : device.volume
-        guard DiskSafety.isSafeMountPoint(mountPoint) else {
-            throw AppError.invalidPath
-        }
         var password: String
         if let passwordOverride {
             password = passwordOverride
@@ -66,22 +60,17 @@ struct MountService {
             password = try await askPassword("messages.passwordDialog.mountDevice", ["name": device.volumeName])
         }
         if device.isMounted && !device.isUnmounted {
-            _ = try await run(["umount", "-f", device.devicePath], password: &password, refreshKey: "messages.passwordDialog.mountDevice", name: device.volumeName)
+            try await unmountIfPresent(device, password: &password, refreshKey: "messages.passwordDialog.mountDevice")
         }
         clearMarker(device.disk)
-        _ = try await run(["mkdir", "-p", mountPoint], password: &password, refreshKey: "messages.passwordDialog.mountDevice", name: device.volumeName)
-
-        let uid = getuid()
-        let gid = getgid()
-        let args = [
-            ntfs3g, "-olocal", "-oallow_other", "-oauto_xattr",
-            "-ouid=\(uid)", "-ogid=\(gid)", "-ovolname=\(device.volumeName)",
-            "-onoatime", device.devicePath, mountPoint
-        ]
-        do {
-            _ = try await run(args, password: &password, refreshKey: "messages.passwordDialog.mountDeviceRetry", name: device.volumeName, timeout: 10, extraEnv: fuseEnv)
-        } catch AppError.timeout(_) {
-            throw AppError.timeout("挂载操作超时（10秒），操作已取消以防止卡死。可能的原因：1) 文件系统处于脏状态（如果该 NTFS 设备之前在 Windows 电脑上使用过，且 Windows 启用了快速启动功能，请将设备插回 Windows 电脑并完全关闭后再试）；2) 设备被其他程序占用；3) 系统权限问题。")
+        let mounted = try await attachNTFS3G(
+            device,
+            ntfs3g: ntfs3g,
+            fuseEnv: fuseEnv,
+            password: &password
+        )
+        if !mounted {
+            throw AppError.failed("挂载失败")
         }
         writeMarker(device.disk)
         return "设备 \(device.volumeName) 已成功挂载为读写模式"
@@ -101,12 +90,12 @@ struct MountService {
                 password: &password
             )
         case .ntfs3gCompatibility:
-            do {
-                _ = try await run(["umount", "-f", device.devicePath], password: &password, refreshKey: "messages.passwordDialog.unmountDevice", name: device.volumeName)
-            } catch {
-                let fallback = await Shell.runQuiet("/usr/sbin/diskutil", ["unmount", "force", device.devicePath], timeout: 8)
-                if !fallback.ok { throw AppError.failed("卸载失败: \(error.localizedDescription)") }
-            }
+            try await unmountBestEffort(
+                device,
+                password: &password,
+                refreshKey: "messages.passwordDialog.unmountDevice",
+                failure: "卸载失败"
+            )
         }
         clearMarker(device.disk)
         return "设备 \(device.volumeName) 已卸载"
@@ -116,12 +105,12 @@ struct MountService {
         try validateBackend()
         try await assertNTFSPartition(device)
         var password = try await askPassword("messages.passwordDialog.restoreToReadOnly", ["name": device.volumeName])
-        do {
-            _ = try await run(["umount", "-f", device.devicePath], password: &password, refreshKey: "messages.passwordDialog.restoreToReadOnly", name: device.volumeName)
-        } catch {
-            let fallback = await Shell.runQuiet("/usr/sbin/diskutil", ["unmount", "force", device.devicePath], timeout: 8)
-            guard fallback.ok else { throw AppError.failed("卸载失败，无法还原只读模式: \(error.localizedDescription)") }
-        }
+        try await unmountBestEffort(
+            device,
+            password: &password,
+            refreshKey: "messages.passwordDialog.restoreToReadOnly",
+            failure: "卸载失败，无法还原只读模式"
+        )
         clearMarker(device.disk)
         try await Task.sleep(nanoseconds: 1_000_000_000)
         switch backend {
@@ -217,7 +206,11 @@ struct MountService {
         if trimmed.isEmpty || trimmed.count > 32 || trimmed.range(of: #"[\\/:*?"<>|]"#, options: .regularExpression) != nil || trimmed.rangeOfCharacter(from: .controlCharacters) != nil {
             throw AppError.coded("RENAME_INVALID_NAME")
         }
-        let newVolume = "/Volumes/\(trimmed)"
+        let mounts = await currentMounts()
+        var renamed = device
+        renamed.volumeName = trimmed
+        renamed.volume = ""
+        let newVolume = VolumeMountPoint.allocate(for: renamed, mounts: mounts)
         guard DiskSafety.isSafeMountPoint(newVolume) else {
             throw AppError.coded("RENAME_INVALID_NAME")
         }
@@ -353,6 +346,129 @@ struct MountService {
         next.isMounted = false
         next.isUnmounted = true
         return next
+    }
+
+    private func currentMounts() async -> [MountedVolume] {
+        MountTable.parse(await Shell.runQuiet("/sbin/mount", timeout: 3).stdout)
+    }
+
+    private func isPresentInMountTable(_ devicePath: String) async -> Bool {
+        await currentMounts().contains { $0.devicePath == devicePath }
+    }
+
+    private func isMountedReadWrite(_ devicePath: String) async -> Bool {
+        guard let live = await currentMounts().first(where: { $0.devicePath == devicePath }) else {
+            return false
+        }
+        return !live.isReadOnly
+    }
+
+    /// 已经不在挂载表里就当卸载成功，避免同名卷误伤后把「not currently mounted」堆成错误框。
+    private func unmountBestEffort(
+        _ device: NTFSDevice,
+        password: inout String,
+        refreshKey: String,
+        failure: String
+    ) async throws {
+        do {
+            _ = try await run(
+                ["umount", "-f", device.devicePath],
+                password: &password,
+                refreshKey: refreshKey,
+                name: device.volumeName
+            )
+        } catch {
+            let fallback = await Shell.runQuiet(
+                "/usr/sbin/diskutil",
+                ["unmount", "force", device.devicePath],
+                timeout: 8
+            )
+            if fallback.ok { return }
+            if await !isPresentInMountTable(device.devicePath) { return }
+            throw AppError.failed("\(failure): \(error.localizedDescription)")
+        }
+    }
+
+    private func unmountIfPresent(
+        _ device: NTFSDevice,
+        password: inout String,
+        refreshKey: String
+    ) async throws {
+        do {
+            _ = try await run(
+                ["umount", "-f", device.devicePath],
+                password: &password,
+                refreshKey: refreshKey,
+                name: device.volumeName
+            )
+        } catch {
+            if await isPresentInMountTable(device.devicePath) { throw error }
+        }
+    }
+
+    /// 按占用情况让出 `新加卷` / `新加卷 1`。撞车时再分配一次；已经是读写则视为成功。
+    private func attachNTFS3G(
+        _ device: NTFSDevice,
+        ntfs3g: String,
+        fuseEnv: [String: String],
+        password: inout String
+    ) async throws -> Bool {
+        var lastError: Error?
+        var used = Set<String>()
+        for _ in 1...2 {
+            if await isMountedReadWrite(device.devicePath) { return true }
+            let mountPoint = VolumeMountPoint.allocate(for: device, mounts: await currentMounts())
+            guard DiskSafety.isSafeMountPoint(mountPoint), !used.contains(mountPoint) else { break }
+            used.insert(mountPoint)
+            do {
+                try await runNTFS3G(
+                    device,
+                    at: mountPoint,
+                    ntfs3g: ntfs3g,
+                    fuseEnv: fuseEnv,
+                    password: &password
+                )
+                return true
+            } catch AppError.timeout(_) {
+                throw AppError.timeout("挂载操作超时（10秒），操作已取消以防止卡死。可能的原因：1) 文件系统处于脏状态（如果该 NTFS 设备之前在 Windows 电脑上使用过，且 Windows 启用了快速启动功能，请将设备插回 Windows 电脑并完全关闭后再试）；2) 设备被其他程序占用；3) 系统权限问题。")
+            } catch {
+                lastError = error
+                if await isMountedReadWrite(device.devicePath) { return true }
+            }
+        }
+        if await isMountedReadWrite(device.devicePath) { return true }
+        if let lastError { throw lastError }
+        return false
+    }
+
+    private func runNTFS3G(
+        _ device: NTFSDevice,
+        at mountPoint: String,
+        ntfs3g: String,
+        fuseEnv: [String: String],
+        password: inout String
+    ) async throws {
+        _ = try await run(
+            ["mkdir", "-p", mountPoint],
+            password: &password,
+            refreshKey: "messages.passwordDialog.mountDevice",
+            name: device.volumeName
+        )
+        let uid = getuid()
+        let gid = getgid()
+        let args = [
+            ntfs3g, "-olocal", "-oallow_other", "-oauto_xattr",
+            "-ouid=\(uid)", "-ogid=\(gid)", "-ovolname=\(device.volumeName)",
+            "-onoatime", device.devicePath, mountPoint
+        ]
+        _ = try await run(
+            args,
+            password: &password,
+            refreshKey: "messages.passwordDialog.mountDeviceRetry",
+            name: device.volumeName,
+            timeout: 10,
+            extraEnv: fuseEnv
+        )
     }
 
     /// 系统原生只读挂载。FSKit/xntfs 默认 RW，必须带 readOnly。

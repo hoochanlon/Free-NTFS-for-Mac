@@ -131,8 +131,10 @@ final class AppModel: ObservableObject {
     private var inProgress = Set<String>()
     private var passwordContinuation: CheckedContinuation<String, Error>?
     private var rescanRequested = false
+    /// 正在扫描时又来了插盘事件：把「要自动转读写」记下来，不能跟这次 applyAutoMount:false 一起丢掉。
+    private var rescanWantsAutoMount = false
     private var knownNTFSDevices: [String: NTFSDevice] = [:]
-    /// 只读↔读写期间钉住卡片。DiskMonitor 在卸载瞬间会扫到空表，不能让列表跟着空。
+    /// 只读↔读写期间钉住卡片。按分区路径记，不能拿整盘一把锁把隔壁分区冻住。
     private var switchPins: [String: DeviceListPin.Pin] = [:]
     private var pinReleaseSeq: [String: UInt64] = [:]
     /// 占用不跟挂载事件走。拷文件时每秒读一次 statfs，数字没变就不发布。
@@ -576,6 +578,7 @@ final class AppModel: ObservableObject {
         guard DeviceScanCommit.decide(quitPhase).allowsScan else { return }
         if isScanningDevices {
             rescanRequested = true
+            if applyAutoMount { rescanWantsAutoMount = true }
             return
         }
         await scanDevicesLocked()
@@ -585,12 +588,18 @@ final class AppModel: ObservableObject {
         case .publishWithoutSideEffects:
             // 卡片已经写上。自动挂载会弹密码，等用户取消退出再做。
             rescanRequested = true
+            if applyAutoMount { rescanWantsAutoMount = true }
             return
         case .publish:
             break
         }
         // autoMount 必须在 scanning 锁外：其内部 run → refreshDevicesAfterAction 还会再等 scanning。
-        if applyAutoMount, busyDisks.isEmpty, switchPins.isEmpty {
+        let wantsAuto = AutoMount.shouldApply(
+            scanRequestedAuto: applyAutoMount,
+            coalescedAuto: rescanWantsAutoMount
+        )
+        rescanWantsAutoMount = false
+        if wantsAuto {
             await self.applyAutoMount(explicit: false)
         }
     }
@@ -624,6 +633,7 @@ final class AppModel: ObservableObject {
                 // 确认框还在时也要出卡片。丢掉结果会把「还在扫描」记成「没有设备」。
                 devices = pinnedDuringTransition(scanned)
                 rememberNTFSDevices(devices)
+                attempted = AutoMount.pruningStale(attempted, devices: devices)
                 published = true
                 updateStatus()
                 TrayController.shared.reload()
@@ -729,20 +739,20 @@ final class AppModel: ObservableObject {
     }
 
     private func run(_ action: DeviceAction, _ device: NTFSDevice, extra: String? = nil) async {
-        let diskKey = device.parentDisk
-        guard !busyDisks.contains(diskKey) else {
+        let busyKey = busyKey(for: action, device: device)
+        guard !isDeviceBusy(device) else {
             if action == .mount {
                 clearRemountProgress(device)
             }
             return
         }
         // 赋值新 Set，保证 @Published 一定发通知（in-place mutate 在部分路径上 UI 不刷新）。
-        markBusy(diskKey)
+        markBusy(busyKey)
         pinSwitch(device, action)
         var busyReleased = false
         defer {
             // 兜底：任意提前退出都不会把整卡锁死在灰色。
-            if !busyReleased { clearBusy(diskKey) }
+            if !busyReleased { clearBusy(busyKey) }
             switch action {
             case .mount:
                 clearRemountProgress(device)
@@ -752,8 +762,8 @@ final class AppModel: ObservableObject {
                 break
             }
             // 钉不能在动作结束瞬间摘掉：迟到的卸载通知还会再扫一次空表。
-            if switchPins[diskKey] != nil {
-                schedulePinRelease(diskKey)
+            if switchPins[device.devicePath] != nil {
+                schedulePinRelease(device.devicePath)
             }
         }
         let service = MountService(backend: resolvedMountBackend()) { [weak self] key, params in
@@ -796,7 +806,7 @@ final class AppModel: ObservableObject {
             case .eject:
                 showToast(try await service.eject(device))
             }
-            clearBusy(diskKey)
+            clearBusy(busyKey)
             busyReleased = true
             // 先乐观改本地列表 + 托盘，避免等 mount 表收敛前托盘仍显示旧橙/绿。
             applyOptimisticDeviceState(action, device, renamedTo: action == .rename ? extra : nil)
@@ -804,17 +814,18 @@ final class AppModel: ObservableObject {
             let skipAuto = action == .restore || action == .reset
             await refreshDevicesAfterAction(action, device: device, applyAutoMount: !skipAuto)
         } catch AppError.cancelled {
-            clearBusy(diskKey)
+            clearBusy(busyKey)
             busyReleased = true
-            dropSwitchPin(diskKey)
+            dropSwitchPin(device.devicePath)
             showToast(L10n.t("messages.cancelled"))
             await refreshDevices(applyAutoMount: false)
         } catch {
-            clearBusy(diskKey)
+            clearBusy(busyKey)
             busyReleased = true
-            dropSwitchPin(diskKey)
+            dropSwitchPin(device.devicePath)
             alert = AppAlert(title: L10n.t("dialog.error"), message: mapError(error, action: action, device: device), kind: .error)
-            await refreshDevices(applyAutoMount: false)
+            // 这一块失败了也要让同盘另一分区继续自动转读写；失败块已在 attempted 里，不会死循环。
+            await refreshDevices(applyAutoMount: action == .mount)
         }
     }
 
@@ -832,6 +843,19 @@ final class AppModel: ObservableObject {
         }
     }
 
+    func isDeviceBusy(_ device: NTFSDevice) -> Bool {
+        busyDisks.contains(device.devicePath) || busyDisks.contains(device.parentDisk)
+    }
+
+    private func busyKey(for action: DeviceAction, device: NTFSDevice) -> String {
+        switch action {
+        case .format, .eject:
+            return device.parentDisk
+        default:
+            return device.devicePath
+        }
+    }
+
     private func markBusy(_ diskKey: String) {
         var next = busyDisks
         next.insert(diskKey)
@@ -839,33 +863,38 @@ final class AppModel: ObservableObject {
     }
 
     private func pinSwitch(_ device: NTFSDevice, _ action: DeviceAction) {
-        let key = device.parentDisk
+        let key = device.devicePath
         pinReleaseSeq[key, default: 0] += 1
         switch action {
         case .eject, .format:
-            switchPins.removeValue(forKey: key)
+            dropPins(onParent: device.parentDisk)
         default:
             switchPins[key] = DeviceListPin.Pin(
                 devicePath: device.devicePath,
-                parentDisk: key,
+                parentDisk: device.parentDisk,
                 action: action
             )
         }
     }
 
-    private func dropSwitchPin(_ diskKey: String) {
-        pinReleaseSeq[diskKey, default: 0] += 1
-        switchPins.removeValue(forKey: diskKey)
+    private func dropSwitchPin(_ devicePath: String) {
+        pinReleaseSeq[devicePath, default: 0] += 1
+        switchPins.removeValue(forKey: devicePath)
+    }
+
+    private func dropPins(onParent parent: String) {
+        let keys = switchPins.compactMap { $0.value.parentDisk == parent ? $0.key : nil }
+        for key in keys { dropSwitchPin(key) }
     }
 
     /// 动作已经结束，再留一小段钉，挡住 DiskMonitor 排队过来的卸载空扫描。
-    private func schedulePinRelease(_ diskKey: String, after seconds: Double = 3) {
-        let seq = (pinReleaseSeq[diskKey] ?? 0) + 1
-        pinReleaseSeq[diskKey] = seq
+    private func schedulePinRelease(_ devicePath: String, after seconds: Double = 3) {
+        let seq = (pinReleaseSeq[devicePath] ?? 0) + 1
+        pinReleaseSeq[devicePath] = seq
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
-            guard pinReleaseSeq[diskKey] == seq else { return }
-            switchPins.removeValue(forKey: diskKey)
+            guard pinReleaseSeq[devicePath] == seq else { return }
+            switchPins.removeValue(forKey: devicePath)
         }
     }
 
@@ -878,7 +907,7 @@ final class AppModel: ObservableObject {
     /// 操作成功后立刻改 devices，托盘图标无需等 diskutil/mount 回读。
     private func applyOptimisticDeviceState(_ action: DeviceAction, _ device: NTFSDevice, renamedTo: String? = nil) {
         let match: (NTFSDevice) -> Bool = {
-            $0.identity == device.identity || $0.disk == device.disk || $0.devicePath == device.devicePath
+            $0.devicePath == device.devicePath || $0.disk == device.disk
         }
         switch action {
         case .mount:
@@ -902,7 +931,7 @@ final class AppModel: ObservableObject {
                 knownNTFSDevices[devices[idx].devicePath] = devices[idx]
             }
         case .eject, .format:
-            dropSwitchPin(device.parentDisk)
+            dropPins(onParent: device.parentDisk)
             devices.removeAll(where: match)
             knownNTFSDevices.removeValue(forKey: device.devicePath)
         case .rename:
@@ -910,13 +939,10 @@ final class AppModel: ObservableObject {
             guard !trimmed.isEmpty, trimmed != device.volumeName,
                   let idx = devices.firstIndex(where: match) else { break }
             devices[idx].volumeName = trimmed
-            if devices[idx].volume.hasPrefix("/Volumes/") {
-                devices[idx].volume = "/Volumes/\(trimmed)"
-            }
             knownNTFSDevices[devices[idx].devicePath] = devices[idx]
-            if var pin = switchPins[device.parentDisk], pin.devicePath == device.devicePath {
+            if var pin = switchPins[device.devicePath] {
                 pin.expectedVolumeName = trimmed
-                switchPins[device.parentDisk] = pin
+                switchPins[device.devicePath] = pin
             }
         case .repair:
             break
@@ -963,7 +989,7 @@ final class AppModel: ObservableObject {
                 return found.isUnmounted || !found.isMounted
             case .rename:
                 guard found.isMounted, !found.isUnmounted else { return false }
-                guard let expected = switchPins[device.parentDisk]?.expectedVolumeName, !expected.isEmpty else {
+                guard let expected = switchPins[device.devicePath]?.expectedVolumeName, !expected.isEmpty else {
                     return true
                 }
                 return found.volumeName == expected
@@ -1030,8 +1056,9 @@ final class AppModel: ObservableObject {
         }
 
         // autoMount / 追加 refresh 必须在释放 scanning 之后，否则嵌套 run 会再等 scanning → 死锁。
+        // 转读写过程中 DiskMonitor 几乎总会排队：不能因此把同盘后到的只读分区漏掉。
         if pendingRescan {
-            await refreshDevices(applyAutoMount: false)
+            await refreshDevices(applyAutoMount: shouldAutoMount)
         } else if shouldAutoMount {
             await applyAutoMount(explicit: false)
         }
@@ -1057,6 +1084,7 @@ final class AppModel: ObservableObject {
             )
         }
         let pending = targets.filter { device in
+            if isDeviceBusy(device) || switchPins[device.devicePath] != nil { return false }
             if !explicit && keysFor(device).contains(where: { attempted.contains($0) || inProgress.contains($0) }) {
                 return false
             }
