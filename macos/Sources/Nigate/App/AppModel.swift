@@ -199,22 +199,17 @@ final class AppModel: ObservableObject {
     /// 关红灯应收进菜单栏。退出确认或正在退出时不要切 accessory，否则 Dock 会留下「正在后台运行」。
     var suppressesTrayWithdraw: Bool { quitPhase != .idle }
 
-    func armQuitConfirm() {
-        guard quitPhase == .idle else { return }
-        quitPhase = .confirming
-    }
-
-    /// 标题栏、托盘、Cmd+Q 都走这里。先出确认，不要先 terminate：
-    /// SwiftUI 会在 terminate 被取消后仍关掉窗口，进程却还在。
+    /// 标题栏、托盘、Cmd+Q 都走这里。确认之前不调用 terminate：
+    /// 一旦取消，SwiftUI 会关掉窗口，之后每次退出都还是取消，进程就留在 Dock。
     func requestQuit() {
         if quitPhase == .exiting {
-            finishQuit()
+            quitImmediately()
             return
         }
         presentQuitConfirm()
     }
 
-    /// 退出确认画在主窗口内，避免独立浮层把窗口拖走，也不走 AppKit sheet（会拖慢 terminate）。
+    /// 退出确认画在主窗口内。窗口已经没了就直接结束，避免确认框没处显示、进程却还在。
     func presentQuitConfirm() {
         guard quitPhase != .exiting else { return }
         quitPhase = .confirming
@@ -223,8 +218,16 @@ final class AppModel: ObservableObject {
         passwordSheet = nil
         renameDevice = nil
         alert = nil
+        let hadWindow = Self.mainWindow()?.isVisible == true
         revealMainWindow()
         quitConfirmOpen = true
+        guard !hadWindow else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            guard let self, self.quitPhase == .confirming else { return }
+            if Self.mainWindow()?.isVisible != true {
+                self.quitImmediately()
+            }
+        }
     }
 
     func cancelQuit() {
@@ -234,27 +237,26 @@ final class AppModel: ObservableObject {
     }
 
     func confirmQuit() {
-        guard quitPhase != .exiting else { return }
-        quitPhase = .exiting
         quitConfirmOpen = false
-        finishQuit()
+        quitImmediately()
     }
 
-    /// 先拆掉会把进程留在后台的东西，再 terminate。
-    /// 用过一段时间后，扫描回调和状态栏图标会在 terminate 期间被装回去，
-    /// AppKit 就改成「停止在后台运行」并且不再返回。后台线程负责把进程结束掉。
-    private func finishQuit() {
+    /// 不走 NSApp.terminate。取消过一次之后，系统会把后续退出改成「正在后台运行」并且不再返回。
+    func quitImmediately() {
         quitPhase = .exiting
         shutdown()
-        NSApp.setActivationPolicy(.regular)
         if NSApp.modalWindow != nil { NSApp.stopModal() }
-        DispatchQueue.global().asyncAfter(deadline: .now() + 0.3) { exit(0) }
-        NSApp.terminate(nil)
         exit(0)
     }
 
     func withdrawToTray() {
-        NSApp.setActivationPolicy(.accessory)
+        // 窗口还在关闭时切 accessory，Dock 图标不会消失，只会变成「正在后台运行」。
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.quitPhase == .idle else { return }
+            NSApp.setActivationPolicy(.accessory)
+            var psn = ProcessSerialNumber(highLongOfPSN: 0, lowLongOfPSN: UInt32(kCurrentProcess))
+            TransformProcessType(&psn, ProcessApplicationTransformState(kProcessTransformToUIElementApplication))
+        }
     }
 
     private static func mainWindow() -> NSWindow? {

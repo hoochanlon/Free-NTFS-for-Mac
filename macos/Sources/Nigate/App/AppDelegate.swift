@@ -27,25 +27,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard let model else { return .terminateNow }
-        if model.quitPhase == .exiting {
-            for window in NSApp.windows {
-                if let sheet = window.attachedSheet {
-                    window.endSheet(sheet)
-                }
-            }
-            if NSApp.modalWindow != nil { NSApp.stopModal() }
-            model.shutdown()
-            return .terminateNow
+        // Dock / 系统退出不能再取消。取消一次后窗口没了，后面每次退出都还是取消，
+        // Dock 就一直显示「正在后台运行」。
+        if let model {
+            model.quitImmediately()
         }
-        // Dock「退出」仍会直接 terminate。先进入确认，再取消这次终止。
-        // 取消前若已切到 accessory，SwiftUI 关掉窗口后 Dock 会留下「停止在后台运行」。
-        model.armQuitConfirm()
-        model.revealMainWindow()
-        DispatchQueue.main.async {
-            model.presentQuitConfirm()
-        }
-        return .terminateCancel
+        exit(0)
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
