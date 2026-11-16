@@ -248,7 +248,7 @@
     "savePassword": "Passwort bis zum Beenden merken",
     "savePasswordDesc": "Wenn aktiviert, geben Sie das Administrator-Passwort einmal ein und es wird bis zum Beenden wiederverwendet. Es bleibt nur im Speicher und wird nicht im Schlüsselbund abgelegt. Ohne Developer ID kann der Schlüsselbund diese App nicht zuverlässig erkennen; Speichern dort führt zu wiederholten Abfragen",
     "deletePassword": "Passwort vergessen",
-    "deletePasswordConfirm": "Das für diese Sitzung gemerkte Passwort vergessen und einen eventuell noch vorhandenen Schlüsselbund-Eintrag älterer Versionen entfernen?",
+    "deletePasswordConfirm": "Aktuelles Passwort vergessen?",
     "deletePasswordSuccess": "Passwort vergessen",
     "deletePasswordError": "Löschen des Passworts fehlgeschlagen, bitte erneut versuchen",
     "startupTab": "Beim Start zu öffnender Tab",

@@ -248,7 +248,7 @@
     "savePassword": "Remember Password Until Quit",
     "savePasswordDesc": "When enabled, you enter the administrator password once and it is reused until you quit. It stays in memory only and is not stored in Keychain. Without a Developer ID, Keychain cannot reliably recognize this app, so saving there can keep prompting",
     "deletePassword": "Forget Password",
-    "deletePasswordConfirm": "Forget the password remembered for this session, and remove any leftover Keychain item from older versions?",
+    "deletePasswordConfirm": "Forget the current password?",
     "deletePasswordSuccess": "Password forgotten",
     "deletePasswordError": "Failed to delete password, please try again",
     "startupTab": "Tab to Open on Startup",

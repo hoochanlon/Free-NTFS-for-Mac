@@ -248,7 +248,7 @@
     "savePassword": "終了するまでパスワードを記憶",
     "savePasswordDesc": "有効にすると、管理者パスワードを一度入力すれば終了まで再利用します。メモリ上のみ保持し、キーチェーンには書き込みません。Developer ID がないとキーチェーンはアプリを安定して識別できず、保存すると何度も確認されます",
     "deletePassword": "パスワードを忘れる",
-    "deletePasswordConfirm": "このセッションで記憶したパスワードを忘れ、以前キーチェーンに残った項目も削除しますか？",
+    "deletePasswordConfirm": "現在のパスワードを忘れますか？",
     "deletePasswordSuccess": "パスワードを忘れました",
     "deletePasswordError": "パスワードの削除に失敗しました。もう一度お試しください",
     "startupTab": "起動時に開くタブ",

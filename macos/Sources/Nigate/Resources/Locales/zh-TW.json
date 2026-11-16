@@ -248,7 +248,7 @@
     "savePassword": "本次執行記住密碼",
     "savePasswordDesc": "啟用後，輸入一次即可在結束前自動用於掛載等操作。密碼只留在記憶體，不寫入鑰匙圈。沒有開發者簽章時，鑰匙圈無法穩定識別本應用，反覆儲存反而會再跳出提示",
     "deletePassword": "忘記目前密碼",
-    "deletePasswordConfirm": "確定要忘記本次記住的密碼，並清除以前儲存在鑰匙圈裡的項目嗎？",
+    "deletePasswordConfirm": "確定要忘記目前密碼嗎？",
     "deletePasswordSuccess": "已忘記密碼",
     "deletePasswordError": "刪除密碼失敗，請重試",
     "startupTab": "啟動時開啟的標籤頁",
