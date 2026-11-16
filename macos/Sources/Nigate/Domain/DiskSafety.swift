@@ -282,6 +282,19 @@ enum DiskSafety {
         return String(cleaned.prefix(32))
     }
 
+    /// diskutil 在无文件系统的整盘上把 Volume Name / Mount Point 写成占位句。
+    static func isPlaceholderVolumeName(_ name: String) -> Bool {
+        let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if n.isEmpty { return true }
+        let lower = n.lowercased()
+        if lower.hasPrefix("not applicable") { return true }
+        if lower.contains("no file system") { return true }
+        if n.hasPrefix("不适用") { return true }
+        if n.contains("无文件系统") || n.contains("没有文件系统") { return true }
+        if lower == "none" || n == "无" { return true }
+        return false
+    }
+
     static func field(_ info: String, _ name: String) -> String? {
         let pattern = #"^\s*"# + NSRegularExpression.escapedPattern(for: name) + #":\s*(.+)$"#
         guard let regex = try? NSRegularExpression(pattern: pattern, options: [.anchorsMatchLines, .caseInsensitive]) else {

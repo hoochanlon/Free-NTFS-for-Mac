@@ -126,6 +126,8 @@ private final class SudoBox: @unchecked Sendable {
             item.resume(throwing: AppError.incorrectPassword)
         } else if FuseLibrary.isMissingLibraryError(combined) {
             item.resume(throwing: AppError.macfuseMissing)
+        } else if NTFSMountIssue.isUnclean(combined) {
+            item.resume(throwing: AppError.uncleanVolume)
         } else {
             let message = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
             item.resume(throwing: AppError.failed(message.isEmpty ? "退出码 \(status)" : message))

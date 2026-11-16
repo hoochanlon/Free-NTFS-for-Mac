@@ -1378,6 +1378,9 @@ final class AppModel: ObservableObject {
     }
 
     private func mapError(_ error: Error, action: DeviceAction, device: NTFSDevice) -> String {
+        if NTFSMountIssue.isUnclean(error) {
+            return L10n.t("messages.mountUnclean")
+        }
         if let app = error as? AppError, let code = app.code {
             if code.hasPrefix("REPAIR_UNMOUNT_FAILED:") {
                 return L10n.t("messages.repairUnmountFailed", ["error": String(code.dropFirst("REPAIR_UNMOUNT_FAILED:".count))])

@@ -88,7 +88,7 @@ enum DeviceScanner {
             )
             filled.append(device)
         }
-        return collapsingDuplicates(filled).sorted { $0.disk < $1.disk }
+        return droppingShadowWholeDisks(collapsingDuplicates(filled)).sorted { $0.disk < $1.disk }
     }
 
     /// 挂载表把同一节点打两行时，列表和自动挂载都只能看见一条。
@@ -108,6 +108,18 @@ enum DeviceScanner {
             }
         }
         return ordered
+    }
+
+    /// PE / Ventoy 这类 MBR 盘会同时冒出整盘 `diskN` 和分区 `diskNsM`。
+    /// 整盘没有可挂载的文件系统，只留分区卡。无分区表的 superfloppy 整盘仍保留。
+    static func droppingShadowWholeDisks(_ devices: [NTFSDevice]) -> [NTFSDevice] {
+        let partitionedParents = Set(
+            devices.filter { DiskSafety.isPartition($0.devicePath) }.map(\.parentDisk)
+        )
+        return devices.filter { device in
+            guard DiskSafety.isWholeDisk(device.devicePath) else { return true }
+            return !partitionedParents.contains(device.disk)
+        }
     }
 
     /// 保留主记录的读写状态，把另一行才有的 UUID / 挂载点补上。
@@ -171,14 +183,26 @@ enum DeviceScanner {
         knownDevice: NTFSDevice?
     ) async -> NTFSDevice? {
         let info = await Shell.runQuiet("/usr/sbin/diskutil", ["info", path], timeout: 1.5).stdout
+        let nameField = DiskSafety.field(info, "Volume Name")
+        let mount = DiskSafety.field(info, "Mount Point") ?? ""
+        let mounted = DiskSafety.isSafeMountPoint(mount)
+        // 分区表整盘的 Volume Name 是「Not applicable (no file system)」，不能当成 NTFS 卷。
+        if DiskSafety.isWholeDisk(path),
+           !mounted,
+           DiskSafety.isPlaceholderVolumeName(nameField ?? "") {
+            return nil
+        }
         let confirmedNTFS = DiskSafety.isNTFSFilesystem(info)
             || DiskSafety.isNTFSVolumeInfo(info)
             || knownDevice.map { DiskSafety.isSameKnownVolume($0, devicePath: path, info: info) } == true
             || knownDevice.map { DiskSafety.canRetainUnmountedNTFSCandidate($0, devicePath: path, info: info) } == true
         guard confirmedNTFS else { return nil }
-        let name = DiskSafety.field(info, "Volume Name") ?? disk
-        let mount = DiskSafety.field(info, "Mount Point") ?? ""
-        let mounted = !mount.isEmpty && mount != "Not applicable" && mount != "none"
+        let name: String
+        if let nameField, !DiskSafety.isPlaceholderVolumeName(nameField) {
+            name = nameField
+        } else {
+            name = disk
+        }
         let volumeUUID = DiskSafety.field(info, "Volume UUID")
         let partitionUUID = DiskSafety.partitionUUID(in: info)
         // 未走挂载表的路径：系统原生挂载按只读处理；未挂载也标只读待用户选择

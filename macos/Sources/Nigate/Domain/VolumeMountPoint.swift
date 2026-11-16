@@ -42,4 +42,15 @@ enum VolumeMountPoint {
     static func occupied(from mounts: [MountedVolume], excludingDevicePath: String) -> Set<String> {
         Set(mounts.compactMap { $0.devicePath == excludingDevicePath ? nil : $0.mountPoint })
     }
+
+    /// Finder / macFUSE 显示名跟挂载点走，避免两块「新加卷」在桌面上撞成同一个名字。
+    static func fuseVolumeName(fromMountPoint path: String) -> String {
+        let raw = path.hasPrefix("/Volumes/") && path.count > "/Volumes/".count
+            ? String(path.dropFirst("/Volumes/".count))
+            : path
+        let cleaned = DiskSafety.sanitizeVolumeName(raw)
+            .replacingOccurrences(of: ",", with: " ")
+            .replacingOccurrences(of: "=", with: " ")
+        return cleaned.isEmpty ? "NTFS" : cleaned
+    }
 }

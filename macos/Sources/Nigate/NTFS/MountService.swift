@@ -471,6 +471,7 @@ struct MountService {
     }
 
     /// 按占用情况让出 `新加卷` / `新加卷 1`。撞车时再分配一次；已经是读写则视为成功。
+    /// 脏卷先 ntfsfix 一次再挂；修完仍失败才把 unclean 映射给界面。
     private func attachNTFS3G(
         _ device: NTFSDevice,
         ntfs3g: String,
@@ -479,7 +480,8 @@ struct MountService {
     ) async throws -> Bool {
         var lastError: Error?
         var used = Set<String>()
-        for _ in 1...2 {
+        var recovered = false
+        for _ in 1...3 {
             if await isMountedReadWrite(device.devicePath) { return true }
             let mountPoint = VolumeMountPoint.allocate(for: device, mounts: await currentMounts())
             guard DiskSafety.isSafeMountPoint(mountPoint), !used.contains(mountPoint) else { break }
@@ -496,12 +498,21 @@ struct MountService {
             } catch AppError.timeout(_) {
                 throw AppError.timeout("挂载操作超时（10秒），操作已取消以防止卡死。可能的原因：1) 文件系统处于脏状态（如果该 NTFS 设备之前在 Windows 电脑上使用过，且 Windows 启用了快速启动功能，请将设备插回 Windows 电脑并完全关闭后再试）；2) 设备被其他程序占用；3) 系统权限问题。")
             } catch {
-                lastError = error
+                lastError = NTFSMountIssue.mapped(error)
                 if await isMountedReadWrite(device.devicePath) { return true }
+                if !recovered, NTFSMountIssue.isUnclean(error) {
+                    recovered = true
+                    used.removeAll()
+                    do {
+                        try await recoverDirtyVolume(device, password: &password)
+                    } catch {
+                        throw NTFSMountIssue.mapped(error)
+                    }
+                }
             }
         }
         if await isMountedReadWrite(device.devicePath) { return true }
-        if let lastError { throw lastError }
+        if let lastError { throw NTFSMountIssue.mapped(lastError) }
         return false
     }
 
@@ -520,9 +531,10 @@ struct MountService {
         )
         let uid = getuid()
         let gid = getgid()
+        let volname = VolumeMountPoint.fuseVolumeName(fromMountPoint: mountPoint)
         let args = [
             ntfs3g, "-olocal", "-oallow_other", "-oauto_xattr",
-            "-ouid=\(uid)", "-ogid=\(gid)", "-ovolname=\(device.volumeName)",
+            "-ouid=\(uid)", "-ogid=\(gid)", "-ovolname=\(volname)",
             "-onoatime", device.devicePath, mountPoint
         ]
         _ = try await run(
@@ -616,7 +628,7 @@ struct MountService {
                 name: volumeName
             )
         } catch {
-            guard isNTFSDirtyVolumeError(error) else { throw error }
+            guard NTFSMountIssue.isUnclean(error) else { throw error }
             _ = try await run(
                 [ntfslabel, "-f", devicePath, label],
                 password: &password,
@@ -626,12 +638,26 @@ struct MountService {
         }
     }
 
-    private func isNTFSDirtyVolumeError(_ error: Error) -> Bool {
-        let text = error.localizedDescription.lowercased()
-        return text.contains("scheduled for check")
-            || text.contains("volume is dirty")
-            || text.contains("dirty volume")
-            || (text.contains("force") && text.contains("option"))
+    /// 已卸载前提下清 dirty bit。修完由调用方再挂，不在这里抢挂载点。
+    private func recoverDirtyVolume(_ device: NTFSDevice, password: inout String) async throws {
+        guard DiskSafety.isMountableNode(device.devicePath) else { throw AppError.uncleanVolume }
+        let ntfsfix = try await ntfsfixPath()
+        try await unmountIfPresent(
+            device,
+            password: &password,
+            refreshKey: "messages.passwordDialog.mountDevice"
+        )
+        do {
+            _ = try await run(
+                [ntfsfix, device.devicePath],
+                password: &password,
+                refreshKey: "messages.passwordDialog.mountDevice",
+                name: device.volumeName
+            )
+        } catch {
+            throw NTFSMountIssue.mapped(error)
+        }
+        try await Task.sleep(nanoseconds: 500_000_000)
     }
 
     private func run(

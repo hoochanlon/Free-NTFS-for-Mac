@@ -15,6 +15,7 @@ enum AppError: Error, Sendable {
     case invalidPath
     case invalidName
     case formatNotAllowed
+    case uncleanVolume
     case failed(String)
     case coded(String)
 
@@ -41,6 +42,7 @@ extension AppError: LocalizedError {
         case .invalidPath: return L10n.t("messages.repairDeviceUnavailable")
         case .invalidName: return L10n.t("messages.renameInvalidName")
         case .formatNotAllowed: return L10n.t("messages.formatNotAllowed")
+        case .uncleanVolume: return L10n.t("messages.mountUnclean")
         case .failed(let message): return message
         case .coded(let code): return code
         }

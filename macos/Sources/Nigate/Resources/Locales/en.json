@@ -332,6 +332,7 @@
     "renameRemountFailed": "The label was written, but remounting failed: {error}",
     "macfuseMissing": "macFUSE is not fully installed, so ntfs-3g cannot load /usr/local/lib/libfuse.2.dylib. Reinstall macFUSE from the Dependencies tab (Homebrew listing it is not enough) and approve the system extension if asked.",
     "renameFailedNeedChkdsk": "Could not write the NTFS volume label. Connect the drive to a Windows PC and run this command as Administrator. When it finishes, try again on your Mac:\nchkdsk X: /x /r /f\nReplace X: with the drive letter of this device.",
+    "mountUnclean": "This NTFS volume was not safely ejected from Windows and is dirty, so it cannot be mounted read-write. Click Repair first, or plug it back into Windows, shut down fully, and try again.",
     "formatting": "Formatting {name} as GPT NTFS...",
     "formattingHint": "Formatting {name} as GPT NTFS. This can take several minutes. Do not disconnect the device or interrupt the process.",
     "remountingReadWrite": "Switching {name} from read-only to read-write...",

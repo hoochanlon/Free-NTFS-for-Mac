@@ -332,6 +332,7 @@
     "renameRemountFailed": "卷標已寫入，但重新掛載失敗：{error}",
     "macfuseMissing": "macFUSE 未完整安裝，ntfs-3g 找不到 /usr/local/lib/libfuse.2.dylib。請到依賴頁重新安裝 macFUSE（僅 Homebrew 列出 macfuse 不夠），並依系統提示核准延伸功能。",
     "renameFailedNeedChkdsk": "無法寫入 NTFS 卷標。請把設備接到 Windows 電腦，以系統管理員身分執行下面的命令修復，完成後再回到 Mac 重試：\nchkdsk X: /x /r /f\n將 X: 替換為該設備的實際磁碟機代號。",
+    "mountUnclean": "此 NTFS 卷在 Windows 上未安全退出，處於髒狀態，無法直接改為讀寫。請先點「修復」，或把裝置插回 Windows 徹底關機後再試。",
     "formatting": "正在將 {name} 格式化為 GPT NTFS...",
     "formattingHint": "正在將 {name} 格式化為 GPT NTFS。過程可能需要幾分鐘，請勿拔出設備或中斷操作。",
     "remountingReadWrite": "正在將 {name} 從只讀轉為讀寫...",

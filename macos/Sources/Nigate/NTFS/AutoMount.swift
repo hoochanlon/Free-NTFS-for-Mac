@@ -13,7 +13,8 @@ enum AutoMount {
         // 自动读写是固定产品行为：扫描后把已挂载只读 NTFS 改挂为读写。
         // 仅排除本次连接的手动只读、冷却中、进行中，以及非 explicit 的已尝试项。
         return devices.filter { device in
-            guard device.isMounted, device.isReadOnly, !device.isUnmounted else { return false }
+            let leftover = isNameCollisionLeftover(device, among: devices)
+            guard leftover || (device.isMounted && device.isReadOnly && !device.isUnmounted) else { return false }
             // 用户明确还原只读后，绝不能再被自动改挂为读写
             if isManuallyReadOnly(device, settings: settings) { return false }
             let id = device.identity
@@ -22,6 +23,18 @@ enum AutoMount {
             if isRecorded(device, in: inProgress) { return false }
             if !explicit && isRecorded(device, in: attempted) { return false }
             return true
+        }
+    }
+
+    /// 同名卷第二块常被系统跳过，停在未挂载。同一父盘上已有已挂载的同名兄弟时补挂。
+    static func isNameCollisionLeftover(_ device: NTFSDevice, among devices: [NTFSDevice]) -> Bool {
+        guard device.needsMount, !device.volumeName.isEmpty else { return false }
+        return devices.contains { other in
+            other.devicePath != device.devicePath
+                && other.parentDisk == device.parentDisk
+                && other.volumeName == device.volumeName
+                && other.isMounted
+                && !other.isUnmounted
         }
     }
 

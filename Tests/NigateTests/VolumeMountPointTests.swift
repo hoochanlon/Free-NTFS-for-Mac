@@ -87,4 +87,10 @@ final class VolumeMountPointTests: XCTestCase {
         )
         XCTAssertEqual(path, "/Volumes/新加卷 1")
     }
+
+    func testFuseVolumeNameFollowsMountPoint() {
+        XCTAssertEqual(VolumeMountPoint.fuseVolumeName(fromMountPoint: "/Volumes/新加卷"), "新加卷")
+        XCTAssertEqual(VolumeMountPoint.fuseVolumeName(fromMountPoint: "/Volumes/新加卷 1"), "新加卷 1")
+        XCTAssertEqual(VolumeMountPoint.fuseVolumeName(fromMountPoint: "/Volumes/a,b=c"), "a b c")
+    }
 }

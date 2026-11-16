@@ -514,6 +514,16 @@ final class DiskSafetyTests: XCTestCase {
         XCTAssertEqual(name, "backup")
         XCTAssertLessThanOrEqual(name.count, 32)
     }
+
+    func testPlaceholderVolumeNameMatchesDiskutilWholeDiskCopy() {
+        XCTAssertTrue(DiskSafety.isPlaceholderVolumeName("Not applicable (no file system)"))
+        XCTAssertTrue(DiskSafety.isPlaceholderVolumeName("Not applicable"))
+        XCTAssertTrue(DiskSafety.isPlaceholderVolumeName("不适用（无文件系统）"))
+        XCTAssertTrue(DiskSafety.isPlaceholderVolumeName("none"))
+        XCTAssertTrue(DiskSafety.isPlaceholderVolumeName(""))
+        XCTAssertFalse(DiskSafety.isPlaceholderVolumeName("新加卷"))
+        XCTAssertFalse(DiskSafety.isPlaceholderVolumeName("Ventoy"))
+    }
 }
 
 final class TrayDeviceStatusTests: XCTestCase {
@@ -826,6 +836,25 @@ final class AutoMountTests: XCTestCase {
         XCTAssertFalse(AutoMount.shouldApply(scanRequestedAuto: false, coalescedAuto: false))
     }
 
+    func testUnmountedSameLabelSiblingIsLeftoverCandidate() {
+        let mounted = readOnlyDevice(disk: "disk4s1", name: "新加卷", uuid: "vol-a")
+        var leftover = readOnlyDevice(disk: "disk4s2", name: "新加卷", uuid: "vol-b")
+        leftover.isMounted = false
+        leftover.isUnmounted = true
+        leftover.volume = ""
+        XCTAssertTrue(AutoMount.isNameCollisionLeftover(leftover, among: [mounted, leftover]))
+        XCTAssertFalse(AutoMount.isNameCollisionLeftover(mounted, among: [mounted, leftover]))
+        let targets = AutoMount.targets(
+            devices: [mounted, leftover],
+            settings: AppSettings(),
+            attempted: [],
+            cooldown: [:],
+            inProgress: [],
+            explicit: false
+        )
+        XCTAssertEqual(Set(targets.map(\.disk)), ["disk4s1", "disk4s2"])
+    }
+
     private func readOnlyDevice(disk: String, name: String, uuid: String?) -> NTFSDevice {
         NTFSDevice(
             disk: disk,
@@ -873,6 +902,19 @@ final class MountIdentityTests: XCTestCase {
         XCTAssertFalse(whole.sameMount(as: part))
         let collapsed = DeviceScanner.collapsingDuplicates([whole, part])
         XCTAssertEqual(Set(collapsed.map(\.disk)), ["disk5s1", "disk8"])
+    }
+
+    func testVentoyWholeDiskShadowIsDroppedWhenPartitionsExist() {
+        let whole = sample(disk: "disk4", name: "Not applicable (no file system)", readOnly: true, uuid: nil)
+        let first = sample(disk: "disk4s1", name: "新加卷", readOnly: true, uuid: "vol-a")
+        let second = sample(disk: "disk4s2", name: "新加卷", readOnly: true, uuid: "vol-b")
+        let kept = DeviceScanner.droppingShadowWholeDisks([whole, first, second])
+        XCTAssertEqual(kept.map(\.disk).sorted(), ["disk4s1", "disk4s2"])
+    }
+
+    func testSuperfloppyWholeDiskIsKeptWithoutPartitions() {
+        let whole = sample(disk: "disk8", name: "移动临时存储", readOnly: true, uuid: nil)
+        XCTAssertEqual(DeviceScanner.droppingShadowWholeDisks([whole]).map(\.disk), ["disk8"])
     }
 
     func testRepeatedSuccessToastIsSuppressed() {
@@ -965,5 +1007,36 @@ final class MountBackendPolicyTests: XCTestCase {
             systemVersion: NigateSystemVersion(major: 15, minor: 4, patch: 0),
             isFSKitControlPlaneAvailable: false
         ))
+    }
+}
+
+final class NTFSMountIssueTests: XCTestCase {
+    func testDetectsNtfs3gUncleanStderr() {
+        let stderr = """
+        The disk contains an unclean file system (0, 0).
+        The file system wasn't safely closed on Windows. Fixing.
+        """
+        XCTAssertTrue(NTFSMountIssue.isUnclean(stderr))
+        XCTAssertTrue(NTFSMountIssue.isUnclean(AppError.failed(stderr)))
+        XCTAssertTrue(NTFSMountIssue.isUnclean(AppError.uncleanVolume))
+        XCTAssertFalse(NTFSMountIssue.isUnclean("failed to mount"))
+        XCTAssertFalse(NTFSMountIssue.isUnclean(AppError.macfuseMissing))
+    }
+
+    func testMappedUncleanBecomesTypedError() {
+        let error = NTFSMountIssue.mapped(AppError.failed("Volume is dirty. Scheduled for check."))
+        XCTAssertTrue(NTFSMountIssue.isUnclean(error))
+        XCTAssertTrue(error is AppError)
+        if let app = error as? AppError, case .uncleanVolume = app {
+            XCTAssertTrue(true)
+        } else {
+            XCTFail("expected uncleanVolume")
+        }
+        let clean = NTFSMountIssue.mapped(AppError.failed("device busy"))
+        if let app = clean as? AppError, case .failed(let message) = app {
+            XCTAssertEqual(message, "device busy")
+        } else {
+            XCTFail("expected failed")
+        }
     }
 }
