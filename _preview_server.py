@@ -32,7 +32,9 @@ WATCHED = (
     ROOT / "README.ja.md",
     ROOT / "_preview_server.py",
     ROOT / "assets" / "css" / "github-alerts.css",
+    ROOT / "assets" / "css" / "theme.css",
     ROOT / "assets" / "js" / "github-alerts.js",
+    ROOT / "assets" / "js" / "theme.js",
 )
 
 PAGES = {
@@ -68,14 +70,24 @@ TEMPLATE = """<!DOCTYPE html>
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Nigate | Free-NTFS-for-Mac</title>
+    <title>Nigate(Free-NTFS-for-Mac)</title>
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('nigate-theme');
+          var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        } catch (e) {}
+      })();
+    </script>
     <link rel="stylesheet" href="https://hoochanlon.github.io/Free-NTFS-for-Mac/assets/css/style.css">
     <link rel="stylesheet" href="/assets/css/github-alerts.css?__QS__">
+    <link rel="stylesheet" href="/assets/css/theme.css?__QS__">
     <script src="/assets/js/github-alerts.js?__QS__" defer></script>
+    <script src="/assets/js/theme.js?__QS__" defer></script>
   </head>
   <body>
     <div class="container-lg px-3 my-5 markdown-body main-content">
-      <h1><a href="/_preview.html">Free-NTFS-for-Mac</a></h1>
       __CONTENT__
       <div class="footer border-top border-gray-light mt-5 pt-3 text-right text-gray">
         Local preview of <code>__SOURCE__</code>. Auto-reloads when Markdown changes.

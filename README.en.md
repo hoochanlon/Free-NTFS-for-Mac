@@ -1,4 +1,4 @@
-# Nigate
+# Nigate(Free-NTFS-for-Mac)
 
 [![Stars](https://img.shields.io/github/stars/hoochanlon/Free-NTFS-for-Mac?logo=github&style=flat-square)](https://github.com/hoochanlon/Free-NTFS-for-Mac) [![License](https://img.shields.io/github/license/hoochanlon/Free-NTFS-for-Mac?style=flat-square)](https://github.com/hoochanlon/Free-NTFS-for-Mac/blob/main/LICENSE) [![Email](https://img.shields.io/badge/Email-联系我-blue?style=flat-square&logo=gmail&logoColor=white)](mailto:hoochanlon@outlook.com)
 

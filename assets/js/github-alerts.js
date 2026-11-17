@@ -185,8 +185,20 @@
     });
   }
 
+  function dropDuplicateSiteTitle() {
+    var root = document.querySelector('.markdown-body') || document.body;
+    var first = root.querySelector(':scope > h1');
+    if (!first || first.id) return;
+    first.remove();
+    var heading = root.querySelector(':scope > h1');
+    if (!heading) return;
+    var text = (heading.textContent || '').replace(/\s+/g, ' ').trim();
+    if (text) document.title = text;
+  }
+
   function run() {
-    var root = document.querySelector('.main-content') || document.body;
+    dropDuplicateSiteTitle();
+    var root = document.querySelector('.markdown-body') || document.querySelector('.main-content') || document.body;
     Array.prototype.forEach.call(root.querySelectorAll('blockquote'), enhanceAlert);
     autolink(root);
     addCopyButtons(root);

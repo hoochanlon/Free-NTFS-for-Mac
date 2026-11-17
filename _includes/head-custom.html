@@ -1,3 +1,14 @@
 {% include head-custom-google-analytics.html %}
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem('nigate-theme');
+      var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    } catch (e) {}
+  })();
+</script>
 <link rel="stylesheet" href="{{ '/assets/css/github-alerts.css' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/css/theme.css' | relative_url }}">
 <script src="{{ '/assets/js/github-alerts.js' | relative_url }}" defer></script>
+<script src="{{ '/assets/js/theme.js' | relative_url }}" defer></script>

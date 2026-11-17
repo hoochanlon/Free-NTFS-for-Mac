@@ -121,3 +121,8 @@
   color: #1a7f37;
   border-color: #4ac26b;
 }
+
+/* Primer 主题会再插一行仓库名 h1，与 README 标题重复 */
+.markdown-body > h1:first-child:not([id]) {
+  display: none;
+}
