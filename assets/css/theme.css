@@ -125,10 +125,15 @@ html[data-theme='dark'] .markdown-body table tr:nth-child(2n) {
   background-color: #161b22;
 }
 
-html[data-theme='dark'] .markdown-body code,
+html[data-theme='dark'] .markdown-body :not(pre) > code,
 html[data-theme='dark'] .markdown-body tt {
   background-color: rgba(110, 118, 129, 0.4);
   color: #c9d1d9;
+}
+
+html[data-theme='dark'] .markdown-body pre code {
+  background: transparent;
+  color: inherit;
 }
 
 html[data-theme='dark'] .markdown-body pre,

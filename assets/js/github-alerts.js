@@ -1,4 +1,4 @@
-/* GitHub Pages 兼容增强：callout、裸 URL 自动链接、代码块复制。 */
+/* GitHub Pages 兼容增强：callout、裸 URL 自动链接、代码块复制与高亮。 */
 (function () {
   var MARKER = /^\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION|WARN)\]\s*/i;
   var URL_RE = /\bhttps?:\/\/[^\s<>"'`]+/gi;
@@ -153,6 +153,156 @@
     button.replaceChildren(svgIcon(kind));
   }
 
+  var SHELL_LANG = { sh: 1, bash: 1, shell: 1, zsh: 1, console: 1, fish: 1 };
+  var TEXT_LANG = { text: 1, plaintext: 1, txt: 1 };
+  var SHELL_KEYWORD = {
+    if: 1, then: 1, else: 1, elif: 1, fi: 1, for: 1, while: 1, until: 1,
+    do: 1, done: 1, case: 1, esac: 1, in: 1, function: 1, select: 1
+  };
+  var SHELL_BUILTIN = {
+    cd: 1, echo: 1, export: 1, test: 1, exec: 1, eval: 1, set: 1, unset: 1,
+    source: 1, exit: 1, pwd: 1, printf: 1, read: 1, trap: 1, wait: 1, alias: 1,
+    true: 1, false: 1, shift: 1, continue: 1, break: 1, return: 1, local: 1,
+    declare: 1, let: 1, command: 1, type: 1, hash: 1, jobs: 1, fg: 1, bg: 1,
+    kill: 1, time: 1, umask: 1
+  };
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function tok(kind, text) {
+    return '<span class="hljs-' + kind + '">' + escapeHtml(text) + '</span>';
+  }
+
+  function fenceLang(wrap, code) {
+    var cls = ((wrap && wrap.className) || '') + ' ' + ((code && code.className) || '');
+    var found = cls.match(/language-([a-z0-9_+-]+)/i);
+    return found ? found[1].toLowerCase() : '';
+  }
+
+  function highlightShellLine(line) {
+    var out = '';
+    var i = 0;
+    var n = line.length;
+    var firstWord = true;
+    while (i < n) {
+      var rest = line.slice(i);
+      var ch = rest.charAt(0);
+      var m;
+      if (ch === ' ' || ch === '\t') {
+        m = rest.match(/^[ \t]+/)[0];
+        out += m;
+        i += m.length;
+        continue;
+      }
+      if (ch === '#') {
+        out += tok('comment', rest);
+        break;
+      }
+      if (ch === "'" || ch === '"') {
+        m = ch === "'" ? rest.match(/^'[^']*'/) : rest.match(/^"(?:\\.|[^"\\])*"/);
+        if (m) {
+          out += tok('string', m[0]);
+          i += m[0].length;
+          firstWord = false;
+          continue;
+        }
+      }
+      if (ch === '\\') {
+        out += escapeHtml(rest.slice(0, 2));
+        i += rest.length > 1 ? 2 : 1;
+        continue;
+      }
+      m = rest.match(/^[A-Za-z_][A-Za-z0-9_]*=/);
+      if (m) {
+        out += tok('variable', m[0].slice(0, -1)) + '=';
+        i += m[0].length;
+        firstWord = false;
+        continue;
+      }
+      m = rest.match(/^\$\{[^}]*\}|^\$[A-Za-z_]\w*/);
+      if (m) {
+        out += tok('variable', m[0]);
+        i += m[0].length;
+        firstWord = false;
+        continue;
+      }
+      m = rest.match(/^https?:\/\/[^\s"'\\]+/);
+      if (m) {
+        out += tok('string', m[0]);
+        i += m[0].length;
+        firstWord = false;
+        continue;
+      }
+      m = rest.match(/^--?[A-Za-z][\w-]*/);
+      if (m) {
+        out += tok('attr', m[0]);
+        i += m[0].length;
+        firstWord = false;
+        continue;
+      }
+      m = rest.match(/^\d+\b/);
+      if (m) {
+        out += tok('number', m[0]);
+        i += m[0].length;
+        firstWord = false;
+        continue;
+      }
+      m = rest.match(/^[A-Za-z_./~][\w./+-]*/);
+      if (m) {
+        var word = m[0];
+        if (SHELL_KEYWORD[word]) out += tok('keyword', word);
+        else if (firstWord && SHELL_BUILTIN[word]) out += tok('built_in', word);
+        else if (firstWord) out += tok('title', word);
+        else out += escapeHtml(word);
+        i += word.length;
+        firstWord = false;
+        continue;
+      }
+      out += escapeHtml(ch);
+      i += 1;
+      if (/[;&|]/.test(ch)) firstWord = true;
+    }
+    return out;
+  }
+
+  function highlightShell(text) {
+    return text.split('\n').map(highlightShellLine).join('\n');
+  }
+
+  function highlightTree(text) {
+    return text.split('\n').map(function (line) {
+      var found = line.match(/^([ \t]*)(\S.*?)( {2,})(\S.*)$/);
+      if (found) {
+        return (
+          escapeHtml(found[1]) +
+          tok('attr', found[2]) +
+          escapeHtml(found[3]) +
+          tok('comment', found[4])
+        );
+      }
+      found = line.match(/^([ \t]*)(\S.*)$/);
+      if (found) return escapeHtml(found[1]) + tok('attr', found[2]);
+      return escapeHtml(line);
+    }).join('\n');
+  }
+
+  function highlightCode(root) {
+    var nodes = root.querySelectorAll('pre code');
+    Array.prototype.forEach.call(nodes, function (code) {
+      if (code.getAttribute('data-nigate-hl') === '1') return;
+      var wrap = code.closest('.highlighter-rouge') || code.parentElement;
+      var lang = fenceLang(wrap, code);
+      var html = null;
+      if (SHELL_LANG[lang]) html = highlightShell(code.textContent);
+      else if (TEXT_LANG[lang]) html = highlightTree(code.textContent);
+      if (html === null) return;
+      code.innerHTML = html;
+      code.setAttribute('data-nigate-hl', '1');
+    });
+  }
+
   function addCopyButtons(root) {
     var blocks = root.querySelectorAll('.highlighter-rouge');
     Array.prototype.forEach.call(blocks, function (block) {
@@ -201,6 +351,7 @@
     var root = document.querySelector('.markdown-body') || document.querySelector('.main-content') || document.body;
     Array.prototype.forEach.call(root.querySelectorAll('blockquote'), enhanceAlert);
     autolink(root);
+    highlightCode(root);
     addCopyButtons(root);
   }
 

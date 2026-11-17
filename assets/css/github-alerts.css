@@ -1,4 +1,4 @@
-/* GitHub Pages 兼容增强：callout、代码块复制。裸 URL 由 JS 改写成链接后走主题默认 a 样式。 */
+/* GitHub Pages 兼容增强：callout、代码块复制与高亮。裸 URL 由 JS 改写成链接后走主题默认 a 样式。 */
 .markdown-alert {
   padding: 0.5rem 1rem;
   margin: 1rem 0;
@@ -125,4 +125,54 @@
 /* Primer 主题会再插一行仓库名 h1，与 README 标题重复 */
 .markdown-body > h1:first-child:not([id]) {
   display: none;
+}
+
+.markdown-body pre code {
+  background: transparent;
+}
+
+.markdown-body .hljs-comment {
+  color: #57606a;
+}
+.markdown-body .hljs-string {
+  color: #0a3069;
+}
+.markdown-body .hljs-variable {
+  color: #953800;
+}
+.markdown-body .hljs-number {
+  color: #0550ae;
+}
+.markdown-body .hljs-built_in,
+.markdown-body .hljs-keyword {
+  color: #cf222e;
+}
+.markdown-body .hljs-title {
+  color: #6639ba;
+}
+.markdown-body .hljs-attr {
+  color: #0550ae;
+}
+
+html[data-theme='dark'] .markdown-body .hljs-comment {
+  color: #8b949e;
+}
+html[data-theme='dark'] .markdown-body .hljs-string {
+  color: #a5d6ff;
+}
+html[data-theme='dark'] .markdown-body .hljs-variable {
+  color: #ffa657;
+}
+html[data-theme='dark'] .markdown-body .hljs-number {
+  color: #79c0ff;
+}
+html[data-theme='dark'] .markdown-body .hljs-built_in,
+html[data-theme='dark'] .markdown-body .hljs-keyword {
+  color: #ff7b72;
+}
+html[data-theme='dark'] .markdown-body .hljs-title {
+  color: #d2a8ff;
+}
+html[data-theme='dark'] .markdown-body .hljs-attr {
+  color: #79c0ff;
 }
