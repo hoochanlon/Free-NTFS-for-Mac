@@ -43,6 +43,7 @@
 - [@grgerwcwetwet](https://x.com/grgerwcwetwet/) - 在 Twitter/X 上推荐本项目
 - [@amiaoapp](https://x.com/amiaoapp) - 在 Twitter/X 上推荐本项目
 - [@ilovek8s](https://x.com/ilovek8s/) - 在 Twitter/X 上推荐本项目
+- [@Foordom](https://discussions.apple.com/thread/256280318?sortBy=rank) 在 apple 社区推荐过本项目
 - [iBeesoft](https://www.ibeesoft.com/howtos/free-ntfs-for-mac.html) - 在教程文章中推荐本项目
 - [@kissu](https://discuss.privacyguides.net/t/can-someone-recommend-a-foss-mac-app-for-writing-on-ntfs-formatted-drives/34789) - 在论坛中提到本项目
 - [MacBed](https://www.macbed.com/nigate/) - 在网站上介绍和推荐本项目
