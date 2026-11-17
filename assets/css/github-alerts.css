@@ -1,0 +1,76 @@
+/* GitHub 风格 callout。Jekyll/kramdown 不会解析 > [!WARNING]，由 github-alerts.js 改写 DOM 后套用本样式。 */
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin: 1rem 0;
+  color: inherit;
+  border-left: 0.25em solid #d0d7de;
+  border-radius: 0.25rem;
+  background: #f6f8fa;
+}
+
+.markdown-alert > :first-child {
+  margin-top: 0;
+}
+
+.markdown-alert > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-alert-title {
+  display: flex;
+  align-items: center;
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.markdown-alert-title svg {
+  margin-right: 0.5rem;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.markdown-alert-note {
+  border-left-color: #0969da;
+  background: #ddf4ff;
+}
+
+.markdown-alert-note .markdown-alert-title {
+  color: #0969da;
+}
+
+.markdown-alert-tip {
+  border-left-color: #1a7f37;
+  background: #dafbe1;
+}
+
+.markdown-alert-tip .markdown-alert-title {
+  color: #1a7f37;
+}
+
+.markdown-alert-important {
+  border-left-color: #8250df;
+  background: #fbefff;
+}
+
+.markdown-alert-important .markdown-alert-title {
+  color: #8250df;
+}
+
+.markdown-alert-warning {
+  border-left-color: #9a6700;
+  background: #fff8c5;
+}
+
+.markdown-alert-warning .markdown-alert-title {
+  color: #9a6700;
+}
+
+.markdown-alert-caution {
+  border-left-color: #cf222e;
+  background: #ffebe9;
+}
+
+.markdown-alert-caution .markdown-alert-title {
+  color: #cf222e;
+}

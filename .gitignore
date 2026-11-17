@@ -52,6 +52,7 @@ coverage/
 *.temp
 *.orig
 .dmg-staging/
+_preview.html
 
 # 本地签名与证书文件
 *.p12
