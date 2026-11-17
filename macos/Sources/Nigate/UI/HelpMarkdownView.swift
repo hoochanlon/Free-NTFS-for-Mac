@@ -139,10 +139,7 @@ struct HelpMarkdownView: View {
                 CopyCommandButton(command: source)
             }
             ScrollView(.horizontal) {
-                Text(source)
-                    .font(.system(.body, design: .monospaced))
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                HighlightedCodeText(source: source, language: language)
                     .padding(.bottom, 16)
             }
             .scrollBounceBehavior(.basedOnSize, axes: .horizontal)

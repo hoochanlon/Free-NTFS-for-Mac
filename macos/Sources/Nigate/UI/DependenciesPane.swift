@@ -45,7 +45,9 @@ struct DependenciesPane: View {
                 } label: {
                     Label(L10n.t("dependencies.checkButton"), systemImage: "arrow.clockwise")
                 }
+                .disabled(model.isCheckingDependencies)
             }
+            .zIndex(1)
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach(dependencyItems.indices, id: \.self) { index in
@@ -60,13 +62,14 @@ struct DependenciesPane: View {
     }
 
     private var dependencyItems: [DependencyItem] {
-        [
+        let d = model.dependencies
+        return [
             DependencyItem(
                 id: "macos-version",
                 icon: "apple.logo",
-                name: L10n.t("dependencies.macosVersion.name", ["version": model.dependencies.macosVersionString]),
-                status: model.dependencies.macosVersion ? L10n.t("dependencies.versionSatisfied") : L10n.t("dependencies.versionUnsatisfied"),
-                isSatisfied: model.dependencies.macosVersion,
+                name: macosVersionName,
+                status: rowStatus(d.macosVersion, ok: L10n.t("dependencies.versionSatisfied"), missing: L10n.t("dependencies.versionUnsatisfied")),
+                tone: rowTone(d.macosVersion),
                 description: L10n.t("dependencies.macosVersion.description"),
                 guide: L10n.t("dependencies.macosVersion.installGuide")
             ),
@@ -74,8 +77,8 @@ struct DependenciesPane: View {
                 id: "swift-tools",
                 icon: "hammer",
                 name: L10n.t("dependencies.swift.name"),
-                status: model.dependencies.swift ? L10n.t("dependencies.installed") : L10n.t("dependencies.missing"),
-                isSatisfied: model.dependencies.swift,
+                status: rowStatus(d.swift, ok: L10n.t("dependencies.installed"), missing: L10n.t("dependencies.missing")),
+                tone: rowTone(d.swift),
                 description: L10n.t("dependencies.swift.description"),
                 guide: L10n.t("dependencies.swift.installGuide"),
                 command: "xcode-select --install"
@@ -84,8 +87,8 @@ struct DependenciesPane: View {
                 id: "homebrew",
                 icon: "shippingbox",
                 name: L10n.t("dependencies.brew.name"),
-                status: model.dependencies.brew ? L10n.t("dependencies.installed") : L10n.t("dependencies.missing"),
-                isSatisfied: model.dependencies.brew,
+                status: rowStatus(d.brew, ok: L10n.t("dependencies.installed"), missing: L10n.t("dependencies.missing")),
+                tone: rowTone(d.brew),
                 description: L10n.t("dependencies.brew.description"),
                 guide: L10n.t("dependencies.brew.installGuide"),
                 command: "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"",
@@ -95,8 +98,8 @@ struct DependenciesPane: View {
                 id: "macfuse",
                 icon: "externaldrive.connected.to.line.below",
                 name: L10n.t("dependencies.macfuse.name"),
-                status: model.dependencies.macfuse ? L10n.t("dependencies.installed") : L10n.t("dependencies.missing"),
-                isSatisfied: model.dependencies.macfuse,
+                status: rowStatus(d.macfuse, ok: L10n.t("dependencies.installed"), missing: L10n.t("dependencies.missing")),
+                tone: rowTone(d.macfuse),
                 description: L10n.t("dependencies.macfuse.description"),
                 guide: L10n.t("dependencies.macfuse.installGuide"),
                 command: "if brew list --cask macfuse >/dev/null 2>&1; then brew reinstall --cask macfuse; else brew install --cask macfuse; fi",
@@ -142,8 +145,8 @@ struct DependenciesPane: View {
                 id: "ntfs3g",
                 icon: "externaldrive.fill.badge.plus",
                 name: L10n.t("dependencies.ntfs3g.name"),
-                status: model.dependencies.ntfs3g ? L10n.t("dependencies.installed") : L10n.t("dependencies.missing"),
-                isSatisfied: model.dependencies.ntfs3g,
+                status: rowStatus(d.ntfs3g, ok: L10n.t("dependencies.installed"), missing: L10n.t("dependencies.missing")),
+                tone: rowTone(d.ntfs3g),
                 description: L10n.t("dependencies.ntfs3g.description"),
                 guide: L10n.t("dependencies.ntfs3g.installGuide"),
                 command: "brew tap gromgit/homebrew-fuse && brew install ntfs-3g-mac",
@@ -153,27 +156,47 @@ struct DependenciesPane: View {
                 id: "fswatch",
                 icon: "waveform.path.ecg",
                 name: L10n.t("dependencies.fswatch.name"),
-                status: model.dependencies.fswatch ? L10n.t("dependencies.installedOptional") : L10n.t("dependencies.missingOptional"),
-                isSatisfied: model.dependencies.fswatch,
+                status: rowStatus(d.fswatch, ok: L10n.t("dependencies.installed"), missing: L10n.t("dependencies.missing")),
+                tone: rowTone(d.fswatch),
                 description: L10n.t("dependencies.fswatch.description"),
                 guide: L10n.t("dependencies.fswatch.installGuide"),
-                command: "brew install fswatch",
-                optional: true
+                command: "brew install fswatch"
             ),
             DependencyItem(
                 id: "fsKit",
                 icon: "externaldrive.badge.timemachine",
                 name: L10n.t("dependencies.fsKit.name"),
                 status: fsKitStatusText,
-                isSatisfied: model.dependencies.fsKitControlPlaneAvailable,
+                tone: rowTone(d.fsKitControlPlaneAvailable),
                 description: L10n.t("dependencies.fsKit.description"),
-                guide: fsKitGuideText,
-                optional: true
+                guide: fsKitGuideText
             )
         ]
     }
 
+    private var macosVersionName: String {
+        let version: String
+        if !model.dependencies.isProbed {
+            version = L10n.t("dependencies.detecting")
+        } else if model.dependencies.macosVersionString.isEmpty {
+            version = L10n.t("dependencies.macosVersion.unknown")
+        } else {
+            version = model.dependencies.macosVersionString
+        }
+        return L10n.t("dependencies.macosVersion.name", ["version": version])
+    }
+
+    private func rowStatus(_ satisfied: Bool, ok: String, missing: String) -> String {
+        model.dependencies.isProbed ? (satisfied ? ok : missing) : L10n.t("dependencies.detecting")
+    }
+
+    private func rowTone(_ satisfied: Bool) -> DependencyRowTone {
+        guard model.dependencies.isProbed else { return .checking }
+        return satisfied ? .satisfied : .error
+    }
+
     private var fsKitStatusText: String {
+        guard model.dependencies.isProbed else { return L10n.t("dependencies.detecting") }
         let d = model.dependencies
         if d.fsKitControlPlaneAvailable {
             return L10n.t("dependencies.fsKit.statusReady")
@@ -291,7 +314,17 @@ struct DependenciesPane: View {
 
     private func statusBadge(_ item: DependencyItem) -> some View {
         HStack(spacing: 5) {
-            Image(systemName: item.isSatisfied ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
+            switch item.tone {
+            case .checking:
+                ProgressView()
+                    .controlSize(.small)
+            case .satisfied:
+                Image(systemName: "checkmark.circle.fill")
+            case .error:
+                Circle()
+                    .fill(item.statusColor)
+                    .frame(width: 7, height: 7)
+            }
             Text(item.status)
         }
         .font(.caption.weight(.semibold))
@@ -307,9 +340,7 @@ struct DependenciesPane: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
             HStack(spacing: 10) {
-                Text(command)
-                    .font(.system(.body, design: .monospaced))
-                    .textSelection(.enabled)
+                HighlightedCodeText(source: command)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 CopyCommandButton(command: command)
             }
@@ -350,22 +381,28 @@ private enum DependencyInstruction: Identifiable {
     }
 }
 
+private enum DependencyRowTone {
+    case checking, satisfied, error
+}
+
 private struct DependencyItem: Identifiable {
     let id: String
     let icon: String
     let name: String
     let status: String
-    let isSatisfied: Bool
+    let tone: DependencyRowTone
     let description: String
     let guide: String
     var command: String? = nil
     var mirrorCommand: String? = nil
     var instructions: [DependencyInstruction] = []
-    var optional = false
     var note: String? = nil
 
     var statusColor: Color {
-        if isSatisfied { return Palette.success }
-        return optional ? Palette.warning : Palette.error
+        switch tone {
+        case .checking: Color.secondary
+        case .satisfied: Palette.success
+        case .error: Palette.error
+        }
     }
 }

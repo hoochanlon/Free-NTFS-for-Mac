@@ -19,18 +19,133 @@ enum Palette {
     static let mail = Color(red: 0.91, green: 0.26, blue: 0.21)
 }
 
-/// 悬停图标按钮提示：只在设置打开时挂 `.help`，默认开启。
+/// 悬停提示的窗口几何：锚点在控件，绘制在窗口层，避免长文画出应用边界。
+enum HelpBubbleLayout {
+    static let maxWidth: CGFloat = 260
+    static let delay: TimeInterval = 2.5
+    static let pad: CGFloat = 10
+    static let gap: CGFloat = 6
+
+    /// 气泡左上角。水平对准控件中心；出窗才平移。下方不够就翻到上方。
+    static func origin(host: CGRect, bubble: CGSize, window: CGSize) -> CGPoint {
+        guard bubble.width > 0, bubble.height > 0, window.width > 0, window.height > 0 else {
+            return .zero
+        }
+        let minX = pad
+        let minY = pad
+        let maxX = max(minX, window.width - pad)
+        let maxY = max(minY, window.height - pad)
+        let width = min(bubble.width, max(0, maxX - minX))
+        let height = min(bubble.height, max(0, maxY - minY))
+
+        var x = host.midX - width / 2
+        x = min(max(x, minX), maxX - width)
+
+        let below = host.maxY + gap
+        let above = host.minY - gap - height
+        let y: CGFloat
+        if below + height <= maxY {
+            y = below
+        } else if above >= minY {
+            y = above
+        } else {
+            y = min(max(below, minY), maxY - height)
+        }
+        return CGPoint(x: x, y: y)
+    }
+
+    static func center(host: CGRect, bubble: CGSize, window: CGSize) -> CGPoint {
+        let topLeft = origin(host: host, bubble: bubble, window: window)
+        return CGPoint(x: topLeft.x + bubble.width / 2, y: topLeft.y + bubble.height / 2)
+    }
+}
+
+private struct HelpBubbleAnchor: Equatable, Sendable {
+    var text: String
+    var host: CGRect
+}
+
+private struct HelpBubbleAnchorKey: PreferenceKey {
+    static let defaultValue: HelpBubbleAnchor? = nil
+    static func reduce(value: inout HelpBubbleAnchor?, nextValue: () -> HelpBubbleAnchor?) {
+        if let next = nextValue() { value = next }
+    }
+}
+
+/// 悬停图标按钮提示：只在设置打开时显示，默认开启。
+/// 自己只上报锚点，气泡由窗口层绘制，这样不会被列表裁切，也不会伸出窗口。
 private struct NigateHelpModifier: ViewModifier {
     @EnvironmentObject private var model: AppModel
     let text: String
+    @State private var hovering = false
+    @State private var show = false
+    @State private var generation = 0
 
-    @ViewBuilder
     func body(content: Content) -> some View {
         if model.settings.showButtonHints {
-            content.help(text)
+            content
+                .background(
+                    GeometryReader { geo in
+                        Color.clear.preference(
+                            key: HelpBubbleAnchorKey.self,
+                            value: show ? HelpBubbleAnchor(
+                                text: text,
+                                host: geo.frame(in: .named("nigateWindow"))
+                            ) : nil
+                        )
+                    }
+                )
+                .onHover { inside in
+                    generation += 1
+                    let gen = generation
+                    hovering = inside
+                    if inside {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + HelpBubbleLayout.delay) {
+                            guard gen == generation, hovering else { return }
+                            show = true
+                        }
+                    } else {
+                        show = false
+                    }
+                }
         } else {
             content
         }
+    }
+}
+
+private struct WindowHelpBubble: View {
+    let text: String
+    let host: CGRect
+    let windowSize: CGSize
+    @State private var size: CGSize = .zero
+
+    var body: some View {
+        let compact = text.count <= 18
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.primary)
+            .multilineTextAlignment(.leading)
+            .lineLimit(compact ? 1 : 4)
+            .fixedSize(horizontal: compact, vertical: true)
+            .frame(maxWidth: compact ? nil : HelpBubbleLayout.maxWidth, alignment: .leading)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .stroke(Color.primary.opacity(0.08))
+            )
+            .shadow(color: .black.opacity(0.14), radius: 8, y: 2)
+            .background(
+                GeometryReader { geo in
+                    Color.clear
+                        .onAppear { size = geo.size }
+                        .onChange(of: geo.size) { _, newSize in size = newSize }
+                }
+            )
+            .position(HelpBubbleLayout.center(host: host, bubble: size, window: windowSize))
+            .opacity(size == .zero ? 0 : 1)
     }
 }
 
@@ -118,6 +233,7 @@ struct RootView: View {
     var body: some View {
         VStack(spacing: 0) {
             TitleChrome()
+                .zIndex(1)
             tabBar
             Divider()
             Group {
@@ -132,6 +248,15 @@ struct RootView: View {
         }
         .id(model.languageStamp)
         .frame(minWidth: WindowLayout.width, maxWidth: WindowLayout.width, minHeight: WindowLayout.minHeight)
+        .coordinateSpace(name: "nigateWindow")
+        .overlayPreferenceValue(HelpBubbleAnchorKey.self) { anchor in
+            GeometryReader { window in
+                if let anchor, anchor.host.width > 0, !anchor.text.isEmpty {
+                    WindowHelpBubble(text: anchor.text, host: anchor.host, windowSize: window.size)
+                }
+            }
+            .allowsHitTesting(false)
+        }
         .background(Color(nsColor: .windowBackgroundColor))
         .background(MainWindowLock())
         .sheet(item: $model.passwordSheet, onDismiss: {

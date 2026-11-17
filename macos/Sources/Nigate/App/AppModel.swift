@@ -95,6 +95,7 @@ final class AppModel: ObservableObject {
     @Published var settings: AppSettings
     @Published var devices: [NTFSDevice] = []
     @Published var dependencies = DependencyStatus()
+    @Published private(set) var isCheckingDependencies = false
     @Published var tab: AppTab
     @Published var statusText = ""
     @Published var protectLocked = false
@@ -125,7 +126,11 @@ final class AppModel: ObservableObject {
     @Published private(set) var fsKitControlPlane = NigateFSKitControlPlaneState.unavailable
 
     let monitor = DiskMonitor()
+    let dependencyWatch = DependencyWatch()
     let sleepGuard = SleepGuard()
+    private var dependencyRecheckRequested = false
+    /// 排队的补检默认静默；手动「检查依赖」不能被静默刷新吃掉。
+    private var dependencyRecheckQuiet = true
     private var attempted = Set<String>()
     private var cooldown: [String: Date] = [:]
     private var inProgress = Set<String>()
@@ -170,11 +175,15 @@ final class AppModel: ObservableObject {
                 await self?.refreshDevices()
             }
         }
-        // 设备卡片不依赖依赖检查。先扫，立刻点退出才挡得住「没有设备」。
-        await refreshDevices(applyAutoMount: false)
-        await refreshFSKitControlPlane()
-        normalizeMountBackendIfNeeded()
+        dependencyWatch.start { [weak self] in
+            Task { @MainActor in
+                await self?.refreshDependencies(quiet: true)
+            }
+        }
+        // 依赖页是默认首页：探测与首扫并行。设备列表仍马上开始，退出确认才挡得住「没有设备」。
+        async let firstScan: Void = refreshDevices(applyAutoMount: false)
         await refreshDependencies()
+        await firstScan
         await refreshDevices()
         startCapacityRefresh()
         TrayController.shared.attach(self)
@@ -194,6 +203,7 @@ final class AppModel: ObservableObject {
         capacityTimer = nil
         capacityRefreshInFlight = false
         monitor.stop()
+        dependencyWatch.stop()
         sleepGuard.stop()
         TrayController.shared.tearDown()
     }
@@ -566,12 +576,29 @@ final class AppModel: ObservableObject {
         persist()
     }
 
-    func refreshDependencies() async {
-        statusText = L10n.t("status.checking")
-        // 先刷新控制面，再汇总依赖状态，避免 UI 读到过期的 FSKit 可用性。
-        await refreshFSKitControlPlane()
-        dependencies = await DependencyService.check()
-        updateStatus()
+    func refreshDependencies(quiet: Bool = false) async {
+        guard !isCheckingDependencies else {
+            dependencyRecheckRequested = true
+            if !quiet { dependencyRecheckQuiet = false }
+            return
+        }
+        isCheckingDependencies = true
+        var quiet = quiet
+        defer { isCheckingDependencies = false }
+        repeat {
+            if !quiet {
+                statusText = L10n.t("status.checking")
+                // 先刷新控制面，再汇总依赖状态，避免 UI 读到过期的 FSKit 可用性。
+                await refreshFSKitControlPlane()
+            }
+            dependencies = await DependencyService.check()
+            dependencyWatch.sync(extraFiles: [dependencies.ntfs3gPath].compactMap { $0 })
+            updateStatus()
+            guard dependencyRecheckRequested else { return }
+            quiet = dependencyRecheckQuiet
+            dependencyRecheckRequested = false
+            dependencyRecheckQuiet = true
+        } while true
     }
 
     func refreshDevices(applyAutoMount: Bool = true) async {
@@ -1327,6 +1354,10 @@ final class AppModel: ObservableObject {
     }
 
     private func updateStatus() {
+        if !dependencies.isProbed {
+            statusText = L10n.t("status.checking")
+            return
+        }
         if dependencies.missingCore {
             statusText = L10n.t("status.missingDeps")
             return

@@ -45,10 +45,9 @@
     "autoInstallOpened": "ターミナルを開きました。ワンクリックインストールが入れるのは MacFUSE、ntfs-3g、fswatch だけです。Xcode Command Line Tools と Homebrew は依存関係一覧から個別にインストールしてください。",
     "autoInstallFailed": "ターミナルを開けませんでした: {error}",
     "checking": "チェック中...",
+    "detecting": "確認中",
     "installed": "インストール済み",
-    "installedOptional": "インストール済み（オプション）",
     "missing": "未インストール",
-    "missingOptional": "未インストール（オプション、推奨）",
     "versionSatisfied": "要件を満たしています",
     "versionUnsatisfied": "要件を満たしていません",
     "installGuide": "インストールガイド",
@@ -62,7 +61,7 @@
     "available": "システムでサポート",
     "unsupported": "システムで未サポート",
     "fsKit": {
-      "name": "FSKit（ネイティブファイルシステムフレームワーク・オプション）",
+      "name": "FSKit（ネイティブファイルシステムフレームワーク）",
       "description": "Apple のファイルシステム拡張フレームワーク（macOS 15.4+）。正式署名された拡張は「システム設定 → ファイルシステム拡張機能」に表示されます。ad-hoc のローカルビルドは pluginkit に登録されても、その一覧に出ないことが一般的です。製品既定は ntfs-3g 互換マウントです。",
       "installGuide": "1. macos/Scripts/build.sh で Nigate.app をビルドし /Applications にインストールします（拡張は Contents/Extensions）。\n2. Apple のコード署名 ID（Developer ID / Development Team）が無い場合、「システム設定 → ファイルシステム拡張機能」に Nigate は通常表示されません。appex 欠落ではなく署名ポリシーです。\n3. 登録確認: pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. 日常利用は ntfs-3g（互換）のまま。拡張が署名され、利用可能な場合のみ FSKit を試してください。失敗時の暗黙フォールバックはありません。",
       "statusReady": "FSKit 利用可能",
@@ -105,13 +104,14 @@
       "installGuideTip": "macFUSE と ntfs-3g のインストール後、「一般」設定で「ログイン項目と機能拡張」>「機能拡張」>「カテゴリ別」>「ファイルシステム機能拡張」の順に選択します。続けて、その項目の情報アイコンをクリックし、ntfs-3g（表示されている場合）と macFUSE などの関連オプションを有効にしてください。"
     },
     "fswatch": {
-      "name": "fswatch (オプション)",
+      "name": "fswatch",
       "description": "ファイルシステムイベント監視ツール、ゼロレイテンシーのデバイス検出を実現（イベント駆動モード）",
       "installCommand": "brew install fswatch",
       "installGuide": "fswatchはオプションのパフォーマンス最適化ツールです。インストール後、ゼロレイテンシーのデバイス検出が可能になり、CPU使用率が90%以上削減されます。上記のコマンドを実行してインストールします。"
     },
     "macosVersion": {
       "name": "macOS バージョン ({version})",
+      "unknown": "不明",
       "description": "システムバージョンチェック、macOSバージョンが要件を満たしていることを確認（macOS 14以上が必要）",
       "installGuide": "macOSバージョンが低すぎる場合は、システム設定 > ソフトウェアアップデートからシステムをアップグレードしてください。このツールは正常に動作するためにmacOS 14（Sonoma）以上が必要です。"
     }

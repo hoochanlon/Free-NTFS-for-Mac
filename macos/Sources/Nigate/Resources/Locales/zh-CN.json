@@ -45,10 +45,9 @@
     "autoInstallOpened": "已打开终端。一键安装只装 MacFUSE、ntfs-3g 和 fswatch；Xcode Command Line Tools 与 Homebrew 需在依赖列表中单独安装。",
     "autoInstallFailed": "打开终端失败: {error}",
     "checking": "正在检查...",
+    "detecting": "检测中",
     "installed": "已安装",
-    "installedOptional": "已安装（可选）",
     "missing": "未安装",
-    "missingOptional": "未安装（可选，建议安装）",
     "versionSatisfied": "符合要求",
     "versionUnsatisfied": "不符合要求",
     "installGuide": "安装指引",
@@ -62,7 +61,7 @@
     "available": "系统支持",
     "unsupported": "系统不支持",
     "fsKit": {
-      "name": "FSKit（原生文件系统框架，可选）",
+      "name": "FSKit（原生文件系统框架）",
       "description": "Apple 提供的文件系统扩展框架（macOS 15.4+）。正式签名的扩展可在“系统设置 → 文件系统扩展”中出现；当前 ad-hoc 本地构建通常不会出现在该列表，但仍可能被 pluginkit 注册。产品默认请用 ntfs-3g 兼容挂载。",
       "installGuide": "1. 用 macos/Scripts/build.sh 构建并安装 Nigate.app 到 /Applications（扩展在 Contents/Extensions）。\n2. 本机若无Apple 代码签名证书，系统设置的“文件系统扩展”列表通常不会显示Nigate。这是签名策略，不是扩展没打进包。\n3. 可用终端确认注册：pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. 日常挂载请保持 ntfs-3g（兼容）。仅在扩展签名有效且可用时再尝试 FSKit；失败不会自动切换后端。",
       "statusReady": "FSKit 可用",
@@ -105,13 +104,14 @@
       "installGuideTip": "macFUSE、ntfs-3g 安装完成后，在“通用”设置中，依次选择“登录项与扩展” > “扩展” > “按类别” > “文件系统扩展”。随后点击该项的信息图标，并启用 ntfs-3g（如存在）及 macFUSE 等相关选项。"
     },
     "fswatch": {
-      "name": "fswatch (可选)",
+      "name": "fswatch",
       "description": "文件系统事件监控工具，用于实现零延迟的设备检测（事件驱动模式）",
       "installCommand": "brew install fswatch",
       "installGuide": "fswatch 是可选的性能优化工具。安装后可实现零延迟的设备检测，CPU使用率降低90%+。运行上述命令即可安装。"
     },
     "macosVersion": {
       "name": "macOS 版本 ({version})",
+      "unknown": "未知",
       "description": "系统版本检查，确保 macOS 版本满足要求（需要 macOS 14 或更高版本）",
       "installGuide": "如果您的 macOS 版本过低，请通过系统设置 > 软件更新来升级系统。本工具需要 macOS 14 (Sonoma) 或更高版本才能正常运行。"
     }

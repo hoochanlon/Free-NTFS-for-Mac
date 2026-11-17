@@ -3,15 +3,13 @@ import NigateFSKitCore
 
 enum DependencyService {
     static func check() async -> DependencyStatus {
+        async let versionTask = Shell.runQuiet("/usr/bin/sw_vers", ["-productVersion"], timeout: 3)
+        async let ntfsTask = PathLookup.ntfs3g()
+
         var status = DependencyStatus()
-        let version = await Shell.runQuiet("/usr/bin/sw_vers", ["-productVersion"], timeout: 3).stdout
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        status.macosVersionString = version.isEmpty ? "未知" : version
-        let major = Int(version.split(separator: ".").first.map(String.init) ?? "0") ?? 0
-        status.macosVersion = major >= 14
-        status.fsKitSupported = NigateFSKit.isSupportedOnCurrentSystem
-        // 控制面快照由 AppModel 注入；依赖页直接读取，避免重复 probe。
+        status.isProbed = true
         let plane = MountBackendPolicy.controlPlaneState
+        status.fsKitSupported = NigateFSKit.isSupportedOnCurrentSystem
         status.fsKitControlPlaneAvailable = plane.isControlPlaneAvailable
         status.fsKitExtensionInstalled = plane.extensionInstalled
         status.fsKitExtensionEnabled = plane.extensionEnabled
@@ -20,7 +18,13 @@ enum DependencyService {
         status.brew = Shell.which("brew") != nil
         status.fswatch = Shell.which("fswatch") != nil
         status.macfuse = FuseLibrary.inspect().isUsable
-        if let path = await PathLookup.ntfs3g() {
+
+        let version = await versionTask.stdout
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        status.macosVersionString = version
+        let major = Int(version.split(separator: ".").first.map(String.init) ?? "0") ?? 0
+        status.macosVersion = major >= 14
+        if let path = await ntfsTask {
             status.ntfs3g = true
             status.ntfs3gPath = path
         }

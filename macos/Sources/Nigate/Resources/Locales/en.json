@@ -45,10 +45,9 @@
     "autoInstallOpened": "Terminal opened. One-click install only adds MacFUSE, ntfs-3g, and fswatch. Install Xcode Command Line Tools and Homebrew from the dependency list first if they are missing.",
     "autoInstallFailed": "Failed to open Terminal: {error}",
     "checking": "Checking...",
+    "detecting": "Checking",
     "installed": "Installed",
-    "installedOptional": "Installed (Optional)",
     "missing": "Not Installed",
-    "missingOptional": "Not Installed (Optional, Recommended)",
     "versionSatisfied": "Meets Requirements",
     "versionUnsatisfied": "Does Not Meet Requirements",
     "installGuide": "Installation Guide",
@@ -62,7 +61,7 @@
     "available": "Supported by system",
     "unsupported": "Not supported by system",
     "fsKit": {
-      "name": "FSKit (Native File System Framework, Optional)",
+      "name": "FSKit (Native File System Framework)",
       "description": "Apple's file system extension framework (macOS 15.4+). Properly signed extensions can appear under System Settings → File System Extensions. Ad-hoc local builds usually do not appear in that list, even if pluginkit already registered them. Keep ntfs-3g as the product default mount path.",
       "installGuide": "1. Build and install Nigate.app into /Applications via macos/Scripts/build.sh (extension under Contents/Extensions).\n2. Without an Apple code-signing identity (Developer ID / Development Team), System Settings → File System Extensions typically will not list Nigate. That is a signing policy filter, not a missing appex.\n3. Verify registration with: pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. Keep Mount Backend on ntfs-3g (Compatibility) for daily use. Try FSKit only when the extension is signed and available; failures never silently fall back.",
       "statusReady": "FSKit available",
@@ -105,13 +104,14 @@
       "installGuideTip": "After installing macFUSE and ntfs-3g, go to System Settings → General → Login Items & Extensions → Extensions → By Category → File System Extensions. Then click the info icon and enable ntfs-3g (if present) and macFUSE."
     },
     "fswatch": {
-      "name": "fswatch (Optional)",
+      "name": "fswatch",
       "description": "File system event monitoring tool for zero-latency device detection (event-driven mode)",
       "installCommand": "brew install fswatch",
       "installGuide": "fswatch is an optional performance optimization tool. After installation, it enables zero-latency device detection and reduces CPU usage by 90%+. Run the above command to install."
     },
     "macosVersion": {
       "name": "macOS Version ({version})",
+      "unknown": "Unknown",
       "description": "System version check to ensure macOS version meets requirements (macOS 14 or higher required)",
       "installGuide": "If your macOS version is too low, please upgrade your system through System Settings > Software Update. This tool requires macOS 14 (Sonoma) or higher to run properly."
     }

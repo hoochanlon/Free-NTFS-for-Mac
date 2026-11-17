@@ -3,15 +3,43 @@ import Foundation
 enum PathLookup {
     private static let ntfs3gCache = LockedValue<String?>(nil)
 
+    /// Homebrew 把 keg-only 公式挂在 `opt/<formula>`，不经过 `brew --prefix`。
+    static let wellKnownNTFS3GPaths: [String] = {
+        var paths: [String] = []
+        for prefix in ["/opt/homebrew", "/usr/local"] {
+            for formula in ["ntfs-3g-mac", "ntfs-3g"] {
+                for dir in ["bin", "sbin"] {
+                    paths.append("\(prefix)/opt/\(formula)/\(dir)/ntfs-3g")
+                }
+            }
+        }
+        return paths
+    }()
+
+    /// 缓存命中也要再 stat：卸载后路径字符串还在，文件已经没了。
+    static func acceptedCache(_ cached: String?, validate: (String) -> Bool) -> String? {
+        guard let cached, !cached.isEmpty, validate(cached) else { return nil }
+        return cached
+    }
+
     static func reset() {
         ntfs3gCache.set(nil)
     }
 
     static func ntfs3g() async -> String? {
-        if let cached = ntfs3gCache.value { return cached }
+        if let cached = acceptedCache(ntfs3gCache.value, validate: { Shell.trustedExecutable($0) != nil }) {
+            return cached
+        }
+        ntfs3gCache.set(nil)
         if let found = Shell.which("ntfs-3g") {
             ntfs3gCache.set(found)
             return found
+        }
+        for candidate in wellKnownNTFS3GPaths {
+            if let trusted = Shell.trustedExecutable(candidate) {
+                ntfs3gCache.set(trusted)
+                return trusted
+            }
         }
         guard let brew = Shell.which("brew") else { return nil }
         for formula in ["ntfs-3g-mac", "ntfs-3g"] {

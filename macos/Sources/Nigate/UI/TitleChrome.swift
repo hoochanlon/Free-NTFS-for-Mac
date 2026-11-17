@@ -111,7 +111,8 @@ struct TitleChrome: View {
     }
 
     private var statusColor: Color {
-        if model.dependencies.missingCore { return Palette.warning }
+        if !model.dependencies.isProbed { return .secondary }
+        if model.dependencies.missingCore { return Palette.error }
         if model.devices.contains(where: \.isReadOnly) { return Palette.warning }
         if !model.devices.isEmpty { return Palette.success }
         return .secondary

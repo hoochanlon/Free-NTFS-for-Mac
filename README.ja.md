@@ -51,6 +51,7 @@ FSKit を有効にする手順：
 | NTFS Explorer Pro | App Store 68 元 | https://appagg.com/macos/utilities/ntfs-explorer-pro-43459914.html |
 | ttntfs | 無料 | https://github.com/dr-kbadawi/ttntfs |
 | LightNTFS Beta | 無料 | https://macadmin.hu/#apps |
+|mountfs| 無料 |https://github.com/guoquan/mountfs|
 | 盘屿 (volisle) | 無料 | https://github.com/qsw745/volisle |
 | ntfskit | ビルドが必要、無料オープンソース | https://github.com/whereteam/ntfskit |
 

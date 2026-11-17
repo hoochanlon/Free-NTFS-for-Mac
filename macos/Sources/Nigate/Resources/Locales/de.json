@@ -45,10 +45,9 @@
     "autoInstallOpened": "Terminal geöffnet. Die Ein-Klick-Installation richtet nur MacFUSE, ntfs-3g und fswatch ein. Xcode Command Line Tools und Homebrew bitte zuerst in der Abhängigkeitsliste installieren, falls sie fehlen.",
     "autoInstallFailed": "Terminal konnte nicht geöffnet werden: {error}",
     "checking": "Wird geprüft...",
+    "detecting": "Prüfung",
     "installed": "Installiert",
-    "installedOptional": "Installiert (Optional)",
     "missing": "Nicht installiert",
-    "missingOptional": "Nicht installiert (Optional, empfohlen)",
     "versionSatisfied": "Erfüllt Anforderungen",
     "versionUnsatisfied": "Erfüllt Anforderungen nicht",
     "installGuide": "Installationsanleitung",
@@ -62,7 +61,7 @@
     "available": "Vom System unterstützt",
     "unsupported": "Vom System nicht unterstützt",
     "fsKit": {
-      "name": "FSKit (natives Dateisystem-Framework, optional)",
+      "name": "FSKit (natives Dateisystem-Framework)",
       "description": "Apples Dateisystem-Erweiterungsrahmen (macOS 15.4+). Korrekt signierte Erweiterungen erscheinen unter Systemeinstellungen → Dateisystemerweiterungen. Ad-hoc-Lokalbuilds erscheinen dort meist nicht, auch wenn pluginkit sie bereits registriert hat. Produktstandard bleibt ntfs-3g.",
       "installGuide": "1. Nigate.app mit macos/Scripts/build.sh bauen und nach /Applications installieren (Erweiterung unter Contents/Extensions).\n2. Ohne Apple-Codesignatur (Developer ID / Development Team) erscheint Nigate in den Systemeinstellungen → Dateisystemerweiterungen in der Regel nicht — Signaturfilter, kein fehlendes appex.\n3. Registrierung prüfen: pluginkit -m -v -p com.apple.fskit.fsmodule | grep -i nigate\n4. Für den Alltag ntfs-3g (Kompatibilität) belassen. FSKit nur verwenden, wenn die Erweiterung signiert und verfügbar ist; es gibt keinen stillen Rückfall.",
       "statusReady": "FSKit verfügbar",
@@ -105,13 +104,14 @@
       "installGuideTip": "Nach der Installation von macFUSE und ntfs-3g wählen Sie in den Systemeinstellungen unter „Allgemein“ nacheinander „Anmeldeobjekte & Erweiterungen“ > „Erweiterungen“ > „Nach Kategorie“ > „Dateisystemerweiterungen“. Klicken Sie anschließend auf das Infosymbol und aktivieren Sie ntfs-3g (falls vorhanden) sowie macFUSE."
     },
     "fswatch": {
-      "name": "fswatch (Optional)",
+      "name": "fswatch",
       "description": "Dateisystem-Ereignisüberwachungstool für verzögerungsfreie Geräteerkennung (ereignisgesteuerter Modus)",
       "installCommand": "brew install fswatch",
       "installGuide": "fswatch ist ein optionales Leistungsoptimierungstool. Nach der Installation ermöglicht es verzögerungsfreie Geräteerkennung und reduziert die CPU-Auslastung um über 90%. Führen Sie den obigen Befehl aus, um zu installieren."
     },
     "macosVersion": {
       "name": "macOS Version ({version})",
+      "unknown": "Unbekannt",
       "description": "Systemversionsprüfung, um sicherzustellen, dass die macOS-Version die Anforderungen erfüllt (macOS 14 oder höher erforderlich)",
       "installGuide": "Wenn Ihre macOS-Version zu niedrig ist, aktualisieren Sie bitte Ihr System über Systemeinstellungen > Softwareaktualisierung. Dieses Tool benötigt macOS 14 (Sonoma) oder höher, um ordnungsgemäß zu funktionieren."
     }

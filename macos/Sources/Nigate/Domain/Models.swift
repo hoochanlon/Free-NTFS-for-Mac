@@ -93,7 +93,7 @@ struct DependencyStatus: Sendable, Equatable {
     var ntfs3g: Bool = false
     var ntfs3gPath: String? = nil
     var macosVersion: Bool = false
-    var macosVersionString: String = "未知"
+    var macosVersionString: String = ""
     /// 系统版本是否达到 FSKit 门槛（≥15.4）
     var fsKitSupported: Bool = false
     /// 扩展已安装且已启用（控制面可挂载）
@@ -102,8 +102,13 @@ struct DependencyStatus: Sendable, Equatable {
     var fsKitExtensionEnabled: Bool = false
     var fsKitDiagnostic: NigateFSKitControlPlaneDiagnostic? = nil
     var fswatch: Bool = false
+    /// 还没测完。默认 false 不能当缺失，否则启动首页会先刷红。
+    var isProbed: Bool = false
 
-    var missingCore: Bool { !macosVersion || !macfuse || !ntfs3g }
+    var missingCore: Bool {
+        guard isProbed else { return false }
+        return !macosVersion || !macfuse || !ntfs3g
+    }
 }
 
 struct AppSettings: Codable, Sendable, Equatable {
