@@ -1,10 +1,10 @@
 # Nigate
 
-**Language / 言語 / 语言**: [English](README.en.md) | [日本語](README.ja.md) | [简体中文](README.md)
+[![Stars](https://img.shields.io/github/stars/hoochanlon/Free-NTFS-for-Mac?logo=github&style=flat-square)](https://github.com/hoochanlon/Free-NTFS-for-Mac) [![License](https://img.shields.io/github/license/hoochanlon/Free-NTFS-for-Mac?style=flat-square)](https://github.com/hoochanlon/Free-NTFS-for-Mac/blob/main/LICENSE) [![Email](https://img.shields.io/badge/Email-联系我-blue?style=flat-square&logo=gmail&logoColor=white)](mailto:hoochanlon@outlook.com)
 
-Nigate is a native macOS application for mounting NTFS volumes with read/write support.
+[简体中文](README.md) [English](README.en.md) [日本語](README.ja.md)
 
-Download the latest version from the [release tags](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags).
+Quick start: download from https://github.com/hoochanlon/Free-NTFS-for-Mac/tags and use it.
 
 ![](./demo.gif)
 

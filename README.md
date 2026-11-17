@@ -1,10 +1,10 @@
 # Nigate
 
-[![Stars](https://img.shields.io/github/stars/hoochanlon/Free-NTFS-for-Mac?logo=github&style=flat-square)](https://github.com/hoochanlon/Free-NTFS-for-Mac) [![License](https://img.shields.io/github/license/hoochanlon/Free-NTFS-for-Mac?style=flat-square)](https://github.com/hoochanlon/Free-NTFS-for-Mac/blob/main/LICENSE)
+[![Stars](https://img.shields.io/github/stars/hoochanlon/Free-NTFS-for-Mac?logo=github&style=flat-square)](https://github.com/hoochanlon/Free-NTFS-for-Mac) [![License](https://img.shields.io/github/license/hoochanlon/Free-NTFS-for-Mac?style=flat-square)](https://github.com/hoochanlon/Free-NTFS-for-Mac/blob/main/LICENSE) [![Email](https://img.shields.io/badge/Email-联系我-blue?style=flat-square&logo=gmail&logoColor=white)](mailto:hoochanlon@outlook.com)
 
-**语言 / Language / 言語**: [简体中文](README.md) [English](README.en.md) [日本語](README.ja.md)
+[简体中文](README.md) [English](README.en.md) [日本語](README.ja.md)
 
-快速开始：从 [发布标签](https://github.com/hoochanlon/Free-NTFS-for-Mac/tags) 下载并使用。
+快速开始：从 https://github.com/hoochanlon/Free-NTFS-for-Mac/tags 下载并使用。
 
 ![](./demo.gif)
 
