@@ -1,4 +1,4 @@
-/* GitHub 风格 callout。Jekyll/kramdown 不会解析 > [!WARNING]，由 github-alerts.js 改写 DOM 后套用本样式。 */
+/* GitHub Pages 兼容增强：callout、代码块复制。裸 URL 由 JS 改写成链接后走主题默认 a 样式。 */
 .markdown-alert {
   padding: 0.5rem 1rem;
   margin: 1rem 0;
@@ -73,4 +73,51 @@
 
 .markdown-alert-caution .markdown-alert-title {
   color: #cf222e;
+}
+
+.highlighter-rouge.has-copy-code {
+  position: relative;
+}
+
+.highlighter-rouge.has-copy-code pre {
+  padding-right: 3rem;
+}
+
+.copy-code {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: #57606a;
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+}
+
+.copy-code svg {
+  fill: currentColor;
+}
+
+.copy-code:hover {
+  color: #24292f;
+  background: #f3f4f6;
+  border-color: #afb8c1;
+}
+
+.copy-code:focus-visible {
+  outline: 2px solid #0969da;
+  outline-offset: 2px;
+}
+
+.copy-code.copied {
+  color: #1a7f37;
+  border-color: #4ac26b;
 }
