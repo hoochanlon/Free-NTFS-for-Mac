@@ -2,9 +2,9 @@
 
 [![Stars](https://img.shields.io/github/stars/hoochanlon/Free-NTFS-for-Mac?logo=github&style=flat-square)](https://github.com/hoochanlon/Free-NTFS-for-Mac) [![License](https://img.shields.io/github/license/hoochanlon/Free-NTFS-for-Mac?style=flat-square)](https://github.com/hoochanlon/Free-NTFS-for-Mac/blob/main/LICENSE) [![Email](https://img.shields.io/badge/Email-联系我-blue?style=flat-square&logo=gmail&logoColor=white)](mailto:hoochanlon@outlook.com)
 
-[简体中文](README.md) [English](README.en.md) [日本語](README.ja.md)
+**言語:** [简体中文](README.md) [English](README.en.md) [日本語](README.ja.md)
 
-クイックスタート：https://github.com/hoochanlon/Free-NTFS-for-Mac/tags からダウンロードして使えます。
+**クイックスタート：** https://github.com/hoochanlon/Free-NTFS-for-Mac/tags からダウンロードして使えます。
 
 ![](./demo.gif)
 

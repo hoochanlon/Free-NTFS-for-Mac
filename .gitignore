@@ -52,7 +52,12 @@ coverage/
 *.temp
 *.orig
 .dmg-staging/
+
+# 本地 Pages 预览（脚本入库；快照 HTML 与字节码不入库）
 _preview.html
+__pycache__/
+*.py[cod]
+*$py.class
 
 # 本地签名与证书文件
 *.p12
