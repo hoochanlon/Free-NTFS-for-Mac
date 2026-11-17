@@ -44,10 +44,12 @@
 - [@amiaoapp](https://x.com/amiaoapp) - 在 Twitter/X 上推荐本项目
 - [@ilovek8s](https://x.com/ilovek8s/) - 在 Twitter/X 上推荐本项目
 - [iBeesoft](https://www.ibeesoft.com/howtos/free-ntfs-for-mac.html) - 在教程文章中推荐本项目
+- [@kissu](https://discuss.privacyguides.net/t/can-someone-recommend-a-foss-mac-app-for-writing-on-ntfs-formatted-drives/34789) - 在论坛中提到本项目
 - [MacBed](https://www.macbed.com/nigate/) - 在网站上介绍和推荐本项目
 - [阮一峰的网络日志](https://www.ruanyifeng.com/blog/2026/01/weekly-issue-381.html) - 投稿采纳
 - [运维鸭](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MjM5OTc3NDM5OQ==&action=getalbum&album_id=1507905061002280960&scene=126&sessionid=1768560415163#wechat_redirect) - 早期终端脚本工具打包
 - [人生海海路](https://zhuanlan.zhihu.com/p/2006600538062616321) - 知乎专栏
+- [赤友助手](https://zhuanlan.zhihu.com/p/2103835855047618653) - 知乎专栏
 
 
 ## 开源库与工具
