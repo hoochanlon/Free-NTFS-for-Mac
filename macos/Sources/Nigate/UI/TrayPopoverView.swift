@@ -42,14 +42,20 @@ enum TrayLayout {
         return CGFloat(visible) * cardHeight + CGFloat(visible - 1) * cardGap
     }
 
-    /// 首帧按默认两张卡估高，避免 NSHostingView 还没报尺寸时面板被压成一条。
-    static func estimatedHeight(deviceCount: Int, hasHint: Bool) -> CGFloat {
+    /// 首帧按列表区估高，避免 NSHostingView 还没报尺寸时面板被压成一条。
+    /// `listHeight` 有值时用用户拖过的视口，否则仍按默认两张卡。
+    static func estimatedHeight(deviceCount: Int, hasHint: Bool, listHeight: CGFloat? = nil) -> CGFloat {
         let chrome: CGFloat = 42
         let divider: CGFloat = 1
         let padding: CGFloat = 28
         let titleRow: CGFloat = 28
         let stackGap: CGFloat = 12
-        let cards = deviceCount == 0 ? 160 : listHeight(deviceCount: deviceCount)
+        let cards: CGFloat
+        if deviceCount == 0 {
+            cards = 160
+        } else {
+            cards = listHeight ?? Self.listHeight(deviceCount: deviceCount)
+        }
         let hint: CGFloat = hasHint ? stackGap + 18 : 0
         return chrome + divider + padding + titleRow + stackGap + cards + hint
     }
@@ -77,6 +83,16 @@ enum TrayListResize {
             - minListHeight(deviceCount: deviceCount, contentHeight: contentHeight) > 0.5
     }
 
+    /// 打开托盘时的视口：有用户高度就夹进当前范围，没有就用最小默认。
+    static func restoredListHeight(
+        preferred: CGFloat?,
+        deviceCount: Int,
+        contentHeight: CGFloat = 0
+    ) -> CGFloat {
+        let fallback = minListHeight(deviceCount: deviceCount, contentHeight: contentHeight)
+        return clamp(preferred ?? fallback, deviceCount: deviceCount, contentHeight: contentHeight)
+    }
+
     /// 用整列实测高度反推单卡，再按要露出的张数还原视口。
     static func slotHeight(_ visibleLimit: Int, contentHeight: CGFloat, deviceCount: Int) -> CGFloat {
         let fallback = TrayLayout.listHeight(deviceCount: deviceCount, limit: visibleLimit)
@@ -94,11 +110,14 @@ final class TrayMetrics: ObservableObject {
     @Published var listHeight: CGFloat = TrayLayout.defaultListHeight
     /// 卡片堆叠实测高度。0 表示还没量到，回退估高。
     @Published var contentHeight: CGFloat = 0
+    /// 用户拖过的列表高度。设备变少时视口会夹紧，偏好本身保留。
+    var preferredListHeight: CGFloat?
 
-    func reset(deviceCount: Int) {
-        listHeight = TrayListResize.minListHeight(
-            deviceCount: deviceCount,
-            contentHeight: contentHeight
+    func prepareForShow(deviceCount: Int) {
+        contentHeight = 0
+        listHeight = TrayListResize.restoredListHeight(
+            preferred: preferredListHeight,
+            deviceCount: deviceCount
         )
     }
 }
@@ -217,7 +236,10 @@ struct TrayPopoverView: View {
         .nigateHelpHost()
         .onChange(of: model.devices.count) { _, count in
             metrics.contentHeight = 0
-            metrics.listHeight = TrayListResize.clamp(metrics.listHeight, deviceCount: count)
+            metrics.listHeight = TrayListResize.restoredListHeight(
+                preferred: metrics.preferredListHeight,
+                deviceCount: count
+            )
         }
     }
 

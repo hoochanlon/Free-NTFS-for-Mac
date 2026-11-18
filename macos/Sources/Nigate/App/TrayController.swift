@@ -65,6 +65,8 @@ final class TrayController: NSObject {
     func attach(_ model: AppModel) {
         guard !tornDown else { return }
         self.model = model
+        metrics.preferredListHeight = model.settings.trayListHeight.map { CGFloat($0) }
+        metrics.prepareForShow(deviceCount: model.devices.count)
         reload()
     }
 
@@ -90,11 +92,19 @@ final class TrayController: NSObject {
         effectView?.appearance = appearance
         panel?.appearance = appearance
         let previous = metrics.listHeight
-        metrics.listHeight = TrayListResize.clamp(
-            metrics.listHeight,
-            deviceCount: model.devices.count,
-            contentHeight: metrics.contentHeight
-        )
+        if resizing {
+            metrics.listHeight = TrayListResize.clamp(
+                metrics.listHeight,
+                deviceCount: model.devices.count,
+                contentHeight: metrics.contentHeight
+            )
+        } else {
+            metrics.listHeight = TrayListResize.restoredListHeight(
+                preferred: metrics.preferredListHeight,
+                deviceCount: model.devices.count,
+                contentHeight: metrics.contentHeight
+            )
+        }
         lastSize.height = max(lastSize.height + (metrics.listHeight - previous), 1)
         resizeStrip?.isEnabled = TrayListResize.canResize(
             deviceCount: model.devices.count,
@@ -147,7 +157,7 @@ final class TrayController: NSObject {
     private func showPanel() {
         guard let model else { return }
         ensurePanel(model)
-        metrics.reset(deviceCount: model.devices.count)
+        metrics.prepareForShow(deviceCount: model.devices.count)
         resizeStrip?.isEnabled = TrayListResize.canResize(
             deviceCount: model.devices.count,
             contentHeight: metrics.contentHeight
@@ -156,7 +166,8 @@ final class TrayController: NSObject {
             width: TrayLayout.width,
             height: TrayLayout.estimatedHeight(
                 deviceCount: model.devices.count,
-                hasHint: model.progressHint != nil
+                hasHint: model.progressHint != nil,
+                listHeight: model.devices.isEmpty ? nil : metrics.listHeight
             )
         )
         applyFrame(lastSize)
@@ -297,6 +308,16 @@ final class TrayController: NSObject {
         resizing = false
         NSCursor.pop()
         applyFrame(lastSize)
+        rememberListHeight()
+    }
+
+    private func rememberListHeight() {
+        guard let model else { return }
+        metrics.preferredListHeight = metrics.listHeight
+        let value = Double(metrics.listHeight)
+        guard model.settings.trayListHeight != value else { return }
+        model.settings.trayListHeight = value
+        model.persist()
     }
 
     /// behindWindow 材质不走 CALayer 圆角，窗口仍是矩形，底角会漏出直角。

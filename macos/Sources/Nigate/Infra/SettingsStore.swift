@@ -39,6 +39,11 @@ enum SettingsStore {
         if let value = raw["showHoverIconButtonHints"] as? Bool {
             settings.showButtonHints = value
         }
+        if let value = raw["trayListHeight"] as? Double, value > 0 {
+            settings.trayListHeight = value
+        } else if let value = raw["trayListHeight"] as? Int, value > 0 {
+            settings.trayListHeight = Double(value)
+        }
         return settings
     }
 

@@ -53,6 +53,13 @@ final class TrayPanelPlacementTests: XCTestCase {
         )
     }
 
+    func testEstimatedHeightUsesPreferredListHeight() {
+        let list = TrayLayout.maxListHeight
+        let two = TrayLayout.estimatedHeight(deviceCount: 4, hasHint: false)
+        let stretched = TrayLayout.estimatedHeight(deviceCount: 4, hasHint: false, listHeight: list)
+        XCTAssertEqual(stretched - two, list - TrayLayout.defaultListHeight, accuracy: 0.5)
+    }
+
     func testFourOrMoreDevicesScrollInsteadOfGrowing() {
         XCTAssertFalse(TrayLayout.needsScroll(1))
         XCTAssertFalse(TrayLayout.needsScroll(2))
@@ -106,6 +113,40 @@ final class TrayPanelPlacementTests: XCTestCase {
             TrayListResize.maxListHeight(deviceCount: 6, contentHeight: 600),
             600
         )
+    }
+
+    func testRestoredListHeightKeepsPreferredStretch() {
+        let preferred = TrayLayout.maxListHeight
+        XCTAssertEqual(
+            TrayListResize.restoredListHeight(preferred: preferred, deviceCount: 6),
+            preferred,
+            accuracy: 0.5
+        )
+        XCTAssertEqual(
+            TrayListResize.restoredListHeight(preferred: nil, deviceCount: 6),
+            TrayLayout.defaultListHeight,
+            accuracy: 0.5
+        )
+        XCTAssertEqual(
+            TrayListResize.restoredListHeight(preferred: preferred, deviceCount: 3),
+            TrayListResize.maxListHeight(deviceCount: 3),
+            accuracy: 0.5
+        )
+        XCTAssertEqual(
+            TrayListResize.restoredListHeight(preferred: preferred, deviceCount: 1),
+            TrayListResize.minListHeight(deviceCount: 1),
+            accuracy: 0.5
+        )
+    }
+
+    func testTrayListHeightSettingRoundTrip() throws {
+        var settings = AppSettings()
+        settings.trayListHeight = Double(TrayLayout.maxListHeight)
+        let data = try JSONEncoder().encode(settings)
+        let decoded = try JSONDecoder().decode(AppSettings.self, from: data)
+        XCTAssertEqual(decoded.trayListHeight, Double(TrayLayout.maxListHeight))
+        let fresh = try JSONDecoder().decode(AppSettings.self, from: try JSONEncoder().encode(AppSettings()))
+        XCTAssertNil(fresh.trayListHeight)
     }
 
     func testCentersUnderStatusItemWhenItFits() {

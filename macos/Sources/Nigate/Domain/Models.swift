@@ -122,12 +122,15 @@ struct AppSettings: Codable, Sendable, Equatable {
     var mountBackend: NigateMountBackend = .ntfs3gCompatibility
     var themeIsLight: Bool = true
     var showButtonHints: Bool = true
+    /// 托盘列表区上次拖出的高度。nil 表示还没用过自定义高度。
+    var trayListHeight: Double? = nil
 
     enum CodingKeys: String, CodingKey {
         case savePassword, startupTab, language, autoStart, preventSleep, keepAwake
         case manuallyReadOnlyDevices, mountBackend, themeIsLight
         /// 旧键 showButtonHints 曾以默认关闭被整表写入，不能再当用户选择。
         case showButtonHints = "showHoverIconButtonHints"
+        case trayListHeight
     }
 
     var sleepMode: SleepMode {
