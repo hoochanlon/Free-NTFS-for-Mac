@@ -24,7 +24,7 @@ struct TitleChrome: View {
                 }
                 .disabled(model.protectLocked)
 
-                ChromeProtectButton(windowHelp: true)
+                ChromeProtectButton()
 
                 iconButton("power", L10n.t("menu.quit"), active: model.quitConfirmOpen, tint: Palette.error) {
                     model.requestQuit()
@@ -38,15 +38,7 @@ struct TitleChrome: View {
                     model.aboutOpen = true
                 }
 
-                Button {
-                    model.toggleTheme()
-                } label: {
-                    Image(systemName: model.settings.themeIsLight ? "moon.fill" : "sun.max.fill")
-                        .frame(width: 22, height: 22)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .nigateHelp(L10n.t("theme.toggle"))
+                ChromeThemeButton()
 
                 ChromeStatusChip()
                     .padding(.leading, 6)
@@ -60,7 +52,7 @@ struct TitleChrome: View {
     }
 
     private func iconButton(_ system: String, _ title: String, active: Bool, tint: Color, action: @escaping () -> Void) -> some View {
-        ChromeIconButton(system: system, title: title, active: active, tint: tint, windowHelp: true, action: action)
+        ChromeIconButton(system: system, title: title, active: active, tint: tint, action: action)
     }
 }
 
@@ -104,20 +96,16 @@ struct NigateMark: View {
     }()
 }
 
-/// 标题栏 / 托盘共用。长按 3 秒切换，避免误触。托盘没有窗口气泡坐标系，改用系统 help。
+/// 标题栏 / 托盘共用。长按 3 秒切换，避免误触。
 struct ChromeProtectButton: View {
     @EnvironmentObject private var model: AppModel
-    var windowHelp: Bool = false
 
     var body: some View {
         Image(systemName: model.protectLocked ? "lock.shield.fill" : "lock.shield")
             .foregroundStyle(model.protectLocked ? Palette.success : Color.primary.opacity(0.7))
             .frame(width: 22, height: 22)
             .contentShape(Rectangle())
-            .modifier(ChromeIconHelp(
-                text: model.protectLocked ? L10n.t("app.protectTooltipLocked") : L10n.t("app.protectTooltip"),
-                windowHelp: windowHelp
-            ))
+            .nigateHelp(model.protectLocked ? L10n.t("app.protectTooltipLocked") : L10n.t("app.protectTooltip"))
             // longPress 不要直接挂在裸 Image 上扩散手势；限制在固定 hit box 内。
             .gesture(
                 LongPressGesture(minimumDuration: 3)
@@ -126,14 +114,30 @@ struct ChromeProtectButton: View {
     }
 }
 
-/// 22pt 线性图标。标题栏走窗口内气泡，托盘没有同一坐标系，改用系统 help。
+/// 浅色显示月亮、深色显示太阳。标题栏 / 托盘共用。
+struct ChromeThemeButton: View {
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        Button {
+            model.toggleTheme()
+        } label: {
+            Image(systemName: model.settings.themeIsLight ? "moon.fill" : "sun.max.fill")
+                .frame(width: 22, height: 22)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .nigateHelp(model.settings.themeIsLight ? L10n.t("theme.toggleDark") : L10n.t("theme.toggleLight"))
+    }
+}
+
+/// 22pt 线性图标。悬停提示画在窗口层，水平居中钉在图标下方。
 struct ChromeIconButton: View {
     let system: String
     let title: String
     var active: Bool
     var tint: Color
     var spinning: Bool = false
-    var windowHelp: Bool = false
     var action: () -> Void
 
     var body: some View {
@@ -151,20 +155,7 @@ struct ChromeIconButton: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .modifier(ChromeIconHelp(text: title, windowHelp: windowHelp))
-    }
-}
-
-private struct ChromeIconHelp: ViewModifier {
-    let text: String
-    let windowHelp: Bool
-
-    func body(content: Content) -> some View {
-        if windowHelp {
-            content.nigateHelp(text)
-        } else {
-            content.help(text)
-        }
+        .nigateHelp(title)
     }
 }
 

@@ -408,7 +408,8 @@
     "unknownError": "未知错误"
   },
   "theme": {
-    "toggle": "切换到浅色主题"
+    "toggleLight": "切换到浅色主题",
+    "toggleDark": "切换到深色主题"
   },
   "about": {
     "title": "关于",

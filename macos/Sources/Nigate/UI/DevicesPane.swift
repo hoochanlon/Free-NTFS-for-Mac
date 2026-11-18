@@ -89,43 +89,98 @@ struct DeviceBatchActions: View {
     }
 
     private func labeledRow<S: LabelStyle>(_ style: S) -> some View {
-        row.labelStyle(style)
+        row(showHelp: style is IconOnlyLabelStyle).labelStyle(style)
     }
 
-    private var row: some View {
+    private func row(showHelp: Bool) -> some View {
         HStack(spacing: compact ? 6 : 8) {
-            batch("arrow.clockwise", L10n.t("devices.refreshDevices"), action: onRefresh)
+            batch("arrow.clockwise", L10n.t("devices.refreshDevices"), showHelp: showHelp, action: onRefresh)
                 .disabled(model.isScanningDevices)
             if TrayBatchAvailability.canMountUnmounted(model.devices) {
-                batch("externaldrive", L10n.t("devices.mountAllDevices")) { model.runBatch(.mount) }
+                batch("externaldrive", L10n.t("devices.mountAllDevices"), showHelp: showHelp) { model.runBatch(.mount) }
             }
             if TrayBatchAvailability.canMountReadOnly(model.devices) {
-                batch("pencil.and.outline", L10n.t("devices.mountAll")) { model.runBatch(.mount) }
+                batch("pencil.and.outline", L10n.t("devices.mountAll"), showHelp: showHelp) { model.runBatch(.mount) }
             }
             if TrayBatchAvailability.canRestore(model.devices) {
-                batch("eye", L10n.t("devices.restoreAllReadOnly")) { model.runBatch(.restore) }
+                batch("eye", L10n.t("devices.restoreAllReadOnly"), showHelp: showHelp) { model.runBatch(.restore) }
             }
             if TrayBatchAvailability.canUnmount(model.devices) {
-                batch("eject", L10n.t("devices.unmountAll")) { model.runBatch(.unmount) }
+                batch("eject", L10n.t("devices.unmountAll"), showHelp: showHelp) { model.runBatch(.unmount) }
             }
             if TrayBatchAvailability.canEject(model.devices) {
-                batch("externaldrive.badge.xmark", L10n.t("devices.ejectAll")) { model.runBatch(.eject) }
+                batch("externaldrive.badge.xmark", L10n.t("devices.ejectAll"), showHelp: showHelp) { model.runBatch(.eject) }
             }
         }
     }
 
-    private func batch(_ icon: String, _ title: String, action: @escaping () -> Void) -> some View {
+    @ViewBuilder
+    private func batch(_ icon: String, _ title: String, showHelp: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Label(title, systemImage: icon)
         }
-        .buttonStyle(.bordered)
-        .help(title)
+        .modifier(DeviceActionChrome(quiet: compact, help: showHelp ? title : nil))
     }
 }
 
 enum DeviceCardDensity {
     case full
     case tray
+}
+
+/// 主窗口用系统 bordered；托盘叠在菜单栏玻璃上，改成淡色描边芯片。
+/// 窗口气泡只给纯图标：有文字时再挂同文提示是多余的。
+private struct DeviceActionChrome: ViewModifier {
+    var quiet: Bool
+    var help: String?
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if quiet {
+            content.buttonStyle(TrayChipButtonStyle())
+                .modifier(OptionalHelp(text: help))
+        } else {
+            content.buttonStyle(.bordered)
+                .modifier(OptionalHelp(text: help))
+        }
+    }
+}
+
+private struct OptionalHelp: ViewModifier {
+    var text: String?
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if let text {
+            content.nigateHelp(text)
+        } else {
+            content
+        }
+    }
+}
+
+private struct TrayChipButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(Color.primary.opacity(fillOpacity(pressed: configuration.isPressed)))
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(isEnabled ? 0.12 : 0.06), lineWidth: 1)
+            }
+            .opacity(isEnabled ? 1 : 0.45)
+    }
+
+    private func fillOpacity(pressed: Bool) -> Double {
+        if !isEnabled { return 0.04 }
+        return pressed ? 0.14 : 0.07
+    }
 }
 
 struct DeviceCard: View {
@@ -182,10 +237,22 @@ struct DeviceCard: View {
             .disabled(model.isDeviceBusy(device))
         }
         .padding(14)
-        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color(nsColor: .controlBackgroundColor)))
-        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.primary.opacity(0.06)))
+        .background { cardFill }
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.primary.opacity(density == .tray ? 0.12 : 0.06)))
         .accessibilityElement(children: .contain)
         .accessibilityLabel(TrayDeviceRow.accessibilityLabel(device, status: statusLabel))
+    }
+
+    @ViewBuilder
+    private var cardFill: some View {
+        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+        if density == .tray {
+            // 比面板玻璃略深一档，卡片才站得住；不要退回实心窗口底。
+            shape.fill(.regularMaterial)
+                .overlay(shape.fill(Color.primary.opacity(0.07)))
+        } else {
+            shape.fill(Color(nsColor: .controlBackgroundColor))
+        }
     }
 
     private func openVolumeInFinder() {
@@ -214,40 +281,39 @@ struct DeviceCard: View {
     }
 
     private func labeledActions<S: LabelStyle>(_ style: S) -> some View {
-        actionRow().labelStyle(style)
+        actionRow(showHelp: style is IconOnlyLabelStyle).labelStyle(style)
     }
 
-    private func actionRow() -> some View {
+    private func actionRow(showHelp: Bool) -> some View {
         HStack {
             if device.needsMount {
-                action(L10n.t("devices.mountDevice"), "externaldrive") { model.perform(.mount, on: device) }
+                action(L10n.t("devices.mountDevice"), "externaldrive", showHelp: showHelp) { model.perform(.mount, on: device) }
             } else {
                 if device.isReadOnly {
-                    action(L10n.t("devices.mount"), "pencil") { model.perform(.mount, on: device) }
+                    action(L10n.t("devices.mount"), "pencil", showHelp: showHelp) { model.perform(.mount, on: device) }
                 }
                 if device.isReadWrite {
-                    action(L10n.t("devices.restoreReadOnly"), "eye") { model.perform(.restore, on: device) }
+                    action(L10n.t("devices.restoreReadOnly"), "eye", showHelp: showHelp) { model.perform(.restore, on: device) }
                 }
-                action(L10n.t("devices.unmount"), "eject") { model.perform(.unmount, on: device) }
-                action(L10n.t("devices.eject"), "externaldrive.badge.xmark") { confirm(.eject) }
+                action(L10n.t("devices.unmount"), "eject", showHelp: showHelp) { model.perform(.unmount, on: device) }
+                action(L10n.t("devices.eject"), "externaldrive.badge.xmark", showHelp: showHelp) { confirm(.eject) }
                 if density == .full {
-                    action(L10n.t("devices.repair"), "wrench.and.screwdriver") { confirm(.repair) }
-                    action(L10n.t("devices.rename"), "character.cursor.ibeam") { model.renameDevice = device }
+                    action(L10n.t("devices.repair"), "wrench.and.screwdriver", showHelp: showHelp) { confirm(.repair) }
+                    action(L10n.t("devices.rename"), "character.cursor.ibeam", showHelp: showHelp) { model.renameDevice = device }
                     if device.canFormat {
-                        action(L10n.t("devices.format"), "internaldrive") { confirm(.format) }
+                        action(L10n.t("devices.format"), "internaldrive", showHelp: showHelp) { confirm(.format) }
                     }
-                    action(L10n.t("devices.reset"), "arrow.counterclockwise") { confirm(.reset) }
+                    action(L10n.t("devices.reset"), "arrow.counterclockwise", showHelp: showHelp) { confirm(.reset) }
                 }
             }
         }
     }
 
-    private func action(_ title: String, _ icon: String, _ run: @escaping () -> Void) -> some View {
+    private func action(_ title: String, _ icon: String, showHelp: Bool, _ run: @escaping () -> Void) -> some View {
         Button(action: run) {
             Label(title, systemImage: icon)
         }
-        .buttonStyle(.bordered)
-        .help(title)
+        .modifier(DeviceActionChrome(quiet: density == .tray, help: showHelp ? title : nil))
     }
 
     private func confirm(_ action: DeviceAction) {

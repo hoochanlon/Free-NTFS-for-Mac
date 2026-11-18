@@ -58,9 +58,54 @@ final class TrayPanelPlacementTests: XCTestCase {
         XCTAssertFalse(TrayLayout.needsScroll(2))
         XCTAssertTrue(TrayLayout.needsScroll(3))
         XCTAssertTrue(TrayLayout.needsScroll(4))
-        XCTAssertEqual(TrayLayout.listHeight(deviceCount: 4), TrayLayout.maxListHeight, accuracy: 0.5)
-        XCTAssertEqual(TrayLayout.listHeight(deviceCount: 2), TrayLayout.maxListHeight, accuracy: 0.5)
-        XCTAssertLessThan(TrayLayout.listHeight(deviceCount: 1), TrayLayout.maxListHeight)
+        XCTAssertEqual(TrayLayout.listHeight(deviceCount: 4), TrayLayout.defaultListHeight, accuracy: 0.5)
+        XCTAssertEqual(TrayLayout.listHeight(deviceCount: 2), TrayLayout.defaultListHeight, accuracy: 0.5)
+        XCTAssertLessThan(TrayLayout.listHeight(deviceCount: 1), TrayLayout.defaultListHeight)
+    }
+
+    func testBottomDragCapsAtFourCards() {
+        let two = TrayListResize.minListHeight(deviceCount: 6)
+        let four = TrayListResize.maxListHeight(deviceCount: 6)
+        XCTAssertEqual(two, TrayLayout.defaultListHeight, accuracy: 0.5)
+        XCTAssertEqual(four, TrayLayout.maxListHeight, accuracy: 0.5)
+        XCTAssertEqual(four - two, 2 * (TrayLayout.cardHeight + TrayLayout.cardGap), accuracy: 0.5)
+        XCTAssertEqual(TrayListResize.clamp(0, deviceCount: 6), two, accuracy: 0.5)
+        XCTAssertEqual(TrayListResize.clamp(10_000, deviceCount: 6), four, accuracy: 0.5)
+        XCTAssertFalse(TrayListResize.canResize(deviceCount: 0))
+        XCTAssertFalse(TrayListResize.canResize(deviceCount: 1))
+        XCTAssertFalse(TrayListResize.canResize(deviceCount: 2))
+        XCTAssertTrue(TrayListResize.canResize(deviceCount: 3))
+        XCTAssertTrue(TrayListResize.canResize(deviceCount: 4))
+        XCTAssertEqual(
+            TrayListResize.maxListHeight(deviceCount: 3),
+            TrayLayout.listHeight(deviceCount: 3, limit: 4),
+            accuracy: 0.5
+        )
+        XCTAssertLessThan(TrayListResize.maxListHeight(deviceCount: 3), four)
+    }
+
+    func testMaxStretchStopsAtMeasuredCards() {
+        let measured: CGFloat = 400
+        XCTAssertEqual(
+            TrayListResize.maxListHeight(deviceCount: 4, contentHeight: measured),
+            measured,
+            accuracy: 0.5
+        )
+        XCTAssertEqual(
+            TrayListResize.clamp(10_000, deviceCount: 4, contentHeight: measured),
+            measured,
+            accuracy: 0.5
+        )
+        let card = (measured - 3 * TrayLayout.cardGap) / 4
+        XCTAssertEqual(
+            TrayListResize.minListHeight(deviceCount: 4, contentHeight: measured),
+            2 * card + TrayLayout.cardGap,
+            accuracy: 0.5
+        )
+        XCTAssertLessThan(
+            TrayListResize.maxListHeight(deviceCount: 6, contentHeight: 600),
+            600
+        )
     }
 
     func testCentersUnderStatusItemWhenItFits() {

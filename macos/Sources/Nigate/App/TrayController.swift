@@ -45,9 +45,18 @@ final class TrayController: NSObject {
     /// tearDown 之后禁止再把状态栏图标装回去。扫描回调晚到一步就会让退出变成后台驻留。
     private var tornDown = false
     private var panel: NSPanel?
+    private var effectView: NSVisualEffectView?
     private var hostingView: NSHostingView<TrayPopoverRoot>?
+    private var resizeStrip: TrayResizeStrip?
     private var outsideMonitors: [Any] = []
     private var lastSize: CGSize = NSSize(width: TrayLayout.width, height: 200)
+    private let metrics = TrayMetrics()
+    /// 拖底时 SwiftUI 尺寸回传可能滞后，不能把面板打回默认高。
+    private var resizing = false
+    /// 按下时记下：顶边、抓点相对底边、chrome = 面板高 − 列表高。拖动只改底边。
+    private var resizeTop: CGFloat = 0
+    private var resizeGrabOffset: CGFloat = 0
+    private var resizeChrome: CGFloat = 0
     private lazy var trayLogo: NSImage? = {
         guard let url = Bundle.module.url(forResource: "AppIcon-white", withExtension: "icns") else { return nil }
         return NSImage(contentsOf: url)
@@ -65,6 +74,8 @@ final class TrayController: NSObject {
         if let item { NSStatusBar.system.removeStatusItem(item) }
         item = nil
         hostingView = nil
+        resizeStrip = nil
+        effectView = nil
         panel = nil
     }
 
@@ -76,8 +87,20 @@ final class TrayController: NSObject {
         updateStatusItemTint(from: model)
         let appearance = NSApp.appearance
         hostingView?.appearance = appearance
+        effectView?.appearance = appearance
         panel?.appearance = appearance
-        if panel?.isVisible == true {
+        let previous = metrics.listHeight
+        metrics.listHeight = TrayListResize.clamp(
+            metrics.listHeight,
+            deviceCount: model.devices.count,
+            contentHeight: metrics.contentHeight
+        )
+        lastSize.height = max(lastSize.height + (metrics.listHeight - previous), 1)
+        resizeStrip?.isEnabled = TrayListResize.canResize(
+            deviceCount: model.devices.count,
+            contentHeight: metrics.contentHeight
+        )
+        if panel?.isVisible == true, !resizing {
             applyFrame(lastSize)
         }
     }
@@ -124,6 +147,11 @@ final class TrayController: NSObject {
     private func showPanel() {
         guard let model else { return }
         ensurePanel(model)
+        metrics.reset(deviceCount: model.devices.count)
+        resizeStrip?.isEnabled = TrayListResize.canResize(
+            deviceCount: model.devices.count,
+            contentHeight: metrics.contentHeight
+        )
         lastSize = CGSize(
             width: TrayLayout.width,
             height: TrayLayout.estimatedHeight(
@@ -137,6 +165,10 @@ final class TrayController: NSObject {
     }
 
     private func hidePanel() {
+        if resizing {
+            NSCursor.pop()
+        }
+        resizing = false
         stopOutsideClickMonitor()
         panel?.orderOut(nil)
         if !tornDown, model?.quitPhase == .confirming {
@@ -146,15 +178,28 @@ final class TrayController: NSObject {
 
     private func ensurePanel(_ model: AppModel) {
         if panel != nil, hostingView != nil { return }
-        let root = TrayPopoverRoot(model: model) { [weak self] size in
+        let root = TrayPopoverRoot(model: model, metrics: metrics) { [weak self] size in
             Task { @MainActor in self?.handleSize(size) }
         }
-        let hosted = NSHostingView(rootView: root)
+        let hosted = TrayHostingView(rootView: root)
         hosted.sizingOptions = .intrinsicContentSize
-        hosted.wantsLayer = true
-        hosted.layer?.cornerRadius = 16
-        hosted.layer?.masksToBounds = true
         hosted.appearance = NSApp.appearance
+
+        let effect = NSVisualEffectView(frame: NSRect(origin: .zero, size: lastSize))
+        effect.material = .menu
+        effect.blendingMode = .behindWindow
+        effect.state = .active
+        effect.autoresizingMask = [.width, .height]
+        hosted.frame = effect.bounds
+        hosted.autoresizingMask = [.width, .height]
+        effect.addSubview(hosted)
+
+        let strip = TrayResizeStrip(frame: NSRect(x: 0, y: 0, width: lastSize.width, height: TrayLayout.resizeStripHeight))
+        strip.autoresizingMask = [.width]
+        strip.onBegin = { [weak self] in self?.beginResize() }
+        strip.onTrack = { [weak self] in self?.trackResize() }
+        strip.onEnd = { [weak self] in self?.endResize() }
+        effect.addSubview(strip)
 
         let panel = TrayPanel(
             contentRect: NSRect(origin: .zero, size: lastSize),
@@ -172,12 +217,16 @@ final class TrayController: NSObject {
         panel.isReleasedWhenClosed = false
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
         panel.appearance = NSApp.appearance
-        panel.contentView = hosted
+        panel.contentView = effect
+        self.effectView = effect
         self.hostingView = hosted
+        self.resizeStrip = strip
         self.panel = panel
+        applyPanelShape()
     }
 
     private func handleSize(_ size: CGSize) {
+        guard !resizing else { return }
         let next = NSSize(width: max(size.width, 1), height: max(size.height, 1))
         guard abs(next.width - lastSize.width) > 0.5 || abs(next.height - lastSize.height) > 0.5 else { return }
         lastSize = next
@@ -190,7 +239,102 @@ final class TrayController: NSObject {
         let fitted = NSSize(width: max(size.width, 1), height: max(size.height, 1))
         let origin = panelOrigin(for: fitted)
         panel.setFrame(NSRect(origin: origin, size: fitted), display: true)
-        hostingView?.frame = NSRect(origin: .zero, size: fitted)
+        let bounds = NSRect(origin: .zero, size: fitted)
+        effectView?.frame = bounds
+        hostingView?.frame = bounds
+        resizeStrip?.frame = NSRect(
+            x: 0,
+            y: 0,
+            width: bounds.width,
+            height: TrayLayout.resizeStripHeight
+        )
+        if let strip = resizeStrip {
+            panel.invalidateCursorRects(for: strip)
+        }
+        applyPanelShape()
+    }
+
+    /// 拖动中只改 frame：顶边钉住，底边跟鼠标。圆角和阴影放到松开后再铺。
+    private func applyLiveFrame(_ size: CGSize) {
+        guard let panel else { return }
+        let fitted = NSSize(width: max(size.width, 1), height: max(size.height, 1))
+        let origin = panelOrigin(for: fitted)
+        NSAnimationContext.beginGrouping()
+        NSAnimationContext.current.duration = 0
+        panel.setFrame(NSRect(origin: origin, size: fitted), display: true)
+        NSAnimationContext.endGrouping()
+    }
+
+    private func beginResize() {
+        resizing = true
+        NSCursor.resizeUpDown.push()
+        resizeChrome = max(lastSize.height - metrics.listHeight, 0)
+        resizeGrabOffset = NSEvent.mouseLocation.y - (panel?.frame.minY ?? 0)
+        resizeTop = panel?.frame.maxY ?? 0
+    }
+
+    /// 用鼠标绝对位置算高度，不要累加 deltaY。抓点一直贴在底边上。
+    private func trackResize() {
+        guard let model else { return }
+        let desiredBottom = NSEvent.mouseLocation.y - resizeGrabOffset
+        let desiredPanel = resizeTop - desiredBottom
+        let nextList = TrayListResize.clamp(
+            desiredPanel - resizeChrome,
+            deviceCount: model.devices.count,
+            contentHeight: metrics.contentHeight
+        )
+        let nextPanel = resizeChrome + nextList
+        guard abs(nextPanel - lastSize.height) > 0.05 else { return }
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            metrics.listHeight = nextList
+        }
+        lastSize = CGSize(width: TrayLayout.width, height: nextPanel)
+        applyLiveFrame(lastSize)
+    }
+
+    private func endResize() {
+        guard resizing else { return }
+        resizing = false
+        NSCursor.pop()
+        applyFrame(lastSize)
+    }
+
+    /// behindWindow 材质不走 CALayer 圆角，窗口仍是矩形，底角会漏出直角。
+    /// maskImage 裁的是窗口 alpha；阴影才能跟着圆角走。
+    private func applyPanelShape() {
+        let radius = TrayLayout.cornerRadius
+        if let effect = effectView {
+            if effect.maskImage == nil {
+                effect.maskImage = Self.stretchableRoundedMask(radius: radius)
+            }
+            clipRounded(effect, radius: radius)
+        }
+        if let hosted = hostingView {
+            clipRounded(hosted, radius: radius)
+        }
+        panel?.invalidateShadow()
+    }
+
+    private func clipRounded(_ view: NSView, radius: CGFloat) {
+        view.wantsLayer = true
+        view.clipsToBounds = true
+        view.layer?.cornerRadius = radius
+        view.layer?.cornerCurve = .continuous
+        view.layer?.masksToBounds = true
+    }
+
+    private static func stretchableRoundedMask(radius: CGFloat) -> NSImage {
+        let side = radius * 2 + 1
+        let image = NSImage(size: NSSize(width: side, height: side), flipped: false) { rect in
+            NSColor.black.setFill()
+            NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius).fill()
+            return true
+        }
+        image.capInsets = NSEdgeInsets(top: radius, left: radius, bottom: radius, right: radius)
+        image.resizingMode = .stretch
+        return image
     }
 
     private func panelOrigin(for size: CGSize) -> CGPoint {
@@ -313,4 +457,67 @@ final class TrayController: NSObject {
 private final class TrayPanel: NSPanel {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
+}
+
+/// 底部拖高。mouseDragged 会跟着手势离开视图，SwiftUI 手势做不到。
+/// 拖动过程只上报，高度用鼠标屏幕坐标算，不走 deltaY。
+private final class TrayResizeStrip: NSView {
+    var isEnabled: Bool = false {
+        didSet {
+            guard isEnabled != oldValue else { return }
+            window?.invalidateCursorRects(for: self)
+        }
+    }
+    var onBegin: (() -> Void)?
+    var onTrack: (() -> Void)?
+    var onEnd: (() -> Void)?
+
+    override var isOpaque: Bool { false }
+    override var mouseDownCanMoveWindow: Bool { false }
+
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        guard isEnabled else { return nil }
+        return super.hitTest(point)
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        guard isEnabled else { return }
+        onBegin?()
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard isEnabled else { return }
+        onTrack?()
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        onEnd?()
+    }
+
+    override func resetCursorRects() {
+        if isEnabled {
+            addCursorRect(bounds, cursor: .resizeUpDown)
+        }
+    }
+}
+
+/// 透明宿主。默认 NSHostingView 会垫一层窗口底，把菜单栏毛玻璃盖住。
+private final class TrayHostingView: NSHostingView<TrayPopoverRoot> {
+    override var isOpaque: Bool { false }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        clearBackground()
+    }
+
+    override func layout() {
+        super.layout()
+        clearBackground()
+    }
+
+    private func clearBackground() {
+        wantsLayer = true
+        layer?.isOpaque = false
+        layer?.backgroundColor = NSColor.clear.cgColor
+    }
 }

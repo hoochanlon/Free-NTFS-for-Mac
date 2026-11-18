@@ -408,7 +408,8 @@
     "unknownError": "Unbekannter Fehler"
   },
   "theme": {
-    "toggle": "Zu hellem Thema wechseln"
+    "toggleLight": "Zu hellem Thema wechseln",
+    "toggleDark": "Zu dunklem Thema wechseln"
   },
   "about": {
     "title": "Über",

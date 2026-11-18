@@ -125,10 +125,10 @@ private struct WindowHelpBubble: View {
         Text(text)
             .font(.caption)
             .foregroundStyle(.primary)
-            .multilineTextAlignment(.leading)
+            .multilineTextAlignment(compact ? .center : .leading)
             .lineLimit(compact ? 1 : 4)
             .fixedSize(horizontal: compact, vertical: true)
-            .frame(maxWidth: compact ? nil : HelpBubbleLayout.maxWidth, alignment: .leading)
+            .frame(maxWidth: compact ? nil : HelpBubbleLayout.maxWidth, alignment: compact ? .center : .leading)
             .padding(.horizontal, 10)
             .padding(.vertical, 7)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
@@ -222,8 +222,28 @@ extension View {
         modifier(NigateHelpModifier(text: text))
     }
 
+    /// 窗口层画气泡。主窗口和托盘各自挂一次，锚点才有坐标系。
+    func nigateHelpHost() -> some View {
+        modifier(NigateHelpHostModifier())
+    }
+
     func linkPointer() -> some View {
         modifier(LinkPointerModifier())
+    }
+}
+
+private struct NigateHelpHostModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .coordinateSpace(name: "nigateWindow")
+            .overlayPreferenceValue(HelpBubbleAnchorKey.self) { anchor in
+                GeometryReader { window in
+                    if let anchor, anchor.host.width > 0, !anchor.text.isEmpty {
+                        WindowHelpBubble(text: anchor.text, host: anchor.host, windowSize: window.size)
+                    }
+                }
+                .allowsHitTesting(false)
+            }
     }
 }
 
@@ -248,15 +268,7 @@ struct RootView: View {
         }
         .id(model.languageStamp)
         .frame(minWidth: WindowLayout.width, maxWidth: WindowLayout.width, minHeight: WindowLayout.minHeight)
-        .coordinateSpace(name: "nigateWindow")
-        .overlayPreferenceValue(HelpBubbleAnchorKey.self) { anchor in
-            GeometryReader { window in
-                if let anchor, anchor.host.width > 0, !anchor.text.isEmpty {
-                    WindowHelpBubble(text: anchor.text, host: anchor.host, windowSize: window.size)
-                }
-            }
-            .allowsHitTesting(false)
-        }
+        .nigateHelpHost()
         .background(Color(nsColor: .windowBackgroundColor))
         .background(MainWindowLock())
         .sheet(item: $model.passwordSheet, onDismiss: {

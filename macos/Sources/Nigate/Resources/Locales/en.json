@@ -408,7 +408,8 @@
     "unknownError": "Unknown error"
   },
   "theme": {
-    "toggle": "Switch to light theme"
+    "toggleLight": "Switch to light theme",
+    "toggleDark": "Switch to dark theme"
   },
   "about": {
     "title": "About",

@@ -408,7 +408,8 @@
     "unknownError": "不明なエラー"
   },
   "theme": {
-    "toggle": "ライトテーマに切り替え"
+    "toggleLight": "ライトテーマに切り替え",
+    "toggleDark": "ダークテーマに切り替え"
   },
   "about": {
     "title": "について",
