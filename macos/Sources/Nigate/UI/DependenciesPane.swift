@@ -11,6 +11,17 @@ struct DependenciesPane: View {
                 Text(L10n.t("dependencies.title")).font(.title2.weight(.semibold))
                 Spacer()
                 Button {
+                    model.openTerminalApp()
+                } label: {
+                    Label(L10n.t("dependencies.openTerminal"), systemImage: "terminal")
+                }
+                Button {
+                    model.openInstaller()
+                } label: {
+                    Label(L10n.t("dependencies.autoInstall"), systemImage: "square.and.arrow.down")
+                }
+                .nigateHelp(L10n.t("dependencies.autoInstallTitle"))
+                Button {
                     Task { @MainActor in
                         do {
                             let result = try await Shell.run("/usr/bin/open", [
@@ -34,12 +45,6 @@ struct DependenciesPane: View {
                 } label: {
                     Label(L10n.t("dependencies.openFileSystemExtensions"), systemImage: "macwindow")
                 }
-                Button {
-                    model.openInstaller()
-                } label: {
-                    Label(L10n.t("dependencies.autoInstall"), systemImage: "terminal")
-                }
-                .nigateHelp(L10n.t("dependencies.autoInstallTitle"))
                 Button {
                     Task { await model.refreshDependencies() }
                 } label: {

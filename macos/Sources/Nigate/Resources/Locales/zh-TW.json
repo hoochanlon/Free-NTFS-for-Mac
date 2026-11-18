@@ -39,7 +39,9 @@
   },
   "dependencies": {
     "title": "系統依賴",
-    "openFileSystemExtensions": "開啟檔案系統延伸功能",
+    "openTerminal": "開啟終端",
+    "openTerminalFailed": "無法開啟終端",
+    "openFileSystemExtensions": "開啟檔案系統延伸功能選項",
     "checkButton": "檢查依賴",
     "autoInstall": "一鍵安裝",
     "autoInstallTitle": "透過 Homebrew 安裝 MacFUSE、ntfs-3g 和 fswatch。不含 Xcode Command Line Tools 和 Homebrew。",

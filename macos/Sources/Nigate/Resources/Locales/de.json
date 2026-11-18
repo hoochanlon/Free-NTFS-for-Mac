@@ -39,7 +39,9 @@
   },
   "dependencies": {
     "title": "Systemabhängigkeiten",
-    "openFileSystemExtensions": "Dateisystemerweiterungen öffnen",
+    "openTerminal": "Terminal öffnen",
+    "openTerminalFailed": "Terminal konnte nicht geöffnet werden",
+    "openFileSystemExtensions": "Dateisystemerweiterungsoptionen öffnen",
     "checkButton": "Abhängigkeiten prüfen",
     "autoInstall": "Ein-Klick-Installation",
     "autoInstallTitle": "Installiert MacFUSE, ntfs-3g und fswatch über Homebrew. Xcode Command Line Tools und Homebrew sind nicht enthalten.",

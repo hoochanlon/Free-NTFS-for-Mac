@@ -779,6 +779,24 @@ final class AppModel: ObservableObject {
         showToast(L10n.t("settings.deletePasswordSuccess"))
     }
 
+    func openTerminalApp() {
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.Terminal") else {
+            alert = AppAlert(
+                title: L10n.t("dialog.error"),
+                message: L10n.t("dependencies.openTerminalFailed"),
+                kind: .error
+            )
+            return
+        }
+        if !NSWorkspace.shared.open(url) {
+            alert = AppAlert(
+                title: L10n.t("dialog.error"),
+                message: L10n.t("dependencies.openTerminalFailed"),
+                kind: .error
+            )
+        }
+    }
+
     func openInstaller() {
         do {
             try Installer.openTerminal(language: settings.language)
