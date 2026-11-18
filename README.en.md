@@ -205,6 +205,20 @@ NOTARIZE=1 \
 ./macos/Scripts/build.sh
 ```
 
+## Command-line scripts (ninja)
+
+`ninja/` is a terminal toolkit separate from Nigate.app; it does not go through the Swift app. One-liners: [ninja/README.md](ninja/README.md).
+
+| Script | Role |
+| --- | --- |
+| `nigate.sh` | Watch for NTFS volumes and remount them read-write |
+| `kamui.sh` | Mount Linux filesystems (ext2/3/4, btrfs, xfs, zfs, …) |
+| `kunai.sh` | Install MacFUSE, ntfs-3g, and related dependencies |
+| `ninpo.sh` | Uninstall those dependencies (leaves Xcode Command Line Tools) |
+| `shuriken.sh` | System permission helpers (Gatekeeper, SIP, …) |
+
+`kamui-lang.sh` and `shuriken-lang.sh` are locale files for those scripts; do not run them alone.
+
 ## Layout
 
 ```text
@@ -214,6 +228,7 @@ macos/Sources/NigateFSKitCore/     Shared FSKit identity & mount-backend policy
 macos/Sources/NigateFSKitExtension/ FSKit data plane (appex)
 macos/Sources/NigateNTFSEngine/    Static-linked NTFS engine for the extension
 Tests/NigateTests/
+ninja/                             CLI scripts (separate from the app)
 docs/README.md
 ```
 

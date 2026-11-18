@@ -205,6 +205,20 @@ NOTARIZE=1 \
 ./macos/Scripts/build.sh
 ```
 
+## 命令行脚本（ninja）
+
+`ninja/` 是和 Nigate.app 独立的终端工具，不经过 Swift 应用。一键命令见 [ninja/README.md](ninja/README.md)。
+
+| 脚本 | 作用 |
+| --- | --- |
+| `nigate.sh` | 监控 NTFS 设备，自动从只读改挂为读写 |
+| `kamui.sh` | 挂载 Linux 文件系统（ext2/3/4、btrfs、xfs、zfs 等） |
+| `kunai.sh` | 安装 MacFUSE、ntfs-3g 等依赖 |
+| `ninpo.sh` | 卸载上述依赖（不卸 Xcode Command Line Tools） |
+| `shuriken.sh` | 系统权限相关设置（Gatekeeper、SIP 等） |
+
+`kamui-lang.sh`、`shuriken-lang.sh` 只给对应脚本提供文案，不要单独运行。
+
 ## 目录结构
 
 ```text
@@ -214,6 +228,7 @@ macos/Sources/NigateFSKitCore/     FSKit 身份与挂载后端策略
 macos/Sources/NigateFSKitExtension/ FSKit 数据面（appex）
 macos/Sources/NigateNTFSEngine/    扩展内静态链接的 NTFS 引擎
 Tests/NigateTests/
+ninja/                             命令行脚本（与应用独立）
 docs/README.md
 ```
 

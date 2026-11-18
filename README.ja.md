@@ -205,6 +205,20 @@ NOTARIZE=1 \
 ./macos/Scripts/build.sh
 ```
 
+## コマンドラインスクリプト（ninja）
+
+`ninja/` は Nigate.app とは別系統のターミナル用ツールで、Swift アプリは経由しません。ワンライナーは [ninja/README.md](ninja/README.md) を参照。
+
+| スクリプト | 役割 |
+| --- | --- |
+| `nigate.sh` | NTFS デバイスを監視し、読み取り専用から読み書きへ掛け直す |
+| `kamui.sh` | Linux ファイルシステム（ext2/3/4、btrfs、xfs、zfs など）をマウント |
+| `kunai.sh` | MacFUSE、ntfs-3g などの依存関係を入れる |
+| `ninpo.sh` | 上記の依存関係を外す（Xcode Command Line Tools は残す） |
+| `shuriken.sh` | システム権限の設定（Gatekeeper、SIP など） |
+
+`kamui-lang.sh` と `shuriken-lang.sh` は対応スクリプトの文言ファイルです。単体では実行しないでください。
+
 ## 構成
 
 ```text
@@ -214,6 +228,7 @@ macos/Sources/NigateFSKitCore/     FSKit 識別子とマウントバックエン
 macos/Sources/NigateFSKitExtension/ FSKit データプレーン（appex）
 macos/Sources/NigateNTFSEngine/    拡張向け静的リンク NTFS エンジン
 Tests/NigateTests/
+ninja/                             コマンドラインスクリプト（アプリとは独立）
 docs/README.md
 ```
 
