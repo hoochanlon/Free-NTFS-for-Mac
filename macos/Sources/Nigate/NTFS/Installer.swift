@@ -1,15 +1,23 @@
 import Foundation
 import AppKit
 
-/// 一键安装只走已有的 Homebrew。CLT / brew 不在包里，停下来告诉用户去依赖列表装。
+/// 一键安装按顺序补齐缺失项：CLT → Homebrew → MacFUSE → ntfs-3g → fswatch。
+/// 已装的跳过。CLT 会弹出系统窗口；Homebrew 可能要密码；MacFUSE 要批准扩展。
+/// 不关 Gatekeeper。
 struct InstallerCopy: Equatable {
     var title: String
     var scope: String
-    var excluded: String
     var next: String
     var macosTooOld: String
-    var missingCLT: String
-    var missingBrew: String
+    var cltPresent: String
+    var installingCLT: String
+    var waitingCLT: String
+    var cltTimeout: String
+    var brewPresent: String
+    var installingBrew: String
+    var brewOfficial: String
+    var brewMirror: String
+    var brewFailed: String
     var fusePresent: String
     var installingFuse: String
     var installingNtfs: String
@@ -38,12 +46,18 @@ struct InstallerCopy: Equatable {
 
     static let zhCN = InstallerCopy(
         title: "Nigate 依赖安装",
-        scope: "本脚本通过已有的 Homebrew 安装：MacFUSE、ntfs-3g、fswatch。",
-        excluded: "不会安装：Xcode Command Line Tools、Homebrew。",
-        next: "缺这两项时会停在这里。请回到应用「系统依赖」，展开对应条目，复制命令装好后再点「安装 MacFUSE + ntfs-3g」。过程中可能要输入密码，并批准 MacFUSE 扩展。",
+        scope: "将按顺序安装缺失项：Xcode Command Line Tools、Homebrew、MacFUSE、ntfs-3g、fswatch。已安装的会跳过。",
+        next: "过程中会弹出系统安装窗口，可能要输入密码，并批准 MacFUSE 扩展。不要关闭本终端。",
         macosTooOld: "需要 macOS 14 或更高版本。",
-        missingCLT: "未检测到 Xcode Command Line Tools。本脚本不能代装，请先运行：\n  xcode-select --install\n按系统窗口完成后再点「安装 MacFUSE + ntfs-3g」。",
-        missingBrew: "未找到 Homebrew。本脚本不能代装。请到「系统依赖」展开 Homebrew，按命令安装后再点「安装 MacFUSE + ntfs-3g」。\n  https://brew.sh",
+        cltPresent: "已检测到 Xcode Command Line Tools，跳过。",
+        installingCLT: "正在安装 Xcode Command Line Tools…",
+        waitingCLT: "请在系统窗口中点「安装」，完成后脚本会自动继续。",
+        cltTimeout: "等待 Xcode Command Line Tools 超时。若已取消系统窗口，关闭终端后重新点「一键安装依赖」。",
+        brewPresent: "已检测到 Homebrew，跳过。",
+        installingBrew: "正在安装 Homebrew…",
+        brewOfficial: "使用 Homebrew 官方安装脚本。",
+        brewMirror: "官方源不可用，改用镜像安装 Homebrew…",
+        brewFailed: "Homebrew 安装失败。请检查网络，或展开依赖列表中的 Homebrew 条目手动安装。",
         fusePresent: "已检测到 MacFUSE，跳过安装。",
         installingFuse: "正在安装 MacFUSE…",
         installingNtfs: "正在安装 ntfs-3g…",
@@ -54,12 +68,18 @@ struct InstallerCopy: Equatable {
 
     static let zhTW = InstallerCopy(
         title: "Nigate 依賴安裝",
-        scope: "本指令碼透過既有的 Homebrew 安裝：MacFUSE、ntfs-3g、fswatch。",
-        excluded: "不會安裝：Xcode Command Line Tools、Homebrew。",
-        next: "缺少這兩項時會停在這裡。請回到應用程式「系統依賴」，展開對應項目，複製命令裝好後再點「安裝 MacFUSE + ntfs-3g」。過程中可能要輸入密碼，並核准 MacFUSE 延伸功能。",
+        scope: "將依序安裝缺少的項目：Xcode Command Line Tools、Homebrew、MacFUSE、ntfs-3g、fswatch。已安裝的會跳過。",
+        next: "過程中會跳出系統安裝視窗，可能要輸入密碼，並核准 MacFUSE 延伸功能。請勿關閉本終端。",
         macosTooOld: "需要 macOS 14 或更高版本。",
-        missingCLT: "未偵測到 Xcode Command Line Tools。本指令碼不能代裝，請先執行：\n  xcode-select --install\n依系統視窗完成後再點「安裝 MacFUSE + ntfs-3g」。",
-        missingBrew: "找不到 Homebrew。本指令碼不能代裝。請到「系統依賴」展開 Homebrew，按命令安裝後再點「安裝 MacFUSE + ntfs-3g」。\n  https://brew.sh",
+        cltPresent: "已偵測到 Xcode Command Line Tools，略過。",
+        installingCLT: "正在安裝 Xcode Command Line Tools…",
+        waitingCLT: "請在系統視窗中點「安裝」，完成後指令碼會自動繼續。",
+        cltTimeout: "等待 Xcode Command Line Tools 逾時。若已取消系統視窗，關閉終端後重新點「一鍵安裝依賴」。",
+        brewPresent: "已偵測到 Homebrew，略過。",
+        installingBrew: "正在安裝 Homebrew…",
+        brewOfficial: "使用 Homebrew 官方安裝指令碼。",
+        brewMirror: "官方源不可用，改用鏡像安裝 Homebrew…",
+        brewFailed: "Homebrew 安裝失敗。請檢查網路，或展開依賴列表中的 Homebrew 項目手動安裝。",
         fusePresent: "已偵測到 MacFUSE，略過安裝。",
         installingFuse: "正在安裝 MacFUSE…",
         installingNtfs: "正在安裝 ntfs-3g…",
@@ -70,12 +90,18 @@ struct InstallerCopy: Equatable {
 
     static let en = InstallerCopy(
         title: "Nigate dependency installer",
-        scope: "This script installs MacFUSE, ntfs-3g, and fswatch through Homebrew you already have.",
-        excluded: "It does not install Xcode Command Line Tools or Homebrew.",
-        next: "If either is missing, the script stops. Expand that row on the Dependencies tab, run its command, then use Install MacFUSE + ntfs-3g again. You may be asked for a password and to approve the MacFUSE extension.",
+        scope: "Missing items are installed in order: Xcode Command Line Tools, Homebrew, MacFUSE, ntfs-3g, and fswatch. Anything already present is skipped.",
+        next: "macOS may show an installer window, ask for your password, and request approval of the MacFUSE extension. Leave this terminal open.",
         macosTooOld: "macOS 14 or later is required.",
-        missingCLT: "Xcode Command Line Tools were not found. This script cannot install them. Run:\n  xcode-select --install\nFinish the system window, then use Install MacFUSE + ntfs-3g again.",
-        missingBrew: "Homebrew was not found. This script cannot install it. Expand Homebrew on the Dependencies tab, install it, then use Install MacFUSE + ntfs-3g again.\n  https://brew.sh",
+        cltPresent: "Xcode Command Line Tools are already present. Skipping.",
+        installingCLT: "Installing Xcode Command Line Tools…",
+        waitingCLT: "In the system window, choose Install. This script continues when that finishes.",
+        cltTimeout: "Timed out waiting for Xcode Command Line Tools. If you cancelled the system window, close this terminal and use Install All Dependencies again.",
+        brewPresent: "Homebrew is already present. Skipping.",
+        installingBrew: "Installing Homebrew…",
+        brewOfficial: "Using the official Homebrew install script.",
+        brewMirror: "Official source unavailable. Installing Homebrew from a mirror…",
+        brewFailed: "Homebrew installation failed. Check the network, or expand Homebrew on the Dependencies tab and install it manually.",
         fusePresent: "MacFUSE is already present. Skipping install.",
         installingFuse: "Installing MacFUSE…",
         installingNtfs: "Installing ntfs-3g…",
@@ -86,12 +112,18 @@ struct InstallerCopy: Equatable {
 
     static let ja = InstallerCopy(
         title: "Nigate 依存関係インストーラー",
-        scope: "このスクリプトは、既に入っている Homebrew で MacFUSE、ntfs-3g、fswatch を入れます。",
-        excluded: "Xcode Command Line Tools と Homebrew はインストールしません。",
-        next: "どちらかが無い場合はここで止まります。依存関係タブで該当行を開き、コマンドを実行してから、もう一度「MacFUSE + ntfs-3g を入れる」を実行してください。パスワード入力と MacFUSE 拡張の承認を求められることがあります。",
+        scope: "未導入の項目を順に入れます：Xcode Command Line Tools、Homebrew、MacFUSE、ntfs-3g、fswatch。既にあるものはスキップします。",
+        next: "システムのインストール窓、パスワード入力、MacFUSE 拡張の承認が出ることがあります。このターミナルは閉じないでください。",
         macosTooOld: "macOS 14 以降が必要です。",
-        missingCLT: "Xcode Command Line Tools が見つかりません。このスクリプトでは入れられません。先に実行してください：\n  xcode-select --install\nシステムの窓で完了してから、「MacFUSE + ntfs-3g を入れる」をやり直してください。",
-        missingBrew: "Homebrew が見つかりません。このスクリプトでは入れられません。依存関係タブで Homebrew を開き、案内のコマンドで入れてからやり直してください。\n  https://brew.sh",
+        cltPresent: "Xcode Command Line Tools は既にあります。スキップします。",
+        installingCLT: "Xcode Command Line Tools をインストールしています…",
+        waitingCLT: "システム窓で「インストール」を選んでください。完了するとこのスクリプトが続きます。",
+        cltTimeout: "Xcode Command Line Tools の待ち時間が切れました。システム窓をキャンセルした場合は、ターミナルを閉じて「すべてインストール」をやり直してください。",
+        brewPresent: "Homebrew は既にあります。スキップします。",
+        installingBrew: "Homebrew をインストールしています…",
+        brewOfficial: "Homebrew 公式のインストールスクリプトを使います。",
+        brewMirror: "公式ソースが使えないため、ミラーから Homebrew を入れます…",
+        brewFailed: "Homebrew のインストールに失敗しました。ネットワークを確認するか、依存関係タブの Homebrew を開いて手動で入れてください。",
         fusePresent: "MacFUSE は既にあります。インストールをスキップします。",
         installingFuse: "MacFUSE をインストールしています…",
         installingNtfs: "ntfs-3g をインストールしています…",
@@ -102,12 +134,18 @@ struct InstallerCopy: Equatable {
 
     static let de = InstallerCopy(
         title: "Nigate-Abhängigkeiten",
-        scope: "Dieses Skript installiert MacFUSE, ntfs-3g und fswatch über das bereits vorhandene Homebrew.",
-        excluded: "Xcode Command Line Tools und Homebrew werden nicht installiert.",
-        next: "Fehlt eines von beiden, hält das Skript an. Klappen Sie den Eintrag unter Abhängigkeiten auf, führen Sie den Befehl aus, und starten Sie „MacFUSE + ntfs-3g installieren“ erneut. Passwort und Freigabe der MacFUSE-Erweiterung können verlangt werden.",
+        scope: "Fehlendes wird der Reihe nach eingerichtet: Xcode Command Line Tools, Homebrew, MacFUSE, ntfs-3g und fswatch. Vorhandenes wird übersprungen.",
+        next: "macOS kann ein Installationsfenster zeigen, nach dem Passwort fragen und die Freigabe der MacFUSE-Erweiterung verlangen. Dieses Terminal geöffnet lassen.",
         macosTooOld: "macOS 14 oder neuer ist erforderlich.",
-        missingCLT: "Xcode Command Line Tools wurden nicht gefunden. Dieses Skript kann sie nicht installieren. Zuerst ausführen:\n  xcode-select --install\nDanach das Systemfenster abschließen und „MacFUSE + ntfs-3g installieren“ erneut starten.",
-        missingBrew: "Homebrew wurde nicht gefunden. Dieses Skript kann es nicht installieren. Klappen Sie Homebrew unter Abhängigkeiten auf, installieren Sie es, und starten Sie danach erneut.\n  https://brew.sh",
+        cltPresent: "Xcode Command Line Tools sind bereits vorhanden. Wird übersprungen.",
+        installingCLT: "Xcode Command Line Tools werden installiert…",
+        waitingCLT: "Im Systemfenster „Installieren“ wählen. Das Skript fährt fort, sobald das abgeschlossen ist.",
+        cltTimeout: "Warten auf Xcode Command Line Tools abgelaufen. Wenn Sie das Systemfenster abgebrochen haben, Terminal schließen und „Alles installieren“ erneut starten.",
+        brewPresent: "Homebrew ist bereits vorhanden. Wird übersprungen.",
+        installingBrew: "Homebrew wird installiert…",
+        brewOfficial: "Offizielles Homebrew-Installationsskript wird verwendet.",
+        brewMirror: "Offizielle Quelle nicht erreichbar. Homebrew wird über einen Spiegel installiert…",
+        brewFailed: "Homebrew-Installation fehlgeschlagen. Netzwerk prüfen oder Homebrew unter Abhängigkeiten aufklappen und manuell installieren.",
         fusePresent: "MacFUSE ist bereits vorhanden. Installation wird übersprungen.",
         installingFuse: "MacFUSE wird installiert…",
         installingNtfs: "ntfs-3g wird installiert…",
@@ -119,7 +157,7 @@ struct InstallerCopy: Equatable {
 
 enum Installer {
     static func openTerminal(language: AppLanguage) throws {
-        let script = localDependencyScript(language: language)
+        let script = dependencyScript(language: language)
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("nigate-install-\(UUID().uuidString).sh")
         try script.write(to: url, atomically: true, encoding: .utf8)
@@ -133,18 +171,22 @@ enum Installer {
         try process.run()
     }
 
-    private static func localDependencyScript(language: AppLanguage) -> String {
+    static func dependencyScript(language: AppLanguage) -> String {
         let copy = InstallerCopy.resolve(language)
         return """
         #!/bin/bash
         set -u
         export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin"
-        trap 'rm -f "$0"' EXIT
+        BREW_INSTALLER=""
+        cleanup() {
+          rm -f "$0"
+          if [[ -n "$BREW_INSTALLER" ]]; then rm -f "$BREW_INSTALLER"; fi
+        }
+        trap cleanup EXIT
         echo "------------------------------------------"
         echo "\(copy.title)"
         echo "------------------------------------------"
         echo "\(copy.scope)"
-        echo "\(copy.excluded)"
         echo "\(copy.next)"
         echo
         if [[ "$(/usr/bin/sw_vers -productVersion 2>/dev/null)" < "14.0" ]]; then
@@ -153,23 +195,95 @@ enum Installer {
           read -r
           exit 1
         fi
-        NEED_STOP=0
-        if ! /usr/bin/xcode-select -p >/dev/null 2>&1; then
-          echo "\(copy.missingCLT)"
-          NEED_STOP=1
+        clt_ready() {
+          /usr/bin/xcode-select -p >/dev/null 2>&1 || return 1
+          /usr/bin/xcrun --find clang >/dev/null 2>&1
+        }
+        if clt_ready; then
+          echo "\(copy.cltPresent)"
+        else
+          echo "\(copy.installingCLT)"
+          /usr/bin/xcode-select --install >/dev/null 2>&1 || true
+          echo "\(copy.waitingCLT)"
+          WAITED=0
+          while ! clt_ready; do
+            /bin/sleep 8
+            WAITED=$((WAITED + 8))
+            if [ $((WAITED % 40)) -eq 0 ]; then
+              echo "\(copy.waitingCLT)"
+            fi
+            if [ "$WAITED" -ge 1800 ]; then
+              echo "\(copy.cltTimeout)"
+              echo "\(copy.pressEnter)"
+              read -r
+              exit 1
+            fi
+          done
         fi
-        BREW=""
-        for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
-          if [[ -x "$candidate" ]]; then BREW="$candidate"; break; fi
-        done
-        if [[ -z "$BREW" ]]; then
-          echo "\(copy.missingBrew)"
-          NEED_STOP=1
-        fi
-        if [[ "$NEED_STOP" -ne 0 ]]; then
-          echo "\(copy.pressEnter)"
-          read -r
-          exit 1
+        find_brew() {
+          local c
+          for c in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+            if [[ -x "$c" ]]; then
+              printf '%s\\n' "$c"
+              return 0
+            fi
+          done
+          c="$(command -v brew 2>/dev/null || true)"
+          if [[ -n "$c" && -x "$c" ]]; then
+            printf '%s\\n' "$c"
+            return 0
+          fi
+          return 1
+        }
+        activate_brew() {
+          if [[ -x /opt/homebrew/bin/brew ]]; then
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+          elif [[ -x /usr/local/bin/brew ]]; then
+            eval "$(/usr/local/bin/brew shellenv)"
+          fi
+        }
+        BREW="$(find_brew || true)"
+        if [[ -n "$BREW" ]]; then
+          echo "\(copy.brewPresent)"
+        else
+          echo "\(copy.installingBrew)"
+          BREW_INSTALLER="$(/usr/bin/mktemp -t nigate-brew)"
+          FETCH_OK=0
+          if /usr/bin/curl -fsSL --connect-timeout 15 --max-time 90 \\
+              "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh" \\
+              -o "$BREW_INSTALLER"; then
+            echo "\(copy.brewOfficial)"
+            FETCH_OK=1
+          elif /usr/bin/curl -fsSL --connect-timeout 15 --max-time 90 \\
+              "https://gitee.com/ineo6/homebrew-install/raw/master/install.sh" \\
+              -o "$BREW_INSTALLER"; then
+            echo "\(copy.brewMirror)"
+            FETCH_OK=1
+          fi
+          if [[ "$FETCH_OK" -ne 1 ]]; then
+            echo "\(copy.brewFailed)"
+            echo "\(copy.pressEnter)"
+            read -r
+            exit 1
+          fi
+          NONINTERACTIVE=1 /bin/bash "$BREW_INSTALLER"
+          BREW_STATUS=$?
+          rm -f "$BREW_INSTALLER"
+          BREW_INSTALLER=""
+          if [[ "$BREW_STATUS" -ne 0 ]]; then
+            echo "\(copy.brewFailed)"
+            echo "\(copy.pressEnter)"
+            read -r
+            exit 1
+          fi
+          activate_brew
+          BREW="$(find_brew || true)"
+          if [[ -z "$BREW" ]]; then
+            echo "\(copy.brewFailed)"
+            echo "\(copy.pressEnter)"
+            read -r
+            exit 1
+          fi
         fi
         FUSE_LIB="/usr/local/lib/libfuse.2.dylib"
         FUSE_FS="/Library/Filesystems/macfuse.fs/Contents/Resources/mount_macfuse"

@@ -12,7 +12,7 @@ Nigate は Swift と SwiftUI で作られたネイティブ macOS アプリで�
 
 1. 「依存関係」画面を開き、「依存関係を確認」を選択して、macOS、Xcode Command Line Tools、Homebrew、MacFUSE、`ntfs-3g`、任意の `fswatch` の状態を確認します。
 2. 読み書きマウントには macOS 14 以降、MacFUSE、`ntfs-3g` が必要です。その他の項目の用途や必須かどうかは一覧に表示されます。
-3. 「MacFUSE + ntfs-3g を入れる」が入れるのは、既にある Homebrew 経由の MacFUSE、`ntfs-3g`、任意の `fswatch` だけです。Xcode Command Line Tools と Homebrew は入りません。足りない場合は該当行を展開してコマンドを実行し、入れてからやり直してください。MacFUSE のシステム拡張は macOS の案内に従って承認します。
+3. 「すべてインストール」は、未導入の Xcode Command Line Tools、Homebrew、MacFUSE、`ntfs-3g`、任意の `fswatch` を順に入れます。既にあるものはスキップします。システムのインストール窓やパスワード入力が出ることがあります。MacFUSE のシステム拡張は macOS の案内に従って承認します。
 4. インストールまたは承認後、依存関係を再確認します。MacFUSE と `ntfs-3g` が利用可能になるまで、NTFS の読み書きマウントなどは行えません。アプリが破損と表示される場合、またはファイルシステム拡張やカーネル拡張の承認が必要な場合は、次の節を参照してください。
 
 ## Mac の必須知識

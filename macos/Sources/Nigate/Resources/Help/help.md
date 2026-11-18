@@ -12,7 +12,7 @@ Nigate 是使用 Swift 和 SwiftUI 构建的原生 macOS 应用，最低支持 m
 
 1. 打开“依赖”页，点击“检查依赖”查看 macOS 版本、Xcode Command Line Tools、Homebrew、MacFUSE、`ntfs-3g` 和可选 `fswatch` 的状态。
 2. 读写挂载需要 macOS 14 或更新版本、MacFUSE 与 `ntfs-3g`。其他组件的用途和是否必需会显示在依赖列表中。
-3. 「安装 MacFUSE + ntfs-3g」只通过已有的 Homebrew 安装 MacFUSE、`ntfs-3g` 和可选 `fswatch`，不会安装 Xcode Command Line Tools 或 Homebrew。缺这两项时请展开对应条目，复制命令手动安装，装好后再点该按钮。MacFUSE 的系统扩展按 macOS 提示批准。
+3. 「一键安装依赖」会按顺序安装缺失的 Xcode Command Line Tools、Homebrew、MacFUSE、`ntfs-3g` 和可选 `fswatch`；已安装的会跳过。过程中会弹出系统安装窗口、可能要输入密码；MacFUSE 的系统扩展按 macOS 提示批准。
 4. 安装或批准扩展后，返回应用重新检查依赖。MacFUSE 与 `ntfs-3g` 未就绪时，NTFS 读写挂载和相关操作无法使用。打开应用若提示已损坏，或需要启用文件系统扩展、批准内核扩展，见下面几节。
 
 ## Mac 必知必会

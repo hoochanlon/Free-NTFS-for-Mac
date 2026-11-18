@@ -12,7 +12,7 @@ Die App deaktiviert Gatekeeper nicht und ändert keine globalen Sicherheitseinst
 
 1. Öffnen Sie **Abhängigkeiten** und wählen Sie **Abhängigkeiten prüfen**, um macOS, Xcode Command Line Tools, Homebrew, MacFUSE, `ntfs-3g` und das optionale `fswatch` zu überprüfen.
 2. Für NTFS-Lese-/Schreibzugriff sind macOS 14 oder neuer, MacFUSE und `ntfs-3g` erforderlich. Zweck und Status der weiteren Komponenten werden in der Liste angezeigt.
-3. **MacFUSE + ntfs-3g installieren** richtet nur MacFUSE, `ntfs-3g` und optional `fswatch` über vorhandenes Homebrew ein. Xcode Command Line Tools und Homebrew werden nicht installiert. Fehlen diese, klappen Sie den Eintrag auf, führen Sie den Befehl aus und starten Sie danach erneut. Die MacFUSE-Systemerweiterung nur nach den macOS-Hinweisen freigeben.
+3. **Alles installieren** richtet fehlende Xcode Command Line Tools, Homebrew, MacFUSE, `ntfs-3g` und optional `fswatch` der Reihe nach ein; Vorhandenes wird übersprungen. macOS kann ein Installationsfenster zeigen und nach dem Passwort fragen. Die MacFUSE-Systemerweiterung nur nach den macOS-Hinweisen freigeben.
 4. Prüfen Sie die Abhängigkeiten nach Installation und Freigabe erneut. NTFS-Lese-/Schreibzugriff und zugehörige Aktionen sind erst möglich, wenn MacFUSE und `ntfs-3g` bereit sind. Wenn macOS die App als beschädigt blockiert oder Dateisystem- bzw. Kernel-Erweiterungen bestätigt werden müssen, lesen Sie die folgenden Abschnitte.
 
 ## Unverzichtbares Mac-Wissen
