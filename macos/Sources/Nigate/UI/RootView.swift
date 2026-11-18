@@ -58,6 +58,30 @@ enum HelpBubbleLayout {
         let topLeft = origin(host: host, bubble: bubble, window: window)
         return CGPoint(x: topLeft.x + bubble.width / 2, y: topLeft.y + bubble.height / 2)
     }
+
+    /// 单行理想宽度。够短就按内容收；超出才顶到上限去折行。
+    /// 不能用字数当阈值：德语复合词很容易超过 18，实际仍是一行。
+    static func fittedWidth(_ idealWidth: CGFloat) -> CGFloat {
+        min(max(idealWidth, 0), maxWidth)
+    }
+}
+
+/// 气泡正文跟内容走，只有真超出上限才折行。
+private struct HelpBubbleTextLayout: Layout {
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard let child = subviews.first else { return .zero }
+        let ideal = child.sizeThatFits(.unspecified)
+        let width = HelpBubbleLayout.fittedWidth(ideal.width)
+        if width >= ideal.width {
+            return CGSize(width: width, height: ideal.height)
+        }
+        return child.sizeThatFits(ProposedViewSize(width: width, height: proposal.height))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard let child = subviews.first else { return }
+        child.place(at: bounds.origin, proposal: ProposedViewSize(bounds.size))
+    }
 }
 
 private struct HelpBubbleAnchor: Equatable, Sendable {
@@ -121,16 +145,15 @@ private struct WindowHelpBubble: View {
     @State private var size: CGSize = .zero
 
     var body: some View {
-        let compact = text.count <= 18
-        Text(text)
-            .font(.caption)
-            .foregroundStyle(.primary)
-            .multilineTextAlignment(compact ? .center : .leading)
-            .lineLimit(compact ? 1 : 4)
-            .fixedSize(horizontal: compact, vertical: true)
-            .frame(maxWidth: compact ? nil : HelpBubbleLayout.maxWidth, alignment: compact ? .center : .leading)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 7)
+        HelpBubbleTextLayout {
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(.primary)
+                .multilineTextAlignment(.leading)
+                .lineLimit(4)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 6, style: .continuous)

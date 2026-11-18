@@ -68,7 +68,7 @@ struct DevicePaneHeader: View {
             Text(L10n.t("devices.title"))
                 .font(compact ? .title3.weight(.semibold) : .title2.weight(.semibold))
                 .layoutPriority(1)
-            Spacer(minLength: 8)
+            Spacer(minLength: compact ? 6 : 8)
             DeviceBatchActions(compact: compact, onRefresh: onRefresh)
         }
     }
@@ -80,10 +80,20 @@ struct DeviceBatchActions: View {
     var onRefresh: () -> Void
 
     var body: some View {
-        ViewThatFits(in: .horizontal) {
-            labeledRow(.titleAndIcon)
-            labeledRow(.titleOnly)
-            labeledRow(.iconOnly)
+        // 托盘窄，不能退回「纯文字」：和图标对不上主界面。放不下标题就只留图标。
+        Group {
+            if compact {
+                ViewThatFits(in: .horizontal) {
+                    labeledRow(DeviceChipLabelStyle())
+                    labeledRow(.iconOnly)
+                }
+            } else {
+                ViewThatFits(in: .horizontal) {
+                    labeledRow(.titleAndIcon)
+                    labeledRow(.titleOnly)
+                    labeledRow(.iconOnly)
+                }
+            }
         }
         .controlSize(compact ? .small : .regular)
     }
@@ -93,7 +103,7 @@ struct DeviceBatchActions: View {
     }
 
     private func row(showHelp: Bool) -> some View {
-        HStack(spacing: compact ? 6 : 8) {
+        HStack(spacing: compact ? 4 : 8) {
             batch("arrow.clockwise", L10n.t("devices.refreshDevices"), showHelp: showHelp, action: onRefresh)
                 .disabled(model.isScanningDevices)
             if TrayBatchAvailability.canMountUnmounted(model.devices) {
@@ -119,7 +129,18 @@ struct DeviceBatchActions: View {
         Button(action: action) {
             Label(title, systemImage: icon)
         }
-        .modifier(DeviceActionChrome(quiet: compact, help: showHelp ? title : nil))
+        .modifier(DeviceActionChrome(quiet: compact, pad: compact ? 6 : 8, help: showHelp ? title : nil))
+    }
+}
+
+/// 托盘批量按钮：图标贴着标题，比系统 titleAndIcon 更省宽度。
+private struct DeviceChipLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 3) {
+            configuration.icon
+                .imageScale(.small)
+            configuration.title
+        }
     }
 }
 
@@ -132,12 +153,13 @@ enum DeviceCardDensity {
 /// 窗口气泡只给纯图标：有文字时再挂同文提示是多余的。
 private struct DeviceActionChrome: ViewModifier {
     var quiet: Bool
+    var pad: CGFloat = 8
     var help: String?
 
     @ViewBuilder
     func body(content: Content) -> some View {
         if quiet {
-            content.buttonStyle(TrayChipButtonStyle())
+            content.buttonStyle(TrayChipButtonStyle(horizontalPad: pad))
                 .modifier(OptionalHelp(text: help))
         } else {
             content.buttonStyle(.bordered)
@@ -160,11 +182,12 @@ private struct OptionalHelp: ViewModifier {
 }
 
 private struct TrayChipButtonStyle: ButtonStyle {
+    var horizontalPad: CGFloat = 8
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .padding(.horizontal, 8)
+            .padding(.horizontal, horizontalPad)
             .padding(.vertical, 3)
             .background {
                 RoundedRectangle(cornerRadius: 6, style: .continuous)

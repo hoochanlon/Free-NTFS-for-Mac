@@ -45,4 +45,18 @@ final class HelpBubbleLayoutTests: XCTestCase {
         XCTAssertLessThanOrEqual(origin.y + bubble.height, host.minY)
         XCTAssertGreaterThanOrEqual(origin.y, HelpBubbleLayout.pad)
     }
+
+    func testGermanReadOnlyLabelHugsContentInsteadOfStretching() {
+        // "Alle schreibgeschützt" 字数超过旧阈值 18，但仍是单行短标签。
+        let german = CGFloat("Alle schreibgeschützt".count)
+        XCTAssertGreaterThan(german, 18)
+        XCTAssertEqual(HelpBubbleLayout.fittedWidth(168), 168)
+        XCTAssertLessThan(HelpBubbleLayout.fittedWidth(168), HelpBubbleLayout.maxWidth)
+    }
+
+    func testLongHintCapsAtMaxWidth() {
+        XCTAssertEqual(HelpBubbleLayout.fittedWidth(480), HelpBubbleLayout.maxWidth)
+        XCTAssertEqual(HelpBubbleLayout.fittedWidth(0), 0)
+        XCTAssertEqual(HelpBubbleLayout.fittedWidth(-10), 0)
+    }
 }
