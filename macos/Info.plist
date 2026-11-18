@@ -18,9 +18,9 @@
     <string>APPL</string>
     <!-- 版本只改这里的两个字符串。界面、扩展和 DMG 文件名都从这里读取。 -->
     <key>CFBundleShortVersionString</key>
-    <string>1.8.2</string>
+    <string>1.8.3</string>
     <key>CFBundleVersion</key>
-    <string>1.8.2</string>
+    <string>1.8.3</string>
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.utilities</string>
     <key>LSMinimumSystemVersion</key>

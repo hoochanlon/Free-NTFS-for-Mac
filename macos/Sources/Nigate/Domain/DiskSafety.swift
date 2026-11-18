@@ -33,6 +33,56 @@ enum DiskSafety {
         return String(trimmed[match])
     }
 
+    private static let ntfsListProbeTypes = [
+        "Microsoft Basic Data",
+        "Windows_NTFS",
+        "xNTFS",
+        "NTFS",
+        "0x07"
+    ]
+
+    /// `diskutil list` 的 TYPE 只决定要不要打 info，不是文件系统身份。
+    /// `Windows_NTFS` / `Microsoft Basic Data` 可能实际是 ExFAT，仍须探测；
+    /// APFS / EFI / 明确的 FAT、ExFAT 不必问。
+    static func isNTFSListProbeRow(_ line: String) -> Bool {
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        guard let prefix = trimmed.range(of: #"^\d+:\s+"#, options: .regularExpression) else { return false }
+        let rest = trimmed[prefix.upperBound...]
+        return ntfsListProbeTypes.contains { type in
+            guard rest.count >= type.count else { return false }
+            let end = rest.index(rest.startIndex, offsetBy: type.count)
+            guard String(rest[..<end]).caseInsensitiveCompare(type) == .orderedSame else { return false }
+            return end == rest.endIndex || rest[end].isWhitespace
+        }
+    }
+
+    /// 从 `diskutil list` 抽出值得打 info 的节点。已挂载卷不在这里处理。
+    static func listProbeIdentifiers(from listOutput: String) -> [String] {
+        var identifiers: [String] = []
+        var seen = Set<String>()
+        var currentDisk = ""
+        for rawLine in listOutput.split(whereSeparator: \.isNewline).map(String.init) {
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+            if let match = line.range(of: #"^/dev/(disk\d+)"#, options: .regularExpression) {
+                currentDisk = String(line[match]).replacingOccurrences(of: "/dev/", with: "")
+                continue
+            }
+            guard !currentDisk.isEmpty else { continue }
+            let identifier: String
+            if let part = line.range(of: #"\bdisk\d+s\d+$"#, options: .regularExpression) {
+                guard isNTFSListProbeRow(line) else { continue }
+                identifier = String(line[part])
+            } else if let whole = wholeDiskVolumeIdentifier(inListRow: line), whole == currentDisk {
+                identifier = whole
+            } else {
+                continue
+            }
+            guard seen.insert(identifier).inserted else { continue }
+            identifiers.append(identifier)
+        }
+        return identifiers
+    }
+
     static func isNTFSFilesystem(_ description: String) -> Bool {
         let patterns = [
             #"(?im)^\s*(?:File System Personality|File System Type|Type \(Bundle\)|Format|格式):\s*(?:(?:xntfs|ntfs(?:-[\w-]+)?)(?:\s+\(macfuse\))?|(?:Unknown|未知)\s+\((?:xntfs|ntfs(?:-[\w-]+)?)\))\s*$"#,

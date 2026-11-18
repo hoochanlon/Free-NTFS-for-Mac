@@ -12,32 +12,20 @@ final class QuitConfirmPolicyTests: XCTestCase {
         XCTAssertEqual(QuitRequest.decide(phase: .idle, didHardExit: true), .exitNow)
     }
 
-    func testNoMainWindowHostsConfirmOnTray() {
-        XCTAssertEqual(QuitConfirmHost.decide(mainWindowVisible: false), .tray)
-        XCTAssertEqual(QuitConfirmHost.decide(mainWindowVisible: true), .mainWindow)
-    }
-
-    func testWatchdogKeepsConfirmOnTrayWithoutMainWindow() {
-        XCTAssertEqual(
-            QuitConfirmWatchdog.decide(confirmOpen: true, mainWindowVisible: false, trayVisible: true),
-            .keep
-        )
-    }
-
     func testWatchdogKeepsConfirmOnMainWindow() {
         XCTAssertEqual(
-            QuitConfirmWatchdog.decide(confirmOpen: true, mainWindowVisible: true, trayVisible: false),
+            QuitConfirmWatchdog.decide(confirmOpen: true, mainWindowVisible: true),
             .keep
         )
     }
 
     func testWatchdogExitsWhenConfirmLostItsHost() {
         XCTAssertEqual(
-            QuitConfirmWatchdog.decide(confirmOpen: true, mainWindowVisible: false, trayVisible: false),
+            QuitConfirmWatchdog.decide(confirmOpen: true, mainWindowVisible: false),
             .exit
         )
         XCTAssertEqual(
-            QuitConfirmWatchdog.decide(confirmOpen: false, mainWindowVisible: false, trayVisible: true),
+            QuitConfirmWatchdog.decide(confirmOpen: false, mainWindowVisible: true),
             .exit
         )
     }

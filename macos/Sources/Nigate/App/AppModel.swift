@@ -64,15 +64,12 @@ enum DockPresence {
     }
 
     /// regular 只许和看得见的主窗口同时存在。
-    /// 确认可以画在托盘上，没有主窗口时不要为了确认去装 Dock，也不要因此把进程杀掉。
+    /// 退出确认画在主窗口上，窗口起来时要把 Dock 装回来。
     static func action(phase: AppQuitPhase, windowVisible: Bool, policyIsRegular: Bool) -> Action {
         switch phase {
         case .exiting:
             return .leave
-        case .confirming:
-            if windowVisible { return .leave }
-            return policyIsRegular ? .hide : .leave
-        case .idle:
+        case .confirming, .idle:
             if windowVisible { return policyIsRegular ? .leave : .show }
             return policyIsRegular ? .hide : .leave
         }
@@ -96,22 +93,13 @@ enum QuitRequest: Equatable {
     }
 }
 
-enum QuitConfirmHost: Equatable {
-    case mainWindow
-    case tray
-
-    static func decide(mainWindowVisible: Bool) -> QuitConfirmHost {
-        mainWindowVisible ? .mainWindow : .tray
-    }
-}
-
-/// 确认框丢了宿主才杀进程。托盘或主窗口任一还在，就继续等用户选。
+/// 确认只画在主窗口。窗口还在就继续等；窗口没起来或被拆掉才杀进程。
 enum QuitConfirmWatchdog: Equatable {
     case keep
     case exit
 
-    static func decide(confirmOpen: Bool, mainWindowVisible: Bool, trayVisible: Bool) -> QuitConfirmWatchdog {
-        if confirmOpen && (mainWindowVisible || trayVisible) { return .keep }
+    static func decide(confirmOpen: Bool, mainWindowVisible: Bool) -> QuitConfirmWatchdog {
+        if confirmOpen && mainWindowVisible { return .keep }
         return .exit
     }
 }
@@ -316,10 +304,7 @@ final class AppModel: ObservableObject {
     }
 
     func revealMainWindow() {
-        guard quitPhase == .idle else {
-            // 确认可能画在托盘上。这时再拉主窗口会把 Dock 装回来。
-            return
-        }
+        guard quitPhase != .exiting else { return }
         withdrawSeq += 1
         let seq = withdrawSeq
         if let window = Self.visibleMainWindow() ?? Self.mainWindow() {
@@ -334,7 +319,7 @@ final class AppModel: ObservableObject {
             NSApp.activate(ignoringOtherApps: true)
         }
         DispatchQueue.main.async { [weak self] in
-            guard let self, self.quitPhase == .idle, self.withdrawSeq == seq else { return }
+            guard let self, self.quitPhase != .exiting, self.withdrawSeq == seq else { return }
             (Self.visibleMainWindow() ?? Self.mainWindow())?.makeKeyAndOrderFront(nil)
             self.promoteDock(seq, attempt: 0)
         }
@@ -342,7 +327,7 @@ final class AppModel: ObservableObject {
 
     /// 主窗口真正出现之后才升为 regular。启动阶段提前占 Dock，慢启动会停在「正在后台运行」。
     func noteMainWindowOnScreen() {
-        guard quitPhase == .idle else { return }
+        guard quitPhase != .exiting else { return }
         promoteDock(withdrawSeq, attempt: 0)
     }
 
@@ -365,7 +350,7 @@ final class AppModel: ObservableObject {
 
     /// 标题栏、托盘、Cmd+Q 都走这里。确认之前不调用 terminate：
     /// 一旦取消，SwiftUI 会关掉窗口，之后每次退出都还是取消，进程就留在 Dock。
-    /// 没有主窗口时确认画在托盘上，不要为了确认去打开窗口。
+    /// 托盘点击退出也先拉起主窗口，确认只画在主界面上。
     func requestQuit() {
         switch QuitRequest.decide(phase: quitPhase, didHardExit: didHardExit) {
         case .exitNow:
@@ -375,7 +360,7 @@ final class AppModel: ObservableObject {
         }
     }
 
-    /// 主窗口在就画在主窗口；否则打开托盘来画。确认还在且还有宿主时，看门狗不要杀进程。
+    /// 确认只画在主窗口。没有窗口就先拉起来，关托盘不能把这次确认取消掉。
     func presentQuitConfirm() {
         guard quitPhase != .exiting, !didHardExit else { return }
         quitPhase = .confirming
@@ -385,18 +370,16 @@ final class AppModel: ObservableObject {
         renameDevice = nil
         alert = nil
         windowConfirm = nil
+        TrayController.shared.dismiss()
         quitConfirmOpen = true
-        if QuitConfirmHost.decide(mainWindowVisible: Self.visibleMainWindow() != nil) == .tray {
-            TrayController.shared.present()
-        }
+        revealMainWindow()
         quitWatchSeq += 1
         let watch = quitWatchSeq
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
             guard let self, self.quitPhase == .confirming, self.quitWatchSeq == watch else { return }
             let lost = QuitConfirmWatchdog.decide(
                 confirmOpen: self.quitConfirmOpen,
-                mainWindowVisible: Self.visibleMainWindow() != nil,
-                trayVisible: TrayController.shared.isVisible
+                mainWindowVisible: Self.visibleMainWindow() != nil
             )
             if lost == .exit {
                 self.quitImmediately()
@@ -510,7 +493,7 @@ final class AppModel: ObservableObject {
     }
 
     private func promoteDock(_ seq: UInt64, attempt: Int) {
-        guard quitPhase == .idle, withdrawSeq == seq else { return }
+        guard quitPhase != .exiting, withdrawSeq == seq else { return }
         if Self.visibleMainWindow() != nil {
             let shouldActivate = NSApp.activationPolicy() != .regular
             applyDockPresence()

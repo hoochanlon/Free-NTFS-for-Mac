@@ -57,8 +57,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Darwin._exit(0)
         }
         if model.quitPhase == .confirming {
-            // 确认可以画在托盘上。关主窗口不等于放弃这次确认。
-            if TrayController.shared.isVisible { return false }
+            // 确认画在主窗口。关主窗口就是丢失宿主。
             model.quitImmediately()
             Darwin._exit(0)
         }
@@ -91,14 +90,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard isMain else { return }
         guard let model else { return }
         if model.quitPhase == .confirming {
-            // 主窗口没了，确认还可以留在托盘。托盘也不在才算丢失宿主。
             let closing = window
             DispatchQueue.main.async {
                 let stillVisible = NSApp.windows.contains {
                     $0 !== closing && $0.isVisible && ($0.title == "Nigate" || $0.identifier?.rawValue == "main")
                 }
                 if stillVisible { return }
-                if TrayController.shared.isVisible { return }
                 model.quitImmediately()
             }
             return

@@ -165,33 +165,12 @@ struct TrayPopoverRoot: View {
                 }
             Spacer(minLength: 0)
         }
-        // 遮罩必须盖住整块宿主，含底下多出来的 Spacer；只挂在内容卡上会在底边留一条未变暗的白边。
-        .overlay { TrayQuitScrim() }
         .environmentObject(model)
         .environmentObject(metrics)
         .onPreferenceChange(TraySizeKey.self) { size in
             guard size.width > 1, size.height > 1 else { return }
             onSize(size)
         }
-    }
-}
-
-/// 条件 overlay 会缩成确认卡大小。按宿主实测尺寸铺满，底边的 Spacer / safe area 才不会漏白。
-private struct TrayQuitScrim: View {
-    @EnvironmentObject private var model: AppModel
-
-    var body: some View {
-        GeometryReader { proxy in
-            if model.quitConfirmOpen {
-                ZStack {
-                    Color.black.opacity(0.46)
-                    QuitConfirmSheet(compact: true)
-                        .padding(18)
-                }
-                .frame(width: proxy.size.width, height: proxy.size.height)
-            }
-        }
-        .ignoresSafeArea()
     }
 }
 

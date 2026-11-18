@@ -51,6 +51,86 @@ final class DiskSafetyTests: XCTestCase {
         )
     }
 
+    func testNTFSListProbeRowUsesTypeNotVolumeName() {
+        XCTAssertTrue(DiskSafety.isNTFSListProbeRow(
+            "1:               Windows_NTFS 新加卷                  68.5 GB    disk4s1"
+        ))
+        XCTAssertTrue(DiskSafety.isNTFSListProbeRow(
+            "2:       Microsoft Basic Data Backup                  63.8 GB    disk5s2"
+        ))
+        XCTAssertTrue(DiskSafety.isNTFSListProbeRow(
+            "1:                        NTFS Untitled               16.0 GB    disk12s1"
+        ))
+        XCTAssertTrue(DiskSafety.isNTFSListProbeRow(
+            "2: xNTFS Backup                 disk6s2"
+        ))
+        XCTAssertTrue(DiskSafety.isNTFSListProbeRow(
+            "1:                       0x07                         32.0 GB    disk9s1"
+        ))
+        XCTAssertFalse(DiskSafety.isNTFSListProbeRow(
+            "1:                APFS Volume My NTFS Backup          1.0 GB     disk3s7"
+        ))
+        XCTAssertFalse(DiskSafety.isNTFSListProbeRow(
+            "2:                 Apple_APFS Container disk3         245.1 GB   disk0s2"
+        ))
+        XCTAssertFalse(DiskSafety.isNTFSListProbeRow(
+            "1:                        EFI EFI                     209.7 MB   disk5s1"
+        ))
+        XCTAssertFalse(DiskSafety.isNTFSListProbeRow(
+            "3:                       0xEF                         33.6 MB    disk4s3"
+        ))
+        XCTAssertFalse(DiskSafety.isNTFSListProbeRow(
+            "3:                      ExFAT Other                   1.0 GB     disk5s3"
+        ))
+        XCTAssertFalse(DiskSafety.isNTFSListProbeRow(
+            "0:      GUID_partition_scheme                        *251.0 GB   disk0"
+        ))
+        XCTAssertFalse(DiskSafety.isNTFSListProbeRow(
+            "#:                       TYPE NAME                    SIZE       IDENTIFIER"
+        ))
+    }
+
+    func testListProbeIdentifiersSkipNonNTFSTypes() {
+        let listing = """
+        /dev/disk0 (internal, physical):
+           #:                       TYPE NAME                    SIZE       IDENTIFIER
+           0:      GUID_partition_scheme                        *251.0 GB   disk0
+           1:             Apple_APFS_ISC Container disk1         524.3 MB   disk0s1
+           2:                 Apple_APFS Container disk3         245.1 GB   disk0s2
+           3:        Apple_APFS_Recovery Container disk2         5.4 GB     disk0s3
+
+        /dev/disk3 (synthesized):
+           #:                       TYPE NAME                    SIZE       IDENTIFIER
+           0:      APFS Container Scheme -                      +245.1 GB   disk3
+           1:                APFS Volume Macintosh HD - Data     184.2 GB   disk3s1
+           2:                APFS Volume Macintosh HD            13.7 GB    disk3s3
+           3:              APFS Snapshot com.apple.os.update-... 13.7 GB    disk3s3s1
+           4:                APFS Volume My NTFS Backup          1.0 GB     disk3s7
+
+        /dev/disk4 (external, physical):
+           #:                       TYPE NAME                    SIZE       IDENTIFIER
+           0:     FDisk_partition_scheme                        *123.1 GB   disk4
+           1:               Windows_NTFS 新加卷                  68.5 GB    disk4s1
+           2:               Windows_NTFS 新加卷                  54.5 GB    disk4s2
+           3:                       0xEF                         33.6 MB    disk4s3
+
+        /dev/disk5 (external, physical):
+           #:                       TYPE NAME                    SIZE       IDENTIFIER
+           0:      GUID_partition_scheme                        *64.0 GB    disk5
+           1:                        EFI EFI                     209.7 MB   disk5s1
+           2:       Microsoft Basic Data Backup                  63.8 GB    disk5s2
+           3:                      ExFAT Other                   1.0 GB     disk5s3
+
+        /dev/disk8 (external, physical):
+           #:                       TYPE NAME                    SIZE       IDENTIFIER
+           0:               Windows_NTFS 移动临时存储            *32.0 GB    disk8
+        """
+        XCTAssertEqual(
+            DiskSafety.listProbeIdentifiers(from: listing),
+            ["disk4s1", "disk4s2", "disk5s2", "disk8"]
+        )
+    }
+
     func testNTFSFilesystemRecognizesFilesystemIdentityWithoutPartitionTypeFalsePositives() {
         XCTAssertTrue(DiskSafety.isNTFSFilesystem("File System Personality: xntfs"))
         XCTAssertTrue(DiskSafety.isNTFSFilesystem("File System Personality: Unknown (xntfs)"))

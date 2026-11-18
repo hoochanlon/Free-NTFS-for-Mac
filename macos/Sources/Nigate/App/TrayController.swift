@@ -171,9 +171,6 @@ final class TrayController: NSObject {
         resizing = false
         stopOutsideClickMonitor()
         panel?.orderOut(nil)
-        if !tornDown, model?.quitPhase == .confirming {
-            model?.cancelQuit()
-        }
     }
 
     private func ensurePanel(_ model: AppModel) {

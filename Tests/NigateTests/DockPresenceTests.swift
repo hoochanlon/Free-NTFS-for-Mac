@@ -38,7 +38,11 @@ final class DockPresenceTests: XCTestCase {
         )
     }
 
-    func testConfirmKeepsVisibleWindow() {
+    func testConfirmWithWindowShowsDockOnce() {
+        XCTAssertEqual(
+            DockPresence.action(phase: .confirming, windowVisible: true, policyIsRegular: false),
+            .show
+        )
         XCTAssertEqual(
             DockPresence.action(phase: .confirming, windowVisible: true, policyIsRegular: true),
             .leave

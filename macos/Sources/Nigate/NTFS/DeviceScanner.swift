@@ -19,25 +19,9 @@ enum DeviceScanner {
             devices.append(device)
         }
 
-        // 2) diskutil list 提供候选：普通分区，或无分区表的整盘 NTFS。
-        //    TYPE 可能把 ExFAT 也标成 Windows_NTFS，必须再用 diskutil info 确认。
-        var currentDisk = ""
-        for rawLine in listOut.split(whereSeparator: \.isNewline).map(String.init) {
-            let line = rawLine.trimmingCharacters(in: .whitespaces)
-            if let match = line.range(of: #"^/dev/(disk\d+)"#, options: .regularExpression) {
-                currentDisk = String(line[match]).replacingOccurrences(of: "/dev/", with: "")
-                continue
-            }
-            guard !currentDisk.isEmpty else { continue }
-            let identifier: String
-            if let part = line.range(of: #"\bdisk\d+s\d+$"#, options: .regularExpression) {
-                identifier = String(line[part])
-            } else if let whole = DiskSafety.wholeDiskVolumeIdentifier(inListRow: line),
-                      whole == currentDisk {
-                identifier = whole
-            } else {
-                continue
-            }
+        // 2) list 只对可能是 NTFS 的 TYPE 打 info。
+        //    Windows_NTFS 可能是 ExFAT，身份仍由 info 确认。APFS / EFI / 明确 FAT 不探。
+        for identifier in DiskSafety.listProbeIdentifiers(from: listOut) {
             let path = "/dev/\(identifier)"
             guard DiskSafety.isMountableNode(path), !seen.contains(path) else { continue }
             guard let extra = await infoDevice(

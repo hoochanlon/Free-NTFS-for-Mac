@@ -504,10 +504,9 @@ struct WindowConfirmCard: View {
 
 struct QuitConfirmSheet: View {
     @EnvironmentObject private var model: AppModel
-    var compact: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: compact ? 12 : 14) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
                 Image(systemName: "power.circle")
                     .font(.title2.weight(.semibold))
@@ -526,17 +525,15 @@ struct QuitConfirmSheet: View {
                     .keyboardShortcut(.defaultAction)
             }
         }
-        .windowConfirmChrome(compact: compact)
+        .windowConfirmChrome()
     }
 }
 
 private extension View {
     /// 不跟窗口底色走。windowBackground 贴在同一层窗口上几乎没有边界。
-    /// 托盘宽度就是 420，再写死宽度会撑破面板，改成吃满剩余宽度。
-    func windowConfirmChrome(compact: Bool = false) -> some View {
-        padding(compact ? 18 : 24)
-            .frame(maxWidth: compact ? .infinity : nil)
-            .frame(width: compact ? nil : 420)
+    func windowConfirmChrome() -> some View {
+        padding(24)
+            .frame(width: 420)
             .background {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(Color(nsColor: .controlBackgroundColor))
@@ -545,7 +542,7 @@ private extension View {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(Color.primary.opacity(0.18), lineWidth: 1)
             )
-            .shadow(color: .black.opacity(compact ? 0.22 : 0.38), radius: compact ? 16 : 28, y: compact ? 6 : 12)
+            .shadow(color: .black.opacity(0.38), radius: 28, y: 12)
     }
 }
 
