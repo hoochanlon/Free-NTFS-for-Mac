@@ -1,58 +1,31 @@
 import SwiftUI
 import AppKit
 
+/// 中文标题短，操作和标题同一行；英德日文案更长，操作落到标题下。
+enum DependencyHeaderLayout: Equatable, Sendable {
+    case inline
+    case stacked
+
+    static func resolve(_ language: AppLanguage) -> Self {
+        switch language {
+        case .system:
+            return resolve(L10n.resolve(.system))
+        case .zhCN, .zhTW:
+            return .inline
+        case .ja, .en, .de:
+            return .stacked
+        }
+    }
+}
+
 struct DependenciesPane: View {
     @EnvironmentObject private var model: AppModel
     @State private var expandedDependencies: Set<String> = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text(L10n.t("dependencies.title")).font(.title2.weight(.semibold))
-                Spacer()
-                Button {
-                    model.openTerminalApp()
-                } label: {
-                    Label(L10n.t("dependencies.openTerminal"), systemImage: "terminal")
-                }
-                Button {
-                    model.openInstaller()
-                } label: {
-                    Label(L10n.t("dependencies.autoInstall"), systemImage: "square.and.arrow.down")
-                }
-                .nigateHelp(L10n.t("dependencies.autoInstallTitle"))
-                Button {
-                    Task { @MainActor in
-                        do {
-                            let result = try await Shell.run("/usr/bin/open", [
-                                "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointIdentifier=com.apple.fskit.fsmodule"
-                            ])
-                            if !result.ok {
-                                model.alert = AppAlert(
-                                    title: L10n.t("dialog.error"),
-                                    message: result.text,
-                                    kind: .error
-                                )
-                            }
-                        } catch {
-                            model.alert = AppAlert(
-                                title: L10n.t("dialog.error"),
-                                message: error.localizedDescription,
-                                kind: .error
-                            )
-                        }
-                    }
-                } label: {
-                    Label(L10n.t("dependencies.openFileSystemExtensions"), systemImage: "macwindow")
-                }
-                Button {
-                    Task { await model.refreshDependencies() }
-                } label: {
-                    Label(L10n.t("dependencies.checkButton"), systemImage: "arrow.clockwise")
-                }
-                .disabled(model.isCheckingDependencies)
-            }
-            .zIndex(1)
+            header
+                .zIndex(1)
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach(dependencyItems.indices, id: \.self) { index in
@@ -64,6 +37,73 @@ struct DependenciesPane: View {
             .padding(.horizontal, -18)
         }
         .padding(18)
+    }
+
+    @ViewBuilder
+    private var header: some View {
+        switch DependencyHeaderLayout.resolve(L10n.language) {
+        case .inline:
+            HStack {
+                titleText
+                Spacer()
+                actionButtons
+            }
+        case .stacked:
+            VStack(alignment: .leading, spacing: 10) {
+                titleText
+                actionButtons
+            }
+        }
+    }
+
+    private var titleText: some View {
+        Text(L10n.t("dependencies.title")).font(.title2.weight(.semibold))
+    }
+
+    private var actionButtons: some View {
+        HStack(spacing: 8) {
+            Button {
+                model.openTerminalApp()
+            } label: {
+                Label(L10n.t("dependencies.openTerminal"), systemImage: "terminal")
+            }
+            Button {
+                model.openInstaller()
+            } label: {
+                Label(L10n.t("dependencies.autoInstall"), systemImage: "square.and.arrow.down")
+            }
+            .nigateHelp(L10n.t("dependencies.autoInstallTitle"))
+            Button {
+                Task { @MainActor in
+                    do {
+                        let result = try await Shell.run("/usr/bin/open", [
+                            "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointIdentifier=com.apple.fskit.fsmodule"
+                        ])
+                        if !result.ok {
+                            model.alert = AppAlert(
+                                title: L10n.t("dialog.error"),
+                                message: result.text,
+                                kind: .error
+                            )
+                        }
+                    } catch {
+                        model.alert = AppAlert(
+                            title: L10n.t("dialog.error"),
+                            message: error.localizedDescription,
+                            kind: .error
+                        )
+                    }
+                }
+            } label: {
+                Label(L10n.t("dependencies.openFileSystemExtensions"), systemImage: "macwindow")
+            }
+            Button {
+                Task { await model.refreshDependencies() }
+            } label: {
+                Label(L10n.t("dependencies.checkButton"), systemImage: "arrow.clockwise")
+            }
+            .disabled(model.isCheckingDependencies)
+        }
     }
 
     private var dependencyItems: [DependencyItem] {

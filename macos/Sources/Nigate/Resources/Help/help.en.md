@@ -12,7 +12,7 @@ The app does not disable Gatekeeper or change global security settings. When ins
 
 1. Open **Dependencies** and select **Check Dependencies** to review macOS, Xcode Command Line Tools, Homebrew, MacFUSE, `ntfs-3g`, and optional `fswatch`.
 2. Read-write mounting requires macOS 14 or later, MacFUSE, and `ntfs-3g`. The dependency list describes the purpose and requirement status of each other component.
-3. **One-click Install** only installs MacFUSE, `ntfs-3g`, and optional `fswatch` through Homebrew you already have. It does not install Xcode Command Line Tools or Homebrew. If those are missing, expand the row, copy the command, install them, then run One-click Install again. Approve the MacFUSE system extension only as prompted by macOS.
+3. **Install MacFUSE + ntfs-3g** only installs MacFUSE, `ntfs-3g`, and optional `fswatch` through Homebrew you already have. It does not install Xcode Command Line Tools or Homebrew. If those are missing, expand the row, copy the command, install them, then use that button again. Approve the MacFUSE system extension only as prompted by macOS.
 4. After installation or approval, check dependencies again. NTFS read-write mounting and related actions are unavailable until MacFUSE and `ntfs-3g` are ready. If macOS says the app is damaged, or you need to enable file system extensions or approve a kernel extension, see the next sections.
 
 ## Essential Mac Knowledge
