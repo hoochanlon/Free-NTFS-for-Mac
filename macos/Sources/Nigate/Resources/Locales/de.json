@@ -10,7 +10,8 @@
     "protectTooltipLocked": "Status geschützt (3s lang drücken zum Schutz entfernen)"
   },
   "titleBar": {
-    "preventSleep": "Ruhezustand verhindern",
+    "preventSleepOff": "Ruhezustand erlaubt",
+    "preventSleepAlways": "Nie Ruhezustand",
     "preventSleepSmart": "Intelligenter Ruhezustandsschutz"
   },
   "menu": {
@@ -208,7 +209,7 @@
         "title": "Titelleisten-Symbole",
         "preventSleep": {
           "name": "Ruhezustand verhindern",
-          "description": "Standardmäßig intelligenter Schutz (teal). Klickzyklus: Aus → Ruhezustand verhindern (kaffeebraun, kein Ruhezustand) → intelligenter Schutz → aus. Bei aktivem Statusschutz ist die Schaltfläche gesperrt."
+          "description": "Standardmäßig intelligenter Schutz (teal). Klickzyklus: Ruhezustand erlaubt → Nie Ruhezustand (kaffeebraun) → intelligenter Schutz → Ruhezustand erlaubt. Bei aktivem Statusschutz ist die Schaltfläche gesperrt."
         },
         "protect": {
           "name": "Status-Schutz Symbol",
@@ -225,9 +226,9 @@
       },
       "preventSleepModes": {
         "title": "Arbeitsweisen des Ruhezustandsschutzes",
-        "intro": "Das Kaffee-Symbol in der Titelleiste steht standardmäßig auf intelligentem Schutz. Klickzyklus: Aus → Ruhezustand verhindern → Intelligenter Schutz → Aus. Bei aktivem Statusschutz ist die Schaltfläche gesperrt.",
-        "off": "Aus: Der Ruhezustand wird nicht verhindert. Das Symbol bleibt ungefärbt.",
-        "always": "Ruhezustand verhindern (kaffeebraun): Kein Ruhezustand, auch nicht im Leerlauf. Nur über das Titelleisten-Symbol erreichbar; der Schalter in den Einstellungen steuert diesen Modus nicht.",
+        "intro": "Das Kaffee-Symbol in der Titelleiste steht standardmäßig auf intelligentem Schutz. Klickzyklus: Ruhezustand erlaubt → Nie Ruhezustand → Intelligenter Schutz → Ruhezustand erlaubt. Bei aktivem Statusschutz ist die Schaltfläche gesperrt.",
+        "off": "Ruhezustand erlaubt: Der Ruhezustand wird nicht verhindert. Das Symbol bleibt ungefärbt.",
+        "always": "Nie Ruhezustand (kaffeebraun): Kein Ruhezustand, auch nicht im Leerlauf. Nur über das Titelleisten-Symbol erreichbar; der Schalter in den Einstellungen steuert diesen Modus nicht.",
         "smart": "Intelligenter Ruhezustandsschutz (teal): Überwacht nur derzeit eingehängte NTFS-Volumes. Bei Lese-/Schreibverkehr wird der Ruhezustand verhindert; etwa 20 Sekunden nach dem Ende der Übertragung wieder zugelassen. Ohne eingehängtes NTFS-Volume oder im Leerlauf bleibt der Mac nicht dauerhaft wach. Das Kontrollkästchen in den Einstellungen synchronisiert nur mit diesem Modus.",
         "quit": "Beim Beenden der App wird der Ruhezustandsschutz gestoppt."
       },
@@ -270,7 +271,7 @@
     "ntfs3gCompatibilityBackend": "ntfs-3g (Kompatibilität)",
     "mountBackendDesc": "Standard ist ntfs-3g (Kompatibilität). FSKit ist optional und braucht macOS 15.4+ sowie die installierte/aktivierte Nigate-FSKit-Erweiterung.",
     "preventSleep": "Intelligenter Ruhezustandsschutz",
-    "preventSleepDesc": "Standardmäßig an. Überwacht nur eingehängte NTFS-Volumes: Bei Übertragung wird der Ruhezustand verhindert, etwa 20 Sekunden nach dem Leerlauf wieder zugelassen. Dieser Schalter aktiviert nur den intelligenten Modus und entspricht dem teal-Zustand in der Titelleiste. Kaffeebraun bedeutet kein Ruhezustand; über das Titelleisten-Symbol einschalten.",
+    "preventSleepDesc": "Standardmäßig an. Überwacht nur eingehängte NTFS-Volumes: Bei Übertragung wird der Ruhezustand verhindert, etwa 20 Sekunden nach dem Leerlauf wieder zugelassen. Dieser Schalter aktiviert nur den intelligenten Modus und entspricht dem teal-Zustand in der Titelleiste. Kaffeebraun ist Nie Ruhezustand; über das Titelleisten-Symbol einschalten.",
     "enabled": "（Aktiviert）",
     "autoStart": "Beim Anmelden starten",
     "autoStartDesc": "Wenn aktiviert, startet die App automatisch beim Systemstart",

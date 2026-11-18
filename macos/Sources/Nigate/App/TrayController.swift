@@ -183,6 +183,7 @@ final class TrayController: NSObject {
         }
         let hosted = TrayHostingView(rootView: root)
         hosted.sizingOptions = .intrinsicContentSize
+        hosted.safeAreaRegions = []
         hosted.appearance = NSApp.appearance
 
         let effect = NSVisualEffectView(frame: NSRect(origin: .zero, size: lastSize))

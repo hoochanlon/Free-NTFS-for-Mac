@@ -166,10 +166,10 @@ After you manually restore read-only mode or use **Reset**, the device is marked
 
 ## Sleep prevention and status protection
 
-Click the title-bar coffee-cup icon to cycle through **Off → Prevent Sleep → Smart Prevent Sleep → Off**. Smart Prevent Sleep is the default. Status protection locks this control.
+Click the title-bar coffee-cup icon to cycle through **Allow Sleep → Never Sleep → Smart Prevent Sleep → Allow Sleep**. Smart Prevent Sleep is the default. Status protection locks this control.
 
-- **Off**: Nigate does not prevent system sleep.
-- **Prevent Sleep**: Continuously prevents idle sleep, including when the drive is idle. Use it for long-running work.
+- **Allow Sleep**: Nigate does not prevent system sleep.
+- **Never Sleep**: Continuously prevents idle sleep, including when the drive is idle. Use it for long-running work.
 - **Smart Prevent Sleep**: Monitors mounted disks only. Sleep is prevented while disk activity is detected and allowed again about 20 seconds after activity stops. With no mounted disks, sleep is not continuously prevented.
 
 Sleep prevention stops when the app quits. Long-press the title-bar shield for 3 seconds to enable or remove status protection. This helps prevent accidental changes; it does not protect disks from failure or data loss.

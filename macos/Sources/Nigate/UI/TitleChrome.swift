@@ -58,7 +58,11 @@ struct TitleChrome: View {
 
 enum SleepChrome {
     static func title(_ mode: SleepMode) -> String {
-        mode == .smart ? L10n.t("titleBar.preventSleepSmart") : L10n.t("titleBar.preventSleep")
+        switch mode {
+        case .off: return L10n.t("titleBar.preventSleepOff")
+        case .always: return L10n.t("titleBar.preventSleepAlways")
+        case .smart: return L10n.t("titleBar.preventSleepSmart")
+        }
     }
 
     static func tint(_ mode: SleepMode) -> Color {

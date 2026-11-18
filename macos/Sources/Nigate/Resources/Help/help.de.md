@@ -166,10 +166,10 @@ Nach manuellem Wiederherstellen des Schreibschutzes oder **Zurücksetzen** wird 
 
 ## Ruhezustandsschutz und Statusschutz
 
-Klicken Sie auf das Kaffeetassen-Symbol in der Titelleiste, um zwischen **Aus → Ruhezustand verhindern → Intelligenter Ruhezustandsschutz → Aus** zu wechseln. Der intelligente Schutz ist die Voreinstellung. Bei aktivem Statusschutz ist diese Steuerung gesperrt.
+Klicken Sie auf das Kaffeetassen-Symbol in der Titelleiste, um zwischen **Ruhezustand erlaubt → Nie Ruhezustand → Intelligenter Ruhezustandsschutz → Ruhezustand erlaubt** zu wechseln. Der intelligente Schutz ist die Voreinstellung. Bei aktivem Statusschutz ist diese Steuerung gesperrt.
 
-- **Aus**: Nigate verhindert den Ruhezustand nicht.
-- **Ruhezustand verhindern**: Verhindert den Ruhezustand dauerhaft, auch wenn das Laufwerk gerade nicht verwendet wird. Geeignet für lange Aufgaben.
+- **Ruhezustand erlaubt**: Nigate verhindert den Ruhezustand nicht.
+- **Nie Ruhezustand**: Verhindert den Ruhezustand dauerhaft, auch wenn das Laufwerk gerade nicht verwendet wird. Geeignet für lange Aufgaben.
 - **Intelligenter Ruhezustandsschutz**: Überwacht nur eingehängte Datenträger. Bei Festplattenaktivität wird der Ruhezustand verhindert; etwa 20 Sekunden nach Ende der Aktivität wieder erlaubt. Ohne eingehängte Datenträger wird er nicht dauerhaft verhindert.
 
 Beim Beenden der App wird der Ruhezustandsschutz beendet. Halten Sie das Schildsymbol in der Titelleiste 3 Sekunden gedrückt, um den Statusschutz ein- oder auszuschalten. Er verhindert versehentliche Änderungen, schützt aber nicht vor Defekten oder Datenverlust.
