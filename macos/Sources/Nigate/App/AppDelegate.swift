@@ -52,7 +52,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard let model else {
             Darwin._exit(0)
         }
-        if model.quitPhase != .idle {
+        if model.quitPhase == .exiting {
+            model.quitImmediately()
+            Darwin._exit(0)
+        }
+        if model.quitPhase == .confirming {
+            // 确认可以画在托盘上。关主窗口不等于放弃这次确认。
+            if TrayController.shared.isVisible { return false }
             model.quitImmediately()
             Darwin._exit(0)
         }
@@ -84,8 +90,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let isMain = window.title == "Nigate" || window.identifier?.rawValue == "main"
         guard isMain else { return }
         guard let model else { return }
+        if model.quitPhase == .confirming {
+            // 主窗口没了，确认还可以留在托盘。托盘也不在才算丢失宿主。
+            let closing = window
+            DispatchQueue.main.async {
+                let stillVisible = NSApp.windows.contains {
+                    $0 !== closing && $0.isVisible && ($0.title == "Nigate" || $0.identifier?.rawValue == "main")
+                }
+                if stillVisible { return }
+                if TrayController.shared.isVisible { return }
+                model.quitImmediately()
+            }
+            return
+        }
         if model.quitPhase != .idle {
-            // 确认框依附主窗口。窗口没了还去拉起，只会把 Dock 图标带回来，进程继续活着。
             let closing = window
             DispatchQueue.main.async {
                 let stillVisible = NSApp.windows.contains {

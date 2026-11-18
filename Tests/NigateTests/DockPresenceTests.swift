@@ -27,14 +27,14 @@ final class DockPresenceTests: XCTestCase {
         )
     }
 
-    func testConfirmWithoutWindowExitsInsteadOfRestoringDock() {
+    func testConfirmWithoutWindowDoesNotRestoreDockOrExit() {
         XCTAssertEqual(
             DockPresence.action(phase: .confirming, windowVisible: false, policyIsRegular: true),
-            .exit
+            .hide
         )
         XCTAssertEqual(
             DockPresence.action(phase: .confirming, windowVisible: false, policyIsRegular: false),
-            .exit
+            .leave
         )
     }
 

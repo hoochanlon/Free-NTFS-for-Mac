@@ -164,6 +164,7 @@
     "available": "verfügbar",
     "total": "gesamt",
     "usageRate": "Auslastung",
+    "trayCapacity": "{available} verfügbar, gesamt {total}",
     "mountConfirm": "Sind Sie sicher, dass Sie {name} als Lese-/Schreibzugriff einhängen möchten?",
     "mountConfirmNote": "Hinweis:\n• Dies erfordert Administratorrechte, und das System wird nach einem Passwort fragen\n• Wenn dieses NTFS-Gerät zuvor auf einem Windows-Computer mit aktiviertem Schnellstart verwendet wurde, müssen Sie es möglicherweise wieder in den Windows-Computer einstecken und vollständig herunterfahren, bevor Sie es erneut versuchen",
     "unmountConfirm": "Sind Sie sicher, dass Sie {name} aushängen möchten?",

@@ -7,19 +7,24 @@ struct TitleChrome: View {
     var body: some View {
         HStack(spacing: 10) {
             HStack(spacing: 8) {
-                nigateMark
+                NigateMark()
                 Text("Nigate（Free NTFS for Mac）")
                     .font(.system(size: 15, weight: .semibold))
             }
             Spacer()
             // 交互区必须禁止“标题栏拖窗口”，否则状态刷新后系统拖拽热区会吞掉点击。
             HStack(spacing: 10) {
-                iconButton("cup.and.saucer.fill", sleepTitle, active: model.settings.sleepMode != .off, tint: sleepTint) {
+                iconButton(
+                    "cup.and.saucer.fill",
+                    SleepChrome.title(model.settings.sleepMode),
+                    active: model.settings.sleepMode != .off,
+                    tint: SleepChrome.tint(model.settings.sleepMode)
+                ) {
                     model.cycleSleep()
                 }
                 .disabled(model.protectLocked)
 
-                protectButton
+                ChromeProtectButton(windowHelp: true)
 
                 iconButton("power", L10n.t("menu.quit"), active: model.quitConfirmOpen, tint: Palette.error) {
                     model.requestQuit()
@@ -43,16 +48,8 @@ struct TitleChrome: View {
                 .buttonStyle(.plain)
                 .nigateHelp(L10n.t("theme.toggle"))
 
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(statusColor)
-                        .frame(width: 8, height: 8)
-                    Text(model.statusText)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-                .padding(.leading, 6)
+                ChromeStatusChip()
+                    .padding(.leading, 6)
             }
             .background(TitleBarClickThroughFix())
         }
@@ -62,16 +59,37 @@ struct TitleChrome: View {
         .padding(.bottom, 8)
     }
 
-    /// 标题栏用白色剪影当模板图，随正文色走，避免红色 AppIcon 和交通灯/线性图标抢色。
-    @ViewBuilder
-    private var nigateMark: some View {
+    private func iconButton(_ system: String, _ title: String, active: Bool, tint: Color, action: @escaping () -> Void) -> some View {
+        ChromeIconButton(system: system, title: title, active: active, tint: tint, windowHelp: true, action: action)
+    }
+}
+
+enum SleepChrome {
+    static func title(_ mode: SleepMode) -> String {
+        mode == .smart ? L10n.t("titleBar.preventSleepSmart") : L10n.t("titleBar.preventSleep")
+    }
+
+    static func tint(_ mode: SleepMode) -> Color {
+        switch mode {
+        case .off: return .secondary
+        case .always: return Palette.coffee
+        case .smart: return Palette.smart
+        }
+    }
+}
+
+/// 标题栏 / 托盘共用白色剪影。随正文色走，避免红色 AppIcon 抢色。
+struct NigateMark: View {
+    var size: CGFloat = 22
+
+    var body: some View {
         if let logo = Self.nigateLogo {
             Image(nsImage: logo)
                 .renderingMode(.template)
                 .resizable()
                 .interpolation(.high)
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 22, height: 22)
+                .frame(width: size, height: size)
                 .foregroundStyle(Color.primary.opacity(0.78))
                 .accessibilityHidden(true)
         }
@@ -84,49 +102,93 @@ struct TitleChrome: View {
         image.isTemplate = true
         return image
     }()
+}
 
-    private var protectButton: some View {
+/// 标题栏 / 托盘共用。长按 3 秒切换，避免误触。托盘没有窗口气泡坐标系，改用系统 help。
+struct ChromeProtectButton: View {
+    @EnvironmentObject private var model: AppModel
+    var windowHelp: Bool = false
+
+    var body: some View {
         Image(systemName: model.protectLocked ? "lock.shield.fill" : "lock.shield")
             .foregroundStyle(model.protectLocked ? Palette.success : Color.primary.opacity(0.7))
             .frame(width: 22, height: 22)
             .contentShape(Rectangle())
-            .nigateHelp(model.protectLocked ? L10n.t("app.protectTooltipLocked") : L10n.t("app.protectTooltip"))
+            .modifier(ChromeIconHelp(
+                text: model.protectLocked ? L10n.t("app.protectTooltipLocked") : L10n.t("app.protectTooltip"),
+                windowHelp: windowHelp
+            ))
             // longPress 不要直接挂在裸 Image 上扩散手势；限制在固定 hit box 内。
             .gesture(
                 LongPressGesture(minimumDuration: 3)
                     .onEnded { _ in model.toggleProtect() }
             )
     }
+}
 
-    private var sleepTitle: String {
-        model.settings.sleepMode == .smart ? L10n.t("titleBar.preventSleepSmart") : L10n.t("titleBar.preventSleep")
+/// 22pt 线性图标。标题栏走窗口内气泡，托盘没有同一坐标系，改用系统 help。
+struct ChromeIconButton: View {
+    let system: String
+    let title: String
+    var active: Bool
+    var tint: Color
+    var spinning: Bool = false
+    var windowHelp: Bool = false
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                if spinning {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(systemName: system)
+                        .foregroundStyle(active ? tint : Color.primary.opacity(0.7))
+                }
+            }
+            .frame(width: 22, height: 22)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .modifier(ChromeIconHelp(text: title, windowHelp: windowHelp))
     }
+}
 
-    private var sleepTint: Color {
-        switch model.settings.sleepMode {
-        case .off: return .secondary
-        case .always: return Palette.coffee
-        case .smart: return Palette.smart
+private struct ChromeIconHelp: ViewModifier {
+    let text: String
+    let windowHelp: Bool
+
+    func body(content: Content) -> some View {
+        if windowHelp {
+            content.nigateHelp(text)
+        } else {
+            content.help(text)
+        }
+    }
+}
+
+struct ChromeStatusChip: View {
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(color)
+                .frame(width: 8, height: 8)
+            Text(model.statusText)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
         }
     }
 
-    private var statusColor: Color {
+    private var color: Color {
         if !model.dependencies.isProbed { return .secondary }
         if model.dependencies.missingCore { return Palette.error }
         if model.devices.contains(where: \.isReadOnly) { return Palette.warning }
         if !model.devices.isEmpty { return Palette.success }
         return .secondary
-    }
-
-    private func iconButton(_ system: String, _ title: String, active: Bool, tint: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: system)
-                .foregroundStyle(active ? tint : Color.primary.opacity(0.7))
-                .frame(width: 22, height: 22)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .nigateHelp(title)
     }
 }
 

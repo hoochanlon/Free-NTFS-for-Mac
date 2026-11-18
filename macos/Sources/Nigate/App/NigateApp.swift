@@ -16,6 +16,8 @@ struct NigateApp: App {
                     appDelegate.model = model
                     model.bindOpenMainWindow { openWindow(id: "main") }
                     model.noteMainWindowOnScreen()
+                    // 托盘是第一帧 UI，不能等依赖探测 / 设备扫描结束。
+                    TrayController.shared.attach(model)
                     await model.bootstrap()
                 }
         }

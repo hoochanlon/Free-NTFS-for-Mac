@@ -164,6 +164,7 @@
     "available": "利用可能",
     "total": "合計",
     "usageRate": "使用率",
+    "trayCapacity": "{available} 利用可能、合計 {total}",
     "mountConfirm": "{name} を読み書きモードでマウントしますか？",
     "mountConfirmNote": "注意：\n• これには管理者権限が必要で、システムがパスワード入力ダイアログを表示します\n• このNTFSデバイスが以前にWindowsコンピューターで使用され、Windowsで高速スタートアップ機能が有効になっていた場合、デバイスをWindowsコンピューターに再度接続して完全にシャットダウンしてから再試行する必要がある場合があります",
     "unmountConfirm": "{name} をアンマウントしますか？",

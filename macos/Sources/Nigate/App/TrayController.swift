@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 
 enum TrayDeviceStatus: Equatable {
     case ready
@@ -21,195 +22,229 @@ enum TrayDeviceStatus: Equatable {
     }
 }
 
+enum TrayDeviceRow {
+    /// 有实测占用就跟主界面同一行文案。没有容量时只报名和状态。
+    static func capacityLine(_ device: NTFSDevice) -> String? {
+        guard let capacity = device.capacity else { return nil }
+        return CapacityText.summary(capacity)
+    }
+
+    static func accessibilityLabel(_ device: NTFSDevice, status: String) -> String {
+        if let line = capacityLine(device) {
+            return "\(device.volumeName), \(status), \(line)"
+        }
+        return "\(device.volumeName), \(status)"
+    }
+}
+
 @MainActor
-final class TrayController: NSObject, NSMenuDelegate {
+final class TrayController: NSObject {
     static let shared = TrayController()
     private var item: NSStatusItem?
     private weak var model: AppModel?
-    private let menu = NSMenu()
     /// tearDown 之后禁止再把状态栏图标装回去。扫描回调晚到一步就会让退出变成后台驻留。
     private var tornDown = false
+    private var panel: NSPanel?
+    private var hostingView: NSHostingView<TrayPopoverRoot>?
+    private var outsideMonitors: [Any] = []
+    private var lastSize: CGSize = NSSize(width: TrayLayout.width, height: 200)
     private lazy var trayLogo: NSImage? = {
         guard let url = Bundle.module.url(forResource: "AppIcon-white", withExtension: "icns") else { return nil }
         return NSImage(contentsOf: url)
     }()
-    /// 菜单打开期间禁止 removeAllItems：否则移入子菜单会被拆掉。
-    private var menuIsOpen = false
-
-    override init() {
-        super.init()
-        menu.delegate = self
-        menu.autoenablesItems = false
-    }
 
     func attach(_ model: AppModel) {
+        guard !tornDown else { return }
         self.model = model
-        tornDown = false
         reload()
     }
 
     func tearDown() {
         tornDown = true
+        hidePanel()
         if let item { NSStatusBar.system.removeStatusItem(item) }
         item = nil
-        menuIsOpen = false
-        menu.removeAllItems()
+        hostingView = nil
+        panel = nil
     }
 
-    /// 设备列表 / 读写态变化后调用。
-    /// - 状态栏图标：始终更新
-    /// - 菜单结构：仅在关闭时 rebuild；打开时只改已有行的颜色，避免子菜单消失
+    /// 设备列表 / 读写态变化后调用。浮层跟 SwiftUI 观察 model，这里只同步图标和位置。
     func reload() {
         guard !tornDown, let model else { return }
         ensureStatusItem()
         item?.button?.toolTip = L10n.t("tray.tooltip")
-        // 图标始终跟 model，不依赖是否打开主窗口。
         updateStatusItemTint(from: model)
-
-        if menuIsOpen {
-            updateOpenMenuDeviceRows(from: model)
-        } else {
-            rebuildMenu(from: model)
+        let appearance = NSApp.appearance
+        hostingView?.appearance = appearance
+        panel?.appearance = appearance
+        if panel?.isVisible == true {
+            applyFrame(lastSize)
         }
     }
 
-    /// 托盘动作已点下：菜单即将关闭。清掉 open 标记，让后续异步结果能立刻 sync。
-    func prepareForAction() {
-        menuIsOpen = false
-    }
+    func prepareForAction() {}
 
-    /// 挂载等异步操作结束后强制与 model 对齐（不依赖主窗口激活）。
     func syncAfterAction() {
-        menuIsOpen = false
         reload()
     }
 
-    func menuWillOpen(_ menu: NSMenu) {
-        guard menu === self.menu else { return }
-        menuIsOpen = true
-        if let model {
-            // 打开瞬间用最新 model 建树；打开后只允许改色，不再拆树。
-            rebuildMenu(from: model)
-            updateStatusItemTint(from: model)
+    var isVisible: Bool { !tornDown && panel?.isVisible == true }
+
+    func present() {
+        guard !tornDown else { return }
+        if panel?.isVisible != true {
+            showPanel()
         }
     }
 
-    func menuDidClose(_ menu: NSMenu) {
-        guard menu === self.menu else { return }
-        menuIsOpen = false
-        // 关闭后再全量 sync 一次，吃掉打开期间积压的设备变化。
-        reload()
+    func dismiss() {
+        hidePanel()
     }
 
-    func menuNeedsUpdate(_ menu: NSMenu) {}
+    @objc private func togglePanel() {
+        guard !tornDown else { return }
+        if panel?.isVisible == true {
+            hidePanel()
+        } else {
+            showPanel()
+        }
+    }
 
     private func ensureStatusItem() {
         guard item == nil else { return }
         let created = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         created.button?.image = makeStatusItemImage(status: .ready)
         created.button?.image?.accessibilityDescription = "Nigate"
-        created.menu = menu
+        created.button?.target = self
+        created.button?.action = #selector(togglePanel)
+        created.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
         item = created
     }
 
-    private func rebuildMenu(from model: AppModel) {
-        menu.removeAllItems()
-        menu.addItem(action(L10n.t("tray.showMainWindow")) {
-            model.revealMainWindow()
-            // 点主界面时也拉一次设备，避免托盘与主界面长期分叉。
-            Task { await model.refreshDevices(applyAutoMount: false) }
-        })
-        menu.addItem(.separator())
-        if model.devices.isEmpty {
-            let title = model.deviceListAppearance == .empty
-                ? L10n.t("devices.emptyState")
-                : L10n.t("devices.scanningState")
-            let empty = NSMenuItem(title: title, action: nil, keyEquivalent: "")
-            empty.isEnabled = false
-            menu.addItem(empty)
-        } else {
-            for device in model.devices {
-                menu.addItem(deviceRow(device, model: model))
-            }
-        }
-        menu.addItem(.separator())
-        if model.devices.contains(where: \.needsMount) {
-            menu.addItem(action(L10n.t("devices.mountAllDevices")) { model.runBatch(.mount) })
-        }
-        if model.devices.contains(where: { !$0.needsMount && $0.isReadOnly }) {
-            menu.addItem(action(L10n.t("devices.mountAll")) { model.runBatch(.mount) })
-        }
-        if model.devices.contains(where: \.isReadWrite) {
-            menu.addItem(action(L10n.t("devices.restoreAllReadOnly")) { model.runBatch(.restore) })
-        }
-        if model.devices.contains(where: { !$0.needsMount }) {
-            menu.addItem(action(L10n.t("devices.unmountAll")) { model.runBatch(.unmount) })
-        }
-        if !model.devices.isEmpty {
-            menu.addItem(action(L10n.t("devices.ejectAll")) { model.runBatch(.eject) })
-        }
-        menu.addItem(.separator())
-        menu.addItem(action(L10n.t("tray.quit")) { model.requestQuit() })
+    private func showPanel() {
+        guard let model else { return }
+        ensurePanel(model)
+        lastSize = CGSize(
+            width: TrayLayout.width,
+            height: TrayLayout.estimatedHeight(
+                deviceCount: model.devices.count,
+                hasHint: model.progressHint != nil
+            )
+        )
+        applyFrame(lastSize)
+        panel?.makeKeyAndOrderFront(nil)
+        startOutsideClickMonitor()
     }
 
-    private func deviceRow(_ device: NTFSDevice, model: AppModel) -> NSMenuItem {
-        let status = statusText(for: device)
-        let row = NSMenuItem(title: device.volumeName, action: nil, keyEquivalent: "")
-        row.representedObject = DeviceMenuRef(identity: device.identity, disk: device.disk)
-        row.image = statusImage(for: device, accessibilityDescription: status)
-        row.setAccessibilityLabel("\(device.volumeName), \(status)")
-        row.isEnabled = true
-
-        let sub = NSMenu()
-        sub.autoenablesItems = false
-        let identity = device.identity
-        let disk = device.disk
-        if device.needsMount {
-            sub.addItem(action(L10n.t("devices.mountDevice")) {
-                TrayController.shared.prepareForAction()
-                guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
-                model.perform(.mount, on: latest)
-            })
-        } else {
-            if device.isReadOnly {
-                sub.addItem(action(L10n.t("devices.mount")) {
-                    TrayController.shared.prepareForAction()
-                    guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
-                    model.perform(.mount, on: latest)
-                })
-            }
-            if device.isReadWrite {
-                sub.addItem(action(L10n.t("devices.restoreReadOnly")) {
-                    TrayController.shared.prepareForAction()
-                    guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
-                    model.perform(.restore, on: latest)
-                })
-            }
-            sub.addItem(action(L10n.t("devices.unmount")) {
-                TrayController.shared.prepareForAction()
-                guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
-                model.perform(.unmount, on: latest)
-            })
-            sub.addItem(action(L10n.t("devices.eject")) {
-                TrayController.shared.prepareForAction()
-                guard let latest = Self.device(in: model, identity: identity, disk: disk) else { return }
-                model.perform(.eject, on: latest)
-            })
+    private func hidePanel() {
+        stopOutsideClickMonitor()
+        panel?.orderOut(nil)
+        if !tornDown, model?.quitPhase == .confirming {
+            model?.cancelQuit()
         }
-        row.submenu = sub
-        return row
     }
 
-    /// 不拆菜单树，只刷新设备行标题旁的橙/绿图标。
-    private func updateOpenMenuDeviceRows(from model: AppModel) {
-        for item in menu.items {
-            guard let ref = item.representedObject as? DeviceMenuRef else { continue }
-            guard let device = Self.device(in: model, identity: ref.identity, disk: ref.disk) else { continue }
-            let status = statusText(for: device)
-            item.title = device.volumeName
-            item.image = statusImage(for: device, accessibilityDescription: status)
-            item.setAccessibilityLabel("\(device.volumeName), \(status)")
+    private func ensurePanel(_ model: AppModel) {
+        if panel != nil, hostingView != nil { return }
+        let root = TrayPopoverRoot(model: model) { [weak self] size in
+            Task { @MainActor in self?.handleSize(size) }
         }
+        let hosted = NSHostingView(rootView: root)
+        hosted.sizingOptions = .intrinsicContentSize
+        hosted.wantsLayer = true
+        hosted.layer?.cornerRadius = 16
+        hosted.layer?.masksToBounds = true
+        hosted.appearance = NSApp.appearance
+
+        let panel = TrayPanel(
+            contentRect: NSRect(origin: .zero, size: lastSize),
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered,
+            defer: false
+        )
+        panel.isFloatingPanel = true
+        panel.becomesKeyOnlyIfNeeded = true
+        panel.level = .popUpMenu
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.hasShadow = true
+        panel.hidesOnDeactivate = false
+        panel.isReleasedWhenClosed = false
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
+        panel.appearance = NSApp.appearance
+        panel.contentView = hosted
+        self.hostingView = hosted
+        self.panel = panel
+    }
+
+    private func handleSize(_ size: CGSize) {
+        let next = NSSize(width: max(size.width, 1), height: max(size.height, 1))
+        guard abs(next.width - lastSize.width) > 0.5 || abs(next.height - lastSize.height) > 0.5 else { return }
+        lastSize = next
+        guard panel?.isVisible == true else { return }
+        applyFrame(next)
+    }
+
+    private func applyFrame(_ size: CGSize) {
+        guard let panel else { return }
+        let fitted = NSSize(width: max(size.width, 1), height: max(size.height, 1))
+        let origin = panelOrigin(for: fitted)
+        panel.setFrame(NSRect(origin: origin, size: fitted), display: true)
+        hostingView?.frame = NSRect(origin: .zero, size: fitted)
+    }
+
+    private func panelOrigin(for size: CGSize) -> CGPoint {
+        guard let button = item?.button, let window = button.window else {
+            return .zero
+        }
+        var buttonScreen = window.convertToScreen(button.convert(button.bounds, to: nil))
+        // 状态栏窗口下沿才是菜单栏底。按钮自己的 22pt 框会缩在栏内，用更低的那条边贴。
+        buttonScreen.origin.y = min(buttonScreen.minY, window.frame.minY)
+        let visible = window.screen?.visibleFrame ?? NSScreen.main?.visibleFrame ?? .zero
+        return TrayPanelPlacement.origin(button: buttonScreen, size: size, visible: visible)
+    }
+
+    private func startOutsideClickMonitor() {
+        stopOutsideClickMonitor()
+        let mouse: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown]
+        if let global = NSEvent.addGlobalMonitorForEvents(matching: mouse, handler: { [weak self] _ in
+            Task { @MainActor in self?.dismissIfClickOutside() }
+        }) {
+            outsideMonitors.append(global)
+        }
+        if let local = NSEvent.addLocalMonitorForEvents(matching: mouse, handler: { [weak self] event in
+            Task { @MainActor in self?.dismissIfClickOutside() }
+            return event
+        }) {
+            outsideMonitors.append(local)
+        }
+        if let escape = NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: { [weak self] event in
+            if event.keyCode == 53 {
+                Task { @MainActor in self?.hidePanel() }
+                return nil
+            }
+            return event
+        }) {
+            outsideMonitors.append(escape)
+        }
+    }
+
+    private func stopOutsideClickMonitor() {
+        for monitor in outsideMonitors {
+            NSEvent.removeMonitor(monitor)
+        }
+        outsideMonitors.removeAll()
+    }
+
+    private func dismissIfClickOutside() {
+        guard let panel, panel.isVisible else { return }
+        let mouse = NSEvent.mouseLocation
+        if panel.frame.contains(mouse) { return }
+        if let button = item?.button, let window = button.window {
+            let buttonScreen = window.convertToScreen(button.convert(button.bounds, to: nil))
+            if buttonScreen.contains(mouse) { return }
+        }
+        hidePanel()
     }
 
     private func updateStatusItemTint(from model: AppModel) {
@@ -272,60 +307,10 @@ final class TrayController: NSObject, NSMenuDelegate {
             NSGraphicsContext.restoreGraphicsState()
         }
     }
-
-    private static func device(in model: AppModel, identity: String, disk: String) -> NTFSDevice? {
-        model.devices.first { $0.identity == identity || $0.disk == disk || $0.devicePath.hasSuffix(disk) }
-    }
-
-    private func statusText(for device: NTFSDevice) -> String {
-        if device.needsMount {
-            return L10n.t("devices.unmounted")
-        }
-        return device.isReadWrite ? L10n.t("devices.readWrite") : L10n.t("devices.readOnly")
-    }
-
-    private func statusImage(for device: NTFSDevice, accessibilityDescription: String) -> NSImage? {
-        guard let image = NSImage(systemSymbolName: "externaldrive.fill", accessibilityDescription: accessibilityDescription) else {
-            return nil
-        }
-        let color: NSColor = device.isReadWrite ? .systemGreen : .systemOrange
-        let configured = image.withSymbolConfiguration(.init(paletteColors: [color])) ?? image
-        configured.isTemplate = false
-        return configured
-    }
-
-    private func action(_ title: String, _ handler: @escaping @MainActor () -> Void) -> NSMenuItem {
-        let item = NSMenuItem(title: title, action: #selector(TrayActionProxy.run), keyEquivalent: "")
-        item.isEnabled = true
-        let proxy = TrayActionProxy(handler)
-        item.target = proxy
-        objc_setAssociatedObject(item, &trayProxyKey, proxy, .OBJC_ASSOCIATION_RETAIN)
-        return item
-    }
 }
 
-/// 菜单行与设备的稳定关联（不用 title 匹配，避免改名后丢刷新）。
-private final class DeviceMenuRef: NSObject {
-    let identity: String
-    let disk: String
-    init(identity: String, disk: String) {
-        self.identity = identity
-        self.disk = disk
-        super.init()
-    }
-}
-
-@MainActor
-private var trayProxyKey: UInt8 = 0
-
-private final class TrayActionProxy: NSObject, @unchecked Sendable {
-    private let handler: @MainActor () -> Void
-    init(_ handler: @escaping @MainActor () -> Void) { self.handler = handler }
-
-    @objc func run() {
-        Task { @MainActor in
-            TrayController.shared.prepareForAction()
-            handler()
-        }
-    }
+/// 不激活应用也能成为 key，托盘按钮才能点。Dock 保持 accessory。
+private final class TrayPanel: NSPanel {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { false }
 }

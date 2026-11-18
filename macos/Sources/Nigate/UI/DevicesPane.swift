@@ -6,28 +6,8 @@ struct DevicesPane: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(L10n.t("devices.title")).font(.title2.weight(.semibold))
-                Spacer()
-                batch("arrow.clockwise", L10n.t("devices.refreshDevices")) {
-                    Task { await model.refreshDevices() }
-                }
-                .disabled(model.isScanningDevices)
-                if model.devices.contains(where: \.needsMount) {
-                    batch("externaldrive", L10n.t("devices.mountAllDevices")) { model.runBatch(.mount) }
-                }
-                if model.devices.contains(where: { !$0.needsMount && $0.isReadOnly }) {
-                    batch("pencil.and.outline", L10n.t("devices.mountAll")) { model.runBatch(.mount) }
-                }
-                if model.devices.contains(where: \.isReadWrite) {
-                    batch("eye", L10n.t("devices.restoreAllReadOnly")) { model.runBatch(.restore) }
-                }
-                if model.devices.contains(where: { !$0.needsMount }) {
-                    batch("eject", L10n.t("devices.unmountAll")) { model.runBatch(.unmount) }
-                }
-                if !model.devices.isEmpty {
-                    batch("externaldrive.badge.xmark", L10n.t("devices.ejectAll")) { model.runBatch(.eject) }
-                }
+            DevicePaneHeader(compact: false) {
+                Task { await model.refreshDevices() }
             }
             if model.devices.isEmpty {
                 VStack(spacing: 8) {
@@ -77,51 +57,85 @@ struct DevicesPane: View {
         }
         .padding(18)
     }
+}
+
+struct DevicePaneHeader: View {
+    var compact: Bool
+    var onRefresh: () -> Void
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 8) {
+            Text(L10n.t("devices.title"))
+                .font(compact ? .title3.weight(.semibold) : .title2.weight(.semibold))
+                .layoutPriority(1)
+            Spacer(minLength: 8)
+            DeviceBatchActions(compact: compact, onRefresh: onRefresh)
+        }
+    }
+}
+
+struct DeviceBatchActions: View {
+    @EnvironmentObject private var model: AppModel
+    var compact: Bool
+    var onRefresh: () -> Void
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            labeledRow(.titleAndIcon)
+            labeledRow(.titleOnly)
+            labeledRow(.iconOnly)
+        }
+        .controlSize(compact ? .small : .regular)
+    }
+
+    private func labeledRow<S: LabelStyle>(_ style: S) -> some View {
+        row.labelStyle(style)
+    }
+
+    private var row: some View {
+        HStack(spacing: compact ? 6 : 8) {
+            batch("arrow.clockwise", L10n.t("devices.refreshDevices"), action: onRefresh)
+                .disabled(model.isScanningDevices)
+            if TrayBatchAvailability.canMountUnmounted(model.devices) {
+                batch("externaldrive", L10n.t("devices.mountAllDevices")) { model.runBatch(.mount) }
+            }
+            if TrayBatchAvailability.canMountReadOnly(model.devices) {
+                batch("pencil.and.outline", L10n.t("devices.mountAll")) { model.runBatch(.mount) }
+            }
+            if TrayBatchAvailability.canRestore(model.devices) {
+                batch("eye", L10n.t("devices.restoreAllReadOnly")) { model.runBatch(.restore) }
+            }
+            if TrayBatchAvailability.canUnmount(model.devices) {
+                batch("eject", L10n.t("devices.unmountAll")) { model.runBatch(.unmount) }
+            }
+            if TrayBatchAvailability.canEject(model.devices) {
+                batch("externaldrive.badge.xmark", L10n.t("devices.ejectAll")) { model.runBatch(.eject) }
+            }
+        }
+    }
 
     private func batch(_ icon: String, _ title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Label(title, systemImage: icon)
         }
         .buttonStyle(.bordered)
-        .controlSize(.regular)
+        .help(title)
     }
 }
 
-/// 不用系统 ProgressView。切换 NSApp.appearance 会清掉它的 tint，而且不会再设回来。
-private struct CapacityBar: View {
-    let capacity: Capacity
-
-    var body: some View {
-        let fraction = min(1, max(0, Double(capacity.used) / Double(max(capacity.total, 1))))
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                Capsule().fill(Color.primary.opacity(0.12))
-                Capsule()
-                    .fill(fill)
-                    .frame(width: geo.size.width * fraction)
-            }
-        }
-        .frame(height: 4)
-        .accessibilityElement()
-        .accessibilityValue(Text(capacity.usedPercentLabel))
-    }
-
-    private var fill: Color {
-        switch capacity.fillLevel {
-        case .normal: Palette.accent
-        case .warning: Palette.warning
-        case .critical: Palette.error
-        }
-    }
+enum DeviceCardDensity {
+    case full
+    case tray
 }
 
 struct DeviceCard: View {
     @EnvironmentObject private var model: AppModel
     let device: NTFSDevice
+    var density: DeviceCardDensity = .full
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // 信息区：双击打开挂载点（与图2 Finder 一致）；按钮行不绑双击，避免误触。
+            // 信息区：双击打开挂载点；按钮行不绑双击，避免误触。
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Image(systemName: "externaldrive.fill")
@@ -135,14 +149,19 @@ struct DeviceCard: View {
                         .background(statusColor.opacity(0.16), in: Capsule())
                         .foregroundStyle(statusColor)
                 }
-                HStack(spacing: 18) {
-                    labeled(L10n.t("devices.deviceLabel"), device.disk)
-                    labeled(L10n.t("devices.mountPointLabel"), device.volume.isEmpty ? L10n.t("devices.notMounted") : device.volume)
+                if density == .full {
+                    HStack(spacing: 18) {
+                        labeled(L10n.t("devices.deviceLabel"), device.disk)
+                        labeled(
+                            L10n.t("devices.mountPointLabel"),
+                            device.volume.isEmpty ? L10n.t("devices.notMounted") : device.volume
+                        )
+                    }
                 }
                 if let capacity = device.capacity {
                     VStack(alignment: .leading, spacing: 4) {
                         CapacityBar(capacity: capacity)
-                        Text("\(L10n.t("devices.available")) \(byteText(capacity.available))  ·  \(L10n.t("devices.total")) \(byteText(capacity.total))  ·  \(L10n.t("devices.usageRate")) \(capacity.usedPercentLabel)")
+                        Text(CapacityText.summary(capacity))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -154,31 +173,19 @@ struct DeviceCard: View {
                 openVolumeInFinder()
             }
 
-            HStack {
-                if device.needsMount {
-                    action(L10n.t("devices.mountDevice"), "externaldrive") { model.perform(.mount, on: device) }
-                } else {
-                    if device.isReadOnly {
-                        action(L10n.t("devices.mount"), "pencil") { model.perform(.mount, on: device) }
-                    }
-                    if device.isReadWrite {
-                        action(L10n.t("devices.restoreReadOnly"), "eye") { model.perform(.restore, on: device) }
-                    }
-                    action(L10n.t("devices.unmount"), "eject") { model.perform(.unmount, on: device) }
-                    action(L10n.t("devices.eject"), "externaldrive.badge.xmark") { confirm(.eject) }
-                    action(L10n.t("devices.repair"), "wrench.and.screwdriver") { confirm(.repair) }
-                    action(L10n.t("devices.rename"), "character.cursor.ibeam") { model.renameDevice = device }
-                    if device.canFormat {
-                        action(L10n.t("devices.format"), "internaldrive") { confirm(.format) }
-                    }
-                    action(L10n.t("devices.reset"), "arrow.counterclockwise") { confirm(.reset) }
-                }
+            ViewThatFits(in: .horizontal) {
+                labeledActions(.titleAndIcon)
+                labeledActions(.titleOnly)
+                labeledActions(.iconOnly)
             }
+            .controlSize(density == .tray ? .small : .regular)
             .disabled(model.isDeviceBusy(device))
         }
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color(nsColor: .controlBackgroundColor)))
         .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.primary.opacity(0.06)))
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(TrayDeviceRow.accessibilityLabel(device, status: statusLabel))
     }
 
     private func openVolumeInFinder() {
@@ -206,12 +213,41 @@ struct DeviceCard: View {
         .font(.caption)
     }
 
+    private func labeledActions<S: LabelStyle>(_ style: S) -> some View {
+        actionRow().labelStyle(style)
+    }
+
+    private func actionRow() -> some View {
+        HStack {
+            if device.needsMount {
+                action(L10n.t("devices.mountDevice"), "externaldrive") { model.perform(.mount, on: device) }
+            } else {
+                if device.isReadOnly {
+                    action(L10n.t("devices.mount"), "pencil") { model.perform(.mount, on: device) }
+                }
+                if device.isReadWrite {
+                    action(L10n.t("devices.restoreReadOnly"), "eye") { model.perform(.restore, on: device) }
+                }
+                action(L10n.t("devices.unmount"), "eject") { model.perform(.unmount, on: device) }
+                action(L10n.t("devices.eject"), "externaldrive.badge.xmark") { confirm(.eject) }
+                if density == .full {
+                    action(L10n.t("devices.repair"), "wrench.and.screwdriver") { confirm(.repair) }
+                    action(L10n.t("devices.rename"), "character.cursor.ibeam") { model.renameDevice = device }
+                    if device.canFormat {
+                        action(L10n.t("devices.format"), "internaldrive") { confirm(.format) }
+                    }
+                    action(L10n.t("devices.reset"), "arrow.counterclockwise") { confirm(.reset) }
+                }
+            }
+        }
+    }
+
     private func action(_ title: String, _ icon: String, _ run: @escaping () -> Void) -> some View {
         Button(action: run) {
             Label(title, systemImage: icon)
         }
         .buttonStyle(.bordered)
-        .controlSize(.regular)
+        .help(title)
     }
 
     private func confirm(_ action: DeviceAction) {
@@ -253,10 +289,6 @@ struct DeviceCard: View {
         ) { [weak model] in
             model?.perform(action, on: target)
         }
-    }
-
-    private func byteText(_ value: Int64) -> String {
-        ByteCountFormatter.string(fromByteCount: value, countStyle: .file)
     }
 }
 

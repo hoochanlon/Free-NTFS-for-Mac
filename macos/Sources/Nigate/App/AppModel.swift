@@ -64,13 +64,14 @@ enum DockPresence {
     }
 
     /// regular 只许和看得见的主窗口同时存在。
-    /// 确认框还没挂上窗口时，禁止为了画确认框把 Dock 图标装回去。
+    /// 确认可以画在托盘上，没有主窗口时不要为了确认去装 Dock，也不要因此把进程杀掉。
     static func action(phase: AppQuitPhase, windowVisible: Bool, policyIsRegular: Bool) -> Action {
         switch phase {
         case .exiting:
             return .leave
         case .confirming:
-            return windowVisible ? .leave : .exit
+            if windowVisible { return .leave }
+            return policyIsRegular ? .hide : .leave
         case .idle:
             if windowVisible { return policyIsRegular ? .leave : .show }
             return policyIsRegular ? .hide : .leave
@@ -81,6 +82,37 @@ enum DockPresence {
         if windowVisible { return .hideWindowsThenDrop }
         if policyIsRegular { return .drop }
         return .none
+    }
+}
+
+/// 标题栏、托盘、Cmd+Q 共用。还没进入 exiting 就必须先确认，不能因为没有主窗口就直接杀进程。
+enum QuitRequest: Equatable {
+    case exitNow
+    case presentConfirm
+
+    static func decide(phase: AppQuitPhase, didHardExit: Bool) -> QuitRequest {
+        if phase == .exiting || didHardExit { return .exitNow }
+        return .presentConfirm
+    }
+}
+
+enum QuitConfirmHost: Equatable {
+    case mainWindow
+    case tray
+
+    static func decide(mainWindowVisible: Bool) -> QuitConfirmHost {
+        mainWindowVisible ? .mainWindow : .tray
+    }
+}
+
+/// 确认框丢了宿主才杀进程。托盘或主窗口任一还在，就继续等用户选。
+enum QuitConfirmWatchdog: Equatable {
+    case keep
+    case exit
+
+    static func decide(confirmOpen: Bool, mainWindowVisible: Bool, trayVisible: Bool) -> QuitConfirmWatchdog {
+        if confirmOpen && (mainWindowVisible || trayVisible) { return .keep }
+        return .exit
     }
 }
 
@@ -164,6 +196,8 @@ final class AppModel: ObservableObject {
     }
 
     func bootstrap() async {
+        // 托盘先于依赖探测和设备扫描出现。扫完再 attach 会空等几秒。
+        TrayController.shared.attach(self)
         applyAppearance()
         // register/unregister 会同步卡住主线程。放在首帧之后，
         // 否则启动期间的退出点击和看门狗都进不了 run loop。
@@ -186,7 +220,6 @@ final class AppModel: ObservableObject {
         await firstScan
         await refreshDevices()
         startCapacityRefresh()
-        TrayController.shared.attach(self)
     }
 
     /// 探测扩展安装/启用态，注入 MountBackendPolicy；Settings 与挂载路径共用此快照。
@@ -249,6 +282,7 @@ final class AppModel: ObservableObject {
         guard let next = CapacityRefresh.applying(devices, samples: samples) else { return }
         devices = next
         rememberNTFSDevices(next)
+        TrayController.shared.reload()
     }
 
     func persist() {
@@ -283,10 +317,7 @@ final class AppModel: ObservableObject {
 
     func revealMainWindow() {
         guard quitPhase == .idle else {
-            // 退出过程中再打开窗口，只会把已经摘掉的 Dock 图标装回来。
-            if quitPhase == .confirming, Self.visibleMainWindow() == nil {
-                quitImmediately()
-            }
+            // 确认可能画在托盘上。这时再拉主窗口会把 Dock 装回来。
             return
         }
         withdrawSeq += 1
@@ -334,26 +365,19 @@ final class AppModel: ObservableObject {
 
     /// 标题栏、托盘、Cmd+Q 都走这里。确认之前不调用 terminate：
     /// 一旦取消，SwiftUI 会关掉窗口，之后每次退出都还是取消，进程就留在 Dock。
-    /// 没有可见主窗口时直接结束。为了确认框去打开窗口，会把 Dock 图标重新装上。
+    /// 没有主窗口时确认画在托盘上，不要为了确认去打开窗口。
     func requestQuit() {
-        if quitPhase == .exiting || didHardExit {
+        switch QuitRequest.decide(phase: quitPhase, didHardExit: didHardExit) {
+        case .exitNow:
             quitImmediately()
-            return
+        case .presentConfirm:
+            presentQuitConfirm()
         }
-        guard Self.visibleMainWindow() != nil else {
-            quitImmediately()
-            return
-        }
-        presentQuitConfirm()
     }
 
-    /// 退出确认只画在已经可见的主窗口里。窗口不在就结束，不再把激活策略升回 regular。
+    /// 主窗口在就画在主窗口；否则打开托盘来画。确认还在且还有宿主时，看门狗不要杀进程。
     func presentQuitConfirm() {
         guard quitPhase != .exiting, !didHardExit else { return }
-        guard Self.visibleMainWindow() != nil else {
-            quitImmediately()
-            return
-        }
         quitPhase = .confirming
         aboutOpen = false
         supportOpen = false
@@ -362,11 +386,19 @@ final class AppModel: ObservableObject {
         alert = nil
         windowConfirm = nil
         quitConfirmOpen = true
+        if QuitConfirmHost.decide(mainWindowVisible: Self.visibleMainWindow() != nil) == .tray {
+            TrayController.shared.present()
+        }
         quitWatchSeq += 1
         let watch = quitWatchSeq
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
             guard let self, self.quitPhase == .confirming, self.quitWatchSeq == watch else { return }
-            if Self.visibleMainWindow() == nil || !self.quitConfirmOpen {
+            let lost = QuitConfirmWatchdog.decide(
+                confirmOpen: self.quitConfirmOpen,
+                mainWindowVisible: Self.visibleMainWindow() != nil,
+                trayVisible: TrayController.shared.isVisible
+            )
+            if lost == .exit {
                 self.quitImmediately()
             }
         }
@@ -386,6 +418,7 @@ final class AppModel: ObservableObject {
         passwordSheet = nil
         renameDevice = nil
         alert = nil
+        TrayController.shared.dismiss()
         revealMainWindow()
         windowConfirm = WindowConfirm(
             title: title,
@@ -1319,6 +1352,8 @@ final class AppModel: ObservableObject {
         }
         return try await withCheckedThrowingContinuation { continuation in
             passwordContinuation = continuation
+            TrayController.shared.dismiss()
+            revealMainWindow()
             passwordSheet = PasswordSheetState(
                 title: L10n.t(key, params),
                 savePassword: settings.savePassword
@@ -1386,6 +1421,7 @@ final class AppModel: ObservableObject {
 
     private func applyAppearance() {
         NSApp.appearance = NSAppearance(named: settings.themeIsLight ? .aqua : .darkAqua)
+        TrayController.shared.reload()
     }
 
     private func scheduleLoginItemRegistration() {
