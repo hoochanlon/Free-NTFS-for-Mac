@@ -155,6 +155,42 @@ final class DeviceListPinTests: XCTestCase {
         XCTAssertEqual(Set(merged.map(\.disk)), ["disk8s1", "disk8s2"])
     }
 
+    /// 转读写 disk4s1 时，扫描常把同盘 disk4s2 瞬态打成已卸载；不能盖掉仍挂着的只读卡。
+    func testTransientUnmountedSiblingKeepsHeldMountedCard() {
+        let target = sample(disk: "disk4s1", mounted: true, readOnly: true)
+        var sibling = sample(disk: "disk4s2", mounted: true, readOnly: true)
+        sibling.volume = "/Volumes/新加卷 1"
+        sibling.volumeName = "新加卷 1"
+        var liveTarget = target
+        liveTarget.isReadOnly = false
+        let ghostSibling = sample(disk: "disk4s2", mounted: false, readOnly: true)
+        let merged = DeviceListPin.merge(
+            scanned: [liveTarget, ghostSibling],
+            held: [target, sibling],
+            pins: [pin(target, .mount)]
+        )
+        XCTAssertEqual(merged.first { $0.disk == "disk4s1" }?.isReadWrite, true)
+        let kept = merged.first { $0.disk == "disk4s2" }
+        XCTAssertEqual(kept?.isMounted, true)
+        XCTAssertEqual(kept?.isUnmounted, false)
+        XCTAssertEqual(kept?.isReadOnly, true)
+        XCTAssertEqual(kept?.volume, "/Volumes/新加卷 1")
+    }
+
+    func testSiblingTrulyUnmountedHeldIsNotForcedMounted() {
+        let target = sample(disk: "disk4s1", mounted: true, readOnly: true)
+        let sibling = sample(disk: "disk4s2", mounted: false, readOnly: true)
+        var liveTarget = target
+        liveTarget.isReadOnly = false
+        let liveSibling = sample(disk: "disk4s2", mounted: false, readOnly: true)
+        let merged = DeviceListPin.merge(
+            scanned: [liveTarget, liveSibling],
+            held: [target, sibling],
+            pins: [pin(target, .mount)]
+        )
+        XCTAssertEqual(merged.first { $0.disk == "disk4s2" }?.isUnmounted, true)
+    }
+
     private func pin(_ device: NTFSDevice, _ action: DeviceAction) -> DeviceListPin.Pin {
         DeviceListPin.Pin(devicePath: device.devicePath, parentDisk: device.parentDisk, action: action)
     }

@@ -911,10 +911,10 @@ struct MountService {
     }
 
     private func writeMarker(_ disk: String) {
-        FileManager.default.createFile(atPath: "/tmp/ntfs_mounted_\(disk)", contents: Data())
+        FileManager.default.createFile(atPath: DiskSafety.mountMarkerPath(disk: disk), contents: Data())
     }
 
     private func clearMarker(_ disk: String) {
-        try? FileManager.default.removeItem(atPath: "/tmp/ntfs_mounted_\(disk)")
+        DiskSafety.clearMountMarker(disk: disk)
     }
 }

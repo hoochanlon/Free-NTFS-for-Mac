@@ -86,6 +86,22 @@ enum AutoMount {
         scanRequestedAuto || coalescedAuto
     }
 
+    /// 外层正在串行挂多分区时，内层 `run` 成功后再调 applyAutoMount 只能排队，
+    /// 否则同盘第二分区会被挂两次（只读→读写跳两次）。
+    enum GateAdmission: Equatable {
+        case enter
+        case queue
+    }
+
+    static func admit(running: Bool) -> GateAdmission {
+        running ? .queue : .enter
+    }
+
+    /// 一轮结束后若排队过，再扫一遍漏网只读分区（手动挂完第一块后的兄弟分区）。
+    static func shouldContinue(queued: Bool) -> Bool {
+        queued
+    }
+
     /// 是否被用户标记为保持只读（identity / uuid / disk 任一命中）。
     static func isManuallyReadOnly(_ device: NTFSDevice, settings: AppSettings) -> Bool {
         let manual = Set(settings.manuallyReadOnlyDevices)

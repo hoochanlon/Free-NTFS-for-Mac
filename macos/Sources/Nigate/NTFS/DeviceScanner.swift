@@ -13,7 +13,12 @@ enum DeviceScanner {
         var seen = Set<String>()
 
         // 1) 挂载表优先：已挂载事实决定列表与读写状态
+        //    猛拔后 mount 行常残留，但 /dev/disk* 已没了——先丢，避免 diskutil/FUSE 标记拖住卡片。
         for mounted in mounts {
+            guard DiskSafety.deviceNodePresent(mounted.devicePath) else {
+                DiskSafety.clearMountMarker(disk: mounted.disk)
+                continue
+            }
             guard let device = await deviceFromMount(mounted, mountOut: mountOut, tags: tags) else { continue }
             seen.insert(device.devicePath)
             devices.append(device)
@@ -23,7 +28,9 @@ enum DeviceScanner {
         //    Windows_NTFS 可能是 ExFAT，身份仍由 info 确认。APFS / EFI / 明确 FAT 不探。
         for identifier in DiskSafety.listProbeIdentifiers(from: listOut) {
             let path = "/dev/\(identifier)"
-            guard DiskSafety.isMountableNode(path), !seen.contains(path) else { continue }
+            guard DiskSafety.isMountableNode(path),
+                  DiskSafety.deviceNodePresent(path),
+                  !seen.contains(path) else { continue }
             guard let extra = await infoDevice(
                 path: path,
                 disk: identifier,
@@ -36,14 +43,19 @@ enum DeviceScanner {
 
         // diskutil list can briefly omit a connected volume during unmount propagation.
         // Revalidate known devices directly; only the same confirmed volume is retained.
+        // 节点已不存在 = 物理拔出，不能再 info（会卡超时）。
         for known in knownDevices where !seen.contains(known.devicePath) {
             guard DiskSafety.isMountableNode(known.devicePath),
+                  DiskSafety.deviceNodePresent(known.devicePath),
                   let extra = await infoDevice(
                     path: known.devicePath,
                     disk: known.disk,
                     tags: tags,
                     knownDevice: known
-                  ) else { continue }
+                  ) else {
+                DiskSafety.clearMountMarker(disk: known.disk)
+                continue
+            }
             seen.insert(extra.devicePath)
             devices.append(extra)
         }

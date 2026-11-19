@@ -158,6 +158,10 @@ final class AppModel: ObservableObject {
     private var rescanRequested = false
     /// 正在扫描时又来了插盘事件：把「要自动转读写」记下来，不能跟这次 applyAutoMount:false 一起丢掉。
     private var rescanWantsAutoMount = false
+    /// 自动转读写闸门：禁止 run→refresh→applyAutoMount 嵌套再挂一遍同盘分区。
+    private var autoMountRunning = false
+    private var autoMountQueued = false
+    private var autoMountQueuedExplicit = false
     private var knownNTFSDevices: [String: NTFSDevice] = [:]
     /// 只读↔读写期间钉住卡片。按分区路径记，不能拿整盘一把锁把隔壁分区冻住。
     private var switchPins: [String: DeviceListPin.Pin] = [:]
@@ -192,7 +196,13 @@ final class AppModel: ObservableObject {
         scheduleLoginItemRegistration()
         sleepGuard.setMode(settings.sleepMode, disks: [])
         lastPersistedSettings = settings
-        monitor.start { [weak self] in
+        monitor.start(
+            onDisappeared: { [weak self] bsdName in
+                Task { @MainActor in
+                    self?.notePhysicalRemoval(bsdName: bsdName)
+                }
+            }
+        ) { [weak self] in
             Task { @MainActor in
                 await self?.refreshDevices()
             }
@@ -244,7 +254,8 @@ final class AppModel: ObservableObject {
     private func refreshLiveCapacity() {
         guard quitPhase == .idle, !capacityRefreshInFlight, !isScanningDevices else { return }
         let probes = devices.compactMap { device -> CapacityProbe? in
-            guard device.isMounted, !device.isUnmounted, !device.volume.isEmpty else { return nil }
+            guard device.isMounted, !device.isUnmounted, !device.volume.isEmpty,
+                  DiskSafety.deviceNodePresent(device.devicePath) else { return nil }
             return CapacityProbe(devicePath: device.devicePath, volume: device.volume, previous: device.capacity)
         }
         guard !probes.isEmpty else { return }
@@ -857,6 +868,17 @@ final class AppModel: ObservableObject {
                 return
             }
         }
+        // 嵌套 autoMount / 外层第二趟时，已读写分区不能再卸再挂，否则只读→读写会跳两次。
+        if action == .mount {
+            if let live = devices.first(where: { $0.devicePath == device.devicePath || $0.disk == device.disk }) {
+                device = live
+            }
+            if device.isReadWrite {
+                clearRemountProgress(device)
+                clearMountProgress(device)
+                return
+            }
+        }
         let busyKey = busyKey(for: action, device: device)
         // 赋值新 Set，保证 @Published 一定发通知（in-place mutate 在部分路径上 UI 不刷新）。
         markBusy(busyKey)
@@ -957,16 +979,63 @@ final class AppModel: ObservableObject {
     }
 
     private func rememberNTFSDevices(_ devices: [NTFSDevice]) {
+        var next = knownNTFSDevices
+        let livePaths = Set(devices.map(\.devicePath))
         for var device in devices {
             if device.volumeUuid?.isEmpty != false,
-               let knownUUID = knownNTFSDevices[device.devicePath]?.volumeUuid {
+               let knownUUID = next[device.devicePath]?.volumeUuid {
                 device.volumeUuid = knownUUID
             }
             if device.partitionUuid?.isEmpty != false,
-               let knownUUID = knownNTFSDevices[device.devicePath]?.partitionUuid {
+               let knownUUID = next[device.devicePath]?.partitionUuid {
                 device.partitionUuid = knownUUID
             }
-            knownNTFSDevices[device.devicePath] = device
+            next[device.devicePath] = device
+        }
+        // 扫描已确认不在列表里、且 /dev 节点也没了：物理拔出，不再靠 known 回填。
+        for path in next.keys where !livePaths.contains(path) {
+            if !DiskSafety.deviceNodePresent(path) {
+                DiskSafety.clearMountMarker(disk: path)
+                next.removeValue(forKey: path)
+            }
+        }
+        knownNTFSDevices = next
+    }
+
+    /// DiskArbitration 物理消失：不等 diskutil/mount 回读，立刻摘卡。
+    /// 读写中途猛拔时，挂载表与 FUSE 标记会残留数秒，全量扫描会被 diskutil 超时拖住。
+    private func notePhysicalRemoval(bsdName: String) {
+        guard quitPhase != .exiting else { return }
+        let gone: (NTFSDevice) -> Bool = {
+            DiskSafety.isRemovedByDisappearance(deviceDisk: $0.disk, disappearedBSDName: bsdName)
+        }
+        let removed = devices.filter(gone)
+        let removedKnown = knownNTFSDevices.values.filter(gone)
+        guard !removed.isEmpty || !removedKnown.isEmpty else { return }
+
+        devices.removeAll(where: gone)
+        for item in removed + removedKnown {
+            knownNTFSDevices.removeValue(forKey: item.devicePath)
+            DiskSafety.clearMountMarker(disk: item.disk)
+            dropSwitchPin(item.devicePath)
+            bottomProgress = BottomProgress.removingRemount(bottomProgress, id: item.devicePath)
+            bottomProgress = BottomProgress.removingRestore(bottomProgress, id: item.devicePath)
+            bottomProgress = BottomProgress.removingMount(bottomProgress, id: item.devicePath)
+            bottomProgress = BottomProgress.removingUnmount(bottomProgress, id: item.devicePath)
+            bottomProgress = BottomProgress.removingEject(bottomProgress, id: item.devicePath)
+            bottomProgress = BottomProgress.removingFormat(bottomProgress, id: item.devicePath)
+            clearBusy(item.devicePath)
+            clearBusy(item.parentDisk)
+        }
+        if DiskSafety.isWholeDisk("/dev/\(bsdName)") {
+            dropPins(onParent: bsdName)
+        }
+        attempted = AutoMount.pruningStale(attempted, devices: devices)
+        publishBottomProgress()
+        updateStatus()
+        TrayController.shared.syncAfterAction()
+        if quitPhase == .idle {
+            sleepGuard.setMode(settings.sleepMode, disks: mountedWholeDisks())
         }
     }
 
@@ -1201,46 +1270,77 @@ final class AppModel: ObservableObject {
 
     private func applyAutoMount(explicit: Bool) async {
         guard quitPhase == .idle else { return }
-        let targets = AutoMount.targets(
-            devices: devices,
-            settings: settings,
-            attempted: attempted,
-            cooldown: cooldown,
-            inProgress: inProgress,
-            explicit: explicit
-        )
-        let known = devices
-        let keysFor: (NTFSDevice) -> Set<String> = { device in
-            Set(
-                known
-                    .filter { $0.sameMount(as: device) }
-                    .flatMap(AutoMount.recordKeys)
-                    + AutoMount.recordKeys(device)
+        // 外层已在串行挂 [A,B] 时，A 成功后的 refresh→applyAutoMount 只能排队；
+        // 若嵌套执行，B 会被挂两次（只读→读写过程跳两遍）。
+        switch AutoMount.admit(running: autoMountRunning) {
+        case .queue:
+            autoMountQueued = true
+            if explicit { autoMountQueuedExplicit = true }
+            return
+        case .enter:
+            break
+        }
+        autoMountRunning = true
+        defer { autoMountRunning = false }
+
+        var passExplicit = explicit
+        repeat {
+            autoMountQueued = false
+            let explicitPass = passExplicit || autoMountQueuedExplicit
+            autoMountQueuedExplicit = false
+            passExplicit = false
+
+            let targets = AutoMount.targets(
+                devices: devices,
+                settings: settings,
+                attempted: attempted,
+                cooldown: cooldown,
+                inProgress: inProgress,
+                explicit: explicitPass
             )
-        }
-        let pending = targets.filter { device in
-            if isDeviceBusy(device) || switchPins[device.devicePath] != nil { return false }
-            if !explicit && keysFor(device).contains(where: { attempted.contains($0) || inProgress.contains($0) }) {
-                return false
+            let known = devices
+            let keysFor: (NTFSDevice) -> Set<String> = { device in
+                Set(
+                    known
+                        .filter { $0.sameMount(as: device) }
+                        .flatMap(AutoMount.recordKeys)
+                        + AutoMount.recordKeys(device)
+                )
             }
-            return true
-        }
-        noteRemounting(pending)
-        for device in pending {
-            let keys = keysFor(device)
-            for key in keys {
-                attempted.insert(key)
-                inProgress.insert(key)
+            let pending = targets.filter { device in
+                if isDeviceBusy(device) || switchPins[device.devicePath] != nil { return false }
+                if !explicitPass && keysFor(device).contains(where: { attempted.contains($0) || inProgress.contains($0) }) {
+                    return false
+                }
+                return true
             }
-            defer {
-                for key in keys { inProgress.remove(key) }
+            noteRemounting(pending)
+            for var device in pending {
+                if let live = devices.first(where: { $0.devicePath == device.devicePath || $0.disk == device.disk }) {
+                    device = live
+                }
+                // 已被外层/嵌套路径挂成读写：记 attempted 并跳过，禁止再卸再挂。
+                if device.isReadWrite {
+                    for key in keysFor(device) { attempted.insert(key) }
+                    clearRemountProgress(device)
+                    clearMountProgress(device)
+                    continue
+                }
+                let keys = keysFor(device)
+                for key in keys {
+                    attempted.insert(key)
+                    inProgress.insert(key)
+                }
+                defer {
+                    for key in keys { inProgress.remove(key) }
+                }
+                guard quitPhase == .idle else {
+                    for leftover in pending { clearRemountProgress(leftover) }
+                    return
+                }
+                await run(.mount, device)
             }
-            guard quitPhase == .idle else {
-                for leftover in pending { clearRemountProgress(leftover) }
-                return
-            }
-            await run(.mount, device)
-        }
+        } while AutoMount.shouldContinue(queued: autoMountQueued) && quitPhase == .idle
     }
 
     private func showToast(_ message: String, now: Date = Date()) {

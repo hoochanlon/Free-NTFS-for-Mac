@@ -16,6 +16,35 @@ final class DiskSafetyTests: XCTestCase {
         XCTAssertEqual(DiskSafety.parentDiskPath("/dev/disk8"), "/dev/disk8")
     }
 
+    func testDeviceNodePresentRejectsMissingAndInvalidPaths() {
+        XCTAssertFalse(DiskSafety.deviceNodePresent("/dev/disk99999s1"))
+        XCTAssertFalse(DiskSafety.deviceNodePresent("/dev/rdisk0"))
+        XCTAssertFalse(DiskSafety.deviceNodePresent("/tmp/not-a-disk"))
+    }
+
+    func testPhysicalRemovalMatchesWholeDiskAndSinglePartition() {
+        XCTAssertTrue(DiskSafety.isRemovedByDisappearance(deviceDisk: "disk4s2", disappearedBSDName: "disk4s2"))
+        XCTAssertTrue(DiskSafety.isRemovedByDisappearance(deviceDisk: "/dev/disk4s2", disappearedBSDName: "disk4s2"))
+        XCTAssertTrue(DiskSafety.isRemovedByDisappearance(deviceDisk: "disk4s1", disappearedBSDName: "disk4"))
+        XCTAssertTrue(DiskSafety.isRemovedByDisappearance(deviceDisk: "disk4s2", disappearedBSDName: "disk4"))
+        XCTAssertTrue(DiskSafety.isRemovedByDisappearance(deviceDisk: "disk4", disappearedBSDName: "disk4"))
+        // 同盘另一分区消失，不误伤
+        XCTAssertFalse(DiskSafety.isRemovedByDisappearance(deviceDisk: "disk4s1", disappearedBSDName: "disk4s2"))
+        XCTAssertFalse(DiskSafety.isRemovedByDisappearance(deviceDisk: "disk5s1", disappearedBSDName: "disk4"))
+        XCTAssertFalse(DiskSafety.isRemovedByDisappearance(deviceDisk: "disk4s2", disappearedBSDName: ""))
+    }
+
+    func testMountMarkerPathAndClear() {
+        let path = DiskSafety.mountMarkerPath(disk: "disk9s1")
+        XCTAssertEqual(path, "/tmp/ntfs_mounted_disk9s1")
+        XCTAssertEqual(DiskSafety.mountMarkerPath(disk: "/dev/disk9s1"), path)
+        try? FileManager.default.removeItem(atPath: path)
+        _ = FileManager.default.createFile(atPath: path, contents: Data())
+        XCTAssertTrue(FileManager.default.fileExists(atPath: path))
+        DiskSafety.clearMountMarker(disk: "disk9s1")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: path))
+    }
+
     func testWholeDiskVolumeIdentifierFromDiskutilList() {
         XCTAssertEqual(
             DiskSafety.wholeDiskVolumeIdentifier(
@@ -914,6 +943,13 @@ final class AutoMountTests: XCTestCase {
         XCTAssertTrue(AutoMount.shouldApply(scanRequestedAuto: false, coalescedAuto: true))
         XCTAssertTrue(AutoMount.shouldApply(scanRequestedAuto: true, coalescedAuto: false))
         XCTAssertFalse(AutoMount.shouldApply(scanRequestedAuto: false, coalescedAuto: false))
+    }
+
+    func testNestedAutoMountOnlyQueuesWhileOuterIsRunning() {
+        XCTAssertEqual(AutoMount.admit(running: false), .enter)
+        XCTAssertEqual(AutoMount.admit(running: true), .queue)
+        XCTAssertTrue(AutoMount.shouldContinue(queued: true))
+        XCTAssertFalse(AutoMount.shouldContinue(queued: false))
     }
 
     func testUnmountedSameLabelSiblingIsLeftoverCandidate() {

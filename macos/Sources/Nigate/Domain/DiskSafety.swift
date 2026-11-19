@@ -15,6 +15,38 @@ enum DiskSafety {
         isPartition(path) || isWholeDisk(path)
     }
 
+    /// 物理节点是否还在。U 盘猛拔后 `/dev/disk*` 会立刻消失，
+    /// 但 `/sbin/mount` 与 FUSE 标记可能仍残留；不能靠 diskutil 超时才发现。
+    static func deviceNodePresent(_ path: String) -> Bool {
+        guard isMountableNode(path) else { return false }
+        var info = stat()
+        return stat(path, &info) == 0
+    }
+
+    /// DiskArbitration 消失事件的 BSD 名（`disk4` / `disk4s2`）是否覆盖这张卡。
+    /// 整盘消失摘同盘全部；分区消失只摘该分区，隔壁 Ventoy 等分区不动。
+    static func isRemovedByDisappearance(deviceDisk: String, disappearedBSDName: String) -> Bool {
+        let gone = disappearedBSDName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !gone.isEmpty else { return false }
+        let disk = deviceDisk.trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "/dev/", with: "")
+        guard !disk.isEmpty else { return false }
+        if disk == gone { return true }
+        if isWholeDisk("/dev/\(gone)") {
+            return parentDiskId(disk) == gone
+        }
+        return false
+    }
+
+    static func mountMarkerPath(disk: String) -> String {
+        let id = disk.replacingOccurrences(of: "/dev/", with: "")
+        return "/tmp/ntfs_mounted_\(id)"
+    }
+
+    static func clearMountMarker(disk: String) {
+        try? FileManager.default.removeItem(atPath: mountMarkerPath(disk: disk))
+    }
+
     /// `diskutil list` 里文件系统直接标在整盘 identifier 上。分区方案行不能当成卷。
     static func wholeDiskVolumeIdentifier(inListRow line: String) -> String? {
         let trimmed = line.trimmingCharacters(in: .whitespaces)
@@ -139,7 +171,7 @@ enum DiskSafety {
 
         // FSKit / ntfs-3g 成功挂载后写入；macOS 可能把 FUSE 卷误报为 ExFAT。
         let disk = devicePath.replacingOccurrences(of: "/dev/", with: "")
-        if FileManager.default.fileExists(atPath: "/tmp/ntfs_mounted_\(disk)") {
+        if FileManager.default.fileExists(atPath: mountMarkerPath(disk: disk)) {
             return true
         }
 
