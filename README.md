@@ -12,7 +12,6 @@
 
 > [!WARNING]
 > Intel Mac 注意事项：
-> * Intel 机型请使用 [v1.4.5](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/tag/v1.4.5)
 > * macFUSE / `ntfs-3g` 经 Homebrew 安装时，官方 bottle 已于 **2026 年 9 月**停止
 > * **2027 年 9 月** 起 Homebrew 不再在 Intel 上运行
 > * Intel 机型最高只到 macOS 26；**macOS 28 不适用 Intel**

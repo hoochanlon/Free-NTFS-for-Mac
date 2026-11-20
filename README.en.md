@@ -12,7 +12,6 @@ The demo shows a version older than 1.6.1.
 
 > [!WARNING]
 > Notes for Intel Macs:
-> * On Intel Macs, use [v1.4.5](https://github.com/hoochanlon/Free-NTFS-for-Mac/releases/tag/v1.4.5)
 > * Homebrew stopped publishing official bottles for macFUSE / `ntfs-3g` in **September 2026**
 > * Homebrew will stop running on Intel in or after **September 2027**
 > * Intel Macs stop at macOS 26; **macOS 28 does not apply to Intel**
