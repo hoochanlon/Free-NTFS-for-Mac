@@ -227,6 +227,47 @@ enum DiskSafety {
         field(info, "Disk / Partition UUID") ?? field(info, "Partition UUID")
     }
 
+    /// UUID-less MBR NTFS volumes still expose a stable partition fingerprint in diskutil info.
+    static func formatIdentity(from info: String) -> FormatIdentity? {
+        func byteCount(_ label: String) -> UInt64? {
+            guard let value = field(info, label),
+                  let regex = try? NSRegularExpression(pattern: #"([\d,]+)\s+Bytes\b"#),
+                  let match = regex.firstMatch(in: value, range: NSRange(value.startIndex..., in: value)),
+                  let range = Range(match.range(at: 1), in: value) else { return nil }
+            return UInt64(value[range].replacingOccurrences(of: ",", with: ""))
+        }
+
+        guard let deviceIdentifier = field(info, "Device Identifier"),
+              isPartition("/dev/\(deviceIdentifier)"),
+              let partitionOffset = byteCount("Partition Offset"),
+              let diskSize = byteCount("Disk Size"),
+              let partitionType = field(info, "Partition Type"),
+              let volumeName = field(info, "Volume Name"),
+              !isPlaceholderVolumeName(volumeName),
+              let protocolName = field(info, "Protocol"),
+              !protocolName.isEmpty else { return nil }
+        return FormatIdentity(
+            deviceIdentifier: deviceIdentifier,
+            partitionOffset: partitionOffset,
+            diskSize: diskSize,
+            partitionType: partitionType,
+            volumeName: volumeName,
+            protocolName: protocolName
+        )
+    }
+
+    static func matchesFormatIdentity(_ expected: FormatIdentity?, info: String) -> Bool {
+        guard let expected else { return false }
+        return formatIdentity(from: info) == expected
+    }
+
+    static func hasMatchingFormatIdentity(_ device: NTFSDevice, info: String) -> Bool {
+        if device.volumeUuid?.isEmpty == false || device.partitionUuid?.isEmpty == false {
+            return hasMatchingUUID(device, info: info)
+        }
+        return matchesFormatIdentity(device.formatIdentity, info: info)
+    }
+
     private static func hasConflictingUUID(_ known: String?, _ actual: String?) -> Bool {
         guard let known, !known.isEmpty, let actual, !actual.isEmpty else { return false }
         return known != actual

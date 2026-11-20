@@ -40,6 +40,15 @@ struct Capacity: Sendable, Equatable {
     }
 }
 
+struct FormatIdentity: Sendable, Equatable {
+    var deviceIdentifier: String
+    var partitionOffset: UInt64
+    var diskSize: UInt64
+    var partitionType: String
+    var volumeName: String
+    var protocolName: String
+}
+
 struct NTFSDevice: Sendable, Equatable, Identifiable {
     var disk: String
     var devicePath: String
@@ -47,6 +56,7 @@ struct NTFSDevice: Sendable, Equatable, Identifiable {
     var volumeName: String
     var volumeUuid: String?
     var partitionUuid: String? = nil
+    var formatIdentity: FormatIdentity? = nil
     var isReadOnly: Bool
     var options: String
     var isMounted: Bool
@@ -63,6 +73,9 @@ struct NTFSDevice: Sendable, Equatable, Identifiable {
         return disk
     }
     var parentDisk: String { DiskSafety.parentDiskId(disk) }
+    var hasStableFormatIdentity: Bool {
+        volumeUuid?.isEmpty == false || partitionUuid?.isEmpty == false || formatIdentity != nil
+    }
 
     /// 挂载表同一分区可能打出两行，diskutil 也可能再给一个节点。
     /// 路径、盘号或 UUID 对上才是同一卷。挂载点相同但 diskNsM 不同，只是卷标撞车。

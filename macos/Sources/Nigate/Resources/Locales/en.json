@@ -152,7 +152,7 @@
     "format": "Format",
     "formatTooltip": "Format",
     "formatConfirm": "This will erase all partitions and data on the entire disk!",
-    "formatConfirmNote": "1. This cannot be undone. Back up important data first.\n2. Formatting may take a while and will unmount and remount the volume several times.\n3. Do not disconnect the device or interrupt the process. Please wait until it finishes.\nContinue?",
+    "formatConfirmNote": "The current formatter rebuilds the partition table for the entire disk and cannot format only the selected NTFS partition. To preserve other partitions on the same disk, format only the target partition in Windows Disk Management.\n1. This cannot be undone. Back up important data first.\n2. Formatting may take a while and will unmount and remount the volume several times.\n3. Do not disconnect the device or interrupt the process. Please wait until it finishes.\nContinue?",
     "unmount": "Unmount",
     "eject": "Eject",
     "restoreReadOnly": "Restore to Read-Only",

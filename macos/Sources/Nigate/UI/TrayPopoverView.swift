@@ -138,6 +138,19 @@ enum TrayPanelPlacement {
     }
 }
 
+enum TrayPanelDismissal {
+    static let statusItemHitTestSlop: CGFloat = 4
+
+    static func shouldDismiss(at point: CGPoint, panelFrame: CGRect, statusItemFrame: CGRect?) -> Bool {
+        let expandedStatusItemFrame = statusItemFrame?.insetBy(
+            dx: -statusItemHitTestSlop,
+            dy: -statusItemHitTestSlop
+        )
+        if let expandedStatusItemFrame, expandedStatusItemFrame.contains(point) { return false }
+        return !panelFrame.contains(point)
+    }
+}
+
 enum TrayBatchAvailability {
     static func canMountUnmounted(_ devices: [NTFSDevice]) -> Bool {
         devices.contains(where: \.needsMount)

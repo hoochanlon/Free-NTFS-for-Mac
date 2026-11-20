@@ -63,20 +63,23 @@ enum DeviceScanner {
         var filled: [NTFSDevice] = []
         for var device in devices {
             let known = knownDevices.first { $0.devicePath == device.devicePath }
-            if device.volumeUuid?.isEmpty != false || device.partitionUuid?.isEmpty != false {
-                let scannedUUIDs = await volumeUUIDs(device.devicePath)
+            if device.volumeUuid?.isEmpty != false || device.partitionUuid?.isEmpty != false || device.formatIdentity == nil {
+                let scannedIdentity = await volumeIdentity(device.devicePath)
                 device.volumeUuid = resolvedVolumeUUID(
-                    scanned: device.volumeUuid?.isEmpty == false ? device.volumeUuid : scannedUUIDs.volume,
+                    scanned: device.volumeUuid?.isEmpty == false ? device.volumeUuid : scannedIdentity.volume,
                     known: known?.volumeUuid
                 )
                 device.partitionUuid = resolvedVolumeUUID(
-                    scanned: device.partitionUuid?.isEmpty == false ? device.partitionUuid : scannedUUIDs.partition,
+                    scanned: device.partitionUuid?.isEmpty == false ? device.partitionUuid : scannedIdentity.partition,
                     known: known?.partitionUuid
                 )
+                device.formatIdentity = scannedIdentity.format ?? known?.formatIdentity
             }
             if device.volumeName == device.disk, let known {
                 device.volumeName = known.volumeName
             }
+            device.canFormat = DiskSafety.canFormat(fromListTags: tags[device.parentDisk])
+                && device.hasStableFormatIdentity
             device.capacity = await capacity(
                 volume: device.volume,
                 devicePath: device.devicePath,
@@ -123,6 +126,7 @@ enum DeviceScanner {
         var device = primary
         if device.volumeUuid?.isEmpty != false { device.volumeUuid = fallback.volumeUuid }
         if device.partitionUuid?.isEmpty != false { device.partitionUuid = fallback.partitionUuid }
+        if device.formatIdentity == nil { device.formatIdentity = fallback.formatIdentity }
         if device.volume.isEmpty { device.volume = fallback.volume }
         if device.capacity == nil { device.capacity = fallback.capacity }
         return device
@@ -209,6 +213,7 @@ enum DeviceScanner {
             volumeName: name,
             volumeUuid: volumeUUID,
             partitionUuid: partitionUUID,
+            formatIdentity: DiskSafety.formatIdentity(from: info),
             isReadOnly: true,
             options: "",
             isMounted: mounted,
@@ -223,11 +228,12 @@ enum DeviceScanner {
         return scanned
     }
 
-    private static func volumeUUIDs(_ path: String) async -> (volume: String?, partition: String?) {
+    private static func volumeIdentity(_ path: String) async -> (volume: String?, partition: String?, format: FormatIdentity?) {
         let info = await Shell.runQuiet("/usr/sbin/diskutil", ["info", path], timeout: 1.2).stdout
         return (
             volume: DiskSafety.field(info, "Volume UUID"),
-            partition: DiskSafety.partitionUUID(in: info)
+            partition: DiskSafety.partitionUUID(in: info),
+            format: DiskSafety.formatIdentity(from: info)
         )
     }
 

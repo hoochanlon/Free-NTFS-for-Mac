@@ -152,7 +152,7 @@
     "format": "Formatieren",
     "formatTooltip": "Formatieren",
     "formatConfirm": "Dieser Vorgang löscht alle Partitionen und Daten der gesamten Festplatte!",
-    "formatConfirmNote": "1. Der Vorgang kann nicht rückgängig gemacht werden. Sichern Sie wichtige Daten zuerst.\n2. Das Formatieren kann länger dauern und hängt das Volume dabei mehrfach aus und wieder ein.\n3. Trennen Sie das Gerät nicht und unterbrechen Sie den Vorgang nicht. Bitte warten Sie, bis er abgeschlossen ist.\nFortfahren?",
+    "formatConfirmNote": "Die aktuelle Formatierung erstellt die Partitionstabelle der gesamten Festplatte neu und kann nicht nur die ausgewählte NTFS-Partition formatieren. Wenn andere Partitionen auf derselben Festplatte erhalten bleiben sollen, formatieren Sie nur die Zielpartition in der Windows-Datenträgerverwaltung.\n1. Der Vorgang kann nicht rückgängig gemacht werden. Sichern Sie wichtige Daten zuerst.\n2. Das Formatieren kann länger dauern und hängt das Volume dabei mehrfach aus und wieder ein.\n3. Trennen Sie das Gerät nicht und unterbrechen Sie den Vorgang nicht. Bitte warten Sie, bis er abgeschlossen ist.\nFortfahren?",
     "unmount": "Aushängen",
     "eject": "Auswerfen",
     "restoreReadOnly": "Nur lesen",

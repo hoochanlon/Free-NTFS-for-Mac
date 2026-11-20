@@ -280,7 +280,7 @@ struct MountService {
         try requireCompatibilityBackend()
         try await assertNTFSPartition(device)
         guard DiskSafety.isPartition(device.devicePath),
-              device.volumeUuid?.isEmpty == false,
+              device.hasStableFormatIdentity,
               device.canFormat else { throw AppError.formatNotAllowed }
         let parent = DiskSafety.parentDiskPath(device.devicePath)
         guard DiskSafety.isWholeDisk(parent) else { throw AppError.formatNotAllowed }
@@ -860,9 +860,8 @@ struct MountService {
         let listResult = await Shell.runQuiet("/usr/sbin/diskutil", ["list", parent], timeout: 5)
         guard parentResult.ok, partitionResult.ok, bootResult.ok, listResult.ok,
               !parentResult.stdout.isEmpty, !partitionResult.stdout.isEmpty, !bootResult.stdout.isEmpty,
-              (partition.volumeUuid?.isEmpty == false || partition.partitionUuid?.isEmpty == false),
               DiskSafety.field(partitionResult.stdout, "Device Identifier") == partition.disk,
-              DiskSafety.hasMatchingUUID(partition, info: partitionResult.stdout),
+              DiskSafety.hasMatchingFormatIdentity(partition, info: partitionResult.stdout),
               DiskSafety.canFormat(fromListTags: DiskSafety.parentDiskTags(from: listResult.stdout)[DiskSafety.parentDiskId(parent)]) else {
             throw AppError.formatNotAllowed
         }

@@ -477,6 +477,50 @@ final class DiskSafetyTests: XCTestCase {
         ))
     }
 
+    func testUUIDlessNTFSPartitionGetsStableFormatIdentity() {
+        let info = """
+        Device Identifier:         disk4s1
+        Volume Name:               新加卷
+        Partition Type:            Windows_NTFS
+        Protocol:                  USB
+        Partition Offset:          1,048,576 Bytes (2048 512-Byte-Device-Blocks)
+        Disk Size:                 68.5 GB (68,499,275,776 Bytes)
+        """
+        let identity = DiskSafety.formatIdentity(from: info)
+
+        XCTAssertEqual(identity?.deviceIdentifier, "disk4s1")
+        XCTAssertEqual(identity?.partitionOffset, 1_048_576)
+        XCTAssertEqual(identity?.diskSize, 68_499_275_776)
+        XCTAssertEqual(identity?.partitionType, "Windows_NTFS")
+        XCTAssertEqual(identity?.volumeName, "新加卷")
+        XCTAssertEqual(identity?.protocolName, "USB")
+        XCTAssertTrue(DiskSafety.matchesFormatIdentity(identity, info: info))
+        XCTAssertFalse(DiskSafety.matchesFormatIdentity(identity, info: info.replacingOccurrences(
+            of: "1,048,576 Bytes",
+            with: "1,048,577 Bytes"
+        )))
+        XCTAssertFalse(DiskSafety.matchesFormatIdentity(identity, info: info.replacingOccurrences(
+            of: "disk4s1",
+            with: "disk4s2"
+        )))
+    }
+
+    func testFormatIdentityRejectsIncompleteOrNonPartitionInfo() {
+        XCTAssertNil(DiskSafety.formatIdentity(from: """
+        Device Identifier:         disk4s1
+        Volume Name:               新加卷
+        Protocol:                  USB
+        """))
+        XCTAssertNil(DiskSafety.formatIdentity(from: """
+        Device Identifier:         disk4
+        Volume Name:               Not applicable (no file system)
+        Partition Offset:          1,048,576 Bytes
+        Disk Size:                 68,499,275,776 Bytes
+        Partition Type:            Windows_NTFS
+        Protocol:                  USB
+        """))
+    }
+
     func testFormattingRequiresExternalWholeDisk() {
         // 旧式：带 Internal=No
         let legacy = """

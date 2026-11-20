@@ -150,7 +150,7 @@ final class TrayController: NSObject {
         created.button?.image?.accessibilityDescription = "Nigate"
         created.button?.target = self
         created.button?.action = #selector(togglePanel)
-        created.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        created.button?.sendAction(on: [.leftMouseDown, .rightMouseDown])
         item = created
     }
 
@@ -371,12 +371,14 @@ final class TrayController: NSObject {
         stopOutsideClickMonitor()
         let mouse: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown]
         if let global = NSEvent.addGlobalMonitorForEvents(matching: mouse, handler: { [weak self] _ in
-            Task { @MainActor in self?.dismissIfClickOutside() }
+            let point = NSEvent.mouseLocation
+            Task { @MainActor in self?.dismissIfClickOutside(at: point) }
         }) {
             outsideMonitors.append(global)
         }
         if let local = NSEvent.addLocalMonitorForEvents(matching: mouse, handler: { [weak self] event in
-            Task { @MainActor in self?.dismissIfClickOutside() }
+            let point = event.window?.convertPoint(toScreen: event.locationInWindow) ?? NSEvent.mouseLocation
+            Task { @MainActor in self?.dismissIfClickOutside(at: point) }
             return event
         }) {
             outsideMonitors.append(local)
@@ -399,14 +401,19 @@ final class TrayController: NSObject {
         outsideMonitors.removeAll()
     }
 
-    private func dismissIfClickOutside() {
+    private func dismissIfClickOutside(at point: NSPoint) {
         guard let panel, panel.isVisible else { return }
-        let mouse = NSEvent.mouseLocation
-        if panel.frame.contains(mouse) { return }
+        let statusItemFrame: NSRect?
         if let button = item?.button, let window = button.window {
-            let buttonScreen = window.convertToScreen(button.convert(button.bounds, to: nil))
-            if buttonScreen.contains(mouse) { return }
+            statusItemFrame = window.convertToScreen(button.convert(button.bounds, to: nil))
+        } else {
+            statusItemFrame = nil
         }
+        guard TrayPanelDismissal.shouldDismiss(
+            at: point,
+            panelFrame: panel.frame,
+            statusItemFrame: statusItemFrame
+        ) else { return }
         hidePanel()
     }
 

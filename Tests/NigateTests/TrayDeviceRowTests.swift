@@ -271,3 +271,54 @@ private func cap(
 ) -> Capacity {
     Capacity(total: total, used: used, available: available)
 }
+
+final class TrayPanelDismissalTests: XCTestCase {
+    private let panel = CGRect(x: 100, y: 100, width: 420, height: 500)
+    private let statusItem = CGRect(x: 500, y: 800, width: 24, height: 24)
+
+    func testPanelClickDoesNotDismiss() {
+        XCTAssertFalse(TrayPanelDismissal.shouldDismiss(
+            at: CGPoint(x: 300, y: 300),
+            panelFrame: panel,
+            statusItemFrame: statusItem
+        ))
+    }
+
+    func testStatusItemClickIsLeftForToggleAction() {
+        XCTAssertFalse(TrayPanelDismissal.shouldDismiss(
+            at: CGPoint(x: 512, y: 812),
+            panelFrame: panel,
+            statusItemFrame: statusItem
+        ))
+        XCTAssertFalse(TrayPanelDismissal.shouldDismiss(
+            at: CGPoint(x: 498, y: 812),
+            panelFrame: panel,
+            statusItemFrame: statusItem
+        ))
+    }
+
+    func testStatusItemTakesPrecedenceWhenFramesOverlap() {
+        let panelOverlappingStatusItem = CGRect(x: 100, y: 100, width: 420, height: 730)
+        XCTAssertFalse(TrayPanelDismissal.shouldDismiss(
+            at: CGPoint(x: 512, y: 812),
+            panelFrame: panelOverlappingStatusItem,
+            statusItemFrame: statusItem
+        ))
+    }
+
+    func testOtherOutsideClickDismisses() {
+        XCTAssertTrue(TrayPanelDismissal.shouldDismiss(
+            at: CGPoint(x: 700, y: 500),
+            panelFrame: panel,
+            statusItemFrame: statusItem
+        ))
+    }
+
+    func testOutsideClickDismissesWhenStatusItemIsUnavailable() {
+        XCTAssertTrue(TrayPanelDismissal.shouldDismiss(
+            at: CGPoint(x: 700, y: 500),
+            panelFrame: panel,
+            statusItemFrame: nil
+        ))
+    }
+}
