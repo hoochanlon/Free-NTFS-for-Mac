@@ -339,6 +339,7 @@
     "mountUnclean": "This NTFS volume was not safely ejected from Windows and is dirty, so it cannot be mounted read-write. Click Repair first, or plug it back into Windows, shut down fully, and try again.",
     "formatting": "Formatting {name} as GPT NTFS...",
     "formattingHint": "Formatting {name} as GPT NTFS. This can take several minutes. Do not disconnect the device or interrupt the process.",
+    "formattingHintMany": "Formatting {count} disks as GPT NTFS: {names}. This can take several minutes. Do not disconnect any device or interrupt the process.",
     "remountingReadWrite": "Switching {name} from read-only to read-write...",
     "remountingReadWriteMany": "Switching {count} devices from read-only to read-write: {names}",
     "restoringReadOnly": "Switching {name} from read-write to read-only...",

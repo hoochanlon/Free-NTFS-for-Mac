@@ -339,6 +339,7 @@
     "mountUnclean": "この NTFS ボリュームは Windows で安全に取り外されておらず、ダーティなため読み書きマウントできません。先に「修復」を押すか、Windows に戻して完全にシャットダウンしてから再試行してください。",
     "formatting": "{name} を GPT NTFS にフォーマットしています...",
     "formattingHint": "{name} を GPT NTFS にフォーマットしています。数分かかることがあります。デバイスを取り外したり操作を中断したりしないでください。",
+    "formattingHintMany": "{count} 台のディスク（{names}）を GPT NTFS にフォーマットしています。数分かかることがあります。デバイスを取り外したり操作を中断したりしないでください。",
     "remountingReadWrite": "{name} を読み取り専用から読み書き可能に切り替えています...",
     "remountingReadWriteMany": "{count} 台のデバイスを読み取り専用から読み書き可能に切り替えています：{names}",
     "restoringReadOnly": "{name} を読み書き可能から読み取り専用に切り替えています...",

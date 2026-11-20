@@ -34,13 +34,37 @@ final class BottomProgressTests: XCTestCase {
             item("SanDisk 32G", "/dev/disk5s1")
         ])
         session = BottomProgress.insertingFormat(session, id: "/dev/disk6s1", name: "Backup")
-        XCTAssertEqual(BottomProgress.kind(session), .format(name: "Backup"))
+        XCTAssertEqual(BottomProgress.kind(session), .format(names: ["Backup"]))
 
         session = BottomProgress.removingFormat(session, id: "/dev/disk6s1")
         XCTAssertEqual(
             BottomProgress.kind(session),
             .remountReadWrite(names: ["Samsung USB", "SanDisk 32G"])
         )
+    }
+
+    func testMultipleFormatsShowEveryDiskAndFallBackToSingularWhenOneRemains() {
+        var session = BottomProgress.Session()
+        session = BottomProgress.insertingFormat(session, id: "/dev/disk4s1", name: "Backup")
+        session = BottomProgress.insertingFormat(session, id: "/dev/disk5s1", name: "Archive")
+        session = BottomProgress.insertingFormat(session, id: "/dev/disk4s1", name: "Duplicate")
+
+        XCTAssertEqual(BottomProgress.kind(session), .format(names: ["Backup", "Archive"]))
+        let many = BottomProgress.text(BottomProgress.kind(session)) { key, params in
+            if key == "messages.nameListSeparator" { return "、" }
+            if key == "messages.formattingHintMany" {
+                return "MANY \(params["count"] ?? "") \(params["names"] ?? "")"
+            }
+            return key
+        }
+        XCTAssertEqual(many, "MANY 2 Backup、Archive")
+
+        session = BottomProgress.removingFormat(session, id: "/dev/disk4s1")
+        XCTAssertEqual(BottomProgress.kind(session), .format(names: ["Archive"]))
+        let one = BottomProgress.text(BottomProgress.kind(session)) { key, params in
+            key == "messages.formattingHint" ? "ONE \(params["name"] ?? "")" : key
+        }
+        XCTAssertEqual(one, "ONE Archive")
     }
 
     func testDeviceDisappearanceKeepsInFlightFormatHint() {
@@ -50,13 +74,13 @@ final class BottomProgressTests: XCTestCase {
         session = BottomProgress.removingDeviceAfterDisappearance(session, id: "/dev/disk4s1")
         XCTAssertTrue(BottomProgress.isFormatting(session, id: "/dev/disk4s2"))
         XCTAssertTrue(BottomProgress.isFormatting(session, parentDisk: "disk4"))
-        XCTAssertEqual(BottomProgress.kind(session), .format(name: "Backup"))
+        XCTAssertEqual(BottomProgress.kind(session), .format(names: ["Backup"]))
         XCTAssertEqual(session.remountRW, [item("Other", "/dev/disk8s1")])
 
         session = BottomProgress.removingDeviceAfterDisappearance(session, id: "/dev/disk4s2")
         XCTAssertTrue(BottomProgress.isFormatting(session, id: "/dev/disk4s2"))
         XCTAssertTrue(BottomProgress.isFormatting(session, parentDisk: "disk4"))
-        XCTAssertEqual(BottomProgress.kind(session), .format(name: "Backup"))
+        XCTAssertEqual(BottomProgress.kind(session), .format(names: ["Backup"]))
 
         session = BottomProgress.removingFormat(session, id: "/dev/disk4s2")
         XCTAssertEqual(BottomProgress.kind(session), .remountReadWrite(names: ["Other"]))

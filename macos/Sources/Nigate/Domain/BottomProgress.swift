@@ -17,7 +17,7 @@ enum BottomProgress {
     }
 
     enum Kind: Equatable, Sendable {
-        case format(name: String)
+        case format(names: [String])
         case remountReadWrite(names: [String])
         case restoreReadOnly(names: [String])
         case eject(names: [String])
@@ -28,8 +28,8 @@ enum BottomProgress {
     /// 格式化压过推出：更长、更危险。推出压过挂载切换：卡片会从列表消失，空表还得靠这句转圈。
     /// 只读转读写压过读写转只读。挂载切换压过卸载/挂载。
     static func kind(_ session: Session) -> Kind? {
-        if let name = session.format.first?.name {
-            return .format(name: name)
+        if let names = named(session.format) {
+            return .format(names: names)
         }
         if let names = named(session.eject) { return .eject(names: names) }
         if let names = named(session.remountRW) { return .remountReadWrite(names: names) }
@@ -41,8 +41,14 @@ enum BottomProgress {
 
     static func text(_ kind: Kind?, t: (String, [String: String]) -> String) -> String? {
         switch kind {
-        case .format(let name):
-            return t("messages.formattingHint", ["name": name])
+        case .format(let names):
+            if names.count == 1 {
+                return t("messages.formattingHint", ["name": names[0]])
+            }
+            return t("messages.formattingHintMany", [
+                "count": "\(names.count)",
+                "names": names.joined(separator: t("messages.nameListSeparator", [:]))
+            ])
         case .remountReadWrite(let names):
             return namedText(names, one: "messages.remountingReadWrite", many: "messages.remountingReadWriteMany", t: t)
         case .restoreReadOnly(let names):

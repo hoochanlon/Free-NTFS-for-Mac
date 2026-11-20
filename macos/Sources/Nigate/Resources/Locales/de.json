@@ -339,6 +339,7 @@
     "mountUnclean": "Dieses NTFS-Volume wurde unter Windows nicht sicher ausgeworfen und ist inkonsistent. Es kann daher nicht mit Schreibzugriff eingehängt werden. Klicken Sie zuerst auf Reparieren, oder schließen Sie es wieder an Windows an, fahren Sie vollständig herunter und versuchen Sie es erneut.",
     "formatting": "{name} wird als GPT-NTFS formatiert...",
     "formattingHint": "{name} wird als GPT-NTFS formatiert. Das kann mehrere Minuten dauern. Trennen Sie das Gerät nicht und unterbrechen Sie den Vorgang nicht.",
+    "formattingHintMany": "{count} Festplatten ({names}) werden als GPT-NTFS formatiert. Das kann mehrere Minuten dauern. Trennen Sie kein Gerät und unterbrechen Sie den Vorgang nicht.",
     "remountingReadWrite": "{name} wird von schreibgeschützt auf Lese-/Schreibzugriff umgestellt...",
     "remountingReadWriteMany": "{count} Geräte werden von schreibgeschützt auf Lese-/Schreibzugriff umgestellt: {names}",
     "restoringReadOnly": "{name} wird von Lese-/Schreibzugriff auf schreibgeschützt umgestellt...",

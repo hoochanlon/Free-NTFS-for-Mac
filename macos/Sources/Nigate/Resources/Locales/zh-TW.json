@@ -339,6 +339,7 @@
     "mountUnclean": "此 NTFS 卷在 Windows 上未安全退出，處於髒狀態，無法直接改為讀寫。請先點「修復」，或把裝置插回 Windows 徹底關機後再試。",
     "formatting": "正在將 {name} 格式化為 GPT NTFS...",
     "formattingHint": "正在將 {name} 格式化為 GPT NTFS。過程可能需要幾分鐘，請勿拔出設備或中斷操作。",
+    "formattingHintMany": "正在將 {count} 塊硬碟格式化為 GPT NTFS：{names}。過程可能需要幾分鐘，請勿拔出設備或中斷操作。",
     "remountingReadWrite": "正在將 {name} 從只讀轉為讀寫...",
     "remountingReadWriteMany": "正在將 {count} 塊設備從只讀轉為讀寫：{names}",
     "restoringReadOnly": "正在將 {name} 從讀寫轉為只讀...",
