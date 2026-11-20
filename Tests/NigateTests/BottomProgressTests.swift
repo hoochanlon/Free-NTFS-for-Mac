@@ -43,6 +43,34 @@ final class BottomProgressTests: XCTestCase {
         )
     }
 
+    func testDeviceDisappearanceKeepsInFlightFormatHint() {
+        var session = BottomProgress.Session()
+        session = BottomProgress.insertingRemount(session, item("Other", "/dev/disk8s1"))
+        session = BottomProgress.insertingFormat(session, id: "/dev/disk4s2", name: "Backup")
+        session = BottomProgress.removingDeviceAfterDisappearance(session, id: "/dev/disk4s1")
+        XCTAssertTrue(BottomProgress.isFormatting(session, id: "/dev/disk4s2"))
+        XCTAssertTrue(BottomProgress.isFormatting(session, parentDisk: "disk4"))
+        XCTAssertEqual(BottomProgress.kind(session), .format(name: "Backup"))
+        XCTAssertEqual(session.remountRW, [item("Other", "/dev/disk8s1")])
+
+        session = BottomProgress.removingDeviceAfterDisappearance(session, id: "/dev/disk4s2")
+        XCTAssertTrue(BottomProgress.isFormatting(session, id: "/dev/disk4s2"))
+        XCTAssertTrue(BottomProgress.isFormatting(session, parentDisk: "disk4"))
+        XCTAssertEqual(BottomProgress.kind(session), .format(name: "Backup"))
+
+        session = BottomProgress.removingFormat(session, id: "/dev/disk4s2")
+        XCTAssertEqual(BottomProgress.kind(session), .remountReadWrite(names: ["Other"]))
+    }
+
+    func testDeviceDisappearanceClearsCompletedFormatHint() {
+        var session = BottomProgress.Session()
+        session = BottomProgress.insertingFormat(session, id: "/dev/disk4s1", name: "Backup")
+        session = BottomProgress.removingFormat(session, id: "/dev/disk4s1")
+        session = BottomProgress.removingDeviceAfterDisappearance(session, id: "/dev/disk4s1")
+        XCTAssertFalse(BottomProgress.isFormatting(session, id: "/dev/disk4s1"))
+        XCTAssertNil(BottomProgress.kind(session))
+    }
+
     func testRemovingUnknownIdIsNoOp() {
         var session = BottomProgress.Session()
         session = BottomProgress.insertingRemount(session, item("Samsung USB", "/dev/disk4s1"))

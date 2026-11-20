@@ -1018,14 +1018,11 @@ final class AppModel: ObservableObject {
             knownNTFSDevices.removeValue(forKey: item.devicePath)
             DiskSafety.clearMountMarker(disk: item.disk)
             dropSwitchPin(item.devicePath)
-            bottomProgress = BottomProgress.removingRemount(bottomProgress, id: item.devicePath)
-            bottomProgress = BottomProgress.removingRestore(bottomProgress, id: item.devicePath)
-            bottomProgress = BottomProgress.removingMount(bottomProgress, id: item.devicePath)
-            bottomProgress = BottomProgress.removingUnmount(bottomProgress, id: item.devicePath)
-            bottomProgress = BottomProgress.removingEject(bottomProgress, id: item.devicePath)
-            bottomProgress = BottomProgress.removingFormat(bottomProgress, id: item.devicePath)
+            bottomProgress = BottomProgress.removingDeviceAfterDisappearance(bottomProgress, id: item.devicePath)
             clearBusy(item.devicePath)
-            clearBusy(item.parentDisk)
+            if !BottomProgress.isFormatting(bottomProgress, parentDisk: item.parentDisk) {
+                clearBusy(item.parentDisk)
+            }
         }
         if DiskSafety.isWholeDisk("/dev/\(bsdName)") {
             dropPins(onParent: bsdName)

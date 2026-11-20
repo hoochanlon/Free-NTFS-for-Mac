@@ -170,6 +170,23 @@ enum BottomProgress {
         removing(session, id: id, from: \.eject)
     }
 
+    static func isFormatting(_ session: Session, id: String) -> Bool {
+        session.format.contains { $0.id == id }
+    }
+
+    static func isFormatting(_ session: Session, parentDisk: String) -> Bool {
+        session.format.contains { DiskSafety.parentDiskId($0.id) == DiskSafety.parentDiskId(parentDisk) }
+    }
+
+    static func removingDeviceAfterDisappearance(_ session: Session, id: String) -> Session {
+        var session = removingRemount(session, id: id)
+        session = removingRestore(session, id: id)
+        session = removingMount(session, id: id)
+        session = removingUnmount(session, id: id)
+        session = removingEject(session, id: id)
+        return isFormatting(session, id: id) ? session : removingFormat(session, id: id)
+    }
+
     /// 卡片已经是读写，底部就不要再转圈。中间卸载、列表暂时缺这张卡时先留着。
     static func droppingFinishedRemounts(_ session: Session, devices: [NTFSDevice]) -> Session {
         droppingFinished(session, into: \.remountRW, devices: devices) { $0.isReadWrite }
