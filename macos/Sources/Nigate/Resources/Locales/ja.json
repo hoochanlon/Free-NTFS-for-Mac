@@ -35,6 +35,9 @@
     "waitingDevices": "デバイス待機中",
     "devicesReadOnly": "{count} 個のデバイスが読み取り専用",
     "devicesReady": "{count} 個のデバイス準備完了",
+    "devicesUnmounted": "{count} 個のデバイスがアンマウント済み",
+    "devicesReadOnlyUnmounted": "{readOnly} 個が読み取り専用 · {unmounted} 個がアンマウント済み",
+    "devicesMixedUnmounted": "{readWrite} 読み書き · {readOnly} 読み取り専用 · {unmounted} 未マウント",
     "detectFailed": "検出失敗"
   },
   "dependencies": {

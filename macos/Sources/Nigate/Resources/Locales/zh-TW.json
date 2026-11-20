@@ -35,6 +35,9 @@
     "waitingDevices": "等待設備",
     "devicesReadOnly": "{count} 個設備只讀",
     "devicesReady": "{count} 個設備就緒",
+    "devicesUnmounted": "{count} 個設備已卸載",
+    "devicesReadOnlyUnmounted": "{readOnly} 個只讀 · {unmounted} 個已卸載",
+    "devicesMixedUnmounted": "{readWrite} 讀寫 · {readOnly} 只讀 · {unmounted} 已卸載",
     "detectFailed": "檢測失敗"
   },
   "dependencies": {

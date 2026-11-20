@@ -681,31 +681,113 @@ final class DiskSafetyTests: XCTestCase {
 
 final class TrayDeviceStatusTests: XCTestCase {
     func testReadyStatusIgnoresUnmountedDevices() {
-        XCTAssertEqual(TrayDeviceStatus(devices: []), .ready)
-        XCTAssertEqual(TrayDeviceStatus(devices: [trayDevice(mounted: false, readOnly: true)]), .ready)
+        XCTAssertEqual(DeviceFleetStatus(devices: []), .ready)
+        XCTAssertEqual(DeviceFleetStatus(devices: [trayDevice(mounted: false, readOnly: true)]), .ready)
     }
 
     func testAllReadWriteStatus() {
         XCTAssertEqual(
-            TrayDeviceStatus(devices: [trayDevice(mounted: true, readOnly: false)]),
+            DeviceFleetStatus(devices: [trayDevice(mounted: true, readOnly: false)]),
             .allReadWrite
         )
     }
 
     func testAllReadOnlyStatus() {
         XCTAssertEqual(
-            TrayDeviceStatus(devices: [trayDevice(mounted: true, readOnly: true)]),
+            DeviceFleetStatus(devices: [trayDevice(mounted: true, readOnly: true)]),
             .allReadOnly
         )
     }
 
     func testMixedStatus() {
         XCTAssertEqual(
-            TrayDeviceStatus(devices: [
+            DeviceFleetStatus(devices: [
                 trayDevice(disk: "disk1s1", mounted: true, readOnly: false),
                 trayDevice(disk: "disk2s1", mounted: true, readOnly: true)
             ]),
             .mixed
+        )
+    }
+
+    func testUnmountedWithReadWriteIsHalfGreen() {
+        XCTAssertEqual(
+            DeviceFleetStatus(devices: [
+                trayDevice(disk: "disk4s2", mounted: true, readOnly: false),
+                trayDevice(disk: "disk5s2", mounted: true, readOnly: false),
+                trayDevice(disk: "disk4s1", mounted: false, readOnly: true)
+            ]),
+            .readWriteUnmounted
+        )
+        XCTAssertEqual(
+            DeviceFleetStatus(devices: [
+                trayDevice(disk: "disk4s2", mounted: true, readOnly: false),
+                trayDevice(disk: "disk4s1", mounted: false, readOnly: true)
+            ]).tones,
+            [.readWrite, .unmounted]
+        )
+    }
+
+    func testUnmountedWithOnlyReadOnlyMountsIsHalfOrange() {
+        XCTAssertEqual(
+            DeviceFleetStatus(devices: [
+                trayDevice(disk: "disk4s1", mounted: true, readOnly: true),
+                trayDevice(disk: "disk5s1", mounted: false, readOnly: true)
+            ]),
+            .readOnlyUnmounted
+        )
+        XCTAssertEqual(
+            DeviceFleetStatus(devices: [
+                trayDevice(disk: "disk4s1", mounted: true, readOnly: true),
+                trayDevice(disk: "disk5s1", mounted: false, readOnly: true)
+            ]).tones,
+            [.readOnly, .unmounted]
+        )
+    }
+
+    /// 三种都在：等宽三色，顺序固定为读写、只读、已卸载。不按数量切。
+    func testThreeStatesKeepGreenOrangeGrayOrder() {
+        let status = DeviceFleetStatus(devices: [
+            trayDevice(disk: "disk4s1", mounted: true, readOnly: false),
+            trayDevice(disk: "disk4s2", mounted: true, readOnly: false),
+            trayDevice(disk: "disk5s1", mounted: true, readOnly: true),
+            trayDevice(disk: "disk6s1", mounted: false, readOnly: true)
+        ])
+        XCTAssertEqual(status, .mixedUnmounted)
+        XCTAssertEqual(status.tones, [.readWrite, .readOnly, .unmounted])
+    }
+
+    func testStatusTextDescribesUnmountedInsteadOfReadOnly() {
+        let previous = L10n.language
+        L10n.apply(.zhCN)
+        defer { L10n.apply(previous) }
+
+        let unmounted = trayDevice(disk: "disk4s1", mounted: false, readOnly: true)
+        let readWrite = trayDevice(disk: "disk5s2", mounted: true, readOnly: false)
+        let readOnly = trayDevice(disk: "disk6s1", mounted: true, readOnly: true)
+
+        XCTAssertEqual(
+            DeviceFleetStatus.text(devices: [readWrite, readWrite, unmounted]),
+            "1 个设备已卸载"
+        )
+        XCTAssertEqual(
+            DeviceFleetStatus.text(devices: [unmounted]),
+            "1 个设备已卸载"
+        )
+        XCTAssertEqual(
+            DeviceFleetStatus.text(devices: [readOnly, unmounted]),
+            "1 个只读 · 1 个已卸载"
+        )
+        XCTAssertEqual(
+            DeviceFleetStatus.text(devices: [readWrite]),
+            "1 个设备就绪"
+        )
+        XCTAssertEqual(
+            DeviceFleetStatus.text(devices: [readOnly, readWrite]),
+            "1 个设备只读"
+        )
+        XCTAssertEqual(
+            DeviceFleetStatus.text(devices: [readWrite, readOnly, unmounted]),
+            "1 读写 · 1 只读 · 1 已卸载"
         )
     }
 

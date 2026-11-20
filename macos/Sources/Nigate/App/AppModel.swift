@@ -293,8 +293,11 @@ final class AppModel: ObservableObject {
         }
 
         // 只在语言真正变化时重建整棵 UI；每次点防止休眠都 stamp++ 会打断交互。
+        // 标题状态和底部长提示是翻译结果，不是 key。换表之后必须重算，否则芯片会停在上一门语言。
         if previous?.language != settings.language {
             L10n.apply(settings.language)
+            updateStatus()
+            publishBottomProgress()
             languageStamp += 1
             TrayController.shared.reload()
         }
@@ -1505,12 +1508,7 @@ final class AppModel: ObservableObject {
         case .cards:
             break
         }
-        let readOnly = devices.filter(\.isReadOnly).count
-        if readOnly == 0 {
-            statusText = L10n.t("status.devicesReady", ["count": "\(devices.count)"])
-        } else {
-            statusText = L10n.t("status.devicesReadOnly", ["count": "\(readOnly)"])
-        }
+        statusText = DeviceFleetStatus.text(devices: devices)
     }
 
     private func mountedWholeDisks() -> [String] {

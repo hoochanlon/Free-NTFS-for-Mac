@@ -217,7 +217,7 @@ struct DeviceCard: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Image(systemName: "externaldrive.fill")
-                        .foregroundStyle(device.isReadWrite ? Palette.success : Palette.warning)
+                        .foregroundStyle(statusColor)
                     Text(device.volumeName).font(.headline)
                     Spacer()
                     Text(statusLabel)
@@ -289,11 +289,14 @@ struct DeviceCard: View {
     }
 
     private var statusLabel: String {
-        if device.isUnmounted { return L10n.t("devices.unmounted") }
+        if device.isUnmounted || !device.isMounted { return L10n.t("devices.unmounted") }
         return device.isReadWrite ? L10n.t("devices.readWrite") : L10n.t("devices.readOnly")
     }
 
-    private var statusColor: Color { device.isReadWrite ? Palette.success : Palette.warning }
+    private var statusColor: Color {
+        if device.isUnmounted || !device.isMounted { return FleetStatusDot.unmounted }
+        return device.isReadWrite ? Palette.success : Palette.warning
+    }
 
     private func labeled(_ title: String, _ value: String) -> some View {
         HStack(spacing: 4) {

@@ -35,6 +35,9 @@
     "waitingDevices": "等待设备",
     "devicesReadOnly": "{count} 个设备只读",
     "devicesReady": "{count} 个设备就绪",
+    "devicesUnmounted": "{count} 个设备已卸载",
+    "devicesReadOnlyUnmounted": "{readOnly} 个只读 · {unmounted} 个已卸载",
+    "devicesMixedUnmounted": "{readWrite} 读写 · {readOnly} 只读 · {unmounted} 已卸载",
     "detectFailed": "检测失败"
   },
   "dependencies": {

@@ -35,6 +35,9 @@
     "waitingDevices": "Waiting for Devices",
     "devicesReadOnly": "{count} devices read-only",
     "devicesReady": "{count} devices ready",
+    "devicesUnmounted": "{count} devices unmounted",
+    "devicesReadOnlyUnmounted": "{readOnly} read-only · {unmounted} unmounted",
+    "devicesMixedUnmounted": "{readWrite} read-write · {readOnly} read-only · {unmounted} unmounted",
     "detectFailed": "Detection Failed"
   },
   "dependencies": {

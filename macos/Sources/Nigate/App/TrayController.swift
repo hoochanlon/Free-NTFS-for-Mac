@@ -1,26 +1,7 @@
 import AppKit
 import SwiftUI
 
-enum TrayDeviceStatus: Equatable {
-    case ready
-    case allReadWrite
-    case allReadOnly
-    case mixed
 
-    init(devices: [NTFSDevice]) {
-        let mounted = devices.filter { $0.isMounted && !$0.isUnmounted }
-        let readWriteCount = mounted.filter(\.isReadWrite).count
-        if mounted.isEmpty {
-            self = .ready
-        } else if readWriteCount == 0 {
-            self = .allReadOnly
-        } else if readWriteCount == mounted.count {
-            self = .allReadWrite
-        } else {
-            self = .mixed
-        }
-    }
-}
 
 enum TrayDeviceRow {
     /// 有实测占用就跟主界面同一行文案。没有容量时只报名和状态。
@@ -418,10 +399,10 @@ final class TrayController: NSObject {
     }
 
     private func updateStatusItemTint(from model: AppModel) {
-        item?.button?.image = makeStatusItemImage(status: TrayDeviceStatus(devices: model.devices))
+        item?.button?.image = makeStatusItemImage(status: DeviceFleetStatus(devices: model.devices))
     }
 
-    private func makeStatusItemImage(status: TrayDeviceStatus) -> NSImage? {
+    private func makeStatusItemImage(status: DeviceFleetStatus) -> NSImage? {
         let size = NSSize(width: 22, height: 22)
         guard let trayLogo else {
             guard let symbol = NSImage(systemSymbolName: "externaldrive.fill", accessibilityDescription: "Nigate") else {
@@ -451,30 +432,44 @@ final class TrayController: NSObject {
         return image
     }
 
-    private func drawStatusBadge(for status: TrayDeviceStatus) {
+    private func drawStatusBadge(for status: DeviceFleetStatus) {
         let badge = NSRect(x: 13.5, y: 0.5, width: 8, height: 8)
         let interior = badge.insetBy(dx: 1, dy: 1)
         NSColor.white.setFill()
         NSBezierPath(ovalIn: badge).fill()
 
-        switch status {
-        case .ready:
-            NSColor.secondaryLabelColor.setFill()
-            NSBezierPath(ovalIn: interior).fill()
-        case .allReadWrite:
-            NSColor.systemGreen.setFill()
-            NSBezierPath(ovalIn: interior).fill()
-        case .allReadOnly:
-            NSColor.systemOrange.setFill()
-            NSBezierPath(ovalIn: interior).fill()
-        case .mixed:
-            NSGraphicsContext.saveGraphicsState()
-            NSBezierPath(ovalIn: interior).addClip()
-            NSColor.systemGreen.setFill()
-            NSBezierPath(rect: NSRect(x: interior.minX, y: interior.minY, width: interior.width / 2, height: interior.height)).fill()
-            NSColor.systemOrange.setFill()
-            NSBezierPath(rect: NSRect(x: interior.midX, y: interior.minY, width: interior.width / 2, height: interior.height)).fill()
-            NSGraphicsContext.restoreGraphicsState()
+        paintTones(interior, status.tones)
+    }
+
+    /// 画在白底圆点里。secondaryLabelColor 在深色外观下会发白，灰条会消失。
+    private static let unmountedGray = NSColor.systemGray
+
+    private func paintTones(_ rect: NSRect, _ tones: [DeviceFleetStatus.Tone]) {
+        guard let first = tones.first else { return }
+        if tones.count == 1 {
+            nsColor(first).setFill()
+            NSBezierPath(ovalIn: rect).fill()
+            return
+        }
+        NSGraphicsContext.saveGraphicsState()
+        NSBezierPath(ovalIn: rect).addClip()
+        let count = CGFloat(tones.count)
+        for (index, tone) in tones.enumerated() {
+            let start = rect.minX + rect.width * CGFloat(index) / count
+            let end = index == tones.count - 1
+                ? rect.maxX
+                : rect.minX + rect.width * CGFloat(index + 1) / count
+            nsColor(tone).setFill()
+            NSBezierPath(rect: NSRect(x: start, y: rect.minY, width: end - start, height: rect.height)).fill()
+        }
+        NSGraphicsContext.restoreGraphicsState()
+    }
+
+    private func nsColor(_ tone: DeviceFleetStatus.Tone) -> NSColor {
+        switch tone {
+        case .readWrite: .systemGreen
+        case .readOnly: .systemOrange
+        case .unmounted: Self.unmountedGray
         }
     }
 }

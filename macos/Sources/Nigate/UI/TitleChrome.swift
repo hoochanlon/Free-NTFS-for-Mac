@@ -168,23 +168,68 @@ struct ChromeStatusChip: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Circle()
-                .fill(color)
-                .frame(width: 8, height: 8)
+            statusMark
             Text(model.statusText)
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
+                .minimumScaleFactor(0.75)
         }
     }
 
-    private var color: Color {
-        if !model.dependencies.isProbed { return .secondary }
-        if model.dependencies.missingCore { return Palette.error }
-        if model.devices.contains(where: \.isReadOnly) { return Palette.warning }
-        if !model.devices.isEmpty { return Palette.success }
+    @ViewBuilder
+    private var statusMark: some View {
+        if let status = fleetStatus {
+            FleetStatusDot(status: status)
+        } else {
+            Circle()
+                .fill(fallbackColor)
+                .frame(width: 8, height: 8)
+        }
+    }
+
+    /// 依赖和扫描还没落到设备列表时，圆点不表达挂载状态。
+    private var fleetStatus: DeviceFleetStatus? {
+        guard model.dependencies.isProbed, !model.dependencies.missingCore else { return nil }
+        guard model.deviceListAppearance == .cards else { return nil }
+        return DeviceFleetStatus(devices: model.devices)
+    }
+
+    private var fallbackColor: Color {
+        if model.dependencies.isProbed, model.dependencies.missingCore { return Palette.error }
         return .secondary
     }
+}
+
+struct FleetStatusDot: View {
+    var status: DeviceFleetStatus
+
+    var body: some View {
+        mark
+            .frame(width: 8, height: 8)
+            .clipShape(Circle())
+    }
+
+    private var mark: some View {
+        HStack(spacing: 0) {
+            ForEach(Array(status.tones.enumerated()), id: \.offset) { _, tone in
+                Rectangle()
+                    .fill(color(tone))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+    }
+
+    private func color(_ tone: DeviceFleetStatus.Tone) -> Color {
+        switch tone {
+        case .readWrite: Palette.success
+        case .readOnly: Palette.warning
+        case .unmounted: Self.unmounted
+        }
+    }
+
+    /// 跟托盘圆点同一灰，不跟主题文字灰走，避免深色标题栏上发白。
+    static let unmounted = Color(nsColor: .systemGray)
 }
 
 /// hiddenTitleBar 下，AppKit 会把标题区域当成拖拽窗口热区。

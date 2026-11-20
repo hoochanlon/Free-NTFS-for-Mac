@@ -35,6 +35,9 @@
     "waitingDevices": "Warten auf Geräte",
     "devicesReadOnly": "{count} Geräte schreibgeschützt",
     "devicesReady": "{count} Geräte bereit",
+    "devicesUnmounted": "{count} Geräte ausgehängt",
+    "devicesReadOnlyUnmounted": "{readOnly} schreibgeschützt · {unmounted} ausgehängt",
+    "devicesMixedUnmounted": "{readWrite} lesen/schreiben · {readOnly} schreibgeschützt · {unmounted} ausgehängt",
     "detectFailed": "Erkennung fehlgeschlagen"
   },
   "dependencies": {
