@@ -51,7 +51,6 @@
 | NTFS Explorer Pro | App Store 68 元 | https://appagg.com/macos/utilities/ntfs-explorer-pro-43459914.html |
 | ttntfs | 免费 | https://github.com/dr-kbadawi/ttntfs |
 | LightNTFS Beta | 免费 | https://macadmin.hu/#apps |
-|mountfs|免费|https://github.com/guoquan/mountfs|
 | 盘屿 (volisle) | 免费 | https://github.com/qsw745/volisle |
 | ntfskit | 需编译，免费开源 | https://github.com/whereteam/ntfskit |
 
